@@ -93,6 +93,33 @@ if (imageSection) {
 // Initialize slideshow when page loads
 document.addEventListener("DOMContentLoaded", initSlideshow);
 
+// Demo credentials auto-fill function
+function fillDemoCredentials(type) {
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+
+  if (type === "demo") {
+    emailInput.value = "demo@guest.com";
+    passwordInput.value = "demo123";
+  } else if (type === "admin") {
+    emailInput.value = "admin@resort.com";
+    passwordInput.value = "admin123";
+  }
+
+  // Add visual feedback
+  emailInput.style.background = "rgba(102, 126, 234, 0.1)";
+  passwordInput.style.background = "rgba(102, 126, 234, 0.1)";
+
+  // Reset background after animation
+  setTimeout(() => {
+    emailInput.style.background = "";
+    passwordInput.style.background = "";
+  }, 1000);
+
+  // Focus on login button
+  document.querySelector(".login-btn").focus();
+}
+
 // Form validation and submission
 loginForm.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -160,18 +187,30 @@ function handleLogin(email, password) {
       cleanEmail === "admin@resort.com" || cleanEmail === "admin";
     const isAdminPassword = password.trim() === "admin123";
 
-    console.log("Login check:", cleanEmail, "is admin:", isAdminLogin);
+    // Check for demo user credentials
+    const isDemoUserLogin =
+      cleanEmail === "demo@guest.com" || cleanEmail === "demo";
+    const isDemoUserPassword = password.trim() === "demo123";
+
+    console.log(
+      "Login check:",
+      cleanEmail,
+      "is admin:",
+      isAdminLogin,
+      "is demo:",
+      isDemoUserLogin
+    );
     console.log(
       "Password check:",
       password.trim(),
-      "===",
-      "admin123",
-      "Result:",
-      isAdminPassword
+      "Result - Admin:",
+      isAdminPassword,
+      "Demo:",
+      isDemoUserPassword
     );
 
     if (isAdminLogin && isAdminPassword) {
-      console.log("✅ Admin login successful - redirecting to dashboard");
+      console.log("✅ Admin login successful - redirecting to admin dashboard");
       // Add success animation
       loginBtn.classList.add("success");
       loginBtn.innerHTML = '<i class="fas fa-check"></i> Admin Access Granted!';
@@ -181,20 +220,47 @@ function handleLogin(email, password) {
         console.log("Redirecting to admin dashboard...");
         window.location.href = "admin-dashboard.html";
       }, 1000);
-    } else {
-      console.log("❌ Not admin credentials - showing demo message");
-      // Add success animation for demo
-      loginBtn.classList.add("success");
-
-      // Show success message for non-admin users
-      alert(
-        `Welcome! Login successful for: ${email}\n\nNote: This is a frontend-only demo. In a real application, this would connect to a backend server.\n\nTip: Use 'admin' (username) or 'admin@resort.com' (email) with password 'admin123' to access the admin dashboard.`
+    } else if (isDemoUserLogin && isDemoUserPassword) {
+      console.log(
+        "✅ Demo user login successful - redirecting to user dashboard"
+      );
+      // Store demo user info for dashboard
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify({
+          email: "demo@guest.com",
+          name: "Demo Guest",
+          memberSince: "2024",
+          loyaltyLevel: "VIP",
+          totalReservations: 12,
+          upcomingReservations: 2,
+        })
       );
 
-      // Reset form after success
+      // Add success animation
+      loginBtn.classList.add("success");
+      loginBtn.innerHTML = '<i class="fas fa-check"></i> Welcome Demo User!';
+
+      // Direct redirect to user dashboard
       setTimeout(() => {
-        loginForm.reset();
-        loginBtn.classList.remove("success");
+        console.log("Redirecting to user dashboard...");
+        window.location.href = "dashboard.html";
+      }, 1000);
+    } else {
+      console.log("❌ Invalid credentials - showing error message");
+      // Show error message for invalid credentials
+      loginBtn.classList.add("error");
+      loginBtn.innerHTML = '<i class="fas fa-times"></i> Invalid Credentials';
+
+      // Show demo credentials info
+      setTimeout(() => {
+        alert(
+          `❌ Invalid credentials!\n\n📝 Demo Accounts Available:\n\n👤 Demo User Dashboard:\n• Email: demo@guest.com (or username: demo)\n• Password: demo123\n\n🔧 Admin Dashboard:\n• Email: admin@resort.com (or username: admin)\n• Password: admin123\n\nPlease try again with valid credentials.`
+        );
+
+        // Reset form after error
+        loginBtn.classList.remove("error");
+        loginBtn.innerHTML = "Sign In";
       }, 2000);
     }
   }, 1500);
@@ -365,3 +431,272 @@ document
       togglePassword();
     }
   });
+
+// ===== MAP MODAL FUNCTIONALITY =====
+
+// Open location map modal
+function openLocationMap() {
+  const modal = document.getElementById("mapModal");
+  modal.classList.add("show");
+  modal.style.display = "flex";
+
+  // Prevent body scrolling when modal is open
+  document.body.style.overflow = "hidden";
+
+  // Add escape key listener
+  document.addEventListener("keydown", handleMapModalEscape);
+
+  // Load map with a small delay for better animation
+  setTimeout(() => {
+    loadResortMap();
+  }, 300);
+}
+
+// Close location map modal
+function closeLocationMap() {
+  const modal = document.getElementById("mapModal");
+  modal.classList.remove("show");
+
+  // Restore body scrolling
+  document.body.style.overflow = "auto";
+
+  // Remove escape key listener
+  document.removeEventListener("keydown", handleMapModalEscape);
+
+  // Hide modal after animation
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 300);
+}
+
+// Handle escape key for modal
+function handleMapModalEscape(e) {
+  if (e.key === "Escape") {
+    closeLocationMap();
+  }
+}
+
+// Load resort map (you can customize the coordinates)
+function loadResortMap() {
+  const mapFrame = document.getElementById("resortMap");
+
+  // 🎯 AR HOMES POSADAS FARM RESORT EXACT COORDINATES
+  // Original: 14°26'24.2"N 120°27'39.2"E
+  const latitude = 14.4400556; // 📍 14°26'24.2"N
+  const longitude = 120.4608889; // 📍 120°27'39.2"E
+
+  // Option 1: Basic Google Maps embed with pin
+  const mapUrl = `https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3925.123!2d${longitude}!3d${latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zAR+Homes+Posadas+Farm+Resort!5e0!3m2!1sen!2sph!4v${Date.now()}!5m2!1sen!2sph`;
+
+  // Option 2: Google Maps with custom marker and zoom
+  // const mapUrlWithMarker = `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${latitude},${longitude}&zoom=15&maptype=satellite`;
+
+  mapFrame.src = mapUrl;
+
+  // Add load event listener to show when map is ready
+  mapFrame.onload = function () {
+    console.log(
+      "🗺️ Resort map loaded successfully at coordinates:",
+      latitude,
+      longitude
+    );
+  };
+}
+
+// Open directions to resort
+function openDirections() {
+  // 🎯 AR HOMES POSADAS FARM RESORT EXACT COORDINATES
+  // Original: 14°26'24.2"N 120°27'39.2"E
+  const latitude = 14.4400556; // 📍 14°26'24.2"N
+  const longitude = 120.4608889; // 📍 120°27'39.2"E
+
+  // Create Google Maps directions URL to your pinned location
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&destination_place_id=AR+Homes+Posadas+Farm+Resort`;
+
+  // Open in new tab
+  window.open(directionsUrl, "_blank");
+
+  // Show success message
+  showMapNotification("Opening directions in Google Maps...", "success");
+}
+
+// Share resort location
+function shareLocation() {
+  const resortInfo = {
+    name: "AR Homes Posadas Farm Resort",
+    address: "2488 Maangay, Balon-Anito, Mariveles, Bataan, Philippines",
+    phone: "+63 (32) 123-4567",
+    website: window.location.origin,
+  };
+
+  // Try to use Web Share API if available
+  if (navigator.share) {
+    navigator
+      .share({
+        title: resortInfo.name,
+        text: `Check out ${resortInfo.name} - ${resortInfo.address}`,
+        url: window.location.origin,
+      })
+      .then(() => {
+        showMapNotification("Location shared successfully!", "success");
+      })
+      .catch((error) => {
+        console.log("Error sharing:", error);
+        fallbackShare(resortInfo);
+      });
+  } else {
+    // Fallback for browsers that don't support Web Share API
+    fallbackShare(resortInfo);
+  }
+}
+
+// Fallback share method
+function fallbackShare(resortInfo) {
+  const shareText = `${resortInfo.name}\n${resortInfo.address}\nPhone: ${resortInfo.phone}\nWebsite: ${resortInfo.website}`;
+
+  // Copy to clipboard
+  if (navigator.clipboard) {
+    navigator.clipboard
+      .writeText(shareText)
+      .then(() => {
+        showMapNotification("Resort location copied to clipboard!", "success");
+      })
+      .catch(() => {
+        showMapNotification("Please copy manually: " + shareText, "info");
+      });
+  } else {
+    // Older browser fallback
+    const textArea = document.createElement("textarea");
+    textArea.value = shareText;
+    document.body.appendChild(textArea);
+    textArea.select();
+
+    try {
+      document.execCommand("copy");
+      showMapNotification("Resort location copied to clipboard!", "success");
+    } catch (err) {
+      showMapNotification("Please copy manually: " + shareText, "info");
+    }
+
+    document.body.removeChild(textArea);
+  }
+}
+
+// Show map notification
+function showMapNotification(message, type = "info") {
+  // Create notification element
+  const notification = document.createElement("div");
+  notification.className = `map-notification map-notification-${type}`;
+  notification.textContent = message;
+
+  // Style the notification
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${getNotificationColor(type)};
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 10001;
+    font-weight: 500;
+    font-size: 0.9rem;
+    max-width: 300px;
+    animation: slideInRight 0.3s ease-out;
+  `;
+
+  // Add to DOM
+  document.body.appendChild(notification);
+
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.style.animation = "slideOutRight 0.3s ease-in";
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// Get notification color based on type
+function getNotificationColor(type) {
+  switch (type) {
+    case "success":
+      return "linear-gradient(135deg, #28a745, #20c997)";
+    case "error":
+      return "linear-gradient(135deg, #dc3545, #e74c3c)";
+    case "warning":
+      return "linear-gradient(135deg, #ffc107, #f39c12)";
+    default:
+      return "linear-gradient(135deg, #667eea, #764ba2)";
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener("click", function (e) {
+  const modal = document.getElementById("mapModal");
+  if (e.target === modal) {
+    closeLocationMap();
+  }
+});
+
+// Add CSS animation for notifications
+const notificationStyles = document.createElement("style");
+notificationStyles.textContent = `
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(notificationStyles);
+
+// Add map icon hover effect
+const mapIconBtn = document.querySelector(".map-icon-btn");
+if (mapIconBtn) {
+  mapIconBtn.addEventListener("mouseenter", function () {
+    this.style.animation = "pulse 1s infinite";
+  });
+
+  mapIconBtn.addEventListener("mouseleave", function () {
+    this.style.animation = "";
+  });
+}
+
+// Add pulse animation
+const pulseAnimation = document.createElement("style");
+pulseAnimation.textContent = `
+  @keyframes pulse {
+    0% { box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); }
+    50% { box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4); }
+    100% { box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); }
+  }
+`;
+document.head.appendChild(pulseAnimation);
+
+console.log("🗺️ Map functionality loaded successfully!");
+console.log("Click the map icon next to the logo to view resort location.");
+
+// Make functions globally available
+window.openLocationMap = openLocationMap;
+window.closeLocationMap = closeLocationMap;
+window.openDirections = openDirections;
+window.shareLocation = shareLocation;

@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Dashboard - AR Homes Posadas Farm Resort</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+    />
+    <link
+      rel="shortcut icon"
+      href="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+    />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Meta tags -->
+    <meta name="theme-color" content="#667eea" />
+    <meta
+      name="description"
+      content="User Dashboard for AR Homes Posadas Farm Resort - Manage your reservations and profile."
+    />
+    <meta
+      name="keywords"
+      content="dashboard, user, resort reservations, AR Homes, Posadas Farm"
+    />
+    <meta name="author" content="AR Homes Posadas Farm Resort" />
+
+    <!-- Open Graph meta tags for social sharing -->
+    <meta
+      property="og:title"
+      content="User Dashboard - AR Homes Posadas Farm Resort"
+    />
+    <meta
+      property="og:description"
+      content="Manage your reservations and profile at AR Homes Posadas Farm Resort."
+    />
+    <meta
+      property="og:image"
+      content="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+    />
+    <meta property="og:url" content="#" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="User Dashboard - AR Homes Posadas Farm Resort"
+    />
+    <meta
+      name="twitter:description"
+      content="Manage your reservations and profile at AR Homes Posadas Farm Resort."
+    />
+    <meta
+      name="twitter:image"
+      content="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="dashboard-styles.css" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <div class="dashboard-container">
+      <!-- Header -->
+      <header class="dashboard-header">
+        <div class="header-left">
+          <div class="logo">
+            <img
+              src="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+              alt="AR Homes Resort Logo"
+            />
+          </div>
+          <div class="resort-info">
+            <h1>AR Homes Posadas Farm Resort</h1>
+            <p>Guest Dashboard</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="user-profile">
+            <div class="profile-info">
+              <span class="user-name" id="userName">John Doe</span>
+              <span class="user-role">Guest</span>
+            </div>
+            <div class="profile-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+          </div>
+          <button class="logout-btn" onclick="showLogoutPopup()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+        <div class="mobile-toggle" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </div>
+      </header>
+
+      <!-- Main Layout Container -->
+      <div class="main-layout">
+        <!-- Resort Gallery Section -->
+        <div class="resort-gallery-section">
+          <div class="resort-gallery">
+            <div class="gallery-container">
+              <div class="gallery-wrapper" id="galleryWrapper">
+                <div class="gallery-slide active">
+                  <img
+                    src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
+                    alt="Resort View 1"
+                  />
+                  <div class="slide-overlay">
+                    <h4>Stunning Pool Area</h4>
+                    <p>
+                      Relax in our pristine pool surrounded by tropical
+                      landscapes
+                    </p>
+                  </div>
+                </div>
+                <div class="gallery-slide">
+                  <img
+                    src="images/545611560_1324092662718848_8811536535004180762_n.jpg"
+                    alt="Resort View 2"
+                  />
+                  <div class="slide-overlay">
+                    <h4>Luxury Accommodations</h4>
+                    <p>Experience comfort in our beautifully designed rooms</p>
+                  </div>
+                </div>
+                <div class="gallery-slide">
+                  <img
+                    src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
+                    alt="Resort View 3"
+                  />
+                  <div class="slide-overlay">
+                    <h4>Restaurant & Dining</h4>
+                    <p>Savor exquisite cuisine with panoramic views</p>
+                  </div>
+                </div>
+                <div class="gallery-slide">
+                  <img
+                    src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                    alt="Resort View 4"
+                  />
+                  <div class="slide-overlay">
+                    <h4>Garden Paradise</h4>
+                    <p>Stroll through our lush tropical gardens</p>
+                  </div>
+                </div>
+                <div class="gallery-slide">
+                  <img
+                    src="images/546260243_2896334557423631_287976220203457252_n.jpg"
+                    alt="Resort View 5"
+                  />
+                  <div class="slide-overlay">
+                    <h4>Recreational Activities</h4>
+                    <p>Enjoy various activities and entertainment</p>
+                  </div>
+                </div>
+                <div class="gallery-slide">
+                  <img
+                    src="images/546407920_1244121977399879_5414686772811094703_n.jpg"
+                    alt="Resort View 6"
+                  />
+                  <div class="slide-overlay">
+                    <h4>Wellness & Spa</h4>
+                    <p>Rejuvenate in our world-class spa facilities</p>
+                  </div>
+                </div>
+              </div>
+              <div class="gallery-controls">
+                <button class="gallery-btn prev-btn" id="prevBtn">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="gallery-btn next-btn" id="nextBtn">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+              <div class="gallery-indicators" id="galleryIndicators">
+                <span class="indicator active" data-slide="0"></span>
+                <span class="indicator" data-slide="1"></span>
+                <span class="indicator" data-slide="2"></span>
+                <span class="indicator" data-slide="3"></span>
+                <span class="indicator" data-slide="4"></span>
+                <span class="indicator" data-slide="5"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Section -->
+        <div class="navigation-section">
+          <div class="horizontal-nav">
+            <nav class="nav-menu-horizontal">
+              <button class="nav-btn active" data-section="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+              </button>
+              <button class="nav-btn" data-section="my-reservations">
+                <i class="fas fa-calendar-plus"></i>
+                <span>Make Reservation</span>
+              </button>
+              <button
+                class="nav-btn booking-nav"
+                id="booking-details-tab"
+                data-section="booking-details"
+                style="display: none"
+              >
+                <i class="fas fa-credit-card"></i>
+                <span>Booking & Payment</span>
+              </button>
+              <button class="nav-btn" data-section="promotions">
+                <i class="fas fa-tags"></i>
+                <span>Promotions</span>
+              </button>
+              <button class="nav-btn" data-section="profile">
+                <i class="fas fa-user-cog"></i>
+                <span>Profile</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Content Area (Half View) -->
+        <div class="content-area" id="contentArea">
+          <!-- Dashboard Content -->
+          <div class="content-section active" id="dashboard-section">
+            <div class="stats-grid">
+              <div class="stats-card">
+                <div class="stats-icon">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stats-content">
+                  <h3 class="stats-number" id="totalReservations">5</h3>
+                  <p class="stats-label">Total Reservations</p>
+                </div>
+              </div>
+              <div class="stats-card">
+                <div class="stats-icon pending">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-content">
+                  <h3 class="stats-number" id="pendingReservations">2</h3>
+                  <p class="stats-label">Pending Reservations</p>
+                </div>
+              </div>
+              <div class="stats-card">
+                <div class="stats-icon approved">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-content">
+                  <h3 class="stats-number" id="approvedReservations">3</h3>
+                  <p class="stats-label">Approved Reservations</p>
+                </div>
+              </div>
+              <div class="stats-card">
+                <div class="stats-icon completed">
+                  <i class="fas fa-star"></i>
+                </div>
+                <div class="stats-content">
+                  <h3 class="stats-number" id="completedStays">8</h3>
+                  <p class="stats-label">Completed Stays</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="recent-activity">
+              <h3>Recent Activity</h3>
+              <div class="activity-list">
+                <div class="activity-item">
+                  <div class="activity-icon">
+                    <i class="fas fa-calendar-check"></i>
+                  </div>
+                  <div class="activity-content">
+                    <h4>Reservation Confirmed</h4>
+                    <p>
+                      Your booking for December 15-18, 2025 has been approved.
+                    </p>
+                    <span class="activity-date">2 days ago</span>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon">
+                    <i class="fas fa-edit"></i>
+                  </div>
+                  <div class="activity-content">
+                    <h4>Profile Updated</h4>
+                    <p>
+                      Your contact information has been successfully updated.
+                    </p>
+                    <span class="activity-date">1 week ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Make Reservation Content -->
+          <div class="content-section" id="my-reservations-section">
+            <!-- Resort Access + Room Selection -->
+            <div class="resort-access-header">
+              <h2>🏖️ Complete Resort Access + Room Selection</h2>
+              <p class="access-description">
+                <strong>✨ ALL GUESTS GET FULL RESORT ACCESS ✨</strong><br />
+                Enjoy exclusive access to all pools, facilities, and outdoor
+                areas.<br />
+                Choose which rooms your group wants to use for accommodation.
+              </p>
+              <div class="included-facilities">
+                <div class="facility-badge">🏊‍♂️ All Pools</div>
+                <div class="facility-badge">🍽️ BBQ Areas</div>
+                <div class="facility-badge">🏐 Sports Facilities</div>
+                <div class="facility-badge">🌿 Gardens</div>
+                <div class="facility-badge">🚗 Parking</div>
+                <div class="facility-badge">📶 WiFi</div>
+              </div>
+              <p class="selection-instruction">
+                <strong>Now select your room package below:</strong>
+              </p>
+            </div>
+            <div class="room-packages-grid">
+              <!-- All Rooms Package -->
+              <div class="room-package-card featured" data-package="all-rooms">
+                <div class="package-header">
+                  <h3>All Rooms Package</h3>
+                  <div class="package-badge premium">Most Popular</div>
+                </div>
+                <div class="package-content">
+                  <div class="package-price">
+                    ₱25,000 <span>per night</span>
+                  </div>
+                  <div class="package-price-day">
+                    ₱15,000 <span>per day</span>
+                  </div>
+
+                  <div class="included-rooms">
+                    <h4>Included Accommodations:</h4>
+                    <div class="room-list">
+                      <div class="room-item">
+                        <img
+                          src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
+                          alt="Deluxe Room"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Deluxe Room</span>
+                          <span class="room-features"
+                            >AC • King Bed • 2 guests</span
+                          >
+                        </div>
+                      </div>
+                      <div class="room-item">
+                        <img
+                          src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
+                          alt="Executive Suite"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Executive Suite</span>
+                          <span class="room-features"
+                            >AC • Living Area • 4 guests</span
+                          >
+                        </div>
+                      </div>
+                      <div class="room-item">
+                        <img
+                          src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                          alt="Family Room"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Family Room</span>
+                          <span class="room-features"
+                            >AC • 2 Queen Beds • 6 guests</span
+                          >
+                        </div>
+                      </div>
+                      <div class="room-item">
+                        <img
+                          src="images/547374912_659920707160374_2419929377794463667_n.jpg"
+                          alt="Private Villa"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Private Villa</span>
+                          <span class="room-features"
+                            >AC • Private Pool • 8 guests</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                    <div class="total-capacity">Total: Up to 20 guests</div>
+                  </div>
+                  <button
+                    class="select-package-btn"
+                    onclick="selectRoomPackage('all-rooms', '₱25,000', '₱15,000')"
+                  >
+                    Select All Rooms Package
+                  </button>
+                </div>
+              </div>
+
+              <!-- Aircon Rooms Only Package -->
+              <div class="room-package-card" data-package="aircon-rooms">
+                <div class="package-header">
+                  <h3>Aircon Rooms Package</h3>
+                  <div class="package-badge comfort">Comfort</div>
+                </div>
+                <div class="package-content">
+                  <div class="package-price">
+                    ₱20,000 <span>per night</span>
+                  </div>
+                  <div class="package-price-day">
+                    ₱12,000 <span>per day</span>
+                  </div>
+
+                  <div class="included-rooms">
+                    <h4>Air-Conditioned Rooms:</h4>
+                    <div class="room-list">
+                      <div class="room-item">
+                        <img
+                          src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
+                          alt="Deluxe Room"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Deluxe Room</span>
+                          <span class="room-features"
+                            >❄️ AC • King Bed • 2 guests</span
+                          >
+                        </div>
+                      </div>
+                      <div class="room-item">
+                        <img
+                          src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
+                          alt="Executive Suite"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Executive Suite</span>
+                          <span class="room-features"
+                            >❄️ AC • Living Area • 4 guests</span
+                          >
+                        </div>
+                      </div>
+                      <div class="room-item">
+                        <img
+                          src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                          alt="Family Room"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Family Room</span>
+                          <span class="room-features"
+                            >❄️ AC • 2 Queen Beds • 6 guests</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                    <div class="total-capacity">Total: Up to 12 guests</div>
+                  </div>
+                  <button
+                    class="select-package-btn"
+                    onclick="selectRoomPackage('aircon-rooms', '₱20,000', '₱12,000')"
+                  >
+                    Select Aircon Rooms
+                  </button>
+                </div>
+              </div>
+
+              <!-- Basic Rooms Package -->
+              <div class="room-package-card" data-package="basic-rooms">
+                <div class="package-header">
+                  <h3>Basic Rooms Package</h3>
+                  <div class="package-badge budget">Budget Friendly</div>
+                </div>
+                <div class="package-content">
+                  <div class="package-price">
+                    ₱12,000 <span>per night</span>
+                  </div>
+                  <div class="package-price-day">
+                    ₱8,000 <span>per day</span>
+                  </div>
+
+                  <div class="included-rooms">
+                    <h4>Basic Accommodations:</h4>
+                    <div class="room-list">
+                      <div class="room-item">
+                        <img
+                          src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                          alt="Fan Room"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Fan Room 1</span>
+                          <span class="room-features"
+                            >🌀 Fan • Double Bed • 4 guests</span
+                          >
+                        </div>
+                      </div>
+                      <div class="room-item">
+                        <img
+                          src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                          alt="Fan Room"
+                        />
+                        <div class="room-info">
+                          <span class="room-name">Fan Room 2</span>
+                          <span class="room-features"
+                            >🌀 Fan • Double Bed • 4 guests</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                    <div class="total-capacity">Total: Up to 8 guests</div>
+                  </div>
+                  <button
+                    class="select-package-btn"
+                    onclick="selectRoomPackage('basic-rooms', '₱12,000', '₱8,000')"
+                  >
+                    Select Basic Rooms
+                  </button>
+                </div>
+              </div>
+
+              <!-- Custom Room Selection -->
+              <div class="room-package-card custom" data-package="custom">
+                <div class="package-header">
+                  <h3>Custom Room Selection</h3>
+                  <div class="package-badge custom">Flexible</div>
+                </div>
+                <div class="package-content">
+                  <div class="package-price">
+                    Varies <span>based on selection</span>
+                  </div>
+
+                  <div class="custom-selection">
+                    <h4>Choose Your Rooms:</h4>
+                    <p>Select exactly which rooms you want to use.</p>
+                    <div class="custom-options">
+                      <label class="custom-option">
+                        <input
+                          type="checkbox"
+                          name="customRoom"
+                          value="deluxe"
+                        />
+                        <span>Deluxe Room (₱3,500/night)</span>
+                      </label>
+                      <label class="custom-option">
+                        <input
+                          type="checkbox"
+                          name="customRoom"
+                          value="suite"
+                        />
+                        <span>Executive Suite (₱5,500/night)</span>
+                      </label>
+                      <label class="custom-option">
+                        <input
+                          type="checkbox"
+                          name="customRoom"
+                          value="family"
+                        />
+                        <span>Family Room (₱4,200/night)</span>
+                      </label>
+                      <label class="custom-option">
+                        <input
+                          type="checkbox"
+                          name="customRoom"
+                          value="villa"
+                        />
+                        <span>Private Villa (₱8,500/night)</span>
+                      </label>
+                    </div>
+                  </div>
+                  <button
+                    class="select-package-btn"
+                    onclick="selectCustomRooms()"
+                  >
+                    Select Custom Package
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resort Access Reminder -->
+            <div class="resort-access-reminder">
+              <h3>🎉 Remember: All packages include FULL RESORT ACCESS!</h3>
+              <p>
+                No matter which room package you choose, your entire group gets
+                complete access to: all swimming pools, BBQ areas, sports
+                facilities, gardens, parking, and WiFi. The room selection only
+                determines your sleeping accommodations.
+              </p>
+            </div>
+          </div>
+
+          <!-- Booking Details & Payment Content -->
+          <div class="content-section" id="booking-details-section">
+            <!-- Selected Room Info -->
+            <div class="selected-room-info" id="selectedRoomInfo">
+              <!-- Room info will be populated by JavaScript -->
+            </div>
+
+            <!-- Booking Details Form -->
+            <div class="booking-form">
+              <!-- All booking form content will be here -->
+              <div class="exclusive-access-section">
+                <h3>🏖️ Exclusive Resort Access for Your Group</h3>
+                <p class="exclusive-description">
+                  Book the entire resort exclusively for your family or group of
+                  friends! Enjoy complete privacy with access to all pools,
+                  facilities, and accommodations.
+                </p>
+
+                <div class="reservation-types">
+                  <div class="reservation-type-option" data-type="whole-day">
+                    <input
+                      type="radio"
+                      id="wholeDay"
+                      name="reservationType"
+                      value="whole-day"
+                      required
+                    />
+                    <label for="wholeDay" class="reservation-type-label">
+                      <div class="reservation-type-icon day-use">
+                        <i class="fas fa-sun"></i>
+                      </div>
+                      <div class="reservation-type-info">
+                        <h4>Whole Day Access</h4>
+                        <p>8:00 AM - 10:00 PM exclusive resort access</p>
+                        <p class="access-details">
+                          🏊‍♂️ All pools • 🏡 Day rooms • 🍽️ BBQ areas
+                        </p>
+                        <span class="reservation-type-price"
+                          >₱15,000 per day</span
+                        >
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="reservation-type-option" data-type="overnight">
+                    <input
+                      type="radio"
+                      id="overnight"
+                      name="reservationType"
+                      value="overnight"
+                      required
+                    />
+                    <label for="overnight" class="reservation-type-label">
+                      <div class="reservation-type-icon overnight">
+                        <i class="fas fa-moon"></i>
+                      </div>
+                      <div class="reservation-type-info">
+                        <h4>Overnight Exclusive</h4>
+                        <p>
+                          24-hour exclusive resort access with accommodation
+                        </p>
+                        <p class="access-details">
+                          🏊‍♂️ All pools • 🛏️ All rooms • 🍽️ Kitchen access
+                        </p>
+                        <span class="reservation-type-price"
+                          >₱25,000 per night</span
+                        >
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Duration and Date Selection -->
+              <div
+                class="duration-selection-section"
+                id="durationSelectionSection"
+                style="display: none"
+              >
+                <div class="form-row" id="wholeDayRow" style="display: none">
+                  <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="numberOfDays">How many days?</label>
+                    <select id="numberOfDays" required>
+                      <option value="">Select duration</option>
+                      <option value="1">1 Day</option>
+                      <option value="2">2 Days</option>
+                      <option value="3">3 Days</option>
+                      <option value="4">4 Days</option>
+                      <option value="5">5 Days</option>
+                      <option value="6">6 Days</option>
+                      <option value="7">1 Week</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row" id="overnightRow" style="display: none">
+                  <div class="form-group">
+                    <label for="checkInDate">Check-in Date</label>
+                    <input type="date" id="checkInDate" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="numberOfNights">How many nights?</label>
+                    <select id="numberOfNights" required>
+                      <option value="">Select duration</option>
+                      <option value="1">1 Night</option>
+                      <option value="2">2 Nights</option>
+                      <option value="3">3 Nights</option>
+                      <option value="4">4 Nights</option>
+                      <option value="5">5 Nights</option>
+                      <option value="6">6 Nights</option>
+                      <option value="7">1 Week</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Group Details -->
+              <div
+                class="group-details-section"
+                id="groupDetailsSection"
+                style="display: none"
+              >
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="groupSize">Total Group Size</label>
+                    <select id="groupSize" required>
+                      <option value="">Select group size</option>
+                      <option value="5-10">5-10 people</option>
+                      <option value="11-20">11-20 people</option>
+                      <option value="21-30">21-30 people</option>
+                      <option value="31-40">31-40 people</option>
+                      <option value="41-50">41-50 people</option>
+                      <option value="50+">50+ people</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="groupType">Group Type</label>
+                    <select id="groupType" required>
+                      <option value="">Select type</option>
+                      <option value="family">Family Reunion</option>
+                      <option value="friends">Friends Getaway</option>
+                      <option value="corporate">Corporate Event</option>
+                      <option value="celebration">Special Celebration</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="specialRequests"
+                    >Special Requests (Optional)</label
+                  >
+                  <textarea
+                    id="specialRequests"
+                    placeholder="Any special requests, dietary requirements, or additional services needed..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="booking-summary">
+                <div class="summary-item">
+                  <span>Room Type:</span>
+                  <span id="summaryRoom">-</span>
+                </div>
+                <div class="summary-item">
+                  <span>Price per night:</span>
+                  <span id="summaryPrice">-</span>
+                </div>
+                <div class="summary-item">
+                  <span>Number of nights:</span>
+                  <span id="summaryNights">-</span>
+                </div>
+                <div class="summary-item total">
+                  <span>Total Amount:</span>
+                  <span id="summaryTotal">-</span>
+                </div>
+              </div>
+
+              <!-- Payment Method Selection -->
+              <div class="payment-method-section">
+                <h3>Select Payment Method</h3>
+                <div class="payment-methods">
+                  <div class="payment-option" data-method="gcash">
+                    <input
+                      type="radio"
+                      id="gcash"
+                      name="paymentMethod"
+                      value="gcash"
+                      required
+                    />
+                    <label for="gcash" class="payment-label">
+                      <div class="payment-icon gcash">
+                        <i class="fas fa-mobile-alt"></i>
+                      </div>
+                      <div class="payment-info">
+                        <h4>GCash</h4>
+                        <p>Pay using your GCash wallet</p>
+                        <span class="payment-badge">Online</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="payment-option" data-method="otc">
+                    <input
+                      type="radio"
+                      id="otc"
+                      name="paymentMethod"
+                      value="otc"
+                      required
+                    />
+                    <label for="otc" class="payment-label">
+                      <div class="payment-icon otc">
+                        <i class="fas fa-store"></i>
+                      </div>
+                      <div class="payment-info">
+                        <h4>Over the Counter</h4>
+                        <p>Pay at the resort reception</p>
+                        <span class="payment-badge">On-site</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Payment Instructions -->
+                <div
+                  class="payment-instructions"
+                  id="paymentInstructions"
+                  style="display: none"
+                >
+                  <!-- GCash Instructions -->
+                  <div
+                    class="instruction-content"
+                    id="gcashInstructions"
+                    style="display: none"
+                  >
+                    <h4>
+                      <i class="fas fa-mobile-alt"></i> GCash Payment
+                      Instructions
+                    </h4>
+                    <div class="gcash-details">
+                      <p><strong>Send payment to:</strong></p>
+                      <div class="gcash-info">
+                        <span class="gcash-number">0917-123-4567</span>
+                        <span class="gcash-name"
+                          >AR Homes Posadas Farm Resort</span
+                        >
+                      </div>
+                      <p>
+                        <strong>Important:</strong> Please include your booking
+                        reference in the message.
+                      </p>
+                      <div class="qr-code-section">
+                        <p>Or scan QR code:</p>
+                        <div class="qr-placeholder">
+                          <i class="fas fa-qrcode"></i>
+                          <span>QR Code</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- OTC Instructions -->
+                  <div
+                    class="instruction-content"
+                    id="otcInstructions"
+                    style="display: none"
+                  >
+                    <h4>
+                      <i class="fas fa-store"></i> Over the Counter Payment
+                    </h4>
+                    <div class="otc-details">
+                      <p><strong>Payment Location:</strong></p>
+                      <address>
+                        AR Homes Posadas Farm Resort<br />
+                        Reception Desk<br />
+                        Posadas, Bohol, Philippines
+                      </address>
+                      <p><strong>Office Hours:</strong></p>
+                      <ul>
+                        <li>Monday - Sunday: 8:00 AM - 6:00 PM</li>
+                        <li>Check-in: 2:00 PM onwards</li>
+                        <li>Check-out: Until 12:00 PM</li>
+                      </ul>
+                      <p>
+                        <strong>Note:</strong> Please bring your booking
+                        confirmation and valid ID.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="booking-actions">
+                <button
+                  type="button"
+                  class="btn-back"
+                  onclick="goBackToRooms()"
+                >
+                  Back to Rooms
+                </button>
+                <button
+                  type="button"
+                  class="btn-proceed"
+                  onclick="proceedToPayment()"
+                >
+                  Complete Booking
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Promotions Content -->
+          <div class="content-section" id="promotions-section">
+            <div class="promotions-grid">
+              <div class="promo-card featured">
+                <div class="promo-ribbon">Featured</div>
+                <div class="promo-header">
+                  <div class="promo-icon">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                  <h4>Early Bird Special</h4>
+                </div>
+                <div class="promo-content">
+                  <div class="discount">25% OFF</div>
+                  <p>
+                    Book 30 days in advance and save big on your next getaway!
+                  </p>
+                  <div class="promo-details">
+                    <span
+                      ><i class="fas fa-calendar"></i> Valid until Dec 31,
+                      2025</span
+                    >
+                    <span><i class="fas fa-tag"></i> Code: EARLYBIRD25</span>
+                  </div>
+                </div>
+                <button class="promo-btn">
+                  <i class="fas fa-ticket-alt"></i>
+                  Apply Promo
+                </button>
+              </div>
+              <div class="promo-card">
+                <div class="promo-header">
+                  <div class="promo-icon weekend">
+                    <i class="fas fa-moon"></i>
+                  </div>
+                  <h4>Weekend Escape</h4>
+                </div>
+                <div class="promo-content">
+                  <div class="discount">20% OFF</div>
+                  <p>Perfect for weekend warriors! Book Friday-Sunday stays.</p>
+                  <div class="promo-details">
+                    <span
+                      ><i class="fas fa-calendar"></i> Valid weekends only</span
+                    >
+                    <span><i class="fas fa-tag"></i> Code: WEEKEND20</span>
+                  </div>
+                </div>
+                <button class="promo-btn">
+                  <i class="fas fa-ticket-alt"></i>
+                  Apply Promo
+                </button>
+              </div>
+              <div class="promo-card">
+                <div class="promo-header">
+                  <div class="promo-icon family">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <h4>Family Fun Package</h4>
+                </div>
+                <div class="promo-content">
+                  <div class="discount">30% OFF</div>
+                  <p>
+                    Special rates for families with children under 12. Includes
+                    breakfast!
+                  </p>
+                  <div class="promo-details">
+                    <span><i class="fas fa-child"></i> Children under 12</span>
+                    <span><i class="fas fa-tag"></i> Code: FAMILY30</span>
+                  </div>
+                </div>
+                <button class="promo-btn">
+                  <i class="fas fa-ticket-alt"></i>
+                  Apply Promo
+                </button>
+              </div>
+              <div class="promo-card exclusive">
+                <div class="promo-ribbon exclusive">VIP Only</div>
+                <div class="promo-header">
+                  <div class="promo-icon vip">
+                    <i class="fas fa-crown"></i>
+                  </div>
+                  <h4>VIP Members Exclusive</h4>
+                </div>
+                <div class="promo-content">
+                  <div class="discount">40% OFF</div>
+                  <p>
+                    Exclusive VIP member rates with premium amenities included.
+                  </p>
+                  <div class="promo-details">
+                    <span><i class="fas fa-star"></i> VIP Members Only</span>
+                    <span><i class="fas fa-tag"></i> Code: VIP40</span>
+                  </div>
+                </div>
+                <button class="promo-btn exclusive">
+                  <i class="fas fa-star"></i>
+                  Claim VIP Rate
+                </button>
+              </div>
+            </div>
+
+            <!-- Promo Code Section -->
+            <div class="promo-code-section">
+              <h3>Have a Promo Code?</h3>
+              <div class="promo-code-input">
+                <input
+                  type="text"
+                  placeholder="Enter your promo code"
+                  id="promoCodeInput"
+                />
+                <button type="button" onclick="validatePromoCode()">
+                  <i class="fas fa-check"></i>
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Content -->
+          <div class="content-section" id="profile-section">
+            <div class="profile-form-container">
+              <form class="profile-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="firstName"
+                      value="John"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      value="Doe"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="john.doe@example.com"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="phone">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value="+1 (555) 123-4567"
+                    required
+                  />
+                </div>
+                <button type="submit" class="submit-btn">
+                  <i class="fas fa-save"></i>
+                  Update Profile
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Popup -->
+    <div class="logout-popup-overlay" id="logoutPopupOverlay">
+      <div class="logout-popup">
+        <div class="logout-popup-header">
+          <h3>Confirm Logout</h3>
+          <button class="logout-popup-close" onclick="hideLogoutPopup()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="logout-popup-body">
+          <div class="logout-popup-icon">
+            <i class="fas fa-sign-out-alt"></i>
+          </div>
+          <p>Are you sure you want to logout from your account?</p>
+          <p class="logout-popup-subtext">
+            You will be redirected to the login page.
+          </p>
+        </div>
+        <div class="logout-popup-footer">
+          <button class="logout-popup-btn cancel" onclick="hideLogoutPopup()">
+            <i class="fas fa-times"></i>
+            Cancel
+          </button>
+          <button class="logout-popup-btn confirm" onclick="confirmLogout()">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="dashboard-script-inline.js"></script>
+  </body>
+</html>
