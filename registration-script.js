@@ -1,9 +1,15 @@
 // Registration Form Validation and Functionality
+console.log("🔧 registration-script.js loaded at", new Date().toISOString());
+
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("📄 Registration form DOM loaded");
+
   // Get form elements
   const form = document.getElementById("registrationForm");
   const errorContainer = document.getElementById("errorContainer");
   const errorList = document.getElementById("errorList");
+
+  console.log("📋 Form found:", form ? "YES" : "NO");
 
   // Get input fields
   const lastName = document.getElementById("lastName");
@@ -56,7 +62,9 @@ document.addEventListener("DOMContentLoaded", function () {
   addRealTimeValidation();
 
   // Handle form submission
+  console.log("🔗 Attaching submit event listener to form");
   form.addEventListener("submit", handleFormSubmission);
+  console.log("✅ Registration form ready!");
 
   /**
    * Initialize password toggle functionality
@@ -273,6 +281,8 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleFormSubmission(e) {
     e.preventDefault();
 
+    console.log("🎯 Registration form submitted!");
+
     // Clear previous error container
     hideErrorContainer();
 
@@ -309,6 +319,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (!isFormValid) {
+      console.log("❌ Form validation failed:", errors);
       showErrorContainer(errors);
       // Scroll to the first error
       const firstErrorField = form.querySelector(".form-input.error");
@@ -319,6 +330,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    console.log("✅ Form validation passed, proceeding to registration...");
     // If form is valid, simulate registration process
     handleSuccessfulRegistration();
   }
@@ -358,24 +370,104 @@ document.addEventListener("DOMContentLoaded", function () {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Registering...';
 
-    // Simulate API call
-    setTimeout(() => {
-      // Reset button state
-      submitBtn.classList.remove("loading");
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+    // Prepare registration data
+    const registrationData = {
+      lastName: lastName.value.trim(),
+      givenName: givenName.value.trim(),
+      middleName: middleName.value.trim(),
+      email: email.value.trim(),
+      phoneNumber: phoneNumber.value.trim(),
+      username: username.value.trim(),
+      password: password.value,
+    };
 
-      // Show success message
-      showSuccessMessage();
+    console.log("📤 Sending registration data:", registrationData);
+    console.log("📍 Endpoint: user/register.php");
 
-      // Store user data (in real app, this would be sent to backend)
-      storeRegistrationData();
+    // Send registration request to backend
+    fetch("user/register.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(registrationData),
+    })
+      .then((response) => {
+        console.log("📡 Response status:", response.status);
+        return response.text();
+      })
+      .then((responseText) => {
+        console.log("📄 Raw response:", responseText);
 
-      // Redirect to login after short delay
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 2000);
-    }, 2000);
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log("📦 Parsed data:", data);
+        } catch (e) {
+          console.error("❌ Failed to parse JSON:", e);
+          console.error("Raw response was:", responseText);
+          throw new Error("Invalid JSON response from server");
+        }
+
+        return data;
+      })
+      .then((data) => {
+        // Reset button state
+        submitBtn.classList.remove("loading");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+
+        if (data.success) {
+          console.log("✅ SUCCESS! Registration response:", data);
+          console.log("🎉 User saved to database:", data.data);
+          console.log("📊 User ID created:", data.data.user_id);
+          console.log("👤 Username:", data.data.username);
+          console.log("📧 Email:", data.data.email);
+
+          // Show success message
+          showSuccessMessage();
+
+          // TEMPORARY: Comment out redirect to see console
+          console.log(
+            "⏸️ Redirect disabled for debugging - Check console above!"
+          );
+          alert(
+            "✅ Registration Successful!\n\nUser ID: " +
+              data.data.user_id +
+              "\nUsername: " +
+              data.data.username +
+              "\n\nCheck console for details, then click OK to stay on this page."
+          );
+
+          // Redirect to login after short delay
+          // setTimeout(() => {
+          //   window.location.href = "index.html";
+          // }, 2000);
+        } else {
+          console.log("❌ REGISTRATION FAILED!");
+          console.log("Error message:", data.message);
+          console.log("Full response:", data);
+
+          // Show error message
+          const errors = data.errors || [
+            data.message || "Registration failed. Please try again.",
+          ];
+          showErrorContainer(errors);
+        }
+      })
+      .catch((error) => {
+        console.error("❌ Registration error:", error);
+
+        // Reset button state
+        submitBtn.classList.remove("loading");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+
+        // Show error message
+        showErrorContainer([
+          "Network error. Please check your connection and try again.",
+        ]);
+      });
   }
 
   /**

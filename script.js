@@ -160,110 +160,128 @@ loginForm.addEventListener("submit", function (e) {
   handleLogin(email, password);
 });
 
-// Handle login simulation
+// Handle login with database authentication
 function handleLogin(email, password) {
   // Add loading state
   loginBtn.classList.add("loading");
   loginBtn.disabled = true;
 
-  // Simulate API call delay
+  const cleanEmail = email.trim().toLowerCase();
+
+  // Check if this is an admin login attempt
+  const isAdminLogin =
+    cleanEmail === "admin" || cleanEmail === "admin@resort.com";
+
+  if (isAdminLogin) {
+    // Admin login - use admin endpoint
+    console.log("🔧 Attempting admin login...");
+
+    fetch("admin/login.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: email.trim(),
+        password: password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        loginBtn.classList.remove("loading");
+        loginBtn.disabled = false;
+
+        if (data.success) {
+          console.log("✅ Admin login successful");
+          loginBtn.classList.add("success");
+          loginBtn.innerHTML =
+            '<i class="fas fa-check"></i> Admin Access Granted!';
+
+          setTimeout(() => {
+            window.location.href = "admin/dashboard.php";
+          }, 1000);
+        } else {
+          console.log("❌ Admin login failed:", data.message);
+          showLoginError(data.message || "Invalid admin credentials");
+        }
+      })
+      .catch((error) => {
+        console.error("❌ Admin login error:", error);
+        loginBtn.classList.remove("loading");
+        loginBtn.disabled = false;
+        showLoginError("Network error. Please try again.");
+      });
+  } else {
+    // Guest user login - use user endpoint
+    console.log("👤 Attempting guest user login...");
+
+    const requestBody = {
+      usernameOrEmail: email.trim(),
+      password: password,
+    };
+
+    console.log("📤 Sending request:", requestBody);
+
+    fetch("user/login.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    })
+      .then((response) => {
+        console.log("📡 Response status:", response.status);
+        return response.text();
+      })
+      .then((responseText) => {
+        console.log("📄 Raw response:", responseText);
+
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          console.error("❌ Failed to parse JSON:", e);
+          loginBtn.classList.remove("loading");
+          loginBtn.disabled = false;
+          showLoginError("Server error. Please try again.");
+          return;
+        }
+
+        console.log("📦 Parsed data:", data);
+        loginBtn.classList.remove("loading");
+        loginBtn.disabled = false;
+
+        if (data.success) {
+          console.log("✅ Guest user login successful");
+          loginBtn.classList.add("success");
+          loginBtn.innerHTML = '<i class="fas fa-check"></i> Welcome Back!';
+
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1000);
+        } else {
+          console.log("❌ Guest login failed:", data.message);
+          showLoginError(data.message || "Invalid credentials");
+        }
+      })
+      .catch((error) => {
+        console.error("❌ Guest login error:", error);
+        loginBtn.classList.remove("loading");
+        loginBtn.disabled = false;
+        showLoginError("Network error. Please try again.");
+      });
+  }
+}
+
+// Show login error message
+function showLoginError(message) {
+  loginBtn.classList.add("error");
+  loginBtn.innerHTML = '<i class="fas fa-times"></i> ' + message;
+
   setTimeout(() => {
-    // Remove loading state
-    loginBtn.classList.remove("loading");
-    loginBtn.disabled = false;
-
-    // Debug: Log the credentials being checked
-    console.log("Checking credentials:", { email, password });
-    console.log(
-      "Email length:",
-      email.length,
-      "Password length:",
-      password.length
-    );
-
-    // Check for admin credentials - accept both username and email
-    const cleanEmail = email.trim().toLowerCase();
-    const isAdminLogin =
-      cleanEmail === "admin@resort.com" || cleanEmail === "admin";
-    const isAdminPassword = password.trim() === "admin123";
-
-    // Check for demo user credentials
-    const isDemoUserLogin =
-      cleanEmail === "demo@guest.com" || cleanEmail === "demo";
-    const isDemoUserPassword = password.trim() === "demo123";
-
-    console.log(
-      "Login check:",
-      cleanEmail,
-      "is admin:",
-      isAdminLogin,
-      "is demo:",
-      isDemoUserLogin
-    );
-    console.log(
-      "Password check:",
-      password.trim(),
-      "Result - Admin:",
-      isAdminPassword,
-      "Demo:",
-      isDemoUserPassword
-    );
-
-    if (isAdminLogin && isAdminPassword) {
-      console.log("✅ Admin login successful - redirecting to admin dashboard");
-      // Add success animation
-      loginBtn.classList.add("success");
-      loginBtn.innerHTML = '<i class="fas fa-check"></i> Admin Access Granted!';
-
-      // Direct redirect to admin dashboard without popup
-      setTimeout(() => {
-        console.log("Redirecting to admin dashboard...");
-        window.location.href = "admin-dashboard.html";
-      }, 1000);
-    } else if (isDemoUserLogin && isDemoUserPassword) {
-      console.log(
-        "✅ Demo user login successful - redirecting to user dashboard"
-      );
-      // Store demo user info for dashboard
-      localStorage.setItem(
-        "currentUser",
-        JSON.stringify({
-          email: "demo@guest.com",
-          name: "Demo Guest",
-          memberSince: "2024",
-          loyaltyLevel: "VIP",
-          totalReservations: 12,
-          upcomingReservations: 2,
-        })
-      );
-
-      // Add success animation
-      loginBtn.classList.add("success");
-      loginBtn.innerHTML = '<i class="fas fa-check"></i> Welcome Demo User!';
-
-      // Direct redirect to user dashboard
-      setTimeout(() => {
-        console.log("Redirecting to user dashboard...");
-        window.location.href = "dashboard.html";
-      }, 1000);
-    } else {
-      console.log("❌ Invalid credentials - showing error message");
-      // Show error message for invalid credentials
-      loginBtn.classList.add("error");
-      loginBtn.innerHTML = '<i class="fas fa-times"></i> Invalid Credentials';
-
-      // Show demo credentials info
-      setTimeout(() => {
-        alert(
-          `❌ Invalid credentials!\n\n📝 Demo Accounts Available:\n\n👤 Demo User Dashboard:\n• Email: demo@guest.com (or username: demo)\n• Password: demo123\n\n🔧 Admin Dashboard:\n• Email: admin@resort.com (or username: admin)\n• Password: admin123\n\nPlease try again with valid credentials.`
-        );
-
-        // Reset form after error
-        loginBtn.classList.remove("error");
-        loginBtn.innerHTML = "Sign In";
-      }, 2000);
-    }
-  }, 1500);
+    loginBtn.classList.remove("error");
+    loginBtn.innerHTML = "Sign In";
+  }, 3000);
 }
 
 // Email validation

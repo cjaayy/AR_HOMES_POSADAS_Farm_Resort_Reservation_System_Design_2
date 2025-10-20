@@ -158,15 +158,39 @@ function confirmLogout() {
       confirmBtn.disabled = true;
     }
 
-    // Simulate logout process
-    setTimeout(() => {
-      // Clear any stored session data
-      localStorage.removeItem("adminSession");
-      sessionStorage.clear();
+    // Call logout API - use relative path from where the page is loaded
+    const logoutPath = window.location.pathname.includes("/admin/")
+      ? "logout.php"
+      : "admin/logout.php";
 
-      // Redirect to login page
-      window.location.href = "index.html";
-    }, 800);
+    fetch(logoutPath, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Clear any stored session data
+        localStorage.removeItem("adminSession");
+        sessionStorage.clear();
+
+        // Redirect to login page - adjust path based on current location
+        const indexPath = window.location.pathname.includes("/admin/")
+          ? "../index.html"
+          : "index.html";
+        setTimeout(() => {
+          window.location.href = indexPath;
+        }, 500);
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        // Redirect anyway - adjust path based on current location
+        const indexPath = window.location.pathname.includes("/admin/")
+          ? "../index.html"
+          : "index.html";
+        window.location.href = indexPath;
+      });
   }, 100);
 }
 

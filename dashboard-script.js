@@ -128,36 +128,33 @@ function closePopup() {
   }
 }
 
-// Load user data from localStorage or use default values
+// Load user data from PHP session (passed via userData global variable)
 function loadUserData() {
-  const storedUser = localStorage.getItem("currentUser");
-  if (storedUser) {
-    try {
-      const user = JSON.parse(storedUser);
-      return {
-        name: user.name || "Demo Guest",
-        email: user.email || "demo@guest.com",
-        phone: "+63 (912) 345-6789",
-        totalReservations: user.totalReservations || 12,
-        pendingReservations: 2,
-        approvedReservations: user.upcomingReservations || 2,
-        completedStays: user.totalReservations
-          ? user.totalReservations - 2
-          : 10,
-        memberSince: user.memberSince || "2024",
-        loyaltyLevel: user.loyaltyLevel || "VIP",
-      };
-    } catch (e) {
-      console.log("Error parsing user data, using defaults");
-    }
+  // Check if userData exists (from PHP session)
+  if (typeof userData !== "undefined" && userData.userId) {
+    return {
+      name: userData.fullName,
+      email: userData.email,
+      phone: userData.phone,
+      totalReservations: 0, // Will be loaded from database
+      pendingReservations: 0,
+      approvedReservations: 0,
+      completedStays: 0,
+      memberSince: userData.memberSince,
+      loyaltyLevel: userData.loyaltyLevel,
+    };
   }
 
-  // Default data for non-demo users
+  // If no session data, redirect to login
+  console.error("❌ No user session found. Redirecting to login...");
+  window.location.href = "index.html";
+
+  // Fallback (should never reach here)
   return {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    totalReservations: 5,
+    name: "Guest",
+    email: "",
+    phone: "",
+    totalReservations: 0,
     pendingReservations: 2,
     approvedReservations: 3,
     completedStays: 8,

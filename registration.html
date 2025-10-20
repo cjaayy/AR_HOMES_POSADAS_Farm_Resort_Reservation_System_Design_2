@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>AR Homes Posadas Farm Resort - Registration</title>
 
     <!-- Favicon -->
@@ -73,9 +79,6 @@
       content="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
     />
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="registration-styles.css" />
-
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -89,8 +92,595 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-  </head>
+    <style>
+      /* Reset and Base Styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
+      body {
+        font-family: "Poppins", sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        overflow-x: hidden;
+      }
+
+      /* Main Container */
+      .registration-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+      }
+
+      /* Header Styles */
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .system-info {
+        text-align: left;
+      }
+
+      .system-name {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        margin-bottom: 5px;
+      }
+
+      .system-subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 300;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 0;
+      }
+
+      .form-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        width: 100%;
+        max-width: 700px;
+        animation: slideUp 0.8s ease-out;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Form Header */
+      .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .form-header h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 10px;
+      }
+
+      .form-header p {
+        font-size: 1.1rem;
+        color: #718096;
+        font-weight: 400;
+      }
+
+      /* Form Styles */
+      .registration-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+        width: 100%;
+      }
+
+      .form-group label {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .form-group label i {
+        color: #667eea;
+        width: 16px;
+      }
+
+      .form-input {
+        padding: 15px 18px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: white;
+        color: #2d3748;
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .form-input::placeholder {
+        color: #a0aec0;
+      }
+
+      .form-input.error {
+        border-color: #e53e3e;
+        box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+      }
+
+      /* Password Input Container */
+      .password-input-container {
+        position: relative;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #718096;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 4px;
+        transition: color 0.3s ease;
+      }
+
+      .password-toggle:hover {
+        color: #667eea;
+      }
+
+      .password-toggle:focus {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+      }
+
+      /* Error Messages */
+      .error-container {
+        background: #fed7d7;
+        color: #e53e3e;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #e53e3e;
+        margin-bottom: 20px;
+      }
+
+      .error-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .error-container ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .error-container li {
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .error-container li:before {
+        content: "⚠";
+        font-weight: bold;
+      }
+
+      .error-message {
+        color: #e53e3e;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-top: 4px;
+        display: block;
+        min-height: 20px;
+      }
+
+      /* Register Button */
+      .register-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 18px 30px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .register-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+      }
+
+      .register-btn:active {
+        transform: translateY(-1px);
+      }
+
+      .register-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      /* Login Link */
+      .login-link {
+        text-align: center;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .login-link p {
+        color: #718096;
+        font-size: 0.95rem;
+      }
+
+      .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+
+      .login-link a:hover {
+        color: #5a67d8;
+        text-decoration: underline;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        margin-top: 30px;
+      }
+
+      /* Success State */
+      .form-input.success {
+        border-color: #38a169;
+        box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.1);
+      }
+
+      .success-message {
+        color: #38a169;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-top: 4px;
+        display: block;
+      }
+
+      /* Loading State */
+      .register-btn.loading {
+        opacity: 0.8;
+        cursor: not-allowed;
+      }
+
+      .register-btn.loading i {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1024px) {
+        .form-container {
+          max-width: 600px;
+          padding: 35px 25px;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .form-container {
+          max-width: 550px;
+          padding: 30px 20px;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+
+        .system-name {
+          font-size: 2rem;
+        }
+      }
+
+      @media (max-width: 1000px) and (max-height: 700px) {
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+
+        .form-container {
+          max-width: 500px;
+          padding: 25px 15px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .registration-container {
+          padding: 15px;
+        }
+
+        .header {
+          margin-bottom: 20px;
+          padding: 15px;
+        }
+
+        .logo-container {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .system-info {
+          text-align: center;
+        }
+
+        .system-name {
+          font-size: 1.8rem;
+        }
+
+        .system-subtitle {
+          font-size: 1rem;
+        }
+
+        .form-container {
+          padding: 25px 20px;
+          margin: 0 5px;
+        }
+
+        .form-header h2 {
+          font-size: 2rem;
+        }
+
+        .form-header p {
+          font-size: 1rem;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+
+        .registration-form {
+          gap: 15px;
+        }
+
+        .register-btn {
+          padding: 16px 25px;
+          font-size: 1rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .registration-container {
+          padding: 10px;
+        }
+
+        .header {
+          padding: 12px;
+        }
+
+        .logo {
+          width: 60px;
+          height: 60px;
+        }
+
+        .system-name {
+          font-size: 1.5rem;
+        }
+
+        .system-subtitle {
+          font-size: 0.9rem;
+        }
+
+        .form-container {
+          padding: 20px 15px;
+        }
+
+        .form-header h2 {
+          font-size: 1.7rem;
+        }
+
+        .form-input {
+          padding: 12px 15px;
+          font-size: 0.95rem;
+        }
+
+        .register-btn {
+          padding: 14px 20px;
+          font-size: 0.95rem;
+        }
+      }
+
+      /* High contrast mode support */
+      @media (prefers-contrast: high) {
+        .form-input {
+          border-width: 3px;
+        }
+
+        .form-input:focus {
+          box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
+        }
+
+        .register-btn {
+          border: 2px solid transparent;
+        }
+
+        .register-btn:focus {
+          outline: 3px solid #667eea;
+          outline-offset: 2px;
+        }
+      }
+
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+
+        .form-container {
+          animation: none;
+        }
+
+        .form-input:focus {
+          transform: none;
+        }
+
+        .register-btn:hover {
+          transform: none;
+        }
+      }
+
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        .form-container {
+          background: rgba(45, 55, 72, 0.95);
+          color: #f7fafc;
+        }
+
+        .form-header h2 {
+          color: #f7fafc;
+        }
+
+        .form-header p {
+          color: #cbd5e0;
+        }
+
+        .form-group label {
+          color: #e2e8f0;
+        }
+
+        .form-input {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.2);
+          color: #f7fafc;
+        }
+
+        .form-input::placeholder {
+          color: #a0aec0;
+        }
+
+        .form-input:focus {
+          border-color: #667eea;
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+        .login-link p {
+          color: #cbd5e0;
+        }
+      }
+    </style>
+  </head>
   <body>
     <div class="registration-container">
       <!-- Header with Logo and System Name -->
@@ -112,26 +702,29 @@
       <main class="main-content">
         <div class="form-container">
           <div class="form-header">
-            <h2 class="form-title">User Registration</h2>
-            <p class="form-subtitle">
-              Create your account to access our reservation system
-            </p>
+            <h2>User Registration</h2>
+            <p>Create your account to access our reservation system</p>
           </div>
 
-          <form id="registrationForm" class="registration-form" novalidate>
-            <!-- Error Messages Container -->
-            <div
-              id="errorContainer"
-              class="error-container"
-              style="display: none"
-            >
-              <ul id="errorList"></ul>
+          <!-- Error Container -->
+          <div
+            id="errorContainer"
+            class="error-container"
+            style="display: none"
+          >
+            <div class="error-header">
+              <i class="fas fa-exclamation-circle"></i>
+              <span>Please fix the following errors:</span>
             </div>
+            <ul id="errorList"></ul>
+          </div>
 
+          <!-- Registration Form -->
+          <form id="registrationForm" class="registration-form" novalidate>
             <!-- Name Fields Row -->
             <div class="form-row">
               <div class="form-group">
-                <label for="lastName" class="form-label">
+                <label for="lastName">
                   <i class="fas fa-user"></i>
                   Last Name *
                 </label>
@@ -143,11 +736,11 @@
                   placeholder="Enter your last name"
                   required
                 />
-                <span class="error-message" id="lastNameError"></span>
+                <span id="lastNameError" class="error-message"></span>
               </div>
 
               <div class="form-group">
-                <label for="givenName" class="form-label">
+                <label for="givenName">
                   <i class="fas fa-user"></i>
                   Given Name *
                 </label>
@@ -159,13 +752,13 @@
                   placeholder="Enter your given name"
                   required
                 />
-                <span class="error-message" id="givenNameError"></span>
+                <span id="givenNameError" class="error-message"></span>
               </div>
             </div>
 
             <!-- Middle Name -->
             <div class="form-group">
-              <label for="middleName" class="form-label">
+              <label for="middleName">
                 <i class="fas fa-user"></i>
                 Middle Name *
               </label>
@@ -177,12 +770,12 @@
                 placeholder="Enter your middle name"
                 required
               />
-              <span class="error-message" id="middleNameError"></span>
+              <span id="middleNameError" class="error-message"></span>
             </div>
 
             <!-- Email Address -->
             <div class="form-group">
-              <label for="email" class="form-label">
+              <label for="email">
                 <i class="fas fa-envelope"></i>
                 Email Address *
               </label>
@@ -194,12 +787,12 @@
                 placeholder="Enter your email address"
                 required
               />
-              <span class="error-message" id="emailError"></span>
+              <span id="emailError" class="error-message"></span>
             </div>
 
             <!-- Phone Number -->
             <div class="form-group">
-              <label for="phoneNumber" class="form-label">
+              <label for="phoneNumber">
                 <i class="fas fa-phone"></i>
                 Phone Number *
               </label>
@@ -211,12 +804,12 @@
                 placeholder="Enter your phone number"
                 required
               />
-              <span class="error-message" id="phoneNumberError"></span>
+              <span id="phoneNumberError" class="error-message"></span>
             </div>
 
             <!-- Username -->
             <div class="form-group">
-              <label for="username" class="form-label">
+              <label for="username">
                 <i class="fas fa-user-circle"></i>
                 Username *
               </label>
@@ -228,13 +821,13 @@
                 placeholder="Choose a username (min. 5 characters, no spaces)"
                 required
               />
-              <span class="error-message" id="usernameError"></span>
+              <span id="usernameError" class="error-message"></span>
             </div>
 
             <!-- Password Fields Row -->
             <div class="form-row">
               <div class="form-group">
-                <label for="password" class="form-label">
+                <label for="password">
                   <i class="fas fa-lock"></i>
                   Password *
                 </label>
@@ -255,11 +848,11 @@
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
-                <span class="error-message" id="passwordError"></span>
+                <span id="passwordError" class="error-message"></span>
               </div>
 
               <div class="form-group">
-                <label for="confirmPassword" class="form-label">
+                <label for="confirmPassword">
                   <i class="fas fa-lock"></i>
                   Confirm Password *
                 </label>
@@ -280,7 +873,7 @@
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
-                <span class="error-message" id="confirmPasswordError"></span>
+                <span id="confirmPasswordError" class="error-message"></span>
               </div>
             </div>
 
@@ -304,7 +897,400 @@
       </footer>
     </div>
 
-    <!-- JavaScript -->
-    <script src="registration-script.js"></script>
+    <!-- ALL JAVASCRIPT INLINE - NO EXTERNAL FILES, NO CACHING ISSUES -->
+    <script>
+      console.log("🚀 Registration form loaded - ALL INLINE JAVASCRIPT");
+      console.log("📅 Timestamp:", new Date().toISOString());
+
+      // Registration Form Validation and Functionality - ALL INLINE
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("📄 DOM loaded, initializing form...");
+
+        // Get form elements
+        const form = document.getElementById("registrationForm");
+        const errorContainer = document.getElementById("errorContainer");
+        const errorList = document.getElementById("errorList");
+
+        // Get input fields
+        const lastName = document.getElementById("lastName");
+        const givenName = document.getElementById("givenName");
+        const middleName = document.getElementById("middleName");
+        const email = document.getElementById("email");
+        const phoneNumber = document.getElementById("phoneNumber");
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const confirmPassword = document.getElementById("confirmPassword");
+
+        // Get password toggle buttons
+        const passwordToggle = document.getElementById("passwordToggle");
+        const confirmPasswordToggle = document.getElementById(
+          "confirmPasswordToggle"
+        );
+
+        // Get submit button
+        const submitBtn = form.querySelector(".register-btn");
+
+        // Validation patterns
+        const patterns = {
+          email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+          phone: /^[\+]?[0-9]{10,15}$/,
+          username: /^[a-zA-Z0-9_-]{5,}$/,
+          name: /^[a-zA-Z\s'-]{2,}$/,
+        };
+
+        // Error messages
+        const errorMessages = {
+          lastName:
+            "Last name is required and must contain only letters, spaces, hyphens, or apostrophes.",
+          givenName:
+            "Given name is required and must contain only letters, spaces, hyphens, or apostrophes.",
+          middleName:
+            "Middle name is required and must contain only letters, spaces, hyphens, or apostrophes.",
+          email: "Please enter a valid email address.",
+          phoneNumber:
+            "Phone number must be 10-15 digits and may include a + sign.",
+          username:
+            "Username must be at least 5 characters long and contain no spaces.",
+          password: "Password is required.",
+          confirmPassword: "Passwords do not match.",
+          required: "This field is required.",
+        };
+
+        // Password toggle functionality
+        if (passwordToggle) {
+          passwordToggle.addEventListener("click", function () {
+            togglePassword(password, passwordToggle);
+          });
+        }
+
+        if (confirmPasswordToggle) {
+          confirmPasswordToggle.addEventListener("click", function () {
+            togglePassword(confirmPassword, confirmPasswordToggle);
+          });
+        }
+
+        function togglePassword(inputField, toggleButton) {
+          const type =
+            inputField.getAttribute("type") === "password"
+              ? "text"
+              : "password";
+          inputField.setAttribute("type", type);
+          const icon = toggleButton.querySelector("i");
+          icon.classList.toggle("fa-eye");
+          icon.classList.toggle("fa-eye-slash");
+        }
+
+        // Add real-time validation
+        addRealTimeValidation();
+
+        // Handle form submission
+        console.log("🔗 Attaching submit event listener");
+        form.addEventListener("submit", handleFormSubmission);
+        console.log("✅ Registration form ready!");
+
+        function addRealTimeValidation() {
+          const fields = [
+            lastName,
+            givenName,
+            middleName,
+            email,
+            phoneNumber,
+            username,
+            password,
+            confirmPassword,
+          ];
+
+          fields.forEach((field) => {
+            field.addEventListener("blur", () => validateField(field));
+            field.addEventListener("input", () => {
+              if (field.classList.contains("error")) {
+                validateField(field);
+              }
+            });
+          });
+
+          confirmPassword.addEventListener("input", validatePasswordMatch);
+        }
+
+        function validateField(field) {
+          const value = field.value.trim();
+          const fieldName = field.name;
+          let isValid = true;
+          let errorMessage = "";
+
+          if (!value) {
+            isValid = false;
+            errorMessage = errorMessages.required;
+          } else {
+            switch (fieldName) {
+              case "lastName":
+              case "givenName":
+              case "middleName":
+                if (!patterns.name.test(value)) {
+                  isValid = false;
+                  errorMessage = errorMessages[fieldName];
+                }
+                break;
+              case "email":
+                if (!patterns.email.test(value)) {
+                  isValid = false;
+                  errorMessage = errorMessages.email;
+                }
+                break;
+              case "phoneNumber":
+                const cleanPhone = value.replace(/[\s\(\)\-]/g, "");
+                if (!patterns.phone.test(cleanPhone)) {
+                  isValid = false;
+                  errorMessage = errorMessages.phoneNumber;
+                }
+                break;
+              case "username":
+                if (!patterns.username.test(value)) {
+                  isValid = false;
+                  errorMessage = errorMessages.username;
+                }
+                break;
+              case "password":
+                if (value.length < 6) {
+                  isValid = false;
+                  errorMessage = "Password must be at least 6 characters long.";
+                }
+                break;
+              case "confirmPassword":
+                if (value !== password.value) {
+                  isValid = false;
+                  errorMessage = errorMessages.confirmPassword;
+                }
+                break;
+            }
+          }
+
+          showFieldError(field, errorMessage, !isValid);
+          return isValid;
+        }
+
+        function validatePasswordMatch() {
+          const isMatch = confirmPassword.value === password.value;
+          if (confirmPassword.value) {
+            showFieldError(
+              confirmPassword,
+              isMatch ? "" : errorMessages.confirmPassword,
+              !isMatch
+            );
+          }
+          return isMatch;
+        }
+
+        function showFieldError(field, message, isError) {
+          const errorElement = document.getElementById(field.name + "Error");
+          if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = isError ? "block" : "none";
+          }
+
+          if (isError) {
+            field.classList.add("error");
+          } else {
+            field.classList.remove("error");
+          }
+        }
+
+        function clearFieldError(field) {
+          field.classList.remove("error");
+          const errorElement = document.getElementById(field.name + "Error");
+          if (errorElement) {
+            errorElement.textContent = "";
+            errorElement.style.display = "none";
+          }
+        }
+
+        function handleFormSubmission(e) {
+          e.preventDefault();
+          console.log("🎯 Form submitted!");
+
+          hideErrorContainer();
+
+          const fields = [
+            lastName,
+            givenName,
+            middleName,
+            email,
+            phoneNumber,
+            username,
+            password,
+            confirmPassword,
+          ];
+
+          let isFormValid = true;
+          const errors = [];
+
+          fields.forEach((field) => {
+            if (!validateField(field)) {
+              isFormValid = false;
+              const fieldLabel = field.previousElementSibling.textContent
+                .replace("*", "")
+                .trim();
+              const errorElement = document.getElementById(
+                field.name + "Error"
+              );
+              if (errorElement && errorElement.textContent) {
+                errors.push(`${fieldLabel}: ${errorElement.textContent}`);
+              }
+            }
+          });
+
+          if (!validatePasswordMatch()) {
+            isFormValid = false;
+          }
+
+          if (!isFormValid) {
+            console.log("❌ Form validation failed:", errors);
+            showErrorContainer(errors);
+            const firstErrorField = form.querySelector(".form-input.error");
+            if (firstErrorField) {
+              firstErrorField.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+              firstErrorField.focus();
+            }
+            return;
+          }
+
+          console.log("✅ Form valid, sending to backend...");
+          handleSuccessfulRegistration();
+        }
+
+        function showErrorContainer(errors) {
+          if (errors.length === 0) return;
+
+          errorList.innerHTML = "";
+          errors.forEach((error) => {
+            const li = document.createElement("li");
+            li.textContent = error;
+            errorList.appendChild(li);
+          });
+
+          errorContainer.style.display = "block";
+          errorContainer.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+
+        function hideErrorContainer() {
+          errorContainer.style.display = "none";
+          errorList.innerHTML = "";
+        }
+
+        function handleSuccessfulRegistration() {
+          submitBtn.classList.add("loading");
+          submitBtn.disabled = true;
+          submitBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Registering...';
+
+          const registrationData = {
+            lastName: lastName.value.trim(),
+            givenName: givenName.value.trim(),
+            middleName: middleName.value.trim(),
+            email: email.value.trim(),
+            phoneNumber: phoneNumber.value.trim().replace(/[\s\(\)\-]/g, ""),
+            username: username.value.trim(),
+            password: password.value,
+          };
+
+          console.log("📤 Sending registration:", registrationData);
+          console.log("📍 Endpoint: user/register.php");
+
+          fetch("user/register.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(registrationData),
+          })
+            .then((response) => {
+              console.log("📡 Response status:", response.status);
+              return response.text();
+            })
+            .then((responseText) => {
+              console.log("📄 Raw response:", responseText.substring(0, 200));
+
+              let data;
+              try {
+                data = JSON.parse(responseText);
+                console.log("📦 Parsed data:", data);
+              } catch (e) {
+                console.error("❌ JSON parse error:", e);
+                throw new Error("Invalid JSON response");
+              }
+
+              return data;
+            })
+            .then((data) => {
+              submitBtn.classList.remove("loading");
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+
+              if (data.success) {
+                console.log("✅ SUCCESS! User saved:", data.data);
+                showSuccessMessage();
+                setTimeout(() => {
+                  console.log("🔄 Redirecting to login...");
+                  window.location.href = "index.html";
+                }, 2000);
+              } else {
+                console.log("❌ Registration failed:", data.message);
+                const errors = data.errors || [
+                  data.message || "Registration failed.",
+                ];
+                showErrorContainer(errors);
+              }
+            })
+            .catch((error) => {
+              console.error("❌ Error:", error);
+              submitBtn.classList.remove("loading");
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+              showErrorContainer([
+                "Network error. Please check your connection.",
+              ]);
+            });
+        }
+
+        function showSuccessMessage() {
+          const successMessage = document.createElement("div");
+          successMessage.className = "success-message-container";
+          successMessage.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 10000;
+            animation: slideIn 0.5s ease-out;
+          `;
+
+          successMessage.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <i class="fas fa-check-circle" style="font-size: 30px;"></i>
+              <div>
+                <h3 style="margin: 0; font-size: 18px;">Registration Successful!</h3>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">Redirecting to login page...</p>
+              </div>
+            </div>
+          `;
+
+          document.body.appendChild(successMessage);
+
+          setTimeout(() => {
+            successMessage.remove();
+          }, 2500);
+        }
+      });
+    </script>
   </body>
 </html>
