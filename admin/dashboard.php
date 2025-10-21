@@ -332,11 +332,180 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             </p>
           </div>
 
-          <!-- Dashboard content area -->
+          <!-- Dashboard Statistics Cards -->
+          <div class="dashboard-stats-grid">
+            <!-- Total Users Card -->
+            <div class="stat-card primary">
+              <div class="stat-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="totalUsersCount">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-change positive">
+                  <i class="fas fa-arrow-up"></i>
+                  <span id="newUsersMonth">0</span> this month
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Users Card -->
+            <div class="stat-card success">
+              <div class="stat-icon">
+                <i class="fas fa-user-check"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="activeUsersCount">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Active Users</div>
+                <div class="stat-change">
+                  <i class="fas fa-info-circle"></i>
+                  <span id="activePercentage">0%</span> of total
+                </div>
+              </div>
+            </div>
+
+            <!-- VIP Members Card -->
+            <div class="stat-card warning">
+              <div class="stat-icon">
+                <i class="fas fa-crown"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="vipUsersCount">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">VIP Members</div>
+                <div class="stat-change">
+                  <i class="fas fa-star"></i>
+                  Premium members
+                </div>
+              </div>
+            </div>
+
+            <!-- New Users Today Card -->
+            <div class="stat-card info">
+              <div class="stat-icon">
+                <i class="fas fa-user-plus"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="newUsersToday">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">New Today</div>
+                <div class="stat-change">
+                  <i class="fas fa-calendar-day"></i>
+                  <span id="newUsersWeek">0</span> this week
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Reservations Card -->
+            <div class="stat-card primary">
+              <div class="stat-icon">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="totalReservationsCount">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Total Reservations</div>
+                <div class="stat-change">
+                  <i class="fas fa-chart-line"></i>
+                  All time
+                </div>
+              </div>
+            </div>
+
+            <!-- Pending Reservations Card -->
+            <div class="stat-card warning">
+              <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="pendingReservationsCount">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Pending</div>
+                <div class="stat-change">
+                  <i class="fas fa-hourglass-half"></i>
+                  Awaiting approval
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirmed Reservations Card -->
+            <div class="stat-card success">
+              <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="confirmedReservationsCount">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Confirmed</div>
+                <div class="stat-change positive">
+                  <i class="fas fa-thumbs-up"></i>
+                  Approved bookings
+                </div>
+              </div>
+            </div>
+
+            <!-- Completed Reservations Card -->
+            <div class="stat-card info">
+              <div class="stat-icon">
+                <i class="fas fa-flag-checkered"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="completedReservationsCount">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Completed</div>
+                <div class="stat-change">
+                  <i class="fas fa-history"></i>
+                  Past stays
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activities Section -->
+          <div class="recent-activities-section">
+            <div class="section-header-inline">
+              <h3><i class="fas fa-history"></i> Recent Activities</h3>
+              <button class="refresh-btn" onclick="loadDashboardStats()" title="Refresh data">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
+            <div class="activities-container" id="recentActivitiesContainer">
+              <div class="loading-activities">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading recent activities...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loyalty Breakdown Section -->
+          <div class="loyalty-breakdown-section">
+            <h3><i class="fas fa-chart-pie"></i> User Loyalty Levels</h3>
+            <div class="loyalty-stats" id="loyaltyBreakdown">
+              <div class="loading-loyalty">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading loyalty statistics...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Database Info -->
           <div class="dashboard-info">
             <div class="info-card">
-              <i class="fas fa-info-circle"></i>
+              <i class="fas fa-database"></i>
               <p>Connected to database: <strong><?php echo DB_NAME; ?></strong></p>
+              <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+                Last updated: <span id="lastUpdated">Loading...</span>
+              </p>
             </div>
           </div>
         </section>
@@ -391,28 +560,36 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               <div class="stat-card">
                 <i class="fas fa-users"></i>
                 <div class="stat-info">
-                  <h3 id="totalUsersCount">0</h3>
+                  <h3 id="manageTotalUsersCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </h3>
                   <p>Total Users</p>
                 </div>
               </div>
               <div class="stat-card">
                 <i class="fas fa-user-check"></i>
                 <div class="stat-info">
-                  <h3 id="activeUsersCount">0</h3>
+                  <h3 id="manageActiveUsersCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </h3>
                   <p>Active Users</p>
                 </div>
               </div>
               <div class="stat-card">
                 <i class="fas fa-crown"></i>
                 <div class="stat-info">
-                  <h3 id="vipUsersCount">0</h3>
+                  <h3 id="manageVipUsersCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </h3>
                   <p>VIP Members</p>
                 </div>
               </div>
               <div class="stat-card">
                 <i class="fas fa-user-plus"></i>
                 <div class="stat-info">
-                  <h3 id="newUsersCount">0</h3>
+                  <h3 id="manageNewUsersCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </h3>
                   <p>New This Month</p>
                 </div>
               </div>
@@ -718,6 +895,199 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             email: <?php echo json_encode($adminEmail); ?>,
             role: <?php echo json_encode($adminRole); ?>
         };
+        
+        // Load dashboard statistics
+        function loadDashboardStats() {
+            console.log('📊 Loading dashboard statistics...');
+            
+            fetch('get_dashboard_stats.php')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📈 Dashboard data received:', data);
+                    
+                    if (data.success) {
+                        updateDashboardUI(data);
+                    } else {
+                        console.error('❌ Failed to load dashboard stats:', data.message);
+                        showErrorState();
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error loading dashboard stats:', error);
+                    showErrorState();
+                });
+        }
+        
+        function updateDashboardUI(data) {
+            const stats = data.stats;
+            
+            // Update stat cards with animation
+            updateStatCard('totalUsersCount', stats.total_users);
+            updateStatCard('activeUsersCount', stats.active_users);
+            updateStatCard('vipUsersCount', stats.vip_users);
+            updateStatCard('newUsersToday', stats.new_users_today);
+            updateStatCard('totalReservationsCount', stats.total_reservations);
+            updateStatCard('pendingReservationsCount', stats.pending_reservations);
+            updateStatCard('confirmedReservationsCount', stats.confirmed_reservations);
+            updateStatCard('completedReservationsCount', stats.completed_reservations);
+            
+            // Update additional info
+            document.getElementById('newUsersMonth').textContent = stats.new_users_this_month;
+            document.getElementById('newUsersWeek').textContent = stats.new_users_this_week;
+            
+            // Calculate and update active percentage
+            const activePercentage = stats.total_users > 0 
+                ? Math.round((stats.active_users / stats.total_users) * 100) 
+                : 0;
+            document.getElementById('activePercentage').textContent = activePercentage + '%';
+            
+            // Update recent activities
+            updateRecentActivities(data.recent_activities);
+            
+            // Update loyalty breakdown
+            updateLoyaltyBreakdown(data.loyalty_breakdown);
+            
+            // Update timestamp
+            const lastUpdated = new Date(data.timestamp);
+            document.getElementById('lastUpdated').textContent = lastUpdated.toLocaleString();
+            
+            console.log('✅ Dashboard UI updated successfully');
+        }
+        
+        function updateStatCard(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                // Animate count from 0 to value
+                animateCount(element, 0, value, 1000);
+            }
+        }
+        
+        function animateCount(element, start, end, duration) {
+            const startTime = Date.now();
+            const difference = end - start;
+            
+            function step() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(start + difference * progress);
+                
+                element.textContent = current.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                }
+            }
+            
+            requestAnimationFrame(step);
+        }
+        
+        function updateRecentActivities(activities) {
+            const container = document.getElementById('recentActivitiesContainer');
+            
+            if (!activities || activities.length === 0) {
+                container.innerHTML = `
+                    <div class="no-activities">
+                        <i class="fas fa-inbox"></i>
+                        <p>No recent activities to display</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const activitiesHTML = activities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas ${activity.icon}"></i>
+                    </div>
+                    <div class="activity-details">
+                        <h4>${activity.title}</h4>
+                        <p>${activity.description}</p>
+                        <span class="activity-time">
+                            <i class="fas fa-clock"></i> ${activity.time}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = activitiesHTML;
+        }
+        
+        function updateLoyaltyBreakdown(loyaltyData) {
+            const container = document.getElementById('loyaltyBreakdown');
+            
+            if (!loyaltyData || loyaltyData.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-chart-pie"></i>
+                        <p>No loyalty data available</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Define colors for each loyalty level
+            const loyaltyColors = {
+                'Regular': '#6c757d',
+                'Silver': '#c0c0c0',
+                'Gold': '#ffd700',
+                'VIP': '#8b00ff'
+            };
+            
+            const loyaltyIcons = {
+                'Regular': 'fa-user',
+                'Silver': 'fa-medal',
+                'Gold': 'fa-trophy',
+                'VIP': 'fa-crown'
+            };
+            
+            const loyaltyHTML = loyaltyData.map(item => `
+                <div class="loyalty-item" style="border-left: 4px solid ${loyaltyColors[item.loyalty_level] || '#667eea'}">
+                    <div class="loyalty-icon" style="color: ${loyaltyColors[item.loyalty_level] || '#667eea'}">
+                        <i class="fas ${loyaltyIcons[item.loyalty_level] || 'fa-star'}"></i>
+                    </div>
+                    <div class="loyalty-info">
+                        <h4>${item.loyalty_level}</h4>
+                        <div class="loyalty-count">${item.count} ${item.count === 1 ? 'member' : 'members'}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = loyaltyHTML;
+        }
+        
+        function showErrorState() {
+            // Show error message in stat cards
+            const statCards = ['totalUsersCount', 'activeUsersCount', 'vipUsersCount', 'newUsersToday',
+                               'totalReservationsCount', 'pendingReservationsCount', 
+                               'confirmedReservationsCount', 'completedReservationsCount'];
+            
+            statCards.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #dc3545;"></i>';
+                }
+            });
+            
+            // Show error in activities
+            const container = document.getElementById('recentActivitiesContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load activities. Please refresh the page.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load dashboard stats when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Dashboard page loaded, fetching statistics...');
+            loadDashboardStats();
+            
+            // Refresh stats every 30 seconds
+            setInterval(loadDashboardStats, 30000);
+        });
         
         // Global logout handler - available immediately
         window.handleLogoutClick = function(event) {

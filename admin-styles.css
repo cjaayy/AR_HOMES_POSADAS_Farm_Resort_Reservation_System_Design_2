@@ -1515,6 +1515,23 @@ body {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.25rem;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.stat-info h3 .fa-spinner {
+  font-size: 1.5rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .stat-info p {
@@ -1727,5 +1744,332 @@ body {
 
   .action-buttons {
     flex-direction: column;
+  }
+}
+
+/* ===== DASHBOARD STATISTICS STYLES ===== */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
+.stat-card.primary::before {
+  background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
+.stat-card.success::before {
+  background: linear-gradient(180deg, #4caf50, #45a049);
+}
+
+.stat-card.warning::before {
+  background: linear-gradient(180deg, #ff9800, #f57c00);
+}
+
+.stat-card.info::before {
+  background: linear-gradient(180deg, #2196f3, #1976d2);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  flex-shrink: 0;
+}
+
+.stat-card.success .stat-icon {
+  background: linear-gradient(135deg, #4caf50, #45a049);
+}
+
+.stat-card.warning .stat-icon {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+}
+
+.stat-card.info .stat-icon {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.stat-change {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.stat-change.positive {
+  color: #4caf50;
+}
+
+.stat-change.negative {
+  color: #f44336;
+}
+
+/* Recent Activities Section */
+.recent-activities-section {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.section-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.section-header-inline h3 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.refresh-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.activities-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+.activity-item .activity-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.activity-details h4 {
+  font-size: 1rem;
+  color: #2c3e50;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.activity-details p {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.loading-activities,
+.no-activities,
+.error-state {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+
+.loading-activities i,
+.no-activities i,
+.error-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.error-state {
+  color: #dc3545;
+}
+
+/* Loyalty Breakdown Section */
+.loyalty-breakdown-section {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.loyalty-breakdown-section h3 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loyalty-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.loyalty-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.loyalty-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loyalty-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.loyalty-info h4 {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.loyalty-count {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.loading-loyalty,
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+
+.loading-loyalty i,
+.no-data i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* Responsive Dashboard */
+@media (max-width: 768px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .loyalty-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header-inline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 }

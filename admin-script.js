@@ -28,6 +28,15 @@ function showSection(sectionId) {
   // Update active navigation item
   setActiveNavItem(sectionId);
 
+  // Load data when switching to specific sections
+  if (sectionId === "users") {
+    console.log("📊 Users section opened - loading user data...");
+    // Load users when users section is opened
+    if (typeof loadUsers === "function") {
+      loadUsers();
+    }
+  }
+
   // Close mobile sidebar if open
   if (window.innerWidth <= 768) {
     closeSidebar();
@@ -958,11 +967,41 @@ function updateUserStatistics() {
     );
   }).length;
 
-  // Update UI
-  document.getElementById("totalUsersCount").textContent = totalUsers;
-  document.getElementById("activeUsersCount").textContent = activeUsers;
-  document.getElementById("vipUsersCount").textContent = vipUsers;
-  document.getElementById("newUsersCount").textContent = newUsers;
+  // Update UI in Manage Users section with animation
+  animateCountUp("manageTotalUsersCount", totalUsers);
+  animateCountUp("manageActiveUsersCount", activeUsers);
+  animateCountUp("manageVipUsersCount", vipUsers);
+  animateCountUp("manageNewUsersCount", newUsers);
+
+  console.log(
+    `📊 User Statistics Updated - Total: ${totalUsers}, Active: ${activeUsers}, VIP: ${vipUsers}, New This Month: ${newUsers}`
+  );
+}
+
+// Animate counter from current value to target value
+function animateCountUp(elementId, targetValue) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  const currentValue = parseInt(element.textContent) || 0;
+  const duration = 1000; // 1 second
+  const steps = 30;
+  const increment = (targetValue - currentValue) / steps;
+  const stepDuration = duration / steps;
+
+  let currentStep = 0;
+
+  const timer = setInterval(() => {
+    currentStep++;
+    const newValue = Math.round(currentValue + increment * currentStep);
+
+    if (currentStep >= steps) {
+      element.textContent = targetValue;
+      clearInterval(timer);
+    } else {
+      element.textContent = newValue;
+    }
+  }, stepDuration);
 }
 
 // Display users in the table
