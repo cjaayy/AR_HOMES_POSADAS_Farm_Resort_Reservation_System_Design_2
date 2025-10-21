@@ -804,27 +804,8 @@ document
           '<span>Send Reset Link</span><i class="fas fa-paper-plane"></i>';
 
         if (data.success) {
-          // Show success message
-          alert(
-            "Password reset instructions have been sent to your email.\n\nFor development: Check the browser console for the reset link."
-          );
-
-          // Log reset link for development
-          if (data.data && data.data.reset_link) {
-            console.log("🔐 PASSWORD RESET LINK (Development Mode)");
-            console.log("==========================================");
-            console.log("Reset Link:", data.data.reset_link);
-            console.log("Expires At:", data.data.expires_at);
-            console.log("Note:", data.data.note);
-            console.log("==========================================");
-            console.log(
-              "\nClick the link above or copy it to your browser to reset your password."
-            );
-
-            // Show modal with reset link for development
-            showResetLinkModal(data.data.reset_link);
-          }
-
+          // Show success modal only
+          showResetSuccessModal();
           closeForgotPasswordModal();
         } else {
           alert(data.message);
@@ -840,6 +821,96 @@ document
   });
 
 // Show reset link modal for development
+// Show reset success modal
+function showResetSuccessModal() {
+  // Remove existing modal if present
+  const existing = document.getElementById("resetSuccessModal");
+  if (existing) existing.remove();
+
+  const modalHtml = `
+    <div id="resetSuccessModal" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+    ">
+      <div style="
+        background: #fff;
+        padding: 32px 28px 24px 28px;
+        border-radius: 16px;
+        max-width: 400px;
+        width: 90vw;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        text-align: center;
+        position: relative;
+        animation: popInModal 0.3s cubic-bezier(.68,-0.55,.27,1.55);
+      ">
+        <div style="margin-bottom: 18px;">
+          <div style="
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: #fff;
+            font-size: 28px;
+          ">
+            <i class="fas fa-envelope-open-text"></i>
+          </div>
+          <h3 style="color: #222; margin-bottom: 8px;">Check Your Email</h3>
+          <p style="color: #555; font-size: 0.97rem;">Password reset instructions have been sent to your email address.</p>
+          <p style="color: #888; font-size: 0.85rem; margin-top: 8px;">If you don't see the email, check your spam or junk folder.</p>
+        </div>
+        <button onclick="closeResetSuccessModal()" style="
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          color: #fff;
+          border: none;
+          padding: 12px 32px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 1rem;
+          margin-top: 10px;
+        ">OK</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+}
+
+// Close reset success modal
+function closeResetSuccessModal() {
+  const modal = document.getElementById("resetSuccessModal");
+  if (modal) modal.remove();
+}
+
+// Add pop-in animation for modal
+const resetSuccessModalStyle = document.createElement("style");
+resetSuccessModalStyle.textContent = `
+  @keyframes popInModal {
+    0% { transform: scale(0.8); opacity: 0; }
+    80% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+`;
+document.head.appendChild(resetSuccessModalStyle);
+
+// Allow closing modal by clicking outside
+document.addEventListener("click", function (e) {
+  const modal = document.getElementById("resetSuccessModal");
+  if (modal && e.target === modal) {
+    closeResetSuccessModal();
+  }
+});
 function showResetLinkModal(resetLink) {
   const modalHtml = `
     <div id="resetLinkModal" style="

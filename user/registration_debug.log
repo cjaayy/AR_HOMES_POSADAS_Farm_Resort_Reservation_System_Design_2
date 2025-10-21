@@ -52,3 +52,75 @@
 2025-10-21 21:08:20 - Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=9f675ccabe840a1f2e7cbd0341bc66509dbddcf94cc32432d28429f05d437e2b
 2025-10-21 21:08:26 - Email send result: TRUE
 2025-10-21 21:08:26 - ✅ Verification email sent to: mayenfacun15@gmail.com
+2025-10-21 15:32:06 - Registration attempt started
+2025-10-21 21:32:06 - Raw input: {"lastName":"Mandani","givenName":"Christian Jay","middleName":"Cereza","email":"mjhayxinadnam@gmail.com","phoneNumber":"09506323579","username":"cjay15","password":"ayen15"}
+2025-10-21 21:32:06 - All fields present
+2025-10-21 21:32:06 - Data: username=cjay15, email=mjhayxinadnam@gmail.com
+2025-10-21 21:32:06 - Connecting to database
+2025-10-21 21:32:06 - Database connected
+2025-10-21 21:32:06 - Executing INSERT
+2025-10-21 21:32:06 - SUCCESS: User ID 1 created
+2025-10-21 21:32:06 - OpenSSL loaded: YES
+2025-10-21 21:32:06 - openssl_encrypt exists: YES
+2025-10-21 21:32:06 - OPENSSL_ALGO_SHA256: 7
+2025-10-21 21:32:06 - Loaded extensions: Core,bcmath,calendar,ctype,date,filter,hash,iconv,json,SPL,pcre,random,readline,Reflection,session,standard,mysqlnd,tokenizer,zlib,libxml,dom,PDO,bz2,SimpleXML,xml,xmlreader,xmlwriter,apache2handler,openssl,curl,fileinfo,gettext,mbstring,exif,mysqli,Phar,pdo_mysql,pdo_sqlite,ftp
+2025-10-21 21:32:06 - Mailer.php loaded
+2025-10-21 21:32:06 - Mailer instance created
+2025-10-21 21:32:06 - About to send email to: mjhayxinadnam@gmail.com
+2025-10-21 21:32:06 - Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=930bc35d08f0b87971f1df51832902412aaa26cad4680c2c066d009692a54b69
+2025-10-21 21:32:10 - Email send result: TRUE
+2025-10-21 21:32:10 - ✅ Verification email sent to: mjhayxinadnam@gmail.com
+2025-10-21 16:09:14 - Registration attempt started
+2025-10-21 22:09:14 - Raw input: {"lastName":"Facun","givenName":"Aienne Joy","middleName":"Ramos","email":"cjmandani03@gmail.com","phoneNumber":"09123456789","username":"ayen15","password":"cjay0715"}
+2025-10-21 22:09:14 - All fields present
+2025-10-21 22:09:14 - Data: username=ayen15, email=cjmandani03@gmail.com
+2025-10-21 22:09:14 - Connecting to database
+2025-10-21 22:09:14 - Database connected
+2025-10-21 22:09:14 - Executing INSERT
+2025-10-21 22:09:14 - SUCCESS: User ID 2 created
+2025-10-21 22:09:14 - OpenSSL loaded: YES
+2025-10-21 22:09:14 - openssl_encrypt exists: YES
+2025-10-21 22:09:14 - OPENSSL_ALGO_SHA256: 7
+2025-10-21 22:09:14 - Loaded extensions: Core,bcmath,calendar,ctype,date,filter,hash,iconv,json,SPL,pcre,random,readline,Reflection,session,standard,mysqlnd,tokenizer,zlib,libxml,dom,PDO,bz2,SimpleXML,xml,xmlreader,xmlwriter,apache2handler,openssl,curl,fileinfo,gettext,mbstring,exif,mysqli,Phar,pdo_mysql,pdo_sqlite,ftp
+2025-10-21 22:09:14 - Mailer.php loaded
+2025-10-21 22:09:14 - Mailer instance created
+2025-10-21 22:09:14 - About to send email to: cjmandani03@gmail.com
+2025-10-21 22:09:14 - Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=7f7930f9fe0c33858804f28d634fc94ecadd9b5ccfd4ef4191a6c2b4dfceb812
+2025-10-21 22:09:20 - Email send result: TRUE
+2025-10-21 22:09:20 - ✅ Verification email sent to: cjmandani03@gmail.com
+2025-10-21 16:16:50 - Registration attempt started
+2025-10-21 22:16:50 - Raw input: {"lastName":"Cereza","givenName":"John Ray","middleName":"Ruiz","email":"johnraycereza02@gmail.com","phoneNumber":"0912345678909","username":"john7","password":"john2002"}
+2025-10-21 22:16:50 - All fields present
+2025-10-21 22:16:50 - Data: username=john7, email=johnraycereza02@gmail.com
+2025-10-21 22:16:50 - Connecting to database
+2025-10-21 22:16:50 - Database connected
+2025-10-21 22:16:51 - Executing INSERT
+2025-10-21 22:16:51 - SUCCESS: User ID 3 created
+2025-10-21 22:16:51 - OpenSSL loaded: YES
+2025-10-21 22:16:51 - openssl_encrypt exists: YES
+2025-10-21 22:16:51 - OPENSSL_ALGO_SHA256: 7
+2025-10-21 22:16:51 - Loaded extensions: Core,bcmath,calendar,ctype,date,filter,hash,iconv,json,SPL,pcre,random,readline,Reflection,session,standard,mysqlnd,tokenizer,zlib,libxml,dom,PDO,bz2,SimpleXML,xml,xmlreader,xmlwriter,apache2handler,openssl,curl,fileinfo,gettext,mbstring,exif,mysqli,Phar,pdo_mysql,pdo_sqlite,ftp
+2025-10-21 22:16:51 - Mailer.php loaded
+2025-10-21 22:16:51 - Mailer instance created
+2025-10-21 22:16:51 - About to send email to: johnraycereza02@gmail.com
+2025-10-21 22:16:51 - Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=a59710fde1b24934c1d223acfff7c2e1d02c6817d17c253337754e187b65cfec
+2025-10-21 22:16:55 - Email send result: TRUE
+2025-10-21 22:16:55 - ✅ Verification email sent to: johnraycereza02@gmail.com
+2025-10-21 16:27:30 - Registration attempt started
+2025-10-21 22:27:30 - Raw input: {"lastName":"Mandani","givenName":"Christian James","middleName":"Cereza","email":"jayjaymandani@gmail.com","phoneNumber":"0912345678909","username":"james22","password":"james2005"}
+2025-10-21 22:27:30 - All fields present
+2025-10-21 22:27:30 - Data: username=james22, email=jayjaymandani@gmail.com
+2025-10-21 22:27:30 - Connecting to database
+2025-10-21 22:27:30 - Database connected
+2025-10-21 22:27:30 - Executing INSERT
+2025-10-21 22:27:30 - SUCCESS: User ID 4 created
+2025-10-21 22:27:30 - OpenSSL loaded: YES
+2025-10-21 22:27:30 - openssl_encrypt exists: YES
+2025-10-21 22:27:30 - OPENSSL_ALGO_SHA256: 7
+2025-10-21 22:27:30 - Loaded extensions: Core,bcmath,calendar,ctype,date,filter,hash,iconv,json,SPL,pcre,random,readline,Reflection,session,standard,mysqlnd,tokenizer,zlib,libxml,dom,PDO,bz2,SimpleXML,xml,xmlreader,xmlwriter,apache2handler,openssl,curl,fileinfo,gettext,mbstring,exif,mysqli,Phar,pdo_mysql,pdo_sqlite,ftp
+2025-10-21 22:27:30 - Mailer.php loaded
+2025-10-21 22:27:30 - Mailer instance created
+2025-10-21 22:27:30 - About to send email to: jayjaymandani@gmail.com
+2025-10-21 22:27:30 - Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=e8b7f5169d18f336db4b469edbd9988a6aa1b21f29c016768d3ccfe11fe1799d
+2025-10-21 22:27:34 - Email send result: TRUE
+2025-10-21 22:27:34 - ✅ Verification email sent to: jayjaymandani@gmail.com

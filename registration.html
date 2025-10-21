@@ -1259,37 +1259,98 @@
         }
 
         function showSuccessMessage() {
-          const successMessage = document.createElement("div");
-          successMessage.className = "success-message-container";
-          successMessage.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            z-index: 10000;
-            animation: slideIn 0.5s ease-out;
-          `;
+          // Remove existing modal if present
+          const existing = document.getElementById("verifyEmailModal");
+          if (existing) existing.remove();
 
-          successMessage.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 15px;">
-              <i class="fas fa-check-circle" style="font-size: 30px;"></i>
-              <div>
-                <h3 style="margin: 0; font-size: 18px;">Registration Successful!</h3>
-                <p style="margin: 5px 0 0 0; opacity: 0.9;">Redirecting to login page...</p>
+          const modalHtml = `
+            <div id="verifyEmailModal" style="
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background: rgba(0,0,0,0.5);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 10001;
+            ">
+              <div style="
+                background: #fff;
+                padding: 36px 30px 28px 30px;
+                border-radius: 18px;
+                max-width: 420px;
+                width: 90vw;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+                text-align: center;
+                position: relative;
+                animation: popInModal 0.3s cubic-bezier(.68,-0.55,.27,1.55);
+              ">
+                <div style="margin-bottom: 18px;">
+                  <div style="
+                    width: 60px;
+                    height: 60px;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 12px;
+                    color: #fff;
+                    font-size: 32px;
+                  ">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <h3 style="color: #222; margin-bottom: 8px;">Verify Your Email</h3>
+                  <p style="color: #555; font-size: 1rem;">Registration successful!<br>Please check your email and verify your account before logging in.</p>
+                  <p style="color: #888; font-size: 0.9rem; margin-top: 10px;">Didn't receive the email? Check your spam or junk folder.</p>
+                </div>
+                <button onclick="closeVerifyEmailModalAndGoLogin()" style="
+                  background: linear-gradient(135deg, #667eea, #764ba2);
+                  color: #fff;
+                  border: none;
+                  padding: 13px 36px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: 600;
+                  font-size: 1rem;
+                  margin-top: 10px;
+                ">Go to Login</button>
               </div>
             </div>
           `;
-
-          document.body.appendChild(successMessage);
-
-          setTimeout(() => {
-            successMessage.remove();
-          }, 2500);
+          document.body.insertAdjacentHTML("beforeend", modalHtml);
         }
+
+        // Close modal and redirect to login
+        window.closeVerifyEmailModalAndGoLogin = function () {
+          const modal = document.getElementById("verifyEmailModal");
+          if (modal) modal.remove();
+          window.location.href = "index.html";
+        };
+
+        // Add pop-in animation for modal if not already present
+        if (!document.getElementById("verifyEmailModalStyle")) {
+          const style = document.createElement("style");
+          style.id = "verifyEmailModalStyle";
+          style.textContent = `
+            @keyframes popInModal {
+              0% { transform: scale(0.8); opacity: 0; }
+              80% { transform: scale(1.05); opacity: 1; }
+              100% { transform: scale(1); opacity: 1; }
+            }
+          `;
+          document.head.appendChild(style);
+        }
+
+        // Allow closing modal by clicking outside
+        document.addEventListener("click", function (e) {
+          const modal = document.getElementById("verifyEmailModal");
+          if (modal && e.target === modal) {
+            closeVerifyEmailModalAndGoLogin();
+          }
+        });
       });
     </script>
   </body>
