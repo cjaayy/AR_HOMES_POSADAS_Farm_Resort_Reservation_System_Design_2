@@ -262,7 +262,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               <i class="fas fa-user-shield"></i>
             </div>
           </div>
-          <button class="logout-btn" onclick="logout()">
+          <button class="logout-btn" id="logoutButton" onclick="handleLogoutClick(event)" style="z-index: 1000; position: relative;">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
           </button>
@@ -641,6 +641,38 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             role: <?php echo json_encode($adminRole); ?>
         };
         
+        // Global logout handler - available immediately
+        window.handleLogoutClick = function(event) {
+            console.log("🖱️ Logout button clicked (inline handler)");
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Check if logout function exists from admin-script.js
+            if (typeof logout === 'function') {
+                console.log("✅ Using logout() from admin-script.js");
+                logout();
+            } else if (typeof showLogoutModal === 'function') {
+                console.log("✅ Using showLogoutModal() directly");
+                showLogoutModal();
+            } else {
+                // Fallback - show modal manually
+                console.log("⚠️ Functions not loaded, showing modal manually");
+                const modal = document.getElementById('logoutModal');
+                if (modal) {
+                    modal.classList.add('show');
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    // Last resort - simple confirm
+                    if (confirm('Are you sure you want to logout?')) {
+                        window.location.href = 'logout.php';
+                    }
+                }
+            }
+        };
+        
+        console.log("✅ handleLogoutClick function loaded globally");
+        
         // CRITICAL: Continuously check database connection every 3 seconds
         // If XAMPP MySQL is stopped, this will detect it immediately
         function checkDatabaseConnection() {
@@ -786,6 +818,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         `;
         document.head.appendChild(style);
     </script>
+    
     <script src="../admin-script.js"></script>
   </body>
 </html>

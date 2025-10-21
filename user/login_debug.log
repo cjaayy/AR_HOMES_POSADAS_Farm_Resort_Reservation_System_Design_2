@@ -140,3 +140,39 @@
 2025-10-21 12:54:36 - Password verified successfully
 2025-10-21 12:54:36 - Session created successfully
 2025-10-21 12:54:36 - SUCCESS: Sending response
+2025-10-21 05:06:38 - Login attempt started
+2025-10-21 13:06:38 - Raw input: {"usernameOrEmail":"ayen15","password":"cjay071525"}
+2025-10-21 13:06:38 - Credentials: username='ayen15', password length=10
+2025-10-21 13:06:38 - Connecting to database
+2025-10-21 13:06:38 - Database connected
+2025-10-21 13:06:38 - Query executed, rows found: 1
+2025-10-21 13:06:38 - User found: ID=17, username=ayen15, email=aj@gmail.com
+2025-10-21 13:06:38 - Account is active
+2025-10-21 13:06:38 - Verifying password
+2025-10-21 13:06:38 - Password verified successfully
+2025-10-21 13:06:38 - Session created successfully
+2025-10-21 13:06:38 - SUCCESS: Sending response
+2025-10-21 05:13:03 - Login attempt started
+2025-10-21 13:13:03 - Raw input: {"usernameOrEmail":"cjay15","password":"Ayen@071525"}
+2025-10-21 13:13:03 - Credentials: username='cjay15', password length=11
+2025-10-21 13:13:03 - Connecting to database
+2025-10-21 13:13:03 - Database connected
+2025-10-21 13:13:03 - Query executed, rows found: 1
+2025-10-21 13:13:03 - User found: ID=16, username=cjay15, email=mjhayxinadnam@gmail.com
+2025-10-21 13:13:03 - Account is active
+2025-10-21 13:13:03 - Verifying password
+2025-10-21 13:13:03 - Password verified successfully
+2025-10-21 13:13:03 - Session created successfully
+2025-10-21 13:13:03 - SUCCESS: Sending response
+2025-10-21 05:20:17 - Login attempt started
+2025-10-21 13:20:17 - Raw input: {"usernameOrEmail":"ayen15","password":"cjay071525"}
+2025-10-21 13:20:17 - Credentials: username='ayen15', password length=10
+2025-10-21 13:20:17 - Connecting to database
+2025-10-21 13:20:17 - Database connected
+2025-10-21 13:20:17 - Query executed, rows found: 1
+2025-10-21 13:20:17 - User found: ID=17, username=ayen15, email=aj@gmail.com
+2025-10-21 13:20:17 - Account is active
+2025-10-21 13:20:17 - Verifying password
+2025-10-21 13:20:17 - Password verified successfully
+2025-10-21 13:20:17 - Session created successfully
+2025-10-21 13:20:17 - SUCCESS: Sending response

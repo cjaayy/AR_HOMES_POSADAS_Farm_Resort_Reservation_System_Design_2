@@ -108,42 +108,84 @@ function removeSidebarOverlay() {
 
 // ===== LOGOUT FUNCTIONALITY =====
 
-function logout() {
+// Make functions globally accessible
+window.logout = function logout() {
+  console.log("🚪 Logout button clicked");
   // Show logout modal instead of confirm dialog
   showLogoutModal();
-}
+};
 
 // Show logout modal
-function showLogoutModal() {
+window.showLogoutModal = function showLogoutModal() {
   const modal = document.getElementById("logoutModal");
+
+  if (!modal) {
+    console.error("❌ Logout modal not found! Logging out directly...");
+    // If modal doesn't exist, logout directly
+    confirmLogout();
+    return;
+  }
+
+  console.log("✅ Showing logout modal");
   modal.classList.add("show");
   modal.style.display = "flex";
 
   // Add event listener to overlay for closing modal
   const overlay = modal.querySelector(".logout-modal-overlay");
-  overlay.onclick = hideLogoutModal;
+  if (overlay) {
+    overlay.onclick = hideLogoutModal;
+  }
 
   // Prevent body scroll when modal is open
   document.body.style.overflow = "hidden";
-}
+};
 
 // Hide logout modal
-function hideLogoutModal() {
+window.hideLogoutModal = function hideLogoutModal() {
   const modal = document.getElementById("logoutModal");
+
+  if (!modal) {
+    console.warn("⚠️ Modal not found when trying to hide");
+    return;
+  }
+
+  console.log("👋 Hiding logout modal");
+
+  // Add hide animation
   modal.classList.add("hide");
+  modal.classList.remove("show");
 
   // Remove modal after animation
   setTimeout(() => {
-    modal.classList.remove("show", "hide");
+    modal.classList.remove("hide");
     modal.style.display = "none";
+    modal.style.visibility = "hidden";
+    modal.style.opacity = "0";
+    modal.style.pointerEvents = "none";
+
+    // Reset body scroll
     document.body.style.overflow = "auto";
+    document.body.style.pointerEvents = "auto";
+
+    // Remove the overlay click listener to prevent duplicates
+    const overlay = modal.querySelector(".logout-modal-overlay");
+    if (overlay) {
+      overlay.onclick = null;
+    }
+
+    console.log("✅ Modal fully hidden and reset");
   }, 300);
-}
+};
 
 // Confirm logout action
-function confirmLogout() {
-  // Hide modal first
-  hideLogoutModal();
+window.confirmLogout = function confirmLogout() {
+  console.log("✅ Logout confirmed, processing...");
+
+  // Hide modal first (if it exists)
+  const modal = document.getElementById("logoutModal");
+  if (modal) {
+    hideLogoutModal();
+  }
 
   // Add logout animation to entire page
   setTimeout(() => {
@@ -159,9 +201,16 @@ function confirmLogout() {
     }
 
     // Call logout API - use relative path from where the page is loaded
-    const logoutPath = window.location.pathname.includes("/admin/")
-      ? "logout.php"
-      : "admin/logout.php";
+    // Determine the correct path based on current location
+    const currentPath = window.location.pathname;
+    const isInAdminFolder = currentPath.includes("/admin/");
+    const logoutPath = isInAdminFolder ? "logout.php" : "admin/logout.php";
+
+    console.log("🔓 Logging out...", {
+      currentPath,
+      isInAdminFolder,
+      logoutPath,
+    });
 
     fetch(logoutPath, {
       method: "POST",
@@ -169,16 +218,20 @@ function confirmLogout() {
         "Content-Type": "application/json",
       },
     })
-      .then((response) => response.json())
+      .then((response) => {
+        console.log("Logout response status:", response.status);
+        return response.json();
+      })
       .then((data) => {
+        console.log("Logout response:", data);
         // Clear any stored session data
         localStorage.removeItem("adminSession");
         sessionStorage.clear();
 
         // Redirect to login page - adjust path based on current location
-        const indexPath = window.location.pathname.includes("/admin/")
-          ? "../index.html"
-          : "index.html";
+        const indexPath = isInAdminFolder ? "../index.html" : "index.html";
+        console.log("Redirecting to:", indexPath);
+
         setTimeout(() => {
           window.location.href = indexPath;
         }, 500);
@@ -186,13 +239,12 @@ function confirmLogout() {
       .catch((error) => {
         console.error("Logout error:", error);
         // Redirect anyway - adjust path based on current location
-        const indexPath = window.location.pathname.includes("/admin/")
-          ? "../index.html"
-          : "index.html";
+        const indexPath = isInAdminFolder ? "../index.html" : "index.html";
+        console.log("Error occurred, redirecting to:", indexPath);
         window.location.href = indexPath;
       });
   }, 100);
-}
+};
 
 // Handle ESC key to close modal
 document.addEventListener("keydown", function (e) {
@@ -760,8 +812,8 @@ function showNotification(message, type = "info") {
 }
 
 // Add CSS animations for notifications
-const style = document.createElement("style");
-style.textContent = `
+const notificationStyles = document.createElement("style");
+notificationStyles.textContent = `
   @keyframes slideIn {
     from {
       transform: translateX(100%);
@@ -784,7 +836,39 @@ style.textContent = `
     }
   }
 `;
-document.head.appendChild(style);
+document.head.appendChild(notificationStyles);
+
+// Attach logout button event listener when DOM is ready
+document.addEventListener("DOMContentLoaded", function () {
+  const logoutButton = document.getElementById("logoutButton");
+
+  if (logoutButton) {
+    // Remove any existing listeners and add new one
+    logoutButton.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      console.log("🖱️ Logout button clicked via event listener");
+
+      // Ensure button is not disabled
+      if (this.disabled) {
+        console.warn("⚠️ Button is disabled, ignoring click");
+        return;
+      }
+
+      logout();
+    });
+
+    // Ensure button is always clickable
+    logoutButton.disabled = false;
+    logoutButton.style.pointerEvents = "auto";
+    logoutButton.style.cursor = "pointer";
+
+    console.log("✅ Logout button event listener attached");
+  } else {
+    console.warn("⚠️ Logout button not found!");
+  }
+});
 
 console.log(
   "🏨 AR Homes Posadas Farm Resort - Admin Dashboard Loaded Successfully!"

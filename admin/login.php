@@ -51,11 +51,12 @@ try {
     // Prepare SQL statement to prevent SQL injection
     $sql = "SELECT admin_id, username, full_name, email, password_hash, role, is_active, last_login, created_at 
             FROM admin_users 
-            WHERE username = :username OR email = :username 
+            WHERE username = :username OR email = :email 
             LIMIT 1";
     
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $username, PDO::PARAM_STR);
     $stmt->execute();
 
     // Check if admin exists

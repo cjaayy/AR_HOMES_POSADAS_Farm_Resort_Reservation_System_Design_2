@@ -6,6 +6,9 @@
 
 session_start();
 
+// Log logout attempt for debugging
+error_log("Admin logout initiated - Session ID: " . session_id());
+
 // Unset all session variables
 $_SESSION = array();
 
@@ -17,10 +20,15 @@ if (isset($_COOKIE[session_name()])) {
 // Destroy the session
 session_destroy();
 
+// Clear any session regeneration
+session_write_close();
+
 // Return JSON response
 header('Content-Type: application/json');
+header('Cache-Control: no-cache, must-revalidate');
 echo json_encode([
     'success' => true,
     'message' => 'Logged out successfully'
 ]);
+exit;
 ?>
