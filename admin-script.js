@@ -1268,7 +1268,106 @@ function editUser(userId) {
   const user = allUsers.find((u) => u.user_id === userId);
   if (!user) return;
 
-  showNotification("User edit functionality will be implemented soon.", "info");
+  const modalContent = `
+    <form id="editUserForm" style="padding: 1rem;">
+      <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Full Name:</label>
+          <input type="text" id="edit_full_name" value="${escapeHtml(
+            user.full_name
+          )}" 
+                 style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Username:</label>
+          <input type="text" id="edit_username" value="${escapeHtml(
+            user.username
+          )}" 
+                 style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email:</label>
+          <input type="email" id="edit_email" value="${escapeHtml(user.email)}" 
+                 style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Phone:</label>
+          <input type="text" id="edit_phone" value="${escapeHtml(
+            user.phone_number
+          )}" 
+                 style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Loyalty Level:</label>
+          <select id="edit_loyalty" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+            <option value="Regular" ${
+              user.loyalty_level === "Regular" ? "selected" : ""
+            }>Regular</option>
+            <option value="Silver" ${
+              user.loyalty_level === "Silver" ? "selected" : ""
+            }>Silver</option>
+            <option value="Gold" ${
+              user.loyalty_level === "Gold" ? "selected" : ""
+            }>Gold</option>
+            <option value="VIP" ${
+              user.loyalty_level === "VIP" ? "selected" : ""
+            }>VIP</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="button" onclick="closeUserModal()" 
+                  style="flex: 1; padding: 0.75rem; background: #e0e0e0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Cancel
+          </button>
+          <button type="submit" 
+                  style="flex: 1; padding: 0.75rem; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </form>
+  `;
+
+  showModal("Edit User", modalContent);
+
+  // Handle form submission
+  document
+    .getElementById("editUserForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const updatedData = {
+        user_id: userId,
+        full_name: document.getElementById("edit_full_name").value,
+        username: document.getElementById("edit_username").value,
+        email: document.getElementById("edit_email").value,
+        phone_number: document.getElementById("edit_phone").value,
+        loyalty_level: document.getElementById("edit_loyalty").value,
+      };
+
+      try {
+        const response = await fetch("update_user.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showNotification("User updated successfully!", "success");
+          closeUserModal();
+          loadUsers(); // Reload the users list
+        } else {
+          showNotification("Error: " + result.message, "error");
+        }
+      } catch (error) {
+        console.error("Error updating user:", error);
+        showNotification("Failed to update user. Please try again.", "error");
+      }
+    });
 }
 
 // Toggle user status
@@ -1277,11 +1376,32 @@ function toggleUserStatus(userId, currentStatus) {
   const statusText = newStatus == 1 ? "activate" : "deactivate";
 
   if (confirm(`Are you sure you want to ${statusText} this user?`)) {
-    showNotification(
-      `User status update functionality will be implemented soon.`,
-      "info"
-    );
-    // TODO: Implement API call to update user status
+    fetch("update_user_status.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        status: newStatus,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.success) {
+          showNotification(`User ${statusText}d successfully!`, "success");
+          loadUsers(); // Reload the users list
+        } else {
+          showNotification("Error: " + result.message, "error");
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating user status:", error);
+        showNotification(
+          "Failed to update user status. Please try again.",
+          "error"
+        );
+      });
   }
 }
 
@@ -1295,11 +1415,28 @@ function deleteUser(userId) {
       `Are you sure you want to delete user "${user.full_name}"? This action cannot be undone.`
     )
   ) {
-    showNotification(
-      "User deletion functionality will be implemented soon.",
-      "warning"
-    );
-    // TODO: Implement API call to delete user
+    fetch("delete_user.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.success) {
+          showNotification("User deleted successfully!", "success");
+          loadUsers(); // Reload the users list
+        } else {
+          showNotification("Error: " + result.message, "error");
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting user:", error);
+        showNotification("Failed to delete user. Please try again.", "error");
+      });
   }
 }
 
