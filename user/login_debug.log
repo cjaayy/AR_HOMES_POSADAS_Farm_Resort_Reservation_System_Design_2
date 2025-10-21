@@ -176,3 +176,27 @@
 2025-10-21 13:20:17 - Password verified successfully
 2025-10-21 13:20:17 - Session created successfully
 2025-10-21 13:20:17 - SUCCESS: Sending response
+2025-10-21 05:25:14 - Login attempt started
+2025-10-21 13:25:14 - Raw input: {"usernameOrEmail":"oneone","password":"oneone"}
+2025-10-21 13:25:14 - Credentials: username='oneone', password length=6
+2025-10-21 13:25:14 - Connecting to database
+2025-10-21 13:25:14 - Database connected
+2025-10-21 13:25:14 - Query executed, rows found: 1
+2025-10-21 13:25:14 - User found: ID=25, username=oneone, email=1@gmail.com
+2025-10-21 13:25:14 - Account is active
+2025-10-21 13:25:14 - Verifying password
+2025-10-21 13:25:14 - Password verified successfully
+2025-10-21 13:25:14 - Session created successfully
+2025-10-21 13:25:14 - SUCCESS: Sending response
+2025-10-21 05:26:56 - Login attempt started
+2025-10-21 13:26:56 - Raw input: {"usernameOrEmail":"ayen15","password":"cjay071525"}
+2025-10-21 13:26:56 - Credentials: username='ayen15', password length=10
+2025-10-21 13:26:56 - Connecting to database
+2025-10-21 13:26:56 - Database connected
+2025-10-21 13:26:56 - Query executed, rows found: 1
+2025-10-21 13:26:56 - User found: ID=17, username=ayen15, email=aj@gmail.com
+2025-10-21 13:26:56 - Account is active
+2025-10-21 13:26:56 - Verifying password
+2025-10-21 13:26:56 - Password verified successfully
+2025-10-21 13:26:56 - Session created successfully
+2025-10-21 13:26:56 - SUCCESS: Sending response

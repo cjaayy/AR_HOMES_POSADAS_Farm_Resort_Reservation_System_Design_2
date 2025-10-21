@@ -873,3 +873,526 @@ document.addEventListener("DOMContentLoaded", function () {
 console.log(
   "🏨 AR Homes Posadas Farm Resort - Admin Dashboard Loaded Successfully!"
 );
+
+// ===== USER MANAGEMENT FUNCTIONALITY =====
+
+let allUsers = [];
+let filteredUsers = [];
+let currentPage = 1;
+const usersPerPage = 10;
+
+// Load users when users section is shown
+document.addEventListener("DOMContentLoaded", function () {
+  // Add click handler for users nav link
+  const usersNavLink = document.querySelector('[data-section="users"]');
+  if (usersNavLink) {
+    usersNavLink.addEventListener("click", function () {
+      loadUsers();
+    });
+  }
+
+  // Add search functionality
+  const searchInput = document.getElementById("searchUsers");
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      filterUsers();
+    });
+  }
+});
+
+// Fetch users from the server
+async function loadUsers() {
+  console.log("Loading users from database...");
+
+  const tableBody = document.getElementById("usersTableBody");
+
+  // Show loading state
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="10" style="text-align: center; padding: 2rem;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+        <p style="margin-top: 1rem; color: #666;">Loading users...</p>
+      </td>
+    </tr>
+  `;
+
+  try {
+    const response = await fetch("get_users.php");
+    const data = await response.json();
+
+    if (data.success) {
+      allUsers = data.users;
+      filteredUsers = [...allUsers];
+
+      console.log(`Loaded ${allUsers.length} users successfully`);
+
+      // Update statistics
+      updateUserStatistics();
+
+      // Display users
+      displayUsers();
+    } else {
+      showError("Failed to load users: " + data.message);
+    }
+  } catch (error) {
+    console.error("Error loading users:", error);
+    showError("Error loading users. Please check the console for details.");
+  }
+}
+
+// Update user statistics
+function updateUserStatistics() {
+  const totalUsers = allUsers.length;
+  const activeUsers = allUsers.filter((u) => u.is_active == 1).length;
+  const vipUsers = allUsers.filter((u) => u.loyalty_level === "VIP").length;
+
+  // Count new users this month
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  const newUsers = allUsers.filter((user) => {
+    const createdDate = new Date(user.created_at);
+    return (
+      createdDate.getMonth() === currentMonth &&
+      createdDate.getFullYear() === currentYear
+    );
+  }).length;
+
+  // Update UI
+  document.getElementById("totalUsersCount").textContent = totalUsers;
+  document.getElementById("activeUsersCount").textContent = activeUsers;
+  document.getElementById("vipUsersCount").textContent = vipUsers;
+  document.getElementById("newUsersCount").textContent = newUsers;
+}
+
+// Display users in the table
+function displayUsers() {
+  const tableBody = document.getElementById("usersTableBody");
+
+  if (filteredUsers.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align: center; padding: 2rem;">
+          <i class="fas fa-users" style="font-size: 2rem; color: #999;"></i>
+          <p style="margin-top: 1rem; color: #666;">No users found</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * usersPerPage;
+  const endIndex = startIndex + usersPerPage;
+  const usersToDisplay = filteredUsers.slice(startIndex, endIndex);
+
+  // Generate table rows
+  const rows = usersToDisplay
+    .map((user) => {
+      const statusClass = user.is_active == 1 ? "active" : "inactive";
+      const statusText = user.is_active == 1 ? "Active" : "Inactive";
+      const loyaltyClass = user.loyalty_level.toLowerCase();
+      const loyaltyIcon = getLoyaltyIcon(user.loyalty_level);
+
+      return `
+      <tr data-user-id="${user.user_id}">
+        <td><strong>#${user.user_id}</strong></td>
+        <td>
+          <strong>${escapeHtml(user.full_name)}</strong>
+        </td>
+        <td>${escapeHtml(user.username)}</td>
+        <td>${escapeHtml(user.email)}</td>
+        <td>${escapeHtml(user.phone_formatted)}</td>
+        <td>
+          <span class="status-badge ${statusClass}">${statusText}</span>
+        </td>
+        <td>
+          <span class="loyalty-badge ${loyaltyClass}">
+            ${loyaltyIcon} ${user.loyalty_level}
+          </span>
+        </td>
+        <td>${user.member_since}</td>
+        <td>${user.last_login_formatted}</td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn-action btn-view" onclick="viewUser(${
+              user.user_id
+            })" title="View Details">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn-action btn-edit" onclick="editUser(${
+              user.user_id
+            })" title="Edit User">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn-action btn-toggle" onclick="toggleUserStatus(${
+              user.user_id
+            }, ${user.is_active})" title="Toggle Status">
+              <i class="fas fa-power-off"></i>
+            </button>
+            <button class="btn-action btn-delete" onclick="deleteUser(${
+              user.user_id
+            })" title="Delete User">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+    })
+    .join("");
+
+  tableBody.innerHTML = rows;
+
+  // Update pagination
+  updatePagination();
+}
+
+// Get loyalty level icon
+function getLoyaltyIcon(level) {
+  const icons = {
+    Regular: '<i class="fas fa-user"></i>',
+    Silver: '<i class="fas fa-medal"></i>',
+    Gold: '<i class="fas fa-star"></i>',
+    VIP: '<i class="fas fa-crown"></i>',
+  };
+  return icons[level] || '<i class="fas fa-user"></i>';
+}
+
+// Filter users based on search and filters
+function filterUsers() {
+  const searchTerm = document.getElementById("searchUsers").value.toLowerCase();
+  const statusFilter = document.getElementById("statusFilter").value;
+  const loyaltyFilter = document.getElementById("loyaltyFilter").value;
+
+  filteredUsers = allUsers.filter((user) => {
+    // Search filter
+    const matchesSearch =
+      user.full_name.toLowerCase().includes(searchTerm) ||
+      user.username.toLowerCase().includes(searchTerm) ||
+      user.email.toLowerCase().includes(searchTerm) ||
+      user.phone_number.includes(searchTerm);
+
+    // Status filter
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && user.is_active == 1) ||
+      (statusFilter === "inactive" && user.is_active == 0);
+
+    // Loyalty filter
+    const matchesLoyalty =
+      loyaltyFilter === "all" || user.loyalty_level === loyaltyFilter;
+
+    return matchesSearch && matchesStatus && matchesLoyalty;
+  });
+
+  // Reset to first page
+  currentPage = 1;
+
+  // Display filtered users
+  displayUsers();
+}
+
+// Update pagination controls
+function updatePagination() {
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const pagination = document.getElementById("usersPagination");
+
+  if (totalPages <= 1) {
+    pagination.innerHTML = "";
+    return;
+  }
+
+  let paginationHTML = `
+    <button onclick="changePage(${currentPage - 1})" ${
+    currentPage === 1 ? "disabled" : ""
+  }>
+      <i class="fas fa-chevron-left"></i> Previous
+    </button>
+  `;
+
+  // Show page numbers
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 ||
+      i === totalPages ||
+      (i >= currentPage - 2 && i <= currentPage + 2)
+    ) {
+      paginationHTML += `
+        <button 
+          onclick="changePage(${i})" 
+          class="${i === currentPage ? "active" : ""}">
+          ${i}
+        </button>
+      `;
+    } else if (i === currentPage - 3 || i === currentPage + 3) {
+      paginationHTML += '<span style="padding: 0 0.5rem;">...</span>';
+    }
+  }
+
+  paginationHTML += `
+    <button onclick="changePage(${currentPage + 1})" ${
+    currentPage === totalPages ? "disabled" : ""
+  }>
+      Next <i class="fas fa-chevron-right"></i>
+    </button>
+  `;
+
+  pagination.innerHTML = paginationHTML;
+}
+
+// Change page
+function changePage(page) {
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  if (page < 1 || page > totalPages) return;
+
+  currentPage = page;
+  displayUsers();
+
+  // Scroll to top of table
+  document
+    .querySelector(".users-container")
+    .scrollIntoView({ behavior: "smooth" });
+}
+
+// View user details
+function viewUser(userId) {
+  const user = allUsers.find((u) => u.user_id === userId);
+  if (!user) return;
+
+  const modalContent = `
+    <div style="padding: 1rem;">
+      <h3 style="color: #667eea; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-user-circle"></i> User Details
+      </h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <strong>User ID:</strong><br>
+          <span>#${user.user_id}</span>
+        </div>
+        <div>
+          <strong>Status:</strong><br>
+          <span class="status-badge ${
+            user.is_active == 1 ? "active" : "inactive"
+          }">
+            ${user.is_active == 1 ? "Active" : "Inactive"}
+          </span>
+        </div>
+        <div>
+          <strong>Full Name:</strong><br>
+          <span>${escapeHtml(user.full_name)}</span>
+        </div>
+        <div>
+          <strong>Username:</strong><br>
+          <span>${escapeHtml(user.username)}</span>
+        </div>
+        <div>
+          <strong>Email:</strong><br>
+          <span>${escapeHtml(user.email)}</span>
+        </div>
+        <div>
+          <strong>Phone:</strong><br>
+          <span>${escapeHtml(user.phone_number)}</span>
+        </div>
+        <div>
+          <strong>Loyalty Level:</strong><br>
+          <span class="loyalty-badge ${user.loyalty_level.toLowerCase()}">
+            ${getLoyaltyIcon(user.loyalty_level)} ${user.loyalty_level}
+          </span>
+        </div>
+        <div>
+          <strong>Member Since:</strong><br>
+          <span>${user.member_since}</span>
+        </div>
+        <div>
+          <strong>Last Login:</strong><br>
+          <span>${user.last_login_formatted}</span>
+        </div>
+        <div>
+          <strong>Account Created:</strong><br>
+          <span>${user.created_at_formatted}</span>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <strong>Last Updated:</strong><br>
+          <span>${user.updated_at_formatted}</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  showModal("User Details", modalContent);
+}
+
+// Edit user
+function editUser(userId) {
+  const user = allUsers.find((u) => u.user_id === userId);
+  if (!user) return;
+
+  showNotification("User edit functionality will be implemented soon.", "info");
+}
+
+// Toggle user status
+function toggleUserStatus(userId, currentStatus) {
+  const newStatus = currentStatus == 1 ? 0 : 1;
+  const statusText = newStatus == 1 ? "activate" : "deactivate";
+
+  if (confirm(`Are you sure you want to ${statusText} this user?`)) {
+    showNotification(
+      `User status update functionality will be implemented soon.`,
+      "info"
+    );
+    // TODO: Implement API call to update user status
+  }
+}
+
+// Delete user
+function deleteUser(userId) {
+  const user = allUsers.find((u) => u.user_id === userId);
+  if (!user) return;
+
+  if (
+    confirm(
+      `Are you sure you want to delete user "${user.full_name}"? This action cannot be undone.`
+    )
+  ) {
+    showNotification(
+      "User deletion functionality will be implemented soon.",
+      "warning"
+    );
+    // TODO: Implement API call to delete user
+  }
+}
+
+// Show modal
+function showModal(title, content) {
+  // Create modal overlay
+  const modal = document.createElement("div");
+  modal.className = "user-modal";
+  modal.innerHTML = `
+    <div class="user-modal-overlay" onclick="closeUserModal()"></div>
+    <div class="user-modal-content">
+      <div class="user-modal-header">
+        <h3>${title}</h3>
+        <button onclick="closeUserModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="user-modal-body">
+        ${content}
+      </div>
+    </div>
+  `;
+
+  // Add modal styles
+  const style = document.createElement("style");
+  style.textContent = `
+    .user-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .user-modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .user-modal-content {
+      position: relative;
+      background: white;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease;
+    }
+    .user-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .user-modal-body {
+      padding: 1.5rem;
+    }
+    @keyframes modalSlideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+  document.body.appendChild(modal);
+  document.body.style.overflow = "hidden";
+}
+
+// Close modal
+function closeUserModal() {
+  const modal = document.querySelector(".user-modal");
+  if (modal) {
+    modal.remove();
+    document.body.style.overflow = "";
+  }
+}
+
+// Show error message
+function showError(message) {
+  const tableBody = document.getElementById("usersTableBody");
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="10" style="text-align: center; padding: 2rem;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f44336;"></i>
+        <p style="margin-top: 1rem; color: #f44336;">${message}</p>
+        <button onclick="loadUsers()" style="
+          margin-top: 1rem;
+          padding: 0.75rem 1.5rem;
+          background: #667eea;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+        ">
+          <i class="fas fa-redo"></i> Retry
+        </button>
+      </td>
+    </tr>
+  `;
+}
+
+// Utility function to escape HTML
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Make functions globally available
+window.loadUsers = loadUsers;
+window.filterUsers = filterUsers;
+window.changePage = changePage;
+window.viewUser = viewUser;
+window.editUser = editUser;
+window.toggleUserStatus = toggleUserStatus;
+window.deleteUser = deleteUser;
+window.closeUserModal = closeUserModal;
+
+console.log("✅ User Management System Loaded");

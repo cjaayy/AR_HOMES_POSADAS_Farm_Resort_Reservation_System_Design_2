@@ -363,13 +363,91 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             <h2>Manage Users</h2>
             <p>Manage user accounts and permissions</p>
           </div>
-          <div class="placeholder-content">
-            <i class="fas fa-users"></i>
-            <h3>User Management</h3>
-            <p>
-              This section will contain user management tools, account settings,
-              and permission controls.
-            </p>
+          
+          <!-- Users Table -->
+          <div class="users-container">
+            <div class="users-header">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchUsers" placeholder="Search users by name, email, or username..." />
+              </div>
+              <div class="filter-options">
+                <select id="statusFilter" onchange="filterUsers()">
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <select id="loyaltyFilter" onchange="filterUsers()">
+                  <option value="all">All Loyalty Levels</option>
+                  <option value="Regular">Regular</option>
+                  <option value="Silver">Silver</option>
+                  <option value="Gold">Gold</option>
+                  <option value="VIP">VIP</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="users-stats">
+              <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <div class="stat-info">
+                  <h3 id="totalUsersCount">0</h3>
+                  <p>Total Users</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <i class="fas fa-user-check"></i>
+                <div class="stat-info">
+                  <h3 id="activeUsersCount">0</h3>
+                  <p>Active Users</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <i class="fas fa-crown"></i>
+                <div class="stat-info">
+                  <h3 id="vipUsersCount">0</h3>
+                  <p>VIP Members</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <i class="fas fa-user-plus"></i>
+                <div class="stat-info">
+                  <h3 id="newUsersCount">0</h3>
+                  <p>New This Month</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="users-table" id="usersTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Loyalty Level</th>
+                    <th>Member Since</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr>
+                    <td colspan="10" style="text-align: center; padding: 2rem;">
+                      <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                      <p style="margin-top: 1rem; color: #666;">Loading users...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination" id="usersPagination">
+              <!-- Pagination will be generated dynamically -->
+            </div>
           </div>
         </section>
 
