@@ -1,0 +1,16 @@
+
+================================================================================
+Email Verification Request
+Time: 2025-10-21 18:42:28
+User: Cereza, John Ray Ruiz (john123)
+Email: johnraycereza02@gmail.com
+Verification Link: http://localhost/Design_2_Ayen_Design_AR_Homes_Posadas_Farm_Resort_Reservation_System/user/verify_email.php?token=879251012c32c1d1afa899ee1511492a1e71393e09b59ff5a2501ae6659376f8
+Expires: 2025-10-22 18:42:23
+================================================================================
+
+================================================================================
+Email Verification Completed
+Time: 2025-10-21 18:42:37
+User: Cereza, John Ray Ruiz (john123)
+Email: johnraycereza02@gmail.com
+================================================================================

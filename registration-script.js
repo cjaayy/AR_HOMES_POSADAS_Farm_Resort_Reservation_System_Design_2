@@ -385,7 +385,10 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("📍 Endpoint: user/register.php");
 
     // Send registration request to backend
-    fetch("user/register.php", {
+    // Always use the full Apache-served URL
+    const registerUrl =
+      "http://localhost/Design_2_Ayen_Design_AR_Homes_Posadas_Farm_Resort_Reservation_System/user/register.php";
+    fetch(registerUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

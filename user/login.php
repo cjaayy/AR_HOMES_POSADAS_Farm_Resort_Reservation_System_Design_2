@@ -76,7 +76,7 @@ try {
 
     // Prepare SQL statement to prevent SQL injection
     $sql = "SELECT user_id, username, email, password_hash, full_name, last_name, given_name, middle_name, 
-                   phone_number, is_active, last_login, created_at 
+                   phone_number, is_active, email_verified, last_login, created_at 
             FROM users 
             WHERE username = :username OR email = :email 
             LIMIT 1";
@@ -99,7 +99,7 @@ try {
     // Fetch user data
     $user = $stmt->fetch();
     
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - User found: ID={$user['user_id']}, username={$user['username']}, email={$user['email']}\n", FILE_APPEND);
+    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - User found: ID={$user['user_id']}, username={$user['username']}, email={$user['email']}, email_verified={$user['email_verified']}\n", FILE_APPEND);
 
     // Check if account is active
     if ($user['is_active'] != 1) {
@@ -110,6 +110,20 @@ try {
     }
     
     file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Account is active\n", FILE_APPEND);
+
+    // Check if email is verified
+    if (!isset($user['email_verified']) || $user['email_verified'] != 1) {
+        $response['message'] = 'Please verify your email address before logging in. Check your inbox for the verification link.';
+        $response['data'] = [
+            'email_verified' => false,
+            'email' => $user['email']
+        ];
+        file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - ERROR: Email not verified\n", FILE_APPEND);
+        echo json_encode($response);
+        exit;
+    }
+    
+    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Email is verified\n", FILE_APPEND);
 
     // Verify password
     file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Verifying password\n", FILE_APPEND);

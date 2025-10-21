@@ -1,0 +1,53 @@
+# AR Homes Posadas Farm Resort Reservation System
+# .gitignore
+
+# Sensitive Configuration Files
+config/mail.php
+config/.env
+.env
+
+# Logs
+user/password_resets/*.txt
+*.log
+
+# PHPMailer (if using Composer)
+/vendor/
+composer.lock
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+*.cache
+
+# Database Backups
+*.sql
+*.sqlite
+*.db
+
+# Test Files (Optional - Remove in production)
+test_email.php
+
+# Uploaded Files (if applicable)
+uploads/*
+!uploads/.gitkeep
+
+# Session Files
+sessions/*
+!sessions/.gitkeep
+
+# Error Logs
+error_log
+php_errors.log

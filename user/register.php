@@ -6,7 +6,7 @@
 
 // Enable error reporting
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0); // Don't display errors as they break JSON
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/registration_errors.log');
 
@@ -121,11 +121,18 @@ try {
     // Create full name
     $fullName = $lastName . ', ' . $givenName . ' ' . $middleName;
 
-    // Insert new user
+    // Generate email verification token
+    $verificationToken = bin2hex(random_bytes(32));
+    $verificationTokenHash = hash('sha256', $verificationToken);
+    $verificationExpiresAt = date('Y-m-d H:i:s', strtotime('+24 hours')); // Token expires in 24 hours
+
+    // Insert new user (email_verified = 0, requires verification)
     $sql = "INSERT INTO users 
-            (username, email, password_hash, last_name, given_name, middle_name, full_name, phone_number, is_active) 
+            (username, email, password_hash, last_name, given_name, middle_name, full_name, phone_number, 
+             email_verified, email_verification_token, email_verification_expires, is_active) 
             VALUES 
-            (:username, :email, :password_hash, :last_name, :given_name, :middle_name, :full_name, :phone_number, 1)";
+            (:username, :email, :password_hash, :last_name, :given_name, :middle_name, :full_name, :phone_number,
+             0, :verification_token, :verification_expires, 1)";
     
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':username', $username);
@@ -136,6 +143,8 @@ try {
     $stmt->bindParam(':middle_name', $middleName);
     $stmt->bindParam(':full_name', $fullName);
     $stmt->bindParam(':phone_number', $phoneNumber);
+    $stmt->bindParam(':verification_token', $verificationTokenHash);
+    $stmt->bindParam(':verification_expires', $verificationExpiresAt);
     
     file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - Executing INSERT\n", FILE_APPEND);
     
@@ -146,15 +155,89 @@ try {
     
     file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - SUCCESS: User ID $userId created\n", FILE_APPEND);
 
+    // Create verification link
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'];
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $basePath = dirname(dirname($scriptName));
+    $verificationLink = "{$protocol}://{$host}{$basePath}/user/verify_email.php?token={$verificationToken}";
+
+    // Send email verification email
+    try {
+    // Debug: Check OpenSSL before loading Mailer
+    $opensslLoaded = extension_loaded('openssl') ? 'YES' : 'NO';
+    $opensslFunc = function_exists('openssl_encrypt') ? 'YES' : 'NO';
+    $opensslAlgo = defined('OPENSSL_ALGO_SHA256') ? OPENSSL_ALGO_SHA256 : 'NOT_DEFINED';
+    $loadedExts = implode(',', get_loaded_extensions());
+    file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - OpenSSL loaded: {$opensslLoaded}\n", FILE_APPEND);
+    file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - openssl_encrypt exists: {$opensslFunc}\n", FILE_APPEND);
+    file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - OPENSSL_ALGO_SHA256: {$opensslAlgo}\n", FILE_APPEND);
+    file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - Loaded extensions: {$loadedExts}\n", FILE_APPEND);
+        
+        require_once '../config/Mailer.php';
+        
+        file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - Mailer.php loaded\n", FILE_APPEND);
+        
+        $mailer = new Mailer();
+        
+        file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - Mailer instance created\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - About to send email to: {$email}\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - Link: {$verificationLink}\n", FILE_APPEND);
+        
+        $emailSent = $mailer->sendEmailVerificationEmail(
+            $email,
+            $fullName,
+            $verificationLink,
+            $verificationExpiresAt
+        );
+
+        file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - Email send result: " . ($emailSent ? 'TRUE' : 'FALSE') . "\n", FILE_APPEND);
+        
+        if ($emailSent) {
+            file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - ✅ Verification email sent to: {$email}\n", FILE_APPEND);
+        } else {
+            $error = $mailer->getError();
+            file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - ❌ Failed to send verification email. Error: {$error}\n", FILE_APPEND);
+            error_log("Registration email failed for {$email}: {$error}");
+        }
+    } catch (Exception $e) {
+        file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - Mailer Exception: " . $e->getMessage() . "\n", FILE_APPEND);
+    }
+
+    // Log verification link for development
+    $logDir = __DIR__ . '/email_verifications';
+    if (!file_exists($logDir)) {
+        mkdir($logDir, 0755, true);
+    }
+    
+    $logFile = $logDir . '/verification_log_' . date('Y-m-d') . '.txt';
+    $logMessage = "\n" . str_repeat('=', 80) . "\n";
+    $logMessage .= "Email Verification Request\n";
+    $logMessage .= "Time: " . date('Y-m-d H:i:s') . "\n";
+    $logMessage .= "User: {$fullName} ({$username})\n";
+    $logMessage .= "Email: {$email}\n";
+    $logMessage .= "Verification Link: {$verificationLink}\n";
+    $logMessage .= "Expires: {$verificationExpiresAt}\n";
+    $logMessage .= str_repeat('=', 80) . "\n";
+    
+    file_put_contents($logFile, $logMessage, FILE_APPEND);
+
     // Prepare success response
     $response['success'] = true;
-    $response['message'] = 'Registration successful! You can now login.';
+    $response['message'] = 'Registration successful! Please check your email to verify your account before logging in.';
     $response['data'] = [
         'user_id' => $userId,
         'username' => $username,
         'email' => $email,
-        'full_name' => $fullName
+        'full_name' => $fullName,
+        'email_verified' => false,
+        'verification_required' => true
     ];
+
+    // In development mode, include verification link
+    if (defined('DEVELOPMENT_MODE') && DEVELOPMENT_MODE === true) {
+        $response['data']['verification_link'] = $verificationLink;
+    }
 
     echo json_encode($response);
 
