@@ -128,3 +128,15 @@
 2025-10-21 01:15:23 - Password verified successfully
 2025-10-21 01:15:23 - Session created successfully
 2025-10-21 01:15:23 - SUCCESS: Sending response
+2025-10-21 04:54:36 - Login attempt started
+2025-10-21 12:54:36 - Raw input: {"usernameOrEmail":"ryan15","password":"ryan15"}
+2025-10-21 12:54:36 - Credentials: username='ryan15', password length=6
+2025-10-21 12:54:36 - Connecting to database
+2025-10-21 12:54:36 - Database connected
+2025-10-21 12:54:36 - Query executed, rows found: 1
+2025-10-21 12:54:36 - User found: ID=20, username=ryan15, email=ryan@gmail.com
+2025-10-21 12:54:36 - Account is active
+2025-10-21 12:54:36 - Verifying password
+2025-10-21 12:54:36 - Password verified successfully
+2025-10-21 12:54:36 - Session created successfully
+2025-10-21 12:54:36 - SUCCESS: Sending response
