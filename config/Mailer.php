@@ -10,21 +10,12 @@
  * Extract to vendor/phpmailer/phpmailer/src/
  */
 
-// Include PHPMailer files
-// Attempt to load from vendor directory (Composer installation)
-if (file_exists(__DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php')) {
-    require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-    require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/SMTP.php';
-    require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/Exception.php';
+
+// Use Composer autoloader for PHPMailer
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
 } else {
-    // Manual installation fallback
-    if (file_exists(__DIR__ . '/../vendor/PHPMailer/src/PHPMailer.php')) {
-        require_once __DIR__ . '/../vendor/PHPMailer/src/PHPMailer.php';
-        require_once __DIR__ . '/../vendor/PHPMailer/src/SMTP.php';
-        require_once __DIR__ . '/../vendor/PHPMailer/src/Exception.php';
-    } else {
-        throw new Exception('PHPMailer not found. Please install PHPMailer library.');
-    }
+    throw new Exception('Composer autoload not found. Please run composer install.');
 }
 
 use PHPMailer\PHPMailer\PHPMailer;

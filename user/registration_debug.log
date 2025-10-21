@@ -1,18 +1,54 @@
-2025-10-21 12:42:22 - Registration attempt started
-2025-10-21 18:42:22 - Raw input: {"lastName":"Cereza","givenName":"John Ray","middleName":"Ruiz","email":"johnraycereza02@gmail.com","phoneNumber":"0912345678909","username":"john123","password":"john123"}
-2025-10-21 18:42:22 - All fields present
-2025-10-21 18:42:22 - Data: username=john123, email=johnraycereza02@gmail.com
-2025-10-21 18:42:22 - Connecting to database
-2025-10-21 18:42:23 - Database connected
-2025-10-21 18:42:23 - Executing INSERT
-2025-10-21 18:42:23 - SUCCESS: User ID 3 created
-2025-10-21 18:42:23 - OpenSSL loaded: YES
-2025-10-21 18:42:23 - openssl_encrypt exists: YES
-2025-10-21 18:42:23 - OPENSSL_ALGO_SHA256: 7
-2025-10-21 18:42:23 - Loaded extensions: Core,bcmath,calendar,ctype,date,filter,hash,iconv,json,SPL,pcre,random,readline,Reflection,session,standard,mysqlnd,tokenizer,zlib,libxml,dom,PDO,bz2,SimpleXML,xml,xmlreader,xmlwriter,apache2handler,openssl,curl,fileinfo,gettext,mbstring,exif,mysqli,Phar,pdo_mysql,pdo_sqlite,ftp
-2025-10-21 18:42:23 - Mailer.php loaded
-2025-10-21 18:42:23 - Mailer instance created
-2025-10-21 18:42:23 - About to send email to: johnraycereza02@gmail.com
-2025-10-21 18:42:23 - Link: http://localhost/Design_2_Ayen_Design_AR_Homes_Posadas_Farm_Resort_Reservation_System/user/verify_email.php?token=879251012c32c1d1afa899ee1511492a1e71393e09b59ff5a2501ae6659376f8
-2025-10-21 18:42:28 - Email send result: TRUE
-2025-10-21 18:42:28 - ✅ Verification email sent to: johnraycereza02@gmail.com
+2025-10-21 14:51:54 - Registration attempt started
+2025-10-21 20:51:54 - Raw input: {"lastName":"ggrwg","givenName":"wgwgrw","middleName":"gwegw","email":"jayjaymandani@gmail.com","phoneNumber":"12345678909","username":"ayen1515","password":"cjay0715"}
+2025-10-21 20:51:54 - All fields present
+2025-10-21 20:51:54 - Data: username=ayen1515, email=jayjaymandani@gmail.com
+2025-10-21 20:51:54 - Connecting to database
+2025-10-21 20:51:54 - Database connected
+2025-10-21 20:51:54 - Executing INSERT
+2025-10-21 20:51:54 - SUCCESS: User ID 5 created
+2025-10-21 20:51:54 - OpenSSL loaded: YES
+2025-10-21 20:51:54 - openssl_encrypt exists: YES
+2025-10-21 20:51:54 - OPENSSL_ALGO_SHA256: 7
+2025-10-21 20:51:54 - Loaded extensions: Core,bcmath,calendar,ctype,date,filter,hash,iconv,json,SPL,pcre,random,readline,Reflection,session,standard,mysqlnd,tokenizer,zlib,libxml,dom,PDO,bz2,SimpleXML,xml,xmlreader,xmlwriter,apache2handler,openssl,curl,fileinfo,gettext,mbstring,exif,mysqli,Phar,pdo_mysql,pdo_sqlite,ftp
+2025-10-21 20:51:54 - Mailer.php loaded
+2025-10-21 20:51:54 - Mailer instance created
+2025-10-21 20:51:54 - About to send email to: jayjaymandani@gmail.com
+2025-10-21 20:51:54 - Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=404db4efa8624900e660eaae25c39975806957268d873ad7e6557efed3828936
+2025-10-21 20:51:54 - Email send result: FALSE
+2025-10-21 20:51:54 - ❌ Failed to send verification email. Error: Message could not be sent. Mailer Error: SMTP Error: Could not connect to SMTP host. Failed to connect to server SMTP server error: Failed to connect to server Additional SMTP info: php_network_getaddresses: getaddrinfo for smtp.example.com failed: No such host is known. 
+2025-10-21 14:55:58 - Registration attempt started
+2025-10-21 20:55:58 - Raw input: {"lastName":"vvsdsd","givenName":"gsdgds","middleName":"sdgdsgds","email":"cjaayyy.003@gmail.com","phoneNumber":"141241341313513","username":"ayen151515","password":"cjay0715"}
+2025-10-21 20:55:58 - All fields present
+2025-10-21 20:55:58 - Data: username=ayen151515, email=cjaayyy.003@gmail.com
+2025-10-21 20:55:58 - Connecting to database
+2025-10-21 20:55:58 - Database connected
+2025-10-21 20:55:58 - Executing INSERT
+2025-10-21 20:55:58 - SUCCESS: User ID 6 created
+2025-10-21 20:55:58 - OpenSSL loaded: YES
+2025-10-21 20:55:58 - openssl_encrypt exists: YES
+2025-10-21 20:55:58 - OPENSSL_ALGO_SHA256: 7
+2025-10-21 20:55:58 - Loaded extensions: Core,bcmath,calendar,ctype,date,filter,hash,iconv,json,SPL,pcre,random,readline,Reflection,session,standard,mysqlnd,tokenizer,zlib,libxml,dom,PDO,bz2,SimpleXML,xml,xmlreader,xmlwriter,apache2handler,openssl,curl,fileinfo,gettext,mbstring,exif,mysqli,Phar,pdo_mysql,pdo_sqlite,ftp
+2025-10-21 20:55:58 - Mailer.php loaded
+2025-10-21 20:55:58 - Mailer instance created
+2025-10-21 20:55:58 - About to send email to: cjaayyy.003@gmail.com
+2025-10-21 20:55:58 - Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=c704326ed738e8947eba3c020c72f4cd0313023670ae6b8483f11274b7daf659
+2025-10-21 20:56:04 - Email send result: TRUE
+2025-10-21 20:56:04 - ✅ Verification email sent to: cjaayyy.003@gmail.com
+2025-10-21 15:08:19 - Registration attempt started
+2025-10-21 21:08:19 - Raw input: {"lastName":"Facun","givenName":"Aienne Joy","middleName":"Ramos","email":"mayenfacun15@gmail.com","phoneNumber":"090788408644","username":"ayen0715","password":"cjay0715"}
+2025-10-21 21:08:19 - All fields present
+2025-10-21 21:08:19 - Data: username=ayen0715, email=mayenfacun15@gmail.com
+2025-10-21 21:08:19 - Connecting to database
+2025-10-21 21:08:19 - Database connected
+2025-10-21 21:08:19 - Executing INSERT
+2025-10-21 21:08:19 - SUCCESS: User ID 7 created
+2025-10-21 21:08:19 - OpenSSL loaded: YES
+2025-10-21 21:08:19 - openssl_encrypt exists: YES
+2025-10-21 21:08:19 - OPENSSL_ALGO_SHA256: 7
+2025-10-21 21:08:20 - Loaded extensions: Core,bcmath,calendar,ctype,date,filter,hash,iconv,json,SPL,pcre,random,readline,Reflection,session,standard,mysqlnd,tokenizer,zlib,libxml,dom,PDO,bz2,SimpleXML,xml,xmlreader,xmlwriter,apache2handler,openssl,curl,fileinfo,gettext,mbstring,exif,mysqli,Phar,pdo_mysql,pdo_sqlite,ftp
+2025-10-21 21:08:20 - Mailer.php loaded
+2025-10-21 21:08:20 - Mailer instance created
+2025-10-21 21:08:20 - About to send email to: mayenfacun15@gmail.com
+2025-10-21 21:08:20 - Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=9f675ccabe840a1f2e7cbd0341bc66509dbddcf94cc32432d28429f05d437e2b
+2025-10-21 21:08:26 - Email send result: TRUE
+2025-10-21 21:08:26 - ✅ Verification email sent to: mayenfacun15@gmail.com

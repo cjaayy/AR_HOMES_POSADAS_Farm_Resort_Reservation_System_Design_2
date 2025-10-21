@@ -14,3 +14,53 @@ Time: 2025-10-21 18:42:37
 User: Cereza, John Ray Ruiz (john123)
 Email: johnraycereza02@gmail.com
 ================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-10-21 19:22:18
+User: Mandani, Christian James Cereza (james123)
+Email: mandanichristian137@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=0010c3ce90a47bf8a23207b078060cca535ad54c5d98804ee1c1386deeff3db5
+Expires: 2025-10-22 19:22:18
+================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-10-21 20:51:54
+User: ggrwg, wgwgrw gwegw (ayen1515)
+Email: jayjaymandani@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=404db4efa8624900e660eaae25c39975806957268d873ad7e6557efed3828936
+Expires: 2025-10-22 20:51:54
+================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-10-21 20:56:04
+User: vvsdsd, gsdgds sdgdsgds (ayen151515)
+Email: cjaayyy.003@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=c704326ed738e8947eba3c020c72f4cd0313023670ae6b8483f11274b7daf659
+Expires: 2025-10-22 20:55:58
+================================================================================
+
+================================================================================
+Email Verification Completed
+Time: 2025-10-21 20:56:54
+User: vvsdsd, gsdgds sdgdsgds (ayen151515)
+Email: cjaayyy.003@gmail.com
+================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-10-21 21:08:26
+User: Facun, Aienne Joy Ramos (ayen0715)
+Email: mayenfacun15@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=9f675ccabe840a1f2e7cbd0341bc66509dbddcf94cc32432d28429f05d437e2b
+Expires: 2025-10-22 21:08:19
+================================================================================
+
+================================================================================
+Email Verification Completed
+Time: 2025-10-21 21:10:10
+User: Facun, Aienne Joy Ramos (ayen0715)
+Email: mayenfacun15@gmail.com
+================================================================================
