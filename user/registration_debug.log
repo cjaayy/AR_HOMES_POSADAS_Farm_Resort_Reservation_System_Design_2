@@ -22,3 +22,11 @@
 2025-10-21 13:25:07 - Database connected
 2025-10-21 13:25:08 - Executing INSERT
 2025-10-21 13:25:08 - SUCCESS: User ID 25 created
+2025-10-21 08:02:15 - Registration attempt started
+2025-10-21 16:02:15 - Raw input: {"lastName":"Test","givenName":"Test","middleName":"Test","email":"Test@gmail.com","phoneNumber":"12345678909","username":"test1","password":"test123"}
+2025-10-21 16:02:15 - All fields present
+2025-10-21 16:02:15 - Data: username=test1, email=Test@gmail.com
+2025-10-21 16:02:15 - Connecting to database
+2025-10-21 16:02:15 - Database connected
+2025-10-21 16:02:16 - Executing INSERT
+2025-10-21 16:02:16 - SUCCESS: User ID 27 created

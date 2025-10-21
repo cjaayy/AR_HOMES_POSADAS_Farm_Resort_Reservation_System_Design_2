@@ -291,3 +291,169 @@
 2025-10-21 15:17:23 - Password verified successfully
 2025-10-21 15:17:23 - Session created successfully
 2025-10-21 15:17:23 - SUCCESS: Sending response
+2025-10-21 07:20:11 - Login attempt started
+2025-10-21 15:20:11 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes22"}
+2025-10-21 15:20:11 - Credentials: username='cjmandani2005@gmail.com', password length=8
+2025-10-21 15:20:11 - Connecting to database
+2025-10-21 15:20:11 - Database connected
+2025-10-21 15:20:11 - Query executed, rows found: 1
+2025-10-21 15:20:11 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:20:11 - Account is active
+2025-10-21 15:20:11 - Verifying password
+2025-10-21 15:20:12 - Password verified successfully
+2025-10-21 15:20:12 - Session created successfully
+2025-10-21 15:20:12 - SUCCESS: Sending response
+2025-10-21 07:26:29 - Login attempt started
+2025-10-21 15:26:29 - Raw input: {"usernameOrEmail":"aj@gmail.com","password":"cjay071525"}
+2025-10-21 15:26:29 - Credentials: username='aj@gmail.com', password length=10
+2025-10-21 15:26:29 - Connecting to database
+2025-10-21 15:26:29 - Database connected
+2025-10-21 15:26:29 - Query executed, rows found: 1
+2025-10-21 15:26:29 - User found: ID=17, username=ayen15, email=aj@gmail.com
+2025-10-21 15:26:29 - Account is active
+2025-10-21 15:26:29 - Verifying password
+2025-10-21 15:26:29 - Password verified successfully
+2025-10-21 15:26:29 - Session created successfully
+2025-10-21 15:26:29 - SUCCESS: Sending response
+2025-10-21 09:33:25 - Login attempt started
+2025-10-21 15:33:25 - Raw input: {"usernameOrEmail":"testuser","password":"password123"}
+2025-10-21 15:33:25 - Credentials: username='testuser', password length=11
+2025-10-21 15:33:25 - Connecting to database
+2025-10-21 15:33:25 - Database connected
+2025-10-21 15:33:25 - Query executed, rows found: 0
+2025-10-21 15:33:25 - ERROR: User not found
+2025-10-21 07:33:45 - Login attempt started
+2025-10-21 15:33:45 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes22"}
+2025-10-21 15:33:45 - Credentials: username='cjmandani2005@gmail.com', password length=8
+2025-10-21 15:33:45 - Connecting to database
+2025-10-21 15:33:45 - Database connected
+2025-10-21 15:33:45 - Query executed, rows found: 1
+2025-10-21 15:33:45 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:33:45 - Account is active
+2025-10-21 15:33:45 - Verifying password
+2025-10-21 15:33:45 - Password verified successfully
+2025-10-21 15:33:45 - Session created successfully
+2025-10-21 15:33:45 - SUCCESS: Sending response
+2025-10-21 07:34:59 - Login attempt started
+2025-10-21 15:34:59 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes22"}
+2025-10-21 15:34:59 - Credentials: username='cjmandani2005@gmail.com', password length=8
+2025-10-21 15:34:59 - Connecting to database
+2025-10-21 15:34:59 - Database connected
+2025-10-21 15:34:59 - Query executed, rows found: 1
+2025-10-21 15:34:59 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:34:59 - Account is active
+2025-10-21 15:34:59 - Verifying password
+2025-10-21 15:35:00 - Password verified successfully
+2025-10-21 15:35:00 - Session created successfully
+2025-10-21 15:35:00 - SUCCESS: Sending response
+2025-10-21 07:48:11 - Login attempt started
+2025-10-21 15:48:11 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"cjay@071525"}
+2025-10-21 15:48:11 - Credentials: username='cjmandani2005@gmail.com', password length=11
+2025-10-21 15:48:11 - Connecting to database
+2025-10-21 15:48:11 - Database connected
+2025-10-21 15:48:11 - Query executed, rows found: 1
+2025-10-21 15:48:11 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:48:11 - Account is active
+2025-10-21 15:48:12 - Verifying password
+2025-10-21 15:48:12 - ERROR: Password verification failed
+2025-10-21 07:48:23 - Login attempt started
+2025-10-21 15:48:23 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes"}
+2025-10-21 15:48:23 - Credentials: username='cjmandani2005@gmail.com', password length=6
+2025-10-21 15:48:23 - Connecting to database
+2025-10-21 15:48:23 - Database connected
+2025-10-21 15:48:23 - Query executed, rows found: 1
+2025-10-21 15:48:23 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:48:23 - Account is active
+2025-10-21 15:48:23 - Verifying password
+2025-10-21 15:48:24 - ERROR: Password verification failed
+2025-10-21 07:48:26 - Login attempt started
+2025-10-21 15:48:26 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes22"}
+2025-10-21 15:48:26 - Credentials: username='cjmandani2005@gmail.com', password length=8
+2025-10-21 15:48:26 - Connecting to database
+2025-10-21 15:48:26 - Database connected
+2025-10-21 15:48:26 - Query executed, rows found: 1
+2025-10-21 15:48:26 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:48:26 - Account is active
+2025-10-21 15:48:26 - Verifying password
+2025-10-21 15:48:27 - Password verified successfully
+2025-10-21 15:48:27 - Session created successfully
+2025-10-21 15:48:27 - SUCCESS: Sending response
+2025-10-21 07:52:42 - Login attempt started
+2025-10-21 15:52:42 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes22"}
+2025-10-21 15:52:42 - Credentials: username='cjmandani2005@gmail.com', password length=8
+2025-10-21 15:52:42 - Connecting to database
+2025-10-21 15:52:43 - Database connected
+2025-10-21 15:52:43 - Query executed, rows found: 1
+2025-10-21 15:52:43 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:52:43 - Account is active
+2025-10-21 15:52:43 - Verifying password
+2025-10-21 15:52:43 - Password verified successfully
+2025-10-21 15:52:43 - Session created successfully
+2025-10-21 15:52:43 - SUCCESS: Sending response
+2025-10-21 07:57:09 - Login attempt started
+2025-10-21 15:57:09 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes22"}
+2025-10-21 15:57:09 - Credentials: username='cjmandani2005@gmail.com', password length=8
+2025-10-21 15:57:09 - Connecting to database
+2025-10-21 15:57:09 - Database connected
+2025-10-21 15:57:09 - Query executed, rows found: 1
+2025-10-21 15:57:09 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:57:09 - Account is active
+2025-10-21 15:57:09 - Verifying password
+2025-10-21 15:57:10 - Password verified successfully
+2025-10-21 15:57:10 - Session created successfully
+2025-10-21 15:57:10 - SUCCESS: Sending response
+2025-10-21 07:58:55 - Login attempt started
+2025-10-21 15:58:55 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes22"}
+2025-10-21 15:58:55 - Credentials: username='cjmandani2005@gmail.com', password length=8
+2025-10-21 15:58:55 - Connecting to database
+2025-10-21 15:58:55 - Database connected
+2025-10-21 15:58:55 - Query executed, rows found: 1
+2025-10-21 15:58:55 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 15:58:55 - Account is active
+2025-10-21 15:58:55 - Verifying password
+2025-10-21 15:58:55 - Password verified successfully
+2025-10-21 15:58:55 - Session created successfully
+2025-10-21 15:58:55 - SUCCESS: Sending response
+2025-10-21 08:00:47 - Login attempt started
+2025-10-21 16:00:47 - Raw input: {"usernameOrEmail":"jona31","password":"jona123"}
+2025-10-21 16:00:47 - Credentials: username='jona31', password length=7
+2025-10-21 16:00:47 - Connecting to database
+2025-10-21 16:00:47 - Database connected
+2025-10-21 16:00:47 - Query executed, rows found: 1
+2025-10-21 16:00:47 - User found: ID=18, username=jona31, email=jona@gmail.com
+2025-10-21 16:00:47 - Account is active
+2025-10-21 16:00:47 - Verifying password
+2025-10-21 16:00:48 - Password verified successfully
+2025-10-21 16:00:48 - Session created successfully
+2025-10-21 16:00:48 - SUCCESS: Sending response
+2025-10-21 08:02:24 - Login attempt started
+2025-10-21 16:02:24 - Raw input: {"usernameOrEmail":"test1","password":"test123"}
+2025-10-21 16:02:24 - Credentials: username='test1', password length=7
+2025-10-21 16:02:24 - Connecting to database
+2025-10-21 16:02:24 - Database connected
+2025-10-21 16:02:24 - Query executed, rows found: 1
+2025-10-21 16:02:24 - User found: ID=27, username=test1, email=Test@gmail.com
+2025-10-21 16:02:24 - Account is active
+2025-10-21 16:02:24 - Verifying password
+2025-10-21 16:02:24 - Password verified successfully
+2025-10-21 16:02:24 - Session created successfully
+2025-10-21 16:02:24 - SUCCESS: Sending response
+2025-10-21 08:07:27 - Login attempt started
+2025-10-21 16:07:27 - Raw input: {"usernameOrEmail":"cjmandani2005@gmail.com","password":"jaymes22"}
+2025-10-21 16:07:27 - Credentials: username='cjmandani2005@gmail.com', password length=8
+2025-10-21 16:07:27 - Connecting to database
+2025-10-21 16:07:27 - Database connected
+2025-10-21 16:07:27 - Query executed, rows found: 1
+2025-10-21 16:07:27 - User found: ID=26, username=jaymes22, email=cjmandani2005@gmail.com
+2025-10-21 16:07:27 - Account is active
+2025-10-21 16:07:27 - Verifying password
+2025-10-21 16:07:28 - Password verified successfully
+2025-10-21 16:07:28 - Session created successfully
+2025-10-21 16:07:28 - SUCCESS: Sending response
+2025-10-21 08:07:41 - Login attempt started
+2025-10-21 16:07:41 - Raw input: {"usernameOrEmail":"test1","password":"test123"}
+2025-10-21 16:07:41 - Credentials: username='test1', password length=7
+2025-10-21 16:07:41 - Connecting to database
+2025-10-21 16:07:41 - Database connected
+2025-10-21 16:07:41 - Query executed, rows found: 0
+2025-10-21 16:07:41 - ERROR: User not found

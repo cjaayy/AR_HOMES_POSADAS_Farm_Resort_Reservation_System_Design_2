@@ -382,9 +382,7 @@ rememberCheckbox.addEventListener("change", function () {
 // Handle "Forgot Password" link
 document.querySelector(".forgot-link").addEventListener("click", function (e) {
   e.preventDefault();
-  alert(
-    "Forgot Password feature would be implemented here.\n\nIn a real application, this would redirect to a password reset page or open a modal."
-  );
+  openForgotPasswordModal();
 });
 
 // Register link now works with standard HTML navigation to registration.html
@@ -718,3 +716,269 @@ window.openLocationMap = openLocationMap;
 window.closeLocationMap = closeLocationMap;
 window.openDirections = openDirections;
 window.shareLocation = shareLocation;
+
+// ===== FORGOT PASSWORD MODAL FUNCTIONALITY =====
+
+// Open forgot password modal
+function openForgotPasswordModal() {
+  const modal = document.getElementById("forgotPasswordModal");
+  modal.style.display = "flex";
+
+  // Prevent body scrolling
+  document.body.style.overflow = "hidden";
+
+  // Focus on email input
+  setTimeout(() => {
+    document.getElementById("resetEmail").focus();
+  }, 100);
+
+  // Add escape key listener
+  document.addEventListener("keydown", handleForgotPasswordEscape);
+}
+
+// Close forgot password modal
+function closeForgotPasswordModal() {
+  const modal = document.getElementById("forgotPasswordModal");
+  modal.style.display = "none";
+
+  // Restore body scrolling
+  document.body.style.overflow = "auto";
+
+  // Clear form
+  document.getElementById("forgotPasswordForm").reset();
+
+  // Remove escape key listener
+  document.removeEventListener("keydown", handleForgotPasswordEscape);
+
+  // Reset button state
+  const sendResetBtn = document.getElementById("sendResetBtn");
+  sendResetBtn.disabled = false;
+  sendResetBtn.innerHTML =
+    '<span>Send Reset Link</span><i class="fas fa-paper-plane"></i>';
+}
+
+// Handle escape key for forgot password modal
+function handleForgotPasswordEscape(e) {
+  if (e.key === "Escape") {
+    closeForgotPasswordModal();
+  }
+}
+
+// Handle forgot password form submission
+document
+  .getElementById("forgotPasswordForm")
+  .addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const resetEmail = document.getElementById("resetEmail").value.trim();
+    const sendResetBtn = document.getElementById("sendResetBtn");
+
+    // Validation
+    if (!resetEmail) {
+      alert("Please enter your email address");
+      return;
+    }
+
+    if (!isValidEmail(resetEmail)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    // Disable button and show loading state
+    sendResetBtn.disabled = true;
+    sendResetBtn.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    // Send password reset request
+    fetch("user/forgot_password.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: resetEmail }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        sendResetBtn.disabled = false;
+        sendResetBtn.innerHTML =
+          '<span>Send Reset Link</span><i class="fas fa-paper-plane"></i>';
+
+        if (data.success) {
+          // Show success message
+          alert(
+            "Password reset instructions have been sent to your email.\n\nFor development: Check the browser console for the reset link."
+          );
+
+          // Log reset link for development
+          if (data.data && data.data.reset_link) {
+            console.log("🔐 PASSWORD RESET LINK (Development Mode)");
+            console.log("==========================================");
+            console.log("Reset Link:", data.data.reset_link);
+            console.log("Expires At:", data.data.expires_at);
+            console.log("Note:", data.data.note);
+            console.log("==========================================");
+            console.log(
+              "\nClick the link above or copy it to your browser to reset your password."
+            );
+
+            // Show modal with reset link for development
+            showResetLinkModal(data.data.reset_link);
+          }
+
+          closeForgotPasswordModal();
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Failed to send reset link. Please try again.");
+        sendResetBtn.disabled = false;
+        sendResetBtn.innerHTML =
+          '<span>Send Reset Link</span><i class="fas fa-paper-plane"></i>';
+      });
+  });
+
+// Show reset link modal for development
+function showResetLinkModal(resetLink) {
+  const modalHtml = `
+    <div id="resetLinkModal" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    ">
+      <div style="
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        max-width: 600px;
+        width: 90%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      ">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 30px;
+          ">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3 style="color: #333; margin-bottom: 10px;">Password Reset Link Generated</h3>
+          <p style="color: #666; font-size: 0.9rem;">
+            For development: Use this link to reset your password
+          </p>
+        </div>
+        
+        <div style="
+          background: #f8f9fa;
+          padding: 15px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          word-break: break-all;
+          font-size: 0.85rem;
+          color: #333;
+        ">
+          ${resetLink}
+        </div>
+        
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button onclick="copyResetLink('${resetLink}')" style="
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          ">
+            <i class="fas fa-copy"></i> Copy Link
+          </button>
+          <button onclick="window.location.href='${resetLink}'" style="
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          ">
+            <i class="fas fa-arrow-right"></i> Go to Reset Page
+          </button>
+        </div>
+        
+        <button onclick="closeResetLinkModal()" style="
+          background: transparent;
+          border: 2px solid #ddd;
+          color: #666;
+          padding: 10px 24px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          width: 100%;
+          margin-top: 10px;
+        ">
+          Close
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+}
+
+// Copy reset link to clipboard
+function copyResetLink(link) {
+  navigator.clipboard
+    .writeText(link)
+    .then(() => {
+      alert("Reset link copied to clipboard!");
+    })
+    .catch((err) => {
+      console.error("Failed to copy:", err);
+      alert("Failed to copy link. Please copy it manually from the console.");
+    });
+}
+
+// Close reset link modal
+function closeResetLinkModal() {
+  const modal = document.getElementById("resetLinkModal");
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener("click", function (e) {
+  const forgotModal = document.getElementById("forgotPasswordModal");
+  if (e.target === forgotModal) {
+    closeForgotPasswordModal();
+  }
+});
+
+// Make functions globally available
+window.openForgotPasswordModal = openForgotPasswordModal;
+window.closeForgotPasswordModal = closeForgotPasswordModal;
+window.copyResetLink = copyResetLink;
+window.closeResetLinkModal = closeResetLinkModal;
+
+console.log("🔐 Forgot Password functionality loaded successfully!");

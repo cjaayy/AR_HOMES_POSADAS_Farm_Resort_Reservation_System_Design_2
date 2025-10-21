@@ -291,6 +291,50 @@
       </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Reset Your Password</h3>
+          <button class="modal-close-btn" onclick="closeForgotPasswordModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description">
+            Enter your email address and we'll send you a link to reset your
+            password.
+          </p>
+          <form id="forgotPasswordForm">
+            <div class="input-group">
+              <div class="input-wrapper">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="resetEmail"
+                  name="resetEmail"
+                  placeholder="Enter your email address"
+                  required
+                />
+              </div>
+            </div>
+            <button type="submit" class="modal-btn" id="sendResetBtn">
+              <span>Send Reset Link</span>
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
+          <div class="modal-footer">
+            <p>
+              Remember your password?
+              <a href="#" onclick="closeForgotPasswordModal(); return false;">
+                Back to Login
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Map Modal -->
     <div id="mapModal" class="map-modal">
       <div class="map-modal-content">
