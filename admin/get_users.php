@@ -51,9 +51,14 @@ try {
     foreach ($users as &$user) {
         // Format dates
         if ($user['last_login']) {
-            $user['last_login_formatted'] = date('M d, Y h:i A', strtotime($user['last_login']));
+            $user['last_login_formatted'] = date('M d, Y', strtotime($user['last_login'])) . '<br><small style="color: #666; font-size: 0.85em;">' . date('h:i A', strtotime($user['last_login'])) . '</small>';
         } else {
             $user['last_login_formatted'] = 'Never';
+        }
+        
+        // Format member_since
+        if ($user['member_since']) {
+            $user['member_since'] = date('M d, Y', strtotime($user['member_since']));
         }
         
         $user['created_at_formatted'] = date('M d, Y', strtotime($user['created_at']));
