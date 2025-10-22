@@ -460,6 +460,13 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 
   focusableElements.forEach((element) => {
+    // Skip programmatic outline for password toggle buttons so CSS :focus-visible
+    // can control the accessible ring for keyboard users. This prevents a box
+    // appearing when the eye is clicked with mouse.
+    if (element.classList && element.classList.contains("password-toggle")) {
+      return;
+    }
+
     element.addEventListener("focus", function () {
       this.style.outline = "2px solid #667eea";
       this.style.outlineOffset = "2px";
@@ -601,7 +608,73 @@ function toggleSettingsPassword(inputId) {
     input.type = "password";
     toggleBtn.className = "fas fa-eye";
   }
+
+  // If the toggle was clicked with a mouse, remove focus from the input
+  // to prevent the browser's focus outline on the input. Keyboard users
+  // who use Enter/Space will still keep focus (no flag set).
+  if (window.__passwordToggleClickedWithMouse) {
+    try {
+      input.blur();
+    } finally {
+      // reset flag after handling
+      window.__passwordToggleClickedWithMouse = false;
+    }
+  }
 }
+
+// Toggle readonly/edit mode for a specific input field (used for adminFullName)
+function toggleEditField(fieldId) {
+  const input = document.getElementById(fieldId);
+  if (!input) return;
+
+  const btn = input.parentElement.querySelector(".field-edit-btn");
+  const label = input.parentElement.querySelector(".field-edit-label");
+
+  if (input.hasAttribute("readonly")) {
+    // Enter edit mode
+    input.removeAttribute("readonly");
+    input.focus();
+    if (btn) btn.classList.add("is-saving");
+    if (label) label.textContent = "Save";
+  } else {
+    // Save mode - blur and set back to readonly
+    input.setAttribute("readonly", "");
+    input.blur();
+    if (btn) btn.classList.remove("is-saving");
+    if (label) label.textContent = "Edit";
+
+    // Update header display name immediately
+    const headerName = document.querySelector(".admin-name");
+    if (headerName) {
+      headerName.textContent = input.value || "Administrator";
+    }
+
+    // Optionally, you could auto-submit the form or mark form dirty so user can Save Changes
+    const saveBtn = document.querySelector(
+      '#adminProfileForm button[type="submit"]'
+    );
+    if (saveBtn) {
+      saveBtn.disabled = false;
+    }
+  }
+}
+
+// Track mouse interactions on password toggle buttons so we can distinguish
+// between mouse clicks and keyboard activation. This helps prevent showing
+// a focus ring on the input when the eye is clicked with mouse.
+document.addEventListener("DOMContentLoaded", function () {
+  document.body.addEventListener("mousedown", function (e) {
+    const toggle = e.target.closest && e.target.closest(".password-toggle");
+    if (toggle) {
+      window.__passwordToggleClickedWithMouse = true;
+    }
+  });
+
+  // Clear flag on keydown so keyboard activations won't be treated as mouse
+  document.body.addEventListener("keydown", function () {
+    window.__passwordToggleClickedWithMouse = false;
+  });
+});
 
 // Reset profile form
 function resetProfileForm() {

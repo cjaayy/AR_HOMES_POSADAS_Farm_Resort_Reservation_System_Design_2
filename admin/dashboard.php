@@ -696,9 +696,13 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                         id="adminFullName"
                         name="fullName"
                         value="<?php echo htmlspecialchars($adminFullName); ?>"
+                        readonly
                         placeholder="Enter full name"
                         required
                       />
+                      <button type="button" class="field-edit-btn" aria-label="Edit full name" onclick="toggleEditField('adminFullName')">
+                        <span class="field-edit-label">Edit</span>
+                      </button>
                     </div>
                   </div>
 
