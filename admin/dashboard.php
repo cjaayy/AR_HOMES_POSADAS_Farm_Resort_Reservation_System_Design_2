@@ -298,12 +298,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <span>Manage Users</span>
               </a>
             </li>
-            <li class="nav-item">
-              <a href="#staff" class="nav-link" data-section="staff">
-                <i class="fas fa-user-tie"></i>
-                <span>Manage Staff Members</span>
-              </a>
-            </li>
+            <!-- Manage Staff Members nav removed from sidebar per request -->
             <li class="nav-item">
               <a href="#reports" class="nav-link" data-section="reports">
                 <i class="fas fa-chart-bar"></i>
@@ -516,14 +511,147 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             <h2>Manage Reservations</h2>
             <p>View and manage all resort reservations</p>
           </div>
-          <div class="placeholder-content">
-            <i class="fas fa-calendar-check"></i>
-            <h3>Reservations Management</h3>
-            <p>
-              This section will contain reservation management tools, booking
-              calendar, and guest information.
-            </p>
+
+          <div class="users-container">
+            <div class="users-header" style="margin-bottom:8px;">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="adminSearchBox" placeholder="Search guest, room, or contact" oninput="adminApplyFilters()" />
+              </div>
+              <div class="filter-options">
+                <select id="adminFilterStatus" onchange="adminApplyFilters()">
+                  <option value="">All</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="completed">Completed</option>
+                  <option value="canceled">Canceled</option>
+                </select>
+                <label class="small">From</label>
+                <input type="date" id="adminFilterFrom" onchange="adminApplyFilters()">
+                <label class="small">To</label>
+                <input type="date" id="adminFilterTo" onchange="adminApplyFilters()">
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:12px;">
+              <button class="btn-primary" onclick="adminShowCreateForm()"><i class="fas fa-plus"></i> Add Walk-in</button>
+              <button class="btn-secondary" onclick="adminExportCSV()">Export CSV</button>
+            </div>
+
+            <div class="table-container">
+              <table class="users-table" id="adminReservationsTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Guest</th>
+                    <th>Contact</th>
+                    <th>Room</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminReservationsBody"><tr><td colspan="9" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+              </table>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:10px; gap:8px; align-items:center;">
+              <div id="adminPaginationInfo" style="font-size:13px;color:#666"></div>
+              <button class="btn-secondary" id="adminPrevPage" onclick="adminChangePage(-1)" disabled>&larr; Prev</button>
+              <button class="btn-secondary" id="adminNextPage" onclick="adminChangePage(1)" disabled>Next &rarr;</button>
+            </div>
           </div>
+
+          <!-- Create modal -->
+          <div id="adminCreateModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+            <div style="background:#fff; padding:18px; border-radius:8px; width:560px; max-width:95%;">
+              <h3>Create Walk-in / Phone Reservation</h3>
+              <form id="adminCreateForm" onsubmit="return adminSubmitCreate(event)">
+                <div class="form-group"><label>Guest Name</label><input name="guest_name" required></div>
+                <div class="form-group"><label>Phone</label><input name="guest_phone"></div>
+                <div class="form-group"><label>Room</label><input name="room"></div>
+                <div class="form-group" style="display:flex;gap:8px;"><div><label>Check-in</label><input type="date" name="check_in_date"></div><div><label>Check-out</label><input type="date" name="check_out_date"></div></div>
+                <div style="display:flex;gap:8px; justify-content:flex-end; margin-top:12px;"><button type="button" onclick="adminHideCreateForm()" class="btn-secondary">Cancel</button><button class="btn-primary">Create</button></div>
+              </form>
+            </div>
+          </div>
+
+          <script>
+            // Admin reservations client-side (mirrors staff reservations UI)
+            let adminAllReservations = [];
+            let adminFilteredReservations = [];
+            let adminCurrentPage = 1;
+            const adminPageSize = 15;
+
+            async function adminFetchAllReservations(){
+              try{
+                const res = await fetch('staff_get_reservations.php?limit=1000', { credentials: 'include' });
+                const data = await res.json();
+                if(!data.success){ console.error('Failed to load reservations', data.message); document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#b00;">Failed to load reservations</td></tr>`; return; }
+                adminAllReservations = data.reservations || [];
+                adminApplyFilters();
+              }catch(err){ console.error(err); document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#b00;">Error loading reservations</td></tr>`; }
+            }
+
+            function adminApplyFilters(){
+              const status = document.getElementById('adminFilterStatus').value;
+              const from = document.getElementById('adminFilterFrom').value;
+              const to = document.getElementById('adminFilterTo').value;
+              const q = (document.getElementById('adminSearchBox').value || '').toLowerCase();
+              adminFilteredReservations = adminAllReservations.filter(r => {
+                if(status && String(r.status) !== status) return false;
+                if(from && r.check_in_date && r.check_in_date < from) return false;
+                if(to && r.check_in_date && r.check_in_date > to) return false;
+                if(q){ const hay = ((r.guest_name||'') + ' ' + (r.room||'') + ' ' + (r.guest_phone||'') + ' ' + (r.guest_email||'')).toLowerCase(); if(!hay.includes(q)) return false; }
+                return true;
+              });
+              adminCurrentPage = 1;
+              adminRenderPage();
+            }
+
+            function adminRenderPage(){
+              const tbody = document.getElementById('adminReservationsBody');
+              if(!adminFilteredReservations || adminFilteredReservations.length===0){ tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:2rem; color:#666;">No reservations found</td></tr>`; document.getElementById('adminPaginationInfo').textContent=''; document.getElementById('adminPrevPage').disabled=true; document.getElementById('adminNextPage').disabled=true; return; }
+              const total = adminFilteredReservations.length; const totalPages = Math.ceil(total / adminPageSize); const start = (adminCurrentPage-1)*adminPageSize; const pageRows = adminFilteredReservations.slice(start, start+adminPageSize);
+              const rowsHtml = pageRows.map(r=> `<tr>
+                <td>${r.reservation_id}</td>
+                <td>${escapeHtml(r.guest_name||'')}</td>
+                <td>${escapeHtml(r.guest_phone||'')}<br/><small>${escapeHtml(r.guest_email||'')}</small></td>
+                <td>${escapeHtml(r.room||'')}</td>
+                <td>${r.check_in_date||''}</td>
+                <td>${r.check_out_date||''}</td>
+                <td>${r.created_at||''}</td>
+                <td><span class="status-badge ${r.status||''}">${escapeHtml(r.status||'')}</span></td>
+                <td style="text-align:center">
+                  <div class="action-buttons">
+                    <button onclick="adminUpdateStatus(${r.reservation_id}, 'confirmed')" class="btn-action btn-approve" title="Approve" aria-label="Approve reservation"><i class="fas fa-check"></i></button>
+                    <button onclick="adminUpdateStatus(${r.reservation_id}, 'canceled')" class="btn-action btn-cancel" title="Cancel" aria-label="Cancel reservation"><i class="fas fa-times"></i></button>
+                    <button onclick="adminViewReservation(${r.reservation_id})" class="btn-action btn-view" title="View" aria-label="View reservation"><i class="fas fa-eye"></i></button>
+                  </div>
+                </td>
+              </tr>`).join('');
+              tbody.innerHTML = rowsHtml; document.getElementById('adminPaginationInfo').textContent = `Page ${adminCurrentPage} of ${totalPages} — ${total} reservations`; document.getElementById('adminPrevPage').disabled = adminCurrentPage<=1; document.getElementById('adminNextPage').disabled = adminCurrentPage>=totalPages;
+            }
+
+            function adminChangePage(dir){ adminCurrentPage += dir; if(adminCurrentPage<1) adminCurrentPage=1; adminRenderPage(); }
+
+            function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+            async function adminShowCreateForm(){ document.getElementById('adminCreateModal').style.display='flex'; }
+            function adminHideCreateForm(){ document.getElementById('adminCreateModal').style.display='none'; }
+
+            async function adminSubmitCreate(e){ e.preventDefault(); const form = new FormData(e.target); form.append('action','create'); try{ const res = await fetch('staff_actions.php',{method:'POST', body: form, credentials:'include'}); const data = await res.json(); if(data.success){ adminHideCreateForm(); adminFetchAllReservations(); alert('Created'); } else { alert('Error: '+(data.message||'')); } }catch(err){ console.error(err); alert('Failed to create reservation'); } }
+
+            async function adminUpdateStatus(id, status){ if(!confirm('Change status?')) return; const form = new FormData(); form.append('action','update_status'); form.append('reservation_id', id); form.append('status', status); try{ const res = await fetch('staff_actions.php',{method:'POST', body: form, credentials:'include'}); const data = await res.json(); if(data.success){ adminFetchAllReservations(); alert('Status updated'); } else { alert('Error: '+(data.message||'')); } }catch(err){ console.error(err); alert('Failed to update status'); } }
+
+            function adminViewReservation(id){ const r = adminAllReservations.find(x=>Number(x.reservation_id)===Number(id)); if(!r) return alert('Not found'); const html = `<div style="padding:1rem;"><h3>Reservation #${r.reservation_id}</h3><p><strong>Guest:</strong> ${escapeHtml(r.guest_name||'')}</p><p><strong>Contact:</strong> ${escapeHtml(r.guest_phone||'')} / ${escapeHtml(r.guest_email||'')}</p><p><strong>Room:</strong> ${escapeHtml(r.room||'')}</p><p><strong>Check-in:</strong> ${r.check_in_date||''} — <strong>Check-out:</strong> ${r.check_out_date||''}</p><p><strong>Status:</strong> ${escapeHtml(r.status||'')}</p><p><strong>Created:</strong> ${r.created_at||''}</p></div>`; if(typeof window.showModal==='function'){ window.showModal('Reservation Details', html); } else { alert('Reservation:\n'+JSON.stringify(r)); } }
+
+            function adminExportCSV(){ if(!adminFilteredReservations || adminFilteredReservations.length===0) return alert('No reservations to export'); const rows = adminFilteredReservations.map(r=>({ id:r.reservation_id, guest:r.guest_name, phone:r.guest_phone, email:r.guest_email, room:r.room, check_in:r.check_in_date, check_out:r.check_out_date, status:r.status, created_at:r.created_at })); const csv = [Object.keys(rows[0]).join(',')].concat(rows.map(r=>Object.values(r).map(v=>'"'+String((v||'')).replace(/"/g,'""')+'"').join(','))).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='admin_reservations_export.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
+            document.addEventListener('DOMContentLoaded', adminFetchAllReservations);
+          </script>
         </section>
 
         <!-- Users Section -->
@@ -630,17 +758,70 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
         <!-- Staff Section -->
         <section id="staff" class="content-section">
-          <div class="section-header">
-            <h2>Staff Members Management</h2>
-            <p>Manage resort staff and employee information</p>
+          <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <h2>Staff Members Management</h2>
+              <p>Manage resort staff and employee information</p>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <!-- Create Staff button opens the create_staff.php page in a new tab -->
+              <button class="btn-primary" onclick="window.open('create_staff.php', '_blank')" title="Create new staff member">
+                <i class="fas fa-user-plus"></i>
+                <span style="margin-left:8px;">Create Staff</span>
+              </button>
+            </div>
           </div>
-          <div class="placeholder-content">
-            <i class="fas fa-user-tie"></i>
-            <h3>Staff Management</h3>
-            <p>
-              This section will contain staff management tools, employee
-              records, scheduling, and role assignments.
-            </p>
+
+          <?php if (isset($_SESSION['flash_success'])): ?>
+            <div class="alert alert-success" style="margin-bottom:12px;">
+              <?php echo htmlspecialchars($_SESSION['flash_success']); ?>
+              <?php if (!empty($_SESSION['flash_staff_username'])): ?>
+                <div style="font-weight:500; margin-top:6px; color:#334155;">Username: <?php echo htmlspecialchars($_SESSION['flash_staff_username']); ?></div>
+              <?php endif; ?>
+            </div>
+            <?php unset($_SESSION['flash_success'], $_SESSION['flash_staff_username']); ?>
+          <?php endif; ?>
+
+          <div class="users-container" id="staffContainer">
+            <div class="users-header">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchStaff" placeholder="Search staff by name, email, or username..." oninput="filterStaff()" />
+              </div>
+              <div class="filter-options">
+                <select id="statusFilterStaff" onchange="filterStaff()">
+                  <option value="all">All Status</option>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="users-table" id="staffTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="staffTableBody">
+                  <tr>
+                    <td colspan="9" style="text-align:center; padding:2rem;">
+                      <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:#667eea"></i>
+                      <p style="margin-top:1rem; color:#666;">Loading staff members...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -1272,5 +1453,94 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
     </script>
     
     <script src="../admin-script.js"></script>
+    <script>
+      // Staff list loader
+      async function loadStaffList() {
+        try {
+          const res = await fetch('get_staff.php');
+          const data = await res.json();
+          const tbody = document.getElementById('staffTableBody');
+          if (!data.success) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:1.5rem; color:#b00;">Failed to load staff: ${data.message || 'Unknown'}</td></tr>`;
+            return;
+          }
+
+          if (!data.staff || data.staff.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:1.5rem; color:#666;">No staff members found.</td></tr>`;
+            return;
+          }
+
+          const rows = data.staff.map(s => {
+            const status = s.is_active == 1 ? '<span class="status-badge active">Active</span>' : '<span class="status-badge inactive">Inactive</span>';
+            const created = s.created_at ? s.created_at : '-';
+            const lastLogin = s.last_login ? s.last_login : '-';
+            return `
+              <tr>
+                <td>${s.admin_id}</td>
+                <td>${escapeHtml(s.full_name || '')}</td>
+                <td>${escapeHtml(s.username || '')}</td>
+                <td>${escapeHtml(s.email || '')}</td>
+                <td>${escapeHtml(s.position || '')}</td>
+                <td style="text-align:center">${status}</td>
+                <td style="text-align:center">${created}</td>
+                <td style="text-align:center">${lastLogin}</td>
+                <td style="text-align:center">
+                  <div class="action-buttons">
+                    <button class="btn-action btn-view" title="View" aria-label="View user"><i class="fas fa-eye"></i></button>
+                    <button class="btn-action btn-edit" title="Edit" aria-label="Edit user"><i class="fas fa-edit"></i></button>
+                    <button class="btn-action btn-delete" title="Delete" aria-label="Delete user"><i class="fas fa-trash"></i></button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+
+          tbody.innerHTML = rows;
+        } catch (err) {
+          const tbody = document.getElementById('staffTableBody');
+          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:1.5rem; color:#b00;">Error loading staff.</td></tr>`;
+          console.error(err);
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function filterStaff() {
+        const q = (document.getElementById('searchStaff').value || '').toLowerCase();
+        const status = document.getElementById('statusFilterStaff').value;
+        const tbody = document.getElementById('staffTableBody');
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(r => {
+          const text = r.textContent.toLowerCase();
+          let visible = true;
+          if (q && !text.includes(q)) visible = false;
+          if (status !== 'all') {
+            const badge = r.querySelector('.status-badge');
+            if (badge) {
+              const isActive = badge.classList.contains('active') ? '1' : '0';
+              if (isActive !== status) visible = false;
+            }
+          }
+          r.style.display = visible ? '' : 'none';
+        });
+      }
+
+      // Load staff on DOM ready
+      document.addEventListener('DOMContentLoaded', function() {
+        loadStaffList();
+      });
+
+      // If redirected with flash, reload staff after short delay
+      if (document.querySelector('.alert-success')) {
+        setTimeout(loadStaffList, 800);
+      }
+    </script>
   </body>
 </html>

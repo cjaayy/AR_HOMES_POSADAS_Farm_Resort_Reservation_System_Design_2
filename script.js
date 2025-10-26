@@ -168,109 +168,69 @@ function handleLogin(email, password) {
 
   const cleanEmail = email.trim().toLowerCase();
 
-  // Check if this is an admin login attempt
-  const isAdminLogin =
-    cleanEmail === "admin" || cleanEmail === "admin@resort.com";
+  // Try admin/staff login first. If that fails, fall back to guest login.
+  console.log("🔧 Attempting admin/staff login first...");
 
-  if (isAdminLogin) {
-    // Admin login - use admin endpoint
-    console.log("🔧 Attempting admin login...");
-
-    fetch("admin/login.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: email.trim(),
-        password: password,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+  fetch("admin/login.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: email.trim(), password: password }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        // Admin/staff login succeeded. Redirect based on role.
         loginBtn.classList.remove("loading");
         loginBtn.disabled = false;
+        loginBtn.classList.add("success");
+        loginBtn.innerHTML = '<i class="fas fa-check"></i> Access Granted!';
 
-        if (data.success) {
-          console.log("✅ Admin login successful");
-          loginBtn.classList.add("success");
-          loginBtn.innerHTML =
-            '<i class="fas fa-check"></i> Admin Access Granted!';
-
-          setTimeout(() => {
+        setTimeout(() => {
+          // If role is staff, send to staff dashboard; admins keep using admin dashboard
+          if (data.data && data.data.role === 'staff') {
+            window.location.href = "admin/staff_dashboard.php";
+          } else {
             window.location.href = "admin/dashboard.php";
-          }, 1000);
-        } else {
-          console.log("❌ Admin login failed:", data.message);
-          showLoginError(data.message || "Invalid admin credentials");
-        }
-      })
-      .catch((error) => {
-        console.error("❌ Admin login error:", error);
-        loginBtn.classList.remove("loading");
-        loginBtn.disabled = false;
-        showLoginError("Network error. Please try again.");
-      });
-  } else {
-    // Guest user login - use user endpoint
-    console.log("👤 Attempting guest user login...");
+          }
+        }, 800);
+      } else {
+        // Admin login failed; try guest login
+        console.log("ℹ️ Admin login failed, falling back to guest login:", data.message);
+        // Proceed to guest login
+        return fetch("user/login.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usernameOrEmail: email.trim(), password: password }),
+        })
+          .then((res) => res.text())
+          .then((text) => {
+            let guestData;
+            try {
+              guestData = JSON.parse(text);
+            } catch (e) {
+              throw new Error('Failed to parse guest login response');
+            }
 
-    const requestBody = {
-      usernameOrEmail: email.trim(),
-      password: password,
-    };
-
-    console.log("📤 Sending request:", requestBody);
-
-    fetch("user/login.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
+            if (guestData.success) {
+              loginBtn.classList.remove("loading");
+              loginBtn.disabled = false;
+              loginBtn.classList.add("success");
+              loginBtn.innerHTML = '<i class="fas fa-check"></i> Welcome Back!';
+              setTimeout(() => { window.location.href = "dashboard.html"; }, 800);
+            } else {
+              loginBtn.classList.remove("loading");
+              loginBtn.disabled = false;
+              showLoginError(guestData.message || 'Invalid credentials');
+            }
+          });
+      }
     })
-      .then((response) => {
-        console.log("📡 Response status:", response.status);
-        return response.text();
-      })
-      .then((responseText) => {
-        console.log("📄 Raw response:", responseText);
-
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          console.error("❌ Failed to parse JSON:", e);
-          loginBtn.classList.remove("loading");
-          loginBtn.disabled = false;
-          showLoginError("Server error. Please try again.");
-          return;
-        }
-
-        console.log("📦 Parsed data:", data);
-        loginBtn.classList.remove("loading");
-        loginBtn.disabled = false;
-
-        if (data.success) {
-          console.log("✅ Guest user login successful");
-          loginBtn.classList.add("success");
-          loginBtn.innerHTML = '<i class="fas fa-check"></i> Welcome Back!';
-
-          setTimeout(() => {
-            window.location.href = "dashboard.html";
-          }, 1000);
-        } else {
-          console.log("❌ Guest login failed:", data.message);
-          showLoginError(data.message || "Invalid credentials");
-        }
-      })
-      .catch((error) => {
-        console.error("❌ Guest login error:", error);
-        loginBtn.classList.remove("loading");
-        loginBtn.disabled = false;
-        showLoginError("Network error. Please try again.");
-      });
-  }
+    .catch((err) => {
+      console.error('Login flow error:', err);
+      loginBtn.classList.remove("loading");
+      loginBtn.disabled = false;
+      showLoginError('Network error. Please try again.');
+    });
 }
 
 // Show login error message

@@ -1794,55 +1794,31 @@ body {
 .btn-action {
   padding: 0.4rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.75rem;
+  transition: all 0.18s ease;
+  font-size: 0.78rem;
   color: white;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, #667eea, #764ba2); /* default (view/edit/delete) */
 }
 
-/* Default state - same grey as sidebar icons */
-.btn-view,
-.btn-edit,
-.btn-delete,
-.btn-toggle {
-  background: #666;
-  transition: all 0.3s ease;
-}
+/* Specific semantic colors for approve/cancel */
+.btn-approve { background: linear-gradient(135deg, #10b981, #059669); }
+.btn-approve:hover { filter: brightness(0.95); transform: scale(1.06); }
+.btn-cancel { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.btn-cancel:hover { filter: brightness(0.95); transform: scale(1.06); }
 
-.btn-view:hover,
-.btn-edit:hover,
-.btn-delete:hover,
-.btn-toggle:hover {
-  background: #667eea;
-  transform: scale(1.1);
-}
+/* Hover and active states for generic action buttons */
+.btn-action:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(102,126,234,0.12); }
+.btn-action:active { transform: scale(1.03); }
 
-/* Active/clicked state - purple gradient like active nav item */
-.btn-view.active,
-.btn-edit.active,
-.btn-delete.active,
-.btn-toggle.active,
-.btn-view:active,
-.btn-edit:active,
-.btn-delete:active,
-.btn-toggle:active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  transform: scale(1.05);
-}
-
-.btn-view.active:hover,
-.btn-edit.active:hover,
-.btn-delete.active:hover,
-.btn-toggle.active:hover {
-  background: linear-gradient(135deg, #5a67d8, #6a42a0);
-  transform: scale(1.1);
-}
+/* Keep disabled appearance consistent */
+.action-buttons .btn-action[disabled]{ opacity: 0.5; cursor: not-allowed; filter: grayscale(0.4); }
 
 .pagination {
   display: flex;
@@ -1996,6 +1972,252 @@ body {
 
 .stat-card.info::before {
   background: linear-gradient(180deg, #2196f3, #1976d2);
+}
+
+/* ===== ADMIN DASHBOARD CARD STYLES ===== */
+.dashboard-stats-grid .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  box-shadow: 0 8px 28px rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.04);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dashboard-stats-grid .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(15,23,42,0.09); }
+
+.dashboard-stats-grid .stat-icon { width:56px; height:56px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+
+.dashboard-stats-grid .stat-content { display:flex; flex-direction:column; gap:6px; }
+
+.dashboard-stats-grid .stat-value { font-size:1.6rem; font-weight:700; color:#0f172a; }
+
+.dashboard-stats-grid .stat-label { font-size:0.95rem; color:#4b5563; font-weight:600; }
+
+.dashboard-stats-grid .stat-change { font-size:0.85rem; color:#475569; display:inline-flex; align-items:center; gap:6px; }
+.dashboard-stats-grid .stat-change.positive { color:#047857; }
+.dashboard-stats-grid .stat-change.negative { color:#b91c1c; }
+
+/* Make spinners smaller and centered inside stat-value until data loads */
+.dashboard-stats-grid .stat-value .fa-spinner { font-size:1.1rem; color:#667eea; }
+
+/* Recent activities and loyalty visuals */
+.recent-activities-section .activity-item { display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:10px; background:linear-gradient(180deg,#fff,#fbfdff); border:1px solid rgba(15,23,42,0.04); margin-bottom:10px; }
+.recent-activities-section .activity-icon { width:46px; height:46px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
+
+.loyalty-item { display:flex; gap:12px; align-items:center; padding:10px; border-radius:10px; background:#fff; border:1px solid rgba(15,23,42,0.03); margin-bottom:8px; }
+.loyalty-icon { width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:18px; }
+
+@media (max-width: 1024px) {
+  .dashboard-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .dashboard-stats-grid { grid-template-columns: 1fr; }
+  .dashboard-stats-grid .stat-value { font-size:1.3rem; }
+}
+
+/* Quick actions (staff) - full width buttons with icons */
+.quick-actions.staff {
+  padding: 10px;
+  display: block;
+}
+
+.quick-actions.staff .action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quick-actions.staff .btn-primary,
+.quick-actions.staff .btn-secondary,
+.quick-actions.staff .action-btn {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+}
+
+.quick-actions.staff .btn-primary i,
+.quick-actions.staff .btn-secondary i,
+.quick-actions.staff .action-btn i {
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+}
+
+.quick-actions.staff .btn-secondary {
+  background: transparent;
+  color: #374151;
+  border: 1px solid rgba(15,23,42,0.06);
+}
+
+
+
+/* ===== STAFF DASHBOARD CUSTOM STYLES ===== */
+.staff-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.staff-card {
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.staff-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.staff-card .stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 8px;
+}
+
+#statsError {
+  background: rgba(220,53,69,0.06);
+  border-left: 4px solid rgba(220,53,69,0.18);
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #9b1c1c;
+}
+
+.recent-activity .loading,
+.recent-activity .empty {
+  color: #6b7280;
+  padding: 12px 8px;
+}
+
+.notifications > div {
+  padding: 10px 8px;
+  border-bottom: 1px dashed rgba(15,23,42,0.04);
+}
+
+.notifications > div:last-child {
+  border-bottom: none;
+}
+
+.notifications strong {
+  color: #111827;
+  display: block;
+}
+
+.notifications .meta {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* Quick actions block inside staff dashboard */
+.quick-actions.staff {
+  padding: 12px;
+  border-radius: 10px;
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  border: 1px solid rgba(15,23,42,0.04);
+  box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+}
+
+@media (max-width: 1024px) {
+  .staff-quick-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .staff-quick-grid { grid-template-columns: 1fr; }
+  .main-content { padding: 1rem; }
+  .staff-card .stat-value { font-size: 1.4rem; }
+}
+
+/* Small utility to center placeholder numbers */
+.stat-centered { display:flex; align-items:center; justify-content:flex-start; gap:8px; }
+
+
+/* ===== CREATE STAFF / GENERIC FORM STYLES ===== */
+.form-card {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 24px;
+  background: rgba(255,255,255,0.98);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  border: 1px solid rgba(102,126,234,0.06);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.actions {
+  text-align: right;
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.alert-error {
+  background: #fff0f0;
+  color: #8b0000;
+  border: 1px solid rgba(220,53,69,0.08);
+}
+
+.alert-success {
+  background: #f0fff4;
+  color: #075b1a;
+  border: 1px solid rgba(39,174,96,0.08);
+}
+
+/* Generic .btn shared by some pages */
+.btn {
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  font-weight: 600;
+}
+
+/* Make the Create Staff action match other action buttons */
+.form-card .btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-card { padding: 16px; }
+  .actions { justify-content: stretch; flex-direction: column-reverse; }
 }
 
 .stat-card:hover {

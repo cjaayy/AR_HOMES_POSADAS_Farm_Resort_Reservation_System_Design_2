@@ -1,29 +1,47 @@
 // ===== NAVIGATION AND SIDEBAR FUNCTIONALITY =====
 
 // Get DOM elements
-const sidebar = document.getElementById("sidebar");
+// Support both admin (`#sidebar`) and staff (`#staff-sidebar`) markup
+const sidebar = document.getElementById("sidebar") || document.getElementById("staff-sidebar");
 const navLinks = document.querySelectorAll(".nav-link");
 const contentSections = document.querySelectorAll(".content-section");
 
 // Initialize dashboard
 document.addEventListener("DOMContentLoaded", function () {
-  // Show dashboard section by default
-  showSection("dashboard");
-  setActiveNavItem("dashboard");
+  // Only initialize the single-page 'dashboard' sections on pages that
+  // actually contain the admin dashboard sections (id="dashboard").
+  // Staff pages use a different layout and rely on server-side PHP to
+  // mark the active nav item and content; running the SPA initializer
+  // there caused all content sections to be hidden on staff pages.
+  if (document.getElementById('dashboard')) {
+    // Show dashboard section by default (admin dashboard layout)
+    showSection("dashboard");
+    setActiveNavItem("dashboard");
+  } else {
+    // If this is a non-admin/staff page, ensure at least one content
+    // section remains visible. Many staff pages already render a
+    // <section class="content-section active"> server-side.
+    const existingActive = document.querySelector('.content-section.active');
+    if (!existingActive) {
+      const first = document.querySelector('.content-section');
+      if (first) first.classList.add('active');
+    }
+  }
 });
 
 // Show specific content section
 function showSection(sectionId) {
-  // Hide all sections
+  // If the requested sectionId doesn't exist on this page, bail out.
+  // This avoids accidentally hiding server-rendered content on staff pages
+  // when the admin SPA behavior isn't applicable.
+  const targetSection = document.getElementById(sectionId);
+  if (!targetSection) return;
+
+  // Hide all sections and show the target
   contentSections.forEach((section) => {
     section.classList.remove("active");
   });
-
-  // Show target section
-  const targetSection = document.getElementById(sectionId);
-  if (targetSection) {
-    targetSection.classList.add("active");
-  }
+  targetSection.classList.add("active");
 
   // Update active navigation item
   setActiveNavItem(sectionId);
@@ -53,15 +71,21 @@ function setActiveNavItem(sectionId) {
   // Add active class to current nav item
   const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
   if (activeLink) {
-    activeLink.closest(".nav-item").classList.add("active");
+    const navItemEl = activeLink.closest(".nav-item");
+    if (navItemEl) navItemEl.classList.add("active");
   }
 }
 
 // Navigation link click handlers
+// Only intercept links that explicitly declare a `data-section` attribute
+// (single-page app behavior). Leave normal anchors (page navigations)
+// untouched so links like staff_manage_users.php navigate as expected.
 navLinks.forEach((link) => {
+  const sectionId = link.getAttribute("data-section");
+  if (!sectionId) return; // no SPA section -> allow normal navigation
+
   link.addEventListener("click", function (e) {
     e.preventDefault();
-    const sectionId = this.getAttribute("data-section");
     showSection(sectionId);
   });
 });
@@ -70,6 +94,7 @@ navLinks.forEach((link) => {
 
 // Toggle sidebar for mobile
 function toggleSidebar() {
+  if (!sidebar) return;
   sidebar.classList.toggle("open");
 
   // Create or remove overlay
@@ -82,6 +107,7 @@ function toggleSidebar() {
 
 // Close sidebar
 function closeSidebar() {
+  if (!sidebar) return;
   sidebar.classList.remove("open");
   removeSidebarOverlay();
 }
@@ -271,7 +297,7 @@ document.addEventListener("keydown", function (e) {
 window.addEventListener("resize", function () {
   if (window.innerWidth > 768) {
     // Desktop view - ensure sidebar is visible and remove mobile overlay
-    sidebar.classList.remove("open");
+    if (sidebar) sidebar.classList.remove("open");
     removeSidebarOverlay();
   }
 });
@@ -526,7 +552,7 @@ function debounce(func, wait) {
 // Debounced resize handler
 const debouncedResize = debounce(() => {
   if (window.innerWidth > 768) {
-    sidebar.classList.remove("open");
+    if (sidebar) sidebar.classList.remove("open");
     removeSidebarOverlay();
   }
 }, 250);
@@ -537,11 +563,11 @@ window.addEventListener("resize", debouncedResize);
 
 // Toggle settings panel visibility
 function toggleSettingsPanel(panelId) {
-  const option = document
-    .querySelector(`#${panelId}-panel`)
-    .closest(".settings-option");
+  const panelElement = document.querySelector(`#${panelId}-panel`);
+  if (!panelElement) return; // nothing to toggle
+  const option = panelElement.closest(".settings-option");
   const panel = document.getElementById(`${panelId}-panel`);
-  const arrow = option.querySelector(".option-arrow");
+  const arrow = option ? option.querySelector(".option-arrow") : null;
 
   // Close all other panels first
   const allOptions = document.querySelectorAll(".settings-option");
@@ -922,33 +948,66 @@ document.head.appendChild(notificationStyles);
 
 // Attach logout button event listener when DOM is ready
 document.addEventListener("DOMContentLoaded", function () {
-  const logoutButton = document.getElementById("logoutButton");
+  // Try several selectors so the script works across admin/staff templates
+  const logoutSelectors = [
+    "#logoutButton",
+    "#logoutBtn",
+    "[data-logout]",
+    ".logout-btn",
+    'a[href*="logout.php"]'
+  ];
+
+  let logoutButton = null;
+  let usedSelector = null;
+
+  for (const sel of logoutSelectors) {
+    const el = document.querySelector(sel);
+    if (el) {
+      logoutButton = el;
+      usedSelector = sel;
+      break;
+    }
+  }
 
   if (logoutButton) {
     // Remove any existing listeners and add new one
     logoutButton.addEventListener("click", function (e) {
-      e.preventDefault();
+      // If it's an anchor, prevent default navigation to allow modal flow
+      if (this.tagName.toLowerCase() === "a") {
+        e.preventDefault();
+      }
       e.stopPropagation();
 
-      console.log("🖱️ Logout button clicked via event listener");
+      if (window.__debugAdminScript) {
+        console.log("🖱️ Logout triggered via selector:", usedSelector);
+      }
 
       // Ensure button is not disabled
       if (this.disabled) {
-        console.warn("⚠️ Button is disabled, ignoring click");
+        if (window.__debugAdminScript) console.warn("⚠️ Button is disabled, ignoring click");
         return;
       }
 
       logout();
     });
 
-    // Ensure button is always clickable
-    logoutButton.disabled = false;
-    logoutButton.style.pointerEvents = "auto";
-    logoutButton.style.cursor = "pointer";
+    // Ensure button is always clickable when present
+    try {
+      logoutButton.disabled = false;
+      logoutButton.style.pointerEvents = "auto";
+      logoutButton.style.cursor = "pointer";
+    } catch (e) {
+      // in case element doesn't support disabled prop
+    }
 
-    console.log("✅ Logout button event listener attached");
+    if (window.__debugAdminScript) {
+      console.log("✅ Logout button event listener attached (selector: " + usedSelector + ")");
+    }
   } else {
-    console.warn("⚠️ Logout button not found!");
+    // Avoid noisy console warnings in production; only notify when debugging is enabled
+    if (window.__debugAdminScript) {
+      console.warn("⚠️ Logout button not found (tried selectors):", logoutSelectors.join(", "));
+    }
   }
 });
 
@@ -1127,24 +1186,16 @@ function displayUsers() {
         <td>${user.last_login_formatted}</td>
         <td>
           <div class="action-buttons">
-            <button class="btn-action btn-view" onclick="viewUser(${
-              user.user_id
-            })" title="View Details">
+            <button class="btn-action btn-view" onclick="viewUser(${user.user_id})" title="View Details" aria-label="View user details">
               <i class="fas fa-eye"></i>
             </button>
-            <button class="btn-action btn-edit" onclick="editUser(${
-              user.user_id
-            })" title="Edit User">
+            <button class="btn-action btn-edit" onclick="editUser(${user.user_id})" title="Edit User" aria-label="Edit user">
               <i class="fas fa-edit"></i>
             </button>
-            <button class="btn-action btn-toggle" onclick="toggleUserStatus(${
-              user.user_id
-            }, ${user.is_active})" title="Toggle Status">
+            <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.user_id}, ${user.is_active})" title="Toggle Status" aria-label="Toggle user status">
               <i class="fas fa-power-off"></i>
             </button>
-            <button class="btn-action btn-delete" onclick="deleteUser(${
-              user.user_id
-            })" title="Delete User">
+            <button class="btn-action btn-delete" onclick="deleteUser(${user.user_id})" title="Delete User" aria-label="Delete user">
               <i class="fas fa-trash"></i>
             </button>
           </div>
