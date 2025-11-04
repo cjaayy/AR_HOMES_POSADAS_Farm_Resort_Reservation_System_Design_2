@@ -14,9 +14,12 @@ document.addEventListener("DOMContentLoaded", function () {
   // mark the active nav item and content; running the SPA initializer
   // there caused all content sections to be hidden on staff pages.
   if (document.getElementById('dashboard')) {
-    // Show dashboard section by default (admin dashboard layout)
-    showSection("dashboard");
-    setActiveNavItem("dashboard");
+    // Check if there's a saved section in localStorage
+    const savedSection = localStorage.getItem('adminActiveSection');
+    const targetSection = savedSection && document.getElementById(savedSection) ? savedSection : 'dashboard';
+    
+    // Show the saved section or dashboard by default (admin dashboard layout)
+    showSection(targetSection, true); // Pass true to skip saving to localStorage on initial load
   } else {
     // If this is a non-admin/staff page, ensure at least one content
     // section remains visible. Many staff pages already render a
@@ -30,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Show specific content section
-function showSection(sectionId) {
+function showSection(sectionId, skipSave = false) {
   // If the requested sectionId doesn't exist on this page, bail out.
   // This avoids accidentally hiding server-rendered content on staff pages
   // when the admin SPA behavior isn't applicable.
@@ -42,6 +45,11 @@ function showSection(sectionId) {
     section.classList.remove("active");
   });
   targetSection.classList.add("active");
+
+  // Save current section to localStorage (unless it's the initial page load)
+  if (!skipSave) {
+    localStorage.setItem('adminActiveSection', sectionId);
+  }
 
   // Update active navigation item
   setActiveNavItem(sectionId);
@@ -261,6 +269,7 @@ window.confirmLogout = function confirmLogout() {
         console.log("Logout response:", data);
         // Clear any stored session data
         localStorage.removeItem("adminSession");
+        localStorage.removeItem("adminActiveSection"); // Clear saved section so Dashboard shows on next login
         sessionStorage.clear();
 
         // Redirect to login page - adjust path based on current location
@@ -1159,45 +1168,50 @@ function displayUsers() {
 
   // Generate table rows
   const rows = usersToDisplay
-    .map((user) => {
+    .map((user, idx) => {
       const statusClass = user.is_active == 1 ? "active" : "inactive";
       const statusText = user.is_active == 1 ? "Active" : "Inactive";
       const loyaltyClass = user.loyalty_level.toLowerCase();
-      const loyaltyIcon = getLoyaltyIcon(user.loyalty_level);
+      const loyaltyIcon = user.loyalty_level === 'Regular' ? '' : getLoyaltyIcon(user.loyalty_level);
+      const statusDot = user.is_active == 1 ? '<i class="fas fa-circle" style="font-size:6px; color:#10b981;"></i>' : '';
 
       return `
-      <tr data-user-id="${user.user_id}">
-        <td><strong>#${user.user_id}</strong></td>
-        <td>
-          <strong>${escapeHtml(user.full_name)}</strong>
+      <tr data-user-id="${user.user_id}" style="animation:fadeIn 0.3s ease ${idx*0.05}s both; border-bottom:1px solid #f1f5f9;">
+        <td style="padding:14px 12px; text-align:center; font-weight:700; color:#64748b; font-size:13px;">${user.user_id}</td>
+        <td style="padding:14px 12px;">
+          <div style="font-weight:600; color:#1e293b; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(user.full_name)}">${escapeHtml(user.full_name)}</div>
         </td>
-        <td>${escapeHtml(user.username)}</td>
-        <td>${escapeHtml(user.email)}</td>
-        <td>${escapeHtml(user.phone_formatted)}</td>
-        <td>
-          <span class="status-badge ${statusClass}">${statusText}</span>
+        <td style="padding:14px 12px;">
+          <div style="font-weight:500; color:#475569; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(user.username)}">${escapeHtml(user.username)}</div>
         </td>
-        <td>
-          <span class="loyalty-badge ${loyaltyClass}">
-            ${loyaltyIcon} ${user.loyalty_level}
+        <td style="padding:14px 12px;">
+          <div style="font-size:12px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(user.email)}">${escapeHtml(user.email)}</div>
+        </td>
+        <td style="padding:14px 12px;">
+          <div style="font-weight:500; color:#475569; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(user.phone_formatted)}</div>
+        </td>
+        <td style="padding:14px 8px; text-align:center;">
+          <span style="display:inline-flex; align-items:center; gap:${statusDot ? '4px' : '0'}; padding:5px 10px; background:${user.is_active == 1 ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#ef4444,#dc2626)'}; color:white; border-radius:16px; font-size:11px; font-weight:600; white-space:nowrap;">
+            ${statusDot}${statusDot ? ' ' : ''}${statusText}
           </span>
         </td>
-        <td>${user.member_since}</td>
-        <td>${user.last_login_formatted}</td>
-        <td>
-          <div class="action-buttons">
-            <button class="btn-action btn-view" onclick="viewUser(${user.user_id})" title="View Details" aria-label="View user details">
-              <i class="fas fa-eye"></i>
-            </button>
-            <button class="btn-action btn-edit" onclick="editUser(${user.user_id})" title="Edit User" aria-label="Edit user">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.user_id}, ${user.is_active})" title="Toggle Status" aria-label="Toggle user status">
-              <i class="fas fa-power-off"></i>
-            </button>
-            <button class="btn-action btn-delete" onclick="deleteUser(${user.user_id})" title="Delete User" aria-label="Delete user">
-              <i class="fas fa-trash"></i>
-            </button>
+        <td style="padding:14px 8px; text-align:center;">
+          <span style="display:inline-flex; align-items:center; gap:${loyaltyIcon ? '4px' : '0'}; padding:5px 10px; background:${user.loyalty_level === 'VIP' ? 'linear-gradient(135deg,#f59e0b,#d97706)' : user.loyalty_level === 'Gold' ? 'linear-gradient(135deg,#eab308,#ca8a04)' : user.loyalty_level === 'Silver' ? 'linear-gradient(135deg,#94a3b8,#64748b)' : 'linear-gradient(135deg,#667eea,#764ba2)'}; color:white; border-radius:16px; font-size:11px; font-weight:600; white-space:nowrap;">
+            ${loyaltyIcon}${loyaltyIcon ? ' ' : ''}${user.loyalty_level}
+          </span>
+        </td>
+        <td style="padding:14px 10px;">
+          <div style="font-weight:500; color:#475569; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${user.member_since}</div>
+        </td>
+        <td style="padding:14px 10px;">
+          <div style="font-size:12px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${user.last_login_formatted}</div>
+        </td>
+        <td style="padding:14px 8px; text-align:center;">
+          <div style="display:flex; gap:5px; justify-content:center; flex-wrap:nowrap;">
+            <button onclick="viewUser(${user.user_id})" style="width:34px; height:34px; border:none; background:#f1f5f9; color:#667eea; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
+            <button onclick="editUser(${user.user_id})" style="width:34px; height:34px; border:none; background:#f1f5f9; color:#3b82f6; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="Edit User" onmouseover="this.style.background='linear-gradient(135deg,#3b82f6,#2563eb)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#3b82f6';"><i class="fas fa-edit"></i></button>
+            <button onclick="toggleUserStatus(${user.user_id}, ${user.is_active})" style="width:34px; height:34px; border:none; background:${user.is_active == 1 ? '#f1f5f9' : 'linear-gradient(135deg,#ef4444,#dc2626)'}; color:${user.is_active == 1 ? '#10b981' : 'white'}; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="${user.is_active == 1 ? 'Deactivate User' : 'Activate User'}" onmouseover="this.style.background='linear-gradient(135deg,${user.is_active == 1 ? '#10b981,#059669' : '#10b981,#059669'})'; this.style.color='white';" onmouseout="this.style.background='${user.is_active == 1 ? '#f1f5f9' : 'linear-gradient(135deg,#ef4444,#dc2626)'}'; this.style.color='${user.is_active == 1 ? '#10b981' : 'white'}';"><i class="fas fa-power-off"></i></button>
+            <button onclick="deleteUser(${user.user_id})" style="width:34px; height:34px; border:none; background:#f1f5f9; color:#ef4444; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="Delete User" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-trash"></i></button>
           </div>
         </td>
       </tr>

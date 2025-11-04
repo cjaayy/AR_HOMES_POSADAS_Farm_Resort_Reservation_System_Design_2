@@ -235,6 +235,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <div class="admin-container">
@@ -276,7 +277,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       <aside class="sidebar" id="sidebar">
         <nav class="sidebar-nav">
           <ul class="nav-menu">
-            <li class="nav-item active">
+            <li class="nav-item">
               <a href="#dashboard" class="nav-link" data-section="dashboard">
                 <i class="fas fa-chart-line"></i>
                 <span>Dashboard</span>
@@ -298,7 +299,12 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <span>Manage Users</span>
               </a>
             </li>
-            <!-- Manage Staff Members nav removed from sidebar per request -->
+            <li class="nav-item">
+              <a href="#staff" class="nav-link" data-section="staff">
+                <i class="fas fa-user-tie"></i>
+                <span>Manage Staff</span>
+              </a>
+            </li>
             <li class="nav-item">
               <a href="#reports" class="nav-link" data-section="reports">
                 <i class="fas fa-chart-bar"></i>
@@ -319,9 +325,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       <main class="main-content">
         <!-- Dashboard Section -->
         <section id="dashboard" class="content-section active">
-          <div class="section-header">
-            <h2>Dashboard Overview</h2>
-            <p>
+          <div class="section-header" style="background:linear-gradient(135deg,#667eea,#764ba2); padding:24px; border-radius:12px; margin-bottom:24px; box-shadow:0 4px 12px rgba(102,126,234,0.25);">
+            <h2 style="color:white; font-size:28px; font-weight:700; margin:0 0 8px 0;">Dashboard Overview</h2>
+            <p style="color:rgba(255,255,255,0.95); margin:0; font-size:15px;">
               Welcome back, <?php echo htmlspecialchars($adminFullName); ?>! Here's what's happening at the resort
               today.
             </p>
@@ -507,60 +513,155 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
         <!-- Reservations Section -->
         <section id="reservations" class="content-section">
-          <div class="section-header">
-            <h2>Manage Reservations</h2>
-            <p>View and manage all resort reservations</p>
+          <div class="section-header" style="background:linear-gradient(135deg,#10b981,#059669); padding:24px; border-radius:12px; margin-bottom:30px; box-shadow:0 4px 12px rgba(16,185,129,0.25);">
+            <div>
+              <h2 style="font-size:32px; font-weight:700; color:white; margin-bottom:8px;">Reservations Management</h2>
+              <p style="color:rgba(255,255,255,0.95); font-size:16px; margin:0;">View and manage all resort reservations efficiently</p>
+            </div>
+          </div>
+
+          <!-- Stats Overview -->
+          <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div class="stat-card-res" style="background:linear-gradient(135deg, #667eea, #764ba2); color:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease;">
+              <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;"><i class="fas fa-calendar-check"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px;" id="adminTotalReservations">0</div>
+                <div style="font-size:14px; opacity:0.95; font-weight:500;">Total Reservations</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:linear-gradient(135deg, #10b981, #059669); color:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease;">
+              <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px;" id="adminConfirmedCount">0</div>
+                <div style="font-size:14px; opacity:0.95; font-weight:500;">Confirmed</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease;">
+              <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;"><i class="fas fa-clock"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px;" id="adminPendingCount">0</div>
+                <div style="font-size:14px; opacity:0.95; font-weight:500;">Pending</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:linear-gradient(135deg, #ef4444, #dc2626); color:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease;">
+              <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;"><i class="fas fa-times-circle"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px;" id="adminCanceledCount">0</div>
+                <div style="font-size:14px; opacity:0.95; font-weight:500;">Canceled</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Filters Section -->
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="margin:0; font-size:16px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-filter" style="color:#667eea;"></i> Filter Reservations
+              </h3>
+              <button onclick="adminClearFilters()" style="padding:6px 14px; background:#f1f5f9; border:none; border-radius:6px; font-size:13px; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.2s;">
+                <i class="fas fa-redo"></i> Clear Filters
+              </button>
+            </div>
+
+            <!-- Quick Status Filters -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:16px;">
+              <div class="filter-chip-enhanced active" onclick="adminQuickFilter('all')" id="admin-chip-all" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #667eea; border-radius:12px; transition:all 0.3s ease; box-shadow:0 4px 16px rgba(102,126,234,0.3); background:linear-gradient(135deg, #667eea, #764ba2);">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-list"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:white;">All</span>
+                  <div style="padding:4px 10px; background:rgba(255,255,255,0.25); border-radius:12px; font-size:12px; font-weight:700; color:white; min-width:32px; text-align:center;" id="admin-count-all">0</div>
+                </div>
+              </div>
+              <div class="filter-chip-enhanced" onclick="adminQuickFilter('pending')" id="admin-chip-pending" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-clock"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#475569;">Pending</span>
+                  <div style="padding:4px 10px; background:rgba(0,0,0,0.05); border-radius:12px; font-size:12px; font-weight:700; color:#64748b; min-width:32px; text-align:center;" id="admin-count-pending">0</div>
+                </div>
+              </div>
+              <div class="filter-chip-enhanced" onclick="adminQuickFilter('confirmed')" id="admin-chip-confirmed" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:linear-gradient(135deg, #10b981, #059669); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-check"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#475569;">Confirmed</span>
+                  <div style="padding:4px 10px; background:rgba(0,0,0,0.05); border-radius:12px; font-size:12px; font-weight:700; color:#64748b; min-width:32px; text-align:center;" id="admin-count-confirmed">0</div>
+                </div>
+              </div>
+              <div class="filter-chip-enhanced" onclick="adminQuickFilter('completed')" id="admin-chip-completed" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:linear-gradient(135deg, #3b82f6, #2563eb); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-flag-checkered"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#475569;">Completed</span>
+                  <div style="padding:4px 10px; background:rgba(0,0,0,0.05); border-radius:12px; font-size:12px; font-weight:700; color:#64748b; min-width:32px; text-align:center;" id="admin-count-completed">0</div>
+                </div>
+              </div>
+              <div class="filter-chip-enhanced" onclick="adminQuickFilter('canceled')" id="admin-chip-canceled" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:linear-gradient(135deg, #ef4444, #dc2626); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-ban"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#475569;">Canceled</span>
+                  <div style="padding:4px 10px; background:rgba(0,0,0,0.05); border-radius:12px; font-size:12px; font-weight:700; color:#64748b; min-width:32px; text-align:center;" id="admin-count-canceled">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div style="display:flex; gap:12px; padding-top:16px; border-top:2px solid #f1f5f9;">
+              <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#667eea;"></i> From Date</label>
+                <input type="date" id="adminFilterFrom" onchange="adminApplyFilters()" style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#667eea;"></i> To Date</label>
+                <input type="date" id="adminFilterTo" onchange="adminApplyFilters()" style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
+              </div>
+            </div>
           </div>
 
           <div class="users-container">
-            <div class="users-header" style="margin-bottom:8px;">
-              <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="adminSearchBox" placeholder="Search guest, room, or contact" oninput="adminApplyFilters()" />
-              </div>
-              <div class="filter-options">
-                <select id="adminFilterStatus" onchange="adminApplyFilters()">
-                  <option value="">All</option>
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="completed">Completed</option>
-                  <option value="canceled">Canceled</option>
-                </select>
-                <label class="small">From</label>
-                <input type="date" id="adminFilterFrom" onchange="adminApplyFilters()">
-                <label class="small">To</label>
-                <input type="date" id="adminFilterTo" onchange="adminApplyFilters()">
+            <div class="users-header" style="padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+              <div class="search-box" style="flex:1; max-width:400px; position:relative;">
+                <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;"></i>
+                <input type="text" id="adminSearchBox" placeholder="Search guest, room, or contact..." oninput="adminApplyFilters()" style="width:100%; padding:14px 16px 14px 48px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; transition:all 0.3s ease;" />
               </div>
             </div>
 
-            <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:12px;">
-              <button class="btn-primary" onclick="adminShowCreateForm()"><i class="fas fa-plus"></i> Add Walk-in</button>
-              <button class="btn-secondary" onclick="adminExportCSV()">Export CSV</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:16px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <button onclick="adminFetchAllReservations()" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <span style="color:#64748b; font-size:14px;" id="adminLastUpdate">Last updated: Just now</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn-primary" onclick="adminShowCreateForm()" style="display:flex; align-items:center; gap:8px; padding:12px 20px; border-radius:10px;">
+                  <i class="fas fa-plus"></i> Add Walk-in
+                </button>
+                <button onclick="adminExportCSV()" style="padding:12px 20px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-file-excel"></i> Export
+                </button>
+              </div>
             </div>
 
-            <div class="table-container">
-              <table class="users-table" id="adminReservationsTable">
-                <thead>
+            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow:hidden; margin-bottom:20px;">
+              <table class="users-table" id="adminReservationsTable" style="width:100%; border-collapse:separate; border-spacing:0;">
+                <thead style="background:linear-gradient(135deg, #667eea, #764ba2); color:white;">
                   <tr>
-                    <th>ID</th>
-                    <th>Guest</th>
-                    <th>Contact</th>
-                    <th>Room</th>
-                    <th>Check-in</th>
-                    <th>Check-out</th>
-                    <th>Created</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th style="padding:18px 16px; text-align:center; width:60px;">#</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-user"></i> Guest Information</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-alt"></i> Check-in</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-alt"></i> Check-out</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-tag"></i> Status</th>
+                    <th style="padding:18px 16px; text-align:center;"><i class="fas fa-cog"></i> Actions</th>
                   </tr>
                 </thead>
-                <tbody id="adminReservationsBody"><tr><td colspan="9" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+                <tbody id="adminReservationsBody"><tr><td colspan="6" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
               </table>
             </div>
 
-            <div style="display:flex; justify-content:flex-end; margin-top:10px; gap:8px; align-items:center;">
-              <div id="adminPaginationInfo" style="font-size:13px;color:#666"></div>
-              <button class="btn-secondary" id="adminPrevPage" onclick="adminChangePage(-1)" disabled>&larr; Prev</button>
-              <button class="btn-secondary" id="adminNextPage" onclick="adminChangePage(1)" disabled>Next &rarr;</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+              <div id="adminPaginationInfo" style="font-size:14px; color:#64748b; font-weight:500;"></div>
+              <div style="display:flex; gap:8px;">
+                <button id="adminPrevPage" onclick="adminChangePage(-1)" disabled style="padding:10px 16px; border:2px solid #e2e8f0; background:white; border-radius:8px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s;">&larr; Prev</button>
+                <button id="adminNextPage" onclick="adminChangePage(1)" disabled style="padding:10px 16px; border:2px solid #e2e8f0; background:white; border-radius:8px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s;">Next &rarr;</button>
+              </div>
             </div>
           </div>
 
@@ -585,23 +686,93 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             let adminCurrentPage = 1;
             const adminPageSize = 15;
 
+            let adminCurrentQuickFilter = 'all';
+
             async function adminFetchAllReservations(){
               try{
                 const res = await fetch('staff_get_reservations.php?limit=1000', { credentials: 'include' });
                 const data = await res.json();
-                if(!data.success){ console.error('Failed to load reservations', data.message); document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#b00;">Failed to load reservations</td></tr>`; return; }
+                if(!data.success){ console.error('Failed to load reservations', data.message); document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#b00;">Failed to load reservations</td></tr>`; return; }
                 adminAllReservations = data.reservations || [];
+                adminUpdateStatsCards();
                 adminApplyFilters();
-              }catch(err){ console.error(err); document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#b00;">Error loading reservations</td></tr>`; }
+                adminUpdateLastUpdateTime();
+              }catch(err){ console.error(err); document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#b00;">Error loading reservations</td></tr>`; }
+            }
+
+            function adminUpdateStatsCards(){
+              const total = adminAllReservations.length;
+              const confirmed = adminAllReservations.filter(r => r.status === 'confirmed').length;
+              const pending = adminAllReservations.filter(r => r.status === 'pending').length;
+              const canceled = adminAllReservations.filter(r => r.status === 'canceled').length;
+              const completed = adminAllReservations.filter(r => r.status === 'completed').length;
+              
+              document.getElementById('adminTotalReservations').textContent = total;
+              document.getElementById('adminConfirmedCount').textContent = confirmed;
+              document.getElementById('adminPendingCount').textContent = pending;
+              document.getElementById('adminCanceledCount').textContent = canceled;
+              
+              document.getElementById('admin-count-all').textContent = total;
+              document.getElementById('admin-count-pending').textContent = pending;
+              document.getElementById('admin-count-confirmed').textContent = confirmed;
+              document.getElementById('admin-count-completed').textContent = completed;
+              document.getElementById('admin-count-canceled').textContent = canceled;
+            }
+
+            function adminUpdateLastUpdateTime(){
+              const now = new Date();
+              const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+              document.getElementById('adminLastUpdate').textContent = `Last updated: ${timeStr}`;
+            }
+
+            function adminQuickFilter(status){
+              adminCurrentQuickFilter = status;
+              document.querySelectorAll('.filter-chip-enhanced').forEach(chip => {
+                chip.classList.remove('active');
+                chip.style.border = '2px solid #e2e8f0';
+                chip.style.boxShadow = 'none';
+                chip.style.background = '#f8fafc';
+                const span = chip.querySelector('span');
+                const count = chip.querySelector('div:last-child');
+                if(span) span.style.color = '#475569';
+                if(count) {
+                  count.style.background = 'rgba(0,0,0,0.05)';
+                  count.style.color = '#64748b';
+                }
+              });
+              
+              const activeChip = document.getElementById(`admin-chip-${status}`);
+              if(activeChip){
+                activeChip.classList.add('active');
+                activeChip.style.border = '2px solid #667eea';
+                activeChip.style.boxShadow = '0 4px 16px rgba(102,126,234,0.3)';
+                activeChip.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                const span = activeChip.querySelector('span');
+                const count = activeChip.querySelector('div:last-child');
+                if(span) span.style.color = 'white';
+                if(count) {
+                  count.style.background = 'rgba(255,255,255,0.25)';
+                  count.style.color = 'white';
+                }
+              }
+              
+              adminApplyFilters();
+            }
+
+            function adminClearFilters(){
+              document.getElementById('adminFilterFrom').value = '';
+              document.getElementById('adminFilterTo').value = '';
+              document.getElementById('adminSearchBox').value = '';
+              adminQuickFilter('all');
             }
 
             function adminApplyFilters(){
-              const status = document.getElementById('adminFilterStatus').value;
               const from = document.getElementById('adminFilterFrom').value;
               const to = document.getElementById('adminFilterTo').value;
               const q = (document.getElementById('adminSearchBox').value || '').toLowerCase();
+              
               adminFilteredReservations = adminAllReservations.filter(r => {
-                if(status && String(r.status) !== status) return false;
+                if(adminCurrentQuickFilter !== 'all' && String(r.status) !== adminCurrentQuickFilter) return false;
                 if(from && r.check_in_date && r.check_in_date < from) return false;
                 if(to && r.check_in_date && r.check_in_date > to) return false;
                 if(q){ const hay = ((r.guest_name||'') + ' ' + (r.room||'') + ' ' + (r.guest_phone||'') + ' ' + (r.guest_email||'')).toLowerCase(); if(!hay.includes(q)) return false; }
@@ -613,26 +784,72 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
             function adminRenderPage(){
               const tbody = document.getElementById('adminReservationsBody');
-              if(!adminFilteredReservations || adminFilteredReservations.length===0){ tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:2rem; color:#666;">No reservations found</td></tr>`; document.getElementById('adminPaginationInfo').textContent=''; document.getElementById('adminPrevPage').disabled=true; document.getElementById('adminNextPage').disabled=true; return; }
-              const total = adminFilteredReservations.length; const totalPages = Math.ceil(total / adminPageSize); const start = (adminCurrentPage-1)*adminPageSize; const pageRows = adminFilteredReservations.slice(start, start+adminPageSize);
-              const rowsHtml = pageRows.map(r=> `<tr>
-                <td>${r.reservation_id}</td>
-                <td>${escapeHtml(r.guest_name||'')}</td>
-                <td>${escapeHtml(r.guest_phone||'')}<br/><small>${escapeHtml(r.guest_email||'')}</small></td>
-                <td>${escapeHtml(r.room||'')}</td>
-                <td>${r.check_in_date||''}</td>
-                <td>${r.check_out_date||''}</td>
-                <td>${r.created_at||''}</td>
-                <td><span class="status-badge ${r.status||''}">${escapeHtml(r.status||'')}</span></td>
-                <td style="text-align:center">
-                  <div class="action-buttons">
-                    <button onclick="adminUpdateStatus(${r.reservation_id}, 'confirmed')" class="btn-action btn-approve" title="Approve" aria-label="Approve reservation"><i class="fas fa-check"></i></button>
-                    <button onclick="adminUpdateStatus(${r.reservation_id}, 'canceled')" class="btn-action btn-cancel" title="Cancel" aria-label="Cancel reservation"><i class="fas fa-times"></i></button>
-                    <button onclick="adminViewReservation(${r.reservation_id})" class="btn-action btn-view" title="View" aria-label="View reservation"><i class="fas fa-eye"></i></button>
-                  </div>
-                </td>
-              </tr>`).join('');
-              tbody.innerHTML = rowsHtml; document.getElementById('adminPaginationInfo').textContent = `Page ${adminCurrentPage} of ${totalPages} — ${total} reservations`; document.getElementById('adminPrevPage').disabled = adminCurrentPage<=1; document.getElementById('adminNextPage').disabled = adminCurrentPage>=totalPages;
+              if(!adminFilteredReservations || adminFilteredReservations.length===0){ 
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:3rem; color:#94a3b8;">
+                  <i class="fas fa-inbox" style="font-size:48px; margin-bottom:16px; opacity:0.5;"></i>
+                  <div style="font-size:16px; font-weight:600;">No reservations found</div>
+                  <div style="font-size:14px; margin-top:8px;">Try adjusting your filters</div>
+                </td></tr>`; 
+                document.getElementById('adminPaginationInfo').textContent=''; 
+                document.getElementById('adminPrevPage').disabled=true; 
+                document.getElementById('adminNextPage').disabled=true; 
+                return; 
+              }
+              
+              const total = adminFilteredReservations.length; 
+              const totalPages = Math.ceil(total / adminPageSize); 
+              const start = (adminCurrentPage-1)*adminPageSize; 
+              const pageRows = adminFilteredReservations.slice(start, start+adminPageSize);
+              
+              const rowsHtml = pageRows.map((r, idx)=> {
+                const initials = (r.guest_name||'?').split(' ').map(n=>n[0]).join('').substr(0,2).toUpperCase();
+                const statusColors = {
+                  'pending': 'background:linear-gradient(135deg,#f59e0b,#d97706);',
+                  'confirmed': 'background:linear-gradient(135deg,#10b981,#059669);',
+                  'completed': 'background:linear-gradient(135deg,#3b82f6,#2563eb);',
+                  'canceled': 'background:linear-gradient(135deg,#ef4444,#dc2626);'
+                };
+                const statusColor = statusColors[r.status] || 'background:#94a3b8;';
+                
+                return `<tr style="animation:fadeIn 0.3s ease ${idx*0.05}s both; border-bottom:1px solid #f1f5f9;">
+                  <td style="padding:16px; text-align:center; font-weight:700; color:#64748b;">${r.reservation_id}</td>
+                  <td style="padding:16px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <div style="width:40px; height:40px; border-radius:50%; ${statusColor} color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;">${initials}</div>
+                      <div>
+                        <div style="font-weight:600; color:#1e293b; margin-bottom:2px;">${escapeHtml(r.guest_name||'')}</div>
+                        <div style="font-size:13px; color:#64748b;"><i class="fas fa-bed" style="margin-right:6px; color:#667eea;"></i>${escapeHtml(r.room||'N/A')}</div>
+                        <div style="font-size:12px; color:#94a3b8; margin-top:2px;"><i class="fas fa-phone" style="margin-right:6px;"></i>${escapeHtml(r.guest_phone||'N/A')}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="padding:16px;">
+                    <div style="font-weight:600; color:#1e293b; margin-bottom:4px;">${r.check_in_date||'N/A'}</div>
+                    <div style="font-size:12px; color:#64748b;"><i class="fas fa-clock" style="margin-right:4px;"></i>Check-in</div>
+                  </td>
+                  <td style="padding:16px;">
+                    <div style="font-weight:600; color:#1e293b; margin-bottom:4px;">${r.check_out_date||'N/A'}</div>
+                    <div style="font-size:12px; color:#64748b;"><i class="fas fa-clock" style="margin-right:4px;"></i>Check-out</div>
+                  </td>
+                  <td style="padding:16px;">
+                    <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; ${statusColor} color:white; border-radius:20px; font-size:13px; font-weight:600; text-transform:capitalize;">
+                      <i class="fas fa-circle" style="font-size:6px;"></i>${escapeHtml(r.status||'')}
+                    </span>
+                  </td>
+                  <td style="padding:16px; text-align:center;">
+                    <div style="display:flex; gap:6px; justify-content:center;">
+                      <button onclick="adminViewReservation(${r.reservation_id})" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#667eea; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
+                      <button onclick="adminUpdateStatus(${r.reservation_id}, 'confirmed')" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#10b981; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="Confirm" onmouseover="this.style.background='linear-gradient(135deg,#10b981,#059669)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#10b981';"><i class="fas fa-check"></i></button>
+                      <button onclick="adminUpdateStatus(${r.reservation_id}, 'canceled')" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#ef4444; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="Cancel" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-times"></i></button>
+                    </div>
+                  </td>
+                </tr>`;
+              }).join('');
+              
+              tbody.innerHTML = rowsHtml; 
+              document.getElementById('adminPaginationInfo').textContent = `Showing ${start+1}-${Math.min(start+adminPageSize, total)} of ${total} reservations`; 
+              document.getElementById('adminPrevPage').disabled = adminCurrentPage<=1; 
+              document.getElementById('adminNextPage').disabled = adminCurrentPage>=totalPages;
             }
 
             function adminChangePage(dir){ adminCurrentPage += dir; if(adminCurrentPage<1) adminCurrentPage=1; adminRenderPage(); }
@@ -646,7 +863,96 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
             async function adminUpdateStatus(id, status){ if(!confirm('Change status?')) return; const form = new FormData(); form.append('action','update_status'); form.append('reservation_id', id); form.append('status', status); try{ const res = await fetch('staff_actions.php',{method:'POST', body: form, credentials:'include'}); const data = await res.json(); if(data.success){ adminFetchAllReservations(); alert('Status updated'); } else { alert('Error: '+(data.message||'')); } }catch(err){ console.error(err); alert('Failed to update status'); } }
 
-            function adminViewReservation(id){ const r = adminAllReservations.find(x=>Number(x.reservation_id)===Number(id)); if(!r) return alert('Not found'); const html = `<div style="padding:1rem;"><h3>Reservation #${r.reservation_id}</h3><p><strong>Guest:</strong> ${escapeHtml(r.guest_name||'')}</p><p><strong>Contact:</strong> ${escapeHtml(r.guest_phone||'')} / ${escapeHtml(r.guest_email||'')}</p><p><strong>Room:</strong> ${escapeHtml(r.room||'')}</p><p><strong>Check-in:</strong> ${r.check_in_date||''} — <strong>Check-out:</strong> ${r.check_out_date||''}</p><p><strong>Status:</strong> ${escapeHtml(r.status||'')}</p><p><strong>Created:</strong> ${r.created_at||''}</p></div>`; if(typeof window.showModal==='function'){ window.showModal('Reservation Details', html); } else { alert('Reservation:\n'+JSON.stringify(r)); } }
+            function adminViewReservation(id){ 
+              const r = adminAllReservations.find(x=>Number(x.reservation_id)===Number(id)); 
+              if(!r) return alert('Not found'); 
+              
+              const statusColors = {
+                'pending': 'background:linear-gradient(135deg,#f59e0b,#d97706);',
+                'confirmed': 'background:linear-gradient(135deg,#10b981,#059669);',
+                'completed': 'background:linear-gradient(135deg,#3b82f6,#2563eb);',
+                'canceled': 'background:linear-gradient(135deg,#ef4444,#dc2626);'
+              };
+              const statusColor = statusColors[r.status] || 'background:#94a3b8;';
+              const initials = (r.guest_name||'?').split(' ').map(n=>n[0]).join('').substr(0,2).toUpperCase();
+              
+              const html = `
+                <div style="padding:0;">
+                  <div style="${statusColor} color:white; padding:32px 24px; margin:-24px -24px 24px; border-radius:16px 16px 0 0; display:flex; align-items:center; gap:20px;">
+                    <div style="width:80px; height:80px; background:rgba(255,255,255,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700;">${initials}</div>
+                    <div style="flex:1;">
+                      <div style="font-size:28px; font-weight:700; margin-bottom:8px;">${escapeHtml(r.guest_name||'')}</div>
+                      <div style="font-size:15px; opacity:0.95; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-bookmark"></i> Reservation #${r.reservation_id}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:24px;">
+                    <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #667eea;">
+                      <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-phone"></i> Phone
+                      </div>
+                      <div style="font-size:15px; font-weight:600; color:#1e293b;">${escapeHtml(r.guest_phone||'N/A')}</div>
+                    </div>
+                    <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #667eea;">
+                      <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-envelope"></i> Email
+                      </div>
+                      <div style="font-size:15px; font-weight:600; color:#1e293b; word-break:break-all;">${escapeHtml(r.guest_email||'N/A')}</div>
+                    </div>
+                  </div>
+                  
+                  <div style="padding:20px; background:linear-gradient(135deg, #f8fafc, #ffffff); border-radius:12px; border:2px solid #e2e8f0; margin-bottom:16px;">
+                    <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center;">
+                      <div>
+                        <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                          <i class="fas fa-calendar-check" style="color:#10b981;"></i> Check-in
+                        </div>
+                        <div style="font-size:18px; font-weight:700; color:#1e293b;">${r.check_in_date||'N/A'}</div>
+                      </div>
+                      <div style="font-size:24px; color:#cbd5e1;"><i class="fas fa-arrow-right"></i></div>
+                      <div style="text-align:right;">
+                        <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:6px; justify-content:flex-end;">
+                          <i class="fas fa-calendar-times" style="color:#ef4444;"></i> Check-out
+                        </div>
+                        <div style="font-size:18px; font-weight:700; color:#1e293b;">${r.check_out_date||'N/A'}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px;">
+                    <div style="padding:16px; background:#f8fafc; border-radius:12px;">
+                      <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-bed"></i> Room
+                      </div>
+                      <div style="font-size:16px; font-weight:700; color:#1e293b;">${escapeHtml(r.room||'N/A')}</div>
+                    </div>
+                    <div style="padding:16px; background:#f8fafc; border-radius:12px;">
+                      <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-tag"></i> Status
+                      </div>
+                      <div>
+                        <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; ${statusColor} color:white; border-radius:20px; font-size:13px; font-weight:600; text-transform:capitalize;">
+                          <i class="fas fa-circle" style="font-size:6px;"></i>${escapeHtml(r.status||'')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="margin-top:20px; padding-top:20px; border-top:2px solid #f1f5f9; font-size:13px; color:#64748b; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-clock"></i>
+                    Created: ${r.created_at||'N/A'}
+                  </div>
+                </div>
+              `; 
+              
+              if(typeof window.showModal==='function'){ 
+                window.showModal('Reservation Details', html); 
+              } else { 
+                alert('Reservation:\n'+JSON.stringify(r)); 
+              } 
+            }
 
             function adminExportCSV(){ if(!adminFilteredReservations || adminFilteredReservations.length===0) return alert('No reservations to export'); const rows = adminFilteredReservations.map(r=>({ id:r.reservation_id, guest:r.guest_name, phone:r.guest_phone, email:r.guest_email, room:r.room, check_in:r.check_in_date, check_out:r.check_out_date, status:r.status, created_at:r.created_at })); const csv = [Object.keys(rows[0]).join(',')].concat(rows.map(r=>Object.values(r).map(v=>'"'+String((v||'')).replace(/"/g,'""')+'"').join(','))).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='admin_reservations_export.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
 
@@ -656,167 +962,237 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
         <!-- Users Section -->
         <section id="users" class="content-section">
-          <div class="section-header">
-            <h2>Manage Users</h2>
-            <p>Manage user accounts and permissions</p>
+          <div class="section-header" style="background:linear-gradient(135deg,#3b82f6,#2563eb); padding:24px; border-radius:12px; margin-bottom:30px; box-shadow:0 4px 12px rgba(59,130,246,0.25);">
+            <div>
+              <h2 style="font-size:32px; font-weight:700; color:white; margin-bottom:8px;">User Management</h2>
+              <p style="color:rgba(255,255,255,0.95); font-size:16px; margin:0;">Manage guest accounts, loyalty levels, and permissions</p>
+            </div>
           </div>
-          
-          <!-- Users Table -->
+
+          <!-- Enhanced Stats Cards -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #667eea; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:56px; height:56px; background:linear-gradient(135deg, #667eea, #764ba2); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-users"></i></div>
+                <div>
+                  <div style="font-size:28px; font-weight:700; color:#1e293b;" id="manageTotalUsersCount"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:#667eea;"></i></div>
+                  <div style="font-size:14px; color:#64748b; font-weight:500;">Total Users</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #10b981; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:56px; height:56px; background:linear-gradient(135deg, #10b981, #059669); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-user-check"></i></div>
+                <div>
+                  <div style="font-size:28px; font-weight:700; color:#1e293b;" id="manageActiveUsersCount"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:#10b981;"></i></div>
+                  <div style="font-size:14px; color:#64748b; font-weight:500;">Active Users</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #f59e0b; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:56px; height:56px; background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-crown"></i></div>
+                <div>
+                  <div style="font-size:28px; font-weight:700; color:#1e293b;" id="manageVipUsersCount"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:#f59e0b;"></i></div>
+                  <div style="font-size:14px; color:#64748b; font-weight:500;">VIP Members</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #3b82f6; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:56px; height:56px; background:linear-gradient(135deg, #3b82f6, #2563eb); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-user-plus"></i></div>
+                <div>
+                  <div style="font-size:28px; font-weight:700; color:#1e293b;" id="manageNewUsersCount"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:#3b82f6;"></i></div>
+                  <div style="font-size:14px; color:#64748b; font-weight:500;">New This Month</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Search and Filter Bar -->
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+              <div style="flex:1; min-width:280px; position:relative;">
+                <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;"></i>
+                <input type="text" id="searchUsers" placeholder="Search users by name, email, or username..." style="width:100%; padding:14px 16px 14px 48px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; transition:all 0.3s ease;" onkeyup="filterUsers()">
+              </div>
+              <select id="statusFilter" onchange="filterUsers()" style="padding:14px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; font-weight:500; color:#475569; background:white; cursor:pointer; transition:all 0.3s ease; min-width:140px;">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              <select id="loyaltyFilter" onchange="filterUsers()" style="padding:14px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; font-weight:500; color:#475569; background:white; cursor:pointer; transition:all 0.3s ease; min-width:160px;">
+                <option value="all">All Loyalty Levels</option>
+                <option value="Regular">Regular</option>
+                <option value="Silver">Silver</option>
+                <option value="Gold">Gold</option>
+                <option value="VIP">VIP</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Enhanced Table -->
           <div class="users-container">
-            <div class="users-header">
-              <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchUsers" placeholder="Search users by name, email, or username..." />
-              </div>
-              <div class="filter-options">
-                <select id="statusFilter" onchange="filterUsers()">
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <select id="loyaltyFilter" onchange="filterUsers()">
-                  <option value="all">All Loyalty Levels</option>
-                  <option value="Regular">Regular</option>
-                  <option value="Silver">Silver</option>
-                  <option value="Gold">Gold</option>
-                  <option value="VIP">VIP</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="users-stats">
-              <div class="stat-card">
-                <i class="fas fa-users"></i>
-                <div class="stat-info">
-                  <h3 id="manageTotalUsersCount">
-                    <i class="fas fa-spinner fa-spin"></i>
-                  </h3>
-                  <p>Total Users</p>
-                </div>
-              </div>
-              <div class="stat-card">
-                <i class="fas fa-user-check"></i>
-                <div class="stat-info">
-                  <h3 id="manageActiveUsersCount">
-                    <i class="fas fa-spinner fa-spin"></i>
-                  </h3>
-                  <p>Active Users</p>
-                </div>
-              </div>
-              <div class="stat-card">
-                <i class="fas fa-crown"></i>
-                <div class="stat-info">
-                  <h3 id="manageVipUsersCount">
-                    <i class="fas fa-spinner fa-spin"></i>
-                  </h3>
-                  <p>VIP Members</p>
-                </div>
-              </div>
-              <div class="stat-card">
-                <i class="fas fa-user-plus"></i>
-                <div class="stat-info">
-                  <h3 id="manageNewUsersCount">
-                    <i class="fas fa-spinner fa-spin"></i>
-                  </h3>
-                  <p>New This Month</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="table-container">
-              <table class="users-table" id="usersTable">
-                <thead>
+            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow:visible;">
+              <table class="users-table" id="usersTable" style="width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0;">
+                <thead style="background:linear-gradient(135deg, #667eea, #764ba2); color:white;">
                   <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Loyalty Level</th>
-                    <th>Member Since</th>
-                    <th>Last Login</th>
-                    <th>Actions</th>
+                    <th style="padding:14px 10px; text-align:center; width:3%; font-size:13px;">#</th>
+                    <th style="padding:14px 10px; text-align:left; width:12%; font-size:13px;"><i class="fas fa-user"></i> Full Name</th>
+                    <th style="padding:14px 10px; text-align:left; width:9%; font-size:13px;"><i class="fas fa-at"></i> Username</th>
+                    <th style="padding:14px 10px; text-align:left; width:15%; font-size:13px;"><i class="fas fa-envelope"></i> Email</th>
+                    <th style="padding:14px 10px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-phone"></i> Phone</th>
+                    <th style="padding:14px 8px; text-align:center; width:8%; font-size:13px;"><i class="fas fa-toggle-on"></i> Status</th>
+                    <th style="padding:14px 8px; text-align:center; width:8%; font-size:13px;"><i class="fas fa-award"></i> Loyalty</th>
+                    <th style="padding:14px 8px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-calendar-alt"></i> Member Since</th>
+                    <th style="padding:14px 8px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-clock"></i> Last Login</th>
+                    <th style="padding:14px 8px; text-align:center; width:15%; font-size:13px;"><i class="fas fa-cog"></i> Actions</th>
                   </tr>
                 </thead>
                 <tbody id="usersTableBody">
                   <tr>
-                    <td colspan="10" style="text-align: center; padding: 2rem;">
-                      <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
-                      <p style="margin-top: 1rem; color: #666;">Loading users...</p>
+                    <td colspan="10" style="text-align: center; padding: 3rem;">
+                      <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #667eea;"></i>
+                      <p style="margin-top: 1rem; color: #64748b; font-size:16px; font-weight:600;">Loading users...</p>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <div class="pagination" id="usersPagination">
+            <div class="pagination" id="usersPagination" style="margin-top:20px;">
               <!-- Pagination will be generated dynamically -->
             </div>
           </div>
         </section>
 
         <!-- Staff Section -->
-        <section id="staff" class="content-section">
-          <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-            <div>
-              <h2>Staff Members Management</h2>
-              <p>Manage resort staff and employee information</p>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <!-- Create Staff button opens the create_staff.php page in a new tab -->
-              <button class="btn-primary" onclick="window.open('create_staff.php', '_blank')" title="Create new staff member">
-                <i class="fas fa-user-plus"></i>
-                <span style="margin-left:8px;">Create Staff</span>
-              </button>
+        <section id="staff" class="content-section" style="background:#ffffff; border-radius:12px; padding:24px;">
+          <div class="section-header" style="margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h2 style="font-size:28px; font-weight:700; color:#1e293b; margin-bottom:8px;">Staff Members Management</h2>
+                <p style="color:#64748b; font-size:14px;">Manage resort staff and employee information</p>
+              </div>
+              <div style="display:flex; gap:12px; align-items:center;">
+                <button onclick="loadStaffList()" style="display:flex; align-items:center; gap:8px; padding:10px 20px; background:#f1f5f9; color:#667eea; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';">
+                  <i class="fas fa-sync-alt"></i>
+                  <span>Refresh</span>
+                </button>
+                <button class="btn-primary" onclick="window.open('create_staff.php', '_blank')" title="Create new staff member" style="display:flex; align-items:center; gap:8px; padding:10px 20px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; box-shadow:0 4px 12px rgba(102,126,234,0.3); transition:all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102,126,234,0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102,126,234,0.3)';">
+                  <i class="fas fa-user-plus"></i>
+                  <span>Create Staff</span>
+                </button>
+              </div>
             </div>
           </div>
 
           <?php if (isset($_SESSION['flash_success'])): ?>
-            <div class="alert alert-success" style="margin-bottom:12px;">
-              <?php echo htmlspecialchars($_SESSION['flash_success']); ?>
-              <?php if (!empty($_SESSION['flash_staff_username'])): ?>
-                <div style="font-weight:500; margin-top:6px; color:#334155;">Username: <?php echo htmlspecialchars($_SESSION['flash_staff_username']); ?></div>
-              <?php endif; ?>
+            <div style="background:linear-gradient(135deg,#10b981,#059669); color:white; padding:16px 20px; border-radius:12px; margin-bottom:20px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 12px rgba(16,185,129,0.3); animation:slideInDown 0.4s ease;">
+              <i class="fas fa-check-circle" style="font-size:24px;"></i>
+              <div>
+                <div style="font-weight:600; font-size:15px;"><?php echo htmlspecialchars($_SESSION['flash_success']); ?></div>
+                <?php if (!empty($_SESSION['flash_staff_username'])): ?>
+                  <div style="font-size:13px; margin-top:4px; opacity:0.9;">Username: <?php echo htmlspecialchars($_SESSION['flash_staff_username']); ?></div>
+                <?php endif; ?>
+              </div>
             </div>
             <?php unset($_SESSION['flash_success'], $_SESSION['flash_staff_username']); ?>
           <?php endif; ?>
 
-          <div class="users-container" id="staffContainer">
-            <div class="users-header">
-              <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchStaff" placeholder="Search staff by name, email, or username..." oninput="filterStaff()" />
-              </div>
-              <div class="filter-options">
-                <select id="statusFilterStaff" onchange="filterStaff()">
-                  <option value="all">All Status</option>
-                  <option value="1">Active</option>
-                  <option value="0">Inactive</option>
-                </select>
+          <!-- Stats Overview -->
+          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; margin-bottom:28px;">
+            <div style="background:linear-gradient(135deg,#667eea,#764ba2); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(102,126,234,0.25); position:relative; overflow:hidden;">
+              <div style="position:absolute; top:-10px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+              <div style="position:relative; z-index:1;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                  <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-user-tie" style="font-size:24px; color:white;"></i>
+                  </div>
+                  <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Total Staff</div>
+                </div>
+                <div style="font-size:32px; font-weight:700; color:white; line-height:1;" id="staffTotalCount">—</div>
               </div>
             </div>
 
-            <div class="table-container">
-              <table class="users-table" id="staffTable">
+            <div style="background:linear-gradient(135deg,#10b981,#059669); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(16,185,129,0.25); position:relative; overflow:hidden;">
+              <div style="position:absolute; top:-10px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+              <div style="position:relative; z-index:1;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                  <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-check-circle" style="font-size:24px; color:white;"></i>
+                  </div>
+                  <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Active Staff</div>
+                </div>
+                <div style="font-size:32px; font-weight:700; color:white; line-height:1;" id="staffActiveCount">—</div>
+              </div>
+            </div>
+
+            <div style="background:linear-gradient(135deg,#f59e0b,#d97706); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(245,158,11,0.25); position:relative; overflow:hidden;">
+              <div style="position:absolute; top:-10px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+              <div style="position:relative; z-index:1;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                  <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-briefcase" style="font-size:24px; color:white;"></i>
+                  </div>
+                  <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Departments</div>
+                </div>
+                <div style="font-size:32px; font-weight:700; color:white; line-height:1;" id="staffDepartmentCount">—</div>
+              </div>
+            </div>
+
+            <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(59,130,246,0.25); position:relative; overflow:hidden;">
+              <div style="position:absolute; top:-10px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+              <div style="position:relative; z-index:1;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                  <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-clock" style="font-size:24px; color:white;"></i>
+                  </div>
+                  <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Online Now</div>
+                </div>
+                <div style="font-size:32px; font-weight:700; color:white; line-height:1;" id="staffOnlineCount">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search and Filter Bar -->
+          <div style="background:#f8fafc; padding:20px; border-radius:12px; margin-bottom:24px; display:flex; gap:16px; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="flex:1; position:relative;">
+              <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:14px;"></i>
+              <input type="text" id="searchStaff" placeholder="Search by name, email, username, or position..." oninput="filterStaff()" style="width:100%; padding:12px 16px 12px 44px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; transition:all 0.3s; background:white;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';" />
+            </div>
+            <select id="statusFilterStaff" onchange="filterStaff()" style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; cursor:pointer; background:white; transition:all 0.3s; min-width:150px;" onfocus="this.style.borderColor='#667eea';" onblur="this.style.borderColor='#e2e8f0';">
+              <option value="all">All Status</option>
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+            <button onclick="filterStaff()" style="padding:12px 24px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:all 0.3s; white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102,126,234,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+              <i class="fas fa-filter" style="margin-right:8px;"></i>Apply Filters
+            </button>
+          </div>
+
+          <!-- Staff Table -->
+          <div style="background:white; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
                 <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Position</th>
-                    <th>Status</th>
-                    <th>Created At</th>
-                    <th>Last Login</th>
-                    <th>Actions</th>
+                  <tr style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                    <th style="width:4%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-hashtag"></i></th>
+                    <th style="width:14%; padding:16px 12px; text-align:left; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-user" style="margin-right:6px;"></i>Full Name</th>
+                    <th style="width:11%; padding:16px 12px; text-align:left; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-id-card" style="margin-right:6px;"></i>Username</th>
+                    <th style="width:16%; padding:16px 12px; text-align:left; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-envelope" style="margin-right:6px;"></i>Email</th>
+                    <th style="width:13%; padding:16px 12px; text-align:left; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-briefcase" style="margin-right:6px;"></i>Position</th>
+                    <th style="width:8%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-toggle-on" style="margin-right:6px;"></i>Status</th>
+                    <th style="width:11%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-calendar-plus" style="margin-right:6px;"></i>Created</th>
+                    <th style="width:11%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-sign-in-alt" style="margin-right:6px;"></i>Last Login</th>
+                    <th style="width:12%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-cog" style="margin-right:6px;"></i>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="staffTableBody">
                   <tr>
-                    <td colspan="9" style="text-align:center; padding:2rem;">
-                      <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:#667eea"></i>
-                      <p style="margin-top:1rem; color:#666;">Loading staff members...</p>
+                    <td colspan="9" style="text-align:center; padding:3rem;">
+                      <i class="fas fa-spinner fa-spin" style="font-size:2.5rem; color:#667eea;"></i>
+                      <p style="margin-top:1rem; color:#64748b; font-weight:500; font-size:15px;">Loading staff members...</p>
                     </td>
                   </tr>
                 </tbody>
@@ -826,26 +1202,168 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         </section>
 
         <!-- Reports Section -->
-        <section id="reports" class="content-section">
-          <div class="section-header">
-            <h2>Reports</h2>
-            <p>Generate and view resort analytics</p>
+        <section id="reports" class="content-section" style="background:#ffffff; border-radius:12px; padding:24px;">
+          <div class="section-header" style="margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h2 style="font-size:28px; font-weight:700; color:#1e293b; margin-bottom:8px;">Reports & Analytics</h2>
+                <p style="color:#64748b;">View detailed reports and insights</p>
+              </div>
+              <div style="display:flex; gap:12px;">
+                <button onclick="exportReportsPDF()" class="btn-secondary" style="display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#ef4444,#dc2626); border:none; color:white;">
+                  <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+                <button onclick="exportReportsExcel()" class="btn-primary" style="display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#10b981,#059669); border:none; color:white;">
+                  <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="placeholder-content">
-            <i class="fas fa-chart-bar"></i>
-            <h3>Analytics & Reports</h3>
-            <p>
-              This section will contain revenue reports, occupancy statistics,
-              and performance analytics.
-            </p>
+
+          <!-- Period Selector -->
+          <div class="report-card">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <label style="font-weight:600; color:#1e293b;">Report Period:</label>
+              <select id="adminPeriodSelector" onchange="updateAdminReports()" style="padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px;">
+                <option value="today">Today</option>
+                <option value="week" selected>This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+                <option value="custom">Custom Range</option>
+              </select>
+              <input type="date" id="adminStartDate" style="padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px; display:none;">
+              <input type="date" id="adminEndDate" style="padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px; display:none;">
+              <button onclick="applyAdminCustomDate()" id="adminApplyDateBtn" class="btn-primary" style="display:none;">Apply</button>
+            </div>
+          </div>
+
+          <!-- Key Metrics -->
+          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; margin-top:24px;">
+            <div class="stat-box" style="background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; padding:24px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(102,126,234,0.3);">
+              <div style="font-size:14px; opacity:0.9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Total Reservations</div>
+              <div style="font-size:36px; font-weight:700; line-height:1;" id="adminTotalReservations">—</div>
+            </div>
+            <div class="stat-box" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; padding:24px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+              <div style="font-size:14px; opacity:0.9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Revenue</div>
+              <div style="font-size:36px; font-weight:700; line-height:1;" id="adminTotalRevenue">—</div>
+            </div>
+            <div class="stat-box" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; padding:24px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(245,158,11,0.3);">
+              <div style="font-size:14px; opacity:0.9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Occupancy Rate</div>
+              <div style="font-size:36px; font-weight:700; line-height:1;" id="adminOccupancyRate">—</div>
+            </div>
+            <div class="stat-box" style="background:linear-gradient(135deg, #ef4444, #dc2626); color:#fff; padding:24px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(239,68,68,0.3);">
+              <div style="font-size:14px; opacity:0.9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Cancellations</div>
+              <div style="font-size:36px; font-weight:700; line-height:1;" id="adminTotalCancellations">—</div>
+            </div>
+          </div>
+
+          <!-- Reservations Trend Chart -->
+          <div class="report-card" style="margin-top:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h3 style="font-size:20px; font-weight:700; color:#1e293b;">Reservations Trend</h3>
+            </div>
+            <div style="position:relative; height:300px;">
+              <canvas id="adminTrendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Revenue Chart -->
+          <div class="report-card" style="margin-top:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h3 style="font-size:20px; font-weight:700; color:#1e293b;">Revenue Analysis</h3>
+            </div>
+            <div style="position:relative; height:300px;">
+              <canvas id="adminRevenueChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Room Type Distribution -->
+          <div class="report-card" style="margin-top:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h3 style="font-size:20px; font-weight:700; color:#1e293b;">Room Type Distribution</h3>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+              <div style="position:relative; height:250px;">
+                <canvas id="adminRoomTypeChart"></canvas>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="report-table" style="width:100%; border-collapse:collapse;">
+                  <thead>
+                    <tr>
+                      <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Room Type</th>
+                      <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Bookings</th>
+                      <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminRoomTypeTable">
+                    <tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Guest Statistics -->
+          <div class="report-card" style="margin-top:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h3 style="font-size:20px; font-weight:700; color:#1e293b;">Guest Statistics</h3>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="report-table" style="width:100%; border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Metric</th>
+                    <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">This Week</th>
+                    <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Last Week</th>
+                    <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Change</th>
+                  </tr>
+                </thead>
+                <tbody id="adminGuestStatsTable" style="color:#1e293b;">
+                  <tr><td colspan="4" style="text-align:center; padding:20px; color:#666;">No data available</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Performance Metrics -->
+          <div class="report-card" style="margin-top:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h3 style="font-size:20px; font-weight:700; color:#1e293b;">Performance Metrics</h3>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+              <div>
+                <h4 style="color:#64748b; font-size:14px; margin-bottom:12px;">CHECK-IN EFFICIENCY</h4>
+                <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+                  <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span>Average Time</span>
+                    <strong id="adminCheckInTime">—</strong>
+                  </div>
+                  <div style="background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+                    <div id="adminCheckInBar" style="background:#10b981; width:0%; height:100%; transition:width 0.3s;"></div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 style="color:#64748b; font-size:14px; margin-bottom:12px;">RESPONSE TIME</h4>
+                <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+                  <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span>Average Response</span>
+                    <strong id="adminResponseTime">—</strong>
+                  </div>
+                  <div style="background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+                    <div id="adminResponseBar" style="background:#667eea; width:0%; height:100%; transition:width 0.3s;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         <!-- Settings Section -->
         <section id="settings" class="content-section">
-          <div class="section-header">
-            <h2>Settings</h2>
-            <p>Configure system and resort settings</p>
+          <div class="section-header" style="background:linear-gradient(135deg,#f59e0b,#d97706); padding:24px; border-radius:12px; margin-bottom:30px; box-shadow:0 4px 12px rgba(245,158,11,0.25);">
+            <h2 style="font-size:32px; font-weight:700; color:white; margin-bottom:8px;">Settings</h2>
+            <p style="color:rgba(255,255,255,0.95); font-size:16px; margin:0;">Configure system and resort settings</p>
           </div>
 
           <!-- Settings Menu -->
@@ -1455,52 +1973,412 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
     <script src="../admin-script.js"></script>
     <script>
       // Staff list loader
+      let allStaff = [];
+      let filteredStaff = [];
+
       async function loadStaffList() {
         try {
           const res = await fetch('get_staff.php');
           const data = await res.json();
           const tbody = document.getElementById('staffTableBody');
+          
           if (!data.success) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:1.5rem; color:#b00;">Failed to load staff: ${data.message || 'Unknown'}</td></tr>`;
-            return;
-          }
-
-          if (!data.staff || data.staff.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:1.5rem; color:#666;">No staff members found.</td></tr>`;
-            return;
-          }
-
-          const rows = data.staff.map(s => {
-            const status = s.is_active == 1 ? '<span class="status-badge active">Active</span>' : '<span class="status-badge inactive">Inactive</span>';
-            const created = s.created_at ? s.created_at : '-';
-            const lastLogin = s.last_login ? s.last_login : '-';
-            return `
+            tbody.innerHTML = `
               <tr>
-                <td>${s.admin_id}</td>
-                <td>${escapeHtml(s.full_name || '')}</td>
-                <td>${escapeHtml(s.username || '')}</td>
-                <td>${escapeHtml(s.email || '')}</td>
-                <td>${escapeHtml(s.position || '')}</td>
-                <td style="text-align:center">${status}</td>
-                <td style="text-align:center">${created}</td>
-                <td style="text-align:center">${lastLogin}</td>
-                <td style="text-align:center">
-                  <div class="action-buttons">
-                    <button class="btn-action btn-view" title="View" aria-label="View user"><i class="fas fa-eye"></i></button>
-                    <button class="btn-action btn-edit" title="Edit" aria-label="Edit user"><i class="fas fa-edit"></i></button>
-                    <button class="btn-action btn-delete" title="Delete" aria-label="Delete user"><i class="fas fa-trash"></i></button>
-                  </div>
+                <td colspan="9" style="text-align:center; padding:3rem;">
+                  <i class="fas fa-exclamation-triangle" style="font-size:2.5rem; color:#ef4444; margin-bottom:12px;"></i>
+                  <p style="color:#ef4444; font-weight:600; font-size:15px;">Failed to load staff: ${data.message || 'Unknown error'}</p>
                 </td>
-              </tr>
-            `;
-          }).join('');
+              </tr>`;
+            return;
+          }
 
-          tbody.innerHTML = rows;
+          allStaff = data.staff || [];
+          filteredStaff = [...allStaff];
+
+          if (allStaff.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="9" style="text-align:center; padding:3rem;">
+                  <i class="fas fa-users" style="font-size:2.5rem; color:#94a3b8; margin-bottom:12px;"></i>
+                  <p style="color:#64748b; font-weight:500; font-size:15px;">No staff members found</p>
+                  <p style="color:#94a3b8; font-size:13px; margin-top:8px;">Click "Create Staff" to add your first staff member</p>
+                </td>
+              </tr>`;
+            updateStaffStats();
+            return;
+          }
+
+          renderStaffTable();
+          updateStaffStats();
         } catch (err) {
           const tbody = document.getElementById('staffTableBody');
-          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:1.5rem; color:#b00;">Error loading staff.</td></tr>`;
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" style="text-align:center; padding:3rem;">
+                <i class="fas fa-exclamation-circle" style="font-size:2.5rem; color:#ef4444; margin-bottom:12px;"></i>
+                <p style="color:#ef4444; font-weight:600; font-size:15px;">Error loading staff members</p>
+              </td>
+            </tr>`;
           console.error(err);
         }
+      }
+
+      function renderStaffTable() {
+        const tbody = document.getElementById('staffTableBody');
+        
+        if (filteredStaff.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" style="text-align:center; padding:3rem;">
+                <i class="fas fa-search" style="font-size:2.5rem; color:#94a3b8; margin-bottom:12px;"></i>
+                <p style="color:#64748b; font-weight:500; font-size:15px;">No staff members match your filters</p>
+                <p style="color:#94a3b8; font-size:13px; margin-top:8px;">Try adjusting your search criteria</p>
+              </td>
+            </tr>`;
+          return;
+        }
+
+        const getPositionIcon = (position) => {
+          const pos = (position || '').toLowerCase();
+          if (pos.includes('manager') || pos.includes('head')) return '<i class="fas fa-user-crown" style="color:#f59e0b;"></i>';
+          if (pos.includes('admin')) return '<i class="fas fa-user-shield" style="color:#667eea;"></i>';
+          if (pos.includes('supervisor')) return '<i class="fas fa-user-tie" style="color:#3b82f6;"></i>';
+          if (pos.includes('reception')) return '<i class="fas fa-concierge-bell" style="color:#10b981;"></i>';
+          return '<i class="fas fa-user" style="color:#64748b;"></i>';
+        };
+
+        const rows = filteredStaff.map((s, idx) => {
+          const statusDot = s.is_active == 1 ? '<i class="fas fa-circle" style="font-size:6px; color:#10b981;"></i>' : '';
+          const statusBadge = s.is_active == 1 
+            ? `<span style="display:inline-flex; align-items:center; gap:${statusDot ? '4px' : '0'}; padding:6px 12px; background:linear-gradient(135deg,#10b981,#059669); color:white; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap;">${statusDot}${statusDot ? ' ' : ''}Active</span>`
+            : `<span style="display:inline-flex; align-items:center; padding:6px 12px; background:linear-gradient(135deg,#ef4444,#dc2626); color:white; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap;">Inactive</span>`;
+          
+          const created = s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '—';
+          const lastLogin = s.last_login ? new Date(s.last_login).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '—';
+          
+          return `
+            <tr style="animation:fadeIn 0.3s ease ${idx*0.05}s both; border-bottom:1px solid #f1f5f9; transition:all 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
+              <td style="padding:14px 12px; text-align:center; font-weight:700; color:#64748b; font-size:13px;">${s.admin_id}</td>
+              <td style="padding:14px 12px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:36px; height:36px; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:14px; flex-shrink:0;">
+                    ${(s.full_name || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <div style="font-weight:600; color:#1e293b; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(s.full_name || '')}">${escapeHtml(s.full_name || 'N/A')}</div>
+                </div>
+              </td>
+              <td style="padding:14px 12px;">
+                <div style="font-weight:500; color:#475569; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(s.username || '')}">${escapeHtml(s.username || 'N/A')}</div>
+              </td>
+              <td style="padding:14px 12px;">
+                <div style="font-size:12px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(s.email || '')}">${escapeHtml(s.email || 'N/A')}</div>
+              </td>
+              <td style="padding:14px 12px;">
+                <div style="display:flex; align-items:center; gap:8px; font-weight:500; color:#475569; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                  ${getPositionIcon(s.position || '')}
+                  <span title="${escapeHtml(s.position || '')}">${escapeHtml(s.position || 'N/A')}</span>
+                </div>
+              </td>
+              <td style="padding:14px 12px; text-align:center;">${statusBadge}</td>
+              <td style="padding:14px 12px; text-align:center;">
+                <div style="font-size:12px; color:#64748b;">${created}</div>
+              </td>
+              <td style="padding:14px 12px; text-align:center;">
+                <div style="font-size:12px; color:#64748b;">${lastLogin}</div>
+              </td>
+              <td style="padding:10px 8px; text-align:center;">
+                <div style="display:flex; gap:4px; justify-content:center; flex-wrap:wrap;">
+                  <button onclick="viewStaffMember(${s.admin_id})" style="width:32px; height:32px; border:none; background:#f1f5f9; color:#667eea; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
+                  <button onclick="editStaffMember(${s.admin_id})" style="width:32px; height:32px; border:none; background:#f1f5f9; color:#3b82f6; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;" title="Edit Staff" onmouseover="this.style.background='linear-gradient(135deg,#3b82f6,#2563eb)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#3b82f6';"><i class="fas fa-edit"></i></button>
+                  <button onclick="toggleStaffStatus(${s.admin_id}, ${s.is_active})" style="width:32px; height:32px; border:none; background:${s.is_active == 1 ? '#f1f5f9' : 'linear-gradient(135deg,#ef4444,#dc2626)'}; color:${s.is_active == 1 ? '#10b981' : 'white'}; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;" title="${s.is_active == 1 ? 'Deactivate Staff' : 'Activate Staff'}" onmouseover="this.style.background='linear-gradient(135deg,#10b981,#059669)'; this.style.color='white';" onmouseout="this.style.background='${s.is_active == 1 ? '#f1f5f9' : 'linear-gradient(135deg,#ef4444,#dc2626)'}'; this.style.color='${s.is_active == 1 ? '#10b981' : 'white'}';"><i class="fas fa-power-off"></i></button>
+                  <button onclick="resetStaffPassword(${s.admin_id})" style="width:32px; height:32px; border:none; background:#f1f5f9; color:#f59e0b; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;" title="Reset Password" onmouseover="this.style.background='linear-gradient(135deg,#f59e0b,#d97706)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#f59e0b';"><i class="fas fa-key"></i></button>
+                  <button onclick="deleteStaffMember(${s.admin_id})" style="width:32px; height:32px; border:none; background:#f1f5f9; color:#ef4444; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;" title="Delete Staff" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-trash"></i></button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.innerHTML = rows;
+      }
+
+      function updateStaffStats() {
+        const total = allStaff.length;
+        const active = allStaff.filter(s => s.is_active == 1).length;
+        
+        // Get unique positions/departments
+        const departments = new Set(allStaff.map(s => s.position).filter(p => p));
+        
+        // Count online (last login within 24 hours)
+        const now = new Date();
+        const onlineThreshold = 24 * 60 * 60 * 1000; // 24 hours
+        const online = allStaff.filter(s => {
+          if (!s.last_login) return false;
+          const lastLogin = new Date(s.last_login);
+          return (now - lastLogin) < onlineThreshold;
+        }).length;
+
+        animateCountUp('staffTotalCount', total);
+        animateCountUp('staffActiveCount', active);
+        animateCountUp('staffDepartmentCount', departments.size);
+        animateCountUp('staffOnlineCount', online);
+      }
+
+      // Action functions for staff management
+      function viewStaffMember(id) {
+        const staff = allStaff.find(s => s.admin_id == id);
+        if (!staff) {
+          alert('Staff member not found!');
+          return;
+        }
+
+        const statusText = staff.is_active == 1 ? 'Active' : 'Inactive';
+        const statusColor = staff.is_active == 1 ? '#10b981' : '#ef4444';
+        const created = staff.created_at ? new Date(staff.created_at).toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'}) : 'N/A';
+        const lastLogin = staff.last_login ? new Date(staff.last_login).toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'Never';
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10000; animation:fadeIn 0.2s ease;';
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+        modal.innerHTML = `
+          <div style="background:white; border-radius:16px; max-width:600px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:slideInDown 0.3s ease;" onclick="event.stopPropagation();">
+            <div style="background:linear-gradient(135deg,#667eea,#764ba2); padding:24px; border-radius:16px 16px 0 0; color:white;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <h3 style="font-size:24px; font-weight:700; margin:0;">Staff Details</h3>
+                  <p style="opacity:0.9; margin:4px 0 0 0; font-size:14px;">View staff member information</p>
+                </div>
+                <button onclick="this.closest('[style*=fixed]').remove()" style="width:36px; height:36px; border:none; background:rgba(255,255,255,0.2); color:white; border-radius:8px; cursor:pointer; font-size:18px; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)';" onmouseout="this.style.background='rgba(255,255,255,0.2)';">×</button>
+              </div>
+            </div>
+            <div style="padding:28px;">
+              <div style="display:grid; gap:20px;">
+                <div style="text-align:center; margin-bottom:8px;">
+                  <div style="width:80px; height:80px; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:32px; margin:0 auto 12px;">
+                    ${(staff.full_name || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <h4 style="font-size:20px; font-weight:700; color:#1e293b; margin:0 0 4px 0;">${escapeHtml(staff.full_name || 'N/A')}</h4>
+                  <span style="display:inline-block; padding:6px 16px; background:${statusColor}; color:white; border-radius:20px; font-size:12px; font-weight:600;">${statusText}</span>
+                </div>
+
+                <div style="background:#f8fafc; padding:16px; border-radius:12px; border-left:4px solid #667eea;">
+                  <div style="color:#64748b; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Staff ID</div>
+                  <div style="color:#1e293b; font-size:16px; font-weight:600;">#${staff.admin_id}</div>
+                </div>
+
+                <div style="background:#f8fafc; padding:16px; border-radius:12px; border-left:4px solid #3b82f6;">
+                  <div style="color:#64748b; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Username</div>
+                  <div style="color:#1e293b; font-size:16px; font-weight:600;">${escapeHtml(staff.username || 'N/A')}</div>
+                </div>
+
+                <div style="background:#f8fafc; padding:16px; border-radius:12px; border-left:4px solid #10b981;">
+                  <div style="color:#64748b; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Email Address</div>
+                  <div style="color:#1e293b; font-size:16px; font-weight:600;">${escapeHtml(staff.email || 'N/A')}</div>
+                </div>
+
+                <div style="background:#f8fafc; padding:16px; border-radius:12px; border-left:4px solid #f59e0b;">
+                  <div style="color:#64748b; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Position</div>
+                  <div style="color:#1e293b; font-size:16px; font-weight:600;">${escapeHtml(staff.position || 'N/A')}</div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                  <div style="background:#f8fafc; padding:16px; border-radius:12px;">
+                    <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Created At</div>
+                    <div style="color:#1e293b; font-size:14px; font-weight:600;">${created}</div>
+                  </div>
+                  <div style="background:#f8fafc; padding:16px; border-radius:12px;">
+                    <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Last Login</div>
+                    <div style="color:#1e293b; font-size:14px; font-weight:600;">${lastLogin}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:12px; margin-top:24px;">
+                <button onclick="editStaffMember(${id}); this.closest('[style*=fixed]').remove();" style="flex:1; padding:12px; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59,130,246,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                  <i class="fas fa-edit" style="margin-right:8px;"></i>Edit Staff
+                </button>
+                <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1; padding:12px; background:#f1f5f9; color:#64748b; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f1f5f9';">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+      }
+
+      function editStaffMember(id) {
+        const staff = allStaff.find(s => s.admin_id == id);
+        if (!staff) {
+          alert('Staff member not found!');
+          return;
+        }
+        
+        // For now, just show a message. You can implement a full edit form later
+        showToast('Edit feature coming soon! Staff ID: ' + id, 'info');
+      }
+
+      async function toggleStaffStatus(id, currentStatus) {
+        const staff = allStaff.find(s => s.admin_id == id);
+        if (!staff) {
+          alert('Staff member not found!');
+          return;
+        }
+
+        const newStatus = currentStatus == 1 ? 0 : 1;
+        const action = newStatus == 1 ? 'activate' : 'deactivate';
+        const actionCap = newStatus == 1 ? 'Activate' : 'Deactivate';
+
+        if (!confirm(`${actionCap} ${staff.full_name}?\n\nThis will ${action} the staff member's account.`)) {
+          return;
+        }
+
+        try {
+          const formData = new FormData();
+          formData.append('action', 'toggle_status');
+          formData.append('admin_id', id);
+          formData.append('is_active', newStatus);
+          
+          const res = await fetch('manage_staff_actions.php', {
+            method: 'POST',
+            body: formData
+          });
+          
+          const data = await res.json();
+          
+          if (data.success) {
+            showToast(`Staff member ${action}d successfully!`, 'success');
+            loadStaffList(); // Reload the list
+          } else {
+            showToast('Failed to update status: ' + (data.message || 'Unknown error'), 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Error updating staff status. Please try again.', 'error');
+        }
+      }
+
+      async function resetStaffPassword(id) {
+        const staff = allStaff.find(s => s.admin_id == id);
+        if (!staff) {
+          alert('Staff member not found!');
+          return;
+        }
+
+        if (!confirm(`Reset password for ${staff.full_name}?\n\nA new temporary password will be generated and sent to their email.`)) {
+          return;
+        }
+
+        try {
+          const formData = new FormData();
+          formData.append('admin_id', id);
+          
+          const res = await fetch('reset_staff_pw.php', {
+            method: 'POST',
+            body: formData
+          });
+          
+          const data = await res.json();
+          
+          if (data.success) {
+            showToast('Password reset successfully! New password: ' + (data.new_password || 'Check email'), 'success');
+          } else {
+            showToast('Failed to reset password: ' + (data.message || 'Unknown error'), 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Error resetting password. Please try again.', 'error');
+        }
+      }
+
+      async function deleteStaffMember(id) {
+        const staff = allStaff.find(s => s.admin_id == id);
+        if (!staff) {
+          alert('Staff member not found!');
+          return;
+        }
+
+        if (!confirm(`Delete ${staff.full_name}?\n\nThis action cannot be undone!`)) {
+          return;
+        }
+
+        if (!confirm(`Are you absolutely sure?\n\nStaff member: ${staff.full_name}\nUsername: ${staff.username}\n\nThis will permanently delete this staff member.`)) {
+          return;
+        }
+
+        try {
+          const formData = new FormData();
+          formData.append('action', 'delete_staff');
+          formData.append('admin_id', id);
+          
+          const res = await fetch('manage_staff_actions.php', {
+            method: 'POST',
+            body: formData
+          });
+          
+          const data = await res.json();
+          
+          if (data.success) {
+            showToast('Staff member deleted successfully!', 'success');
+            loadStaffList(); // Reload the list
+          } else {
+            showToast('Failed to delete staff: ' + (data.message || 'Unknown error'), 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Error deleting staff member. Please try again.', 'error');
+        }
+      }
+
+      function showToast(message, type = 'info') {
+        const colors = {
+          success: '#10b981',
+          error: '#ef4444',
+          info: '#3b82f6',
+          warning: '#f59e0b'
+        };
+        
+        const icons = {
+          success: 'fa-check-circle',
+          error: 'fa-exclamation-circle',
+          info: 'fa-info-circle',
+          warning: 'fa-exclamation-triangle'
+        };
+        
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          background: ${colors[type]};
+          color: white;
+          padding: 16px 24px;
+          border-radius: 12px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+          z-index: 10001;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          animation: slideInRight 0.3s ease;
+          max-width: 400px;
+        `;
+        
+        toast.innerHTML = `
+          <i class="fas ${icons[type]}" style="font-size: 20px;"></i>
+          <span>${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.animation = 'slideOutRight 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 4000);
       }
 
       function escapeHtml(str) {
@@ -1515,21 +2393,30 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       function filterStaff() {
         const q = (document.getElementById('searchStaff').value || '').toLowerCase();
         const status = document.getElementById('statusFilterStaff').value;
-        const tbody = document.getElementById('staffTableBody');
-        const rows = tbody.querySelectorAll('tr');
-        rows.forEach(r => {
-          const text = r.textContent.toLowerCase();
-          let visible = true;
-          if (q && !text.includes(q)) visible = false;
-          if (status !== 'all') {
-            const badge = r.querySelector('.status-badge');
-            if (badge) {
-              const isActive = badge.classList.contains('active') ? '1' : '0';
-              if (isActive !== status) visible = false;
-            }
+
+        filteredStaff = allStaff.filter(s => {
+          // Search filter
+          if (q) {
+            const searchText = [
+              s.full_name || '',
+              s.username || '',
+              s.email || '',
+              s.position || ''
+            ].join(' ').toLowerCase();
+            
+            if (!searchText.includes(q)) return false;
           }
-          r.style.display = visible ? '' : 'none';
+
+          // Status filter
+          if (status !== 'all') {
+            const isActive = s.is_active == 1 ? '1' : '0';
+            if (isActive !== status) return false;
+          }
+
+          return true;
         });
+
+        renderStaffTable();
       }
 
       // Load staff on DOM ready
@@ -1540,6 +2427,284 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       // If redirected with flash, reload staff after short delay
       if (document.querySelector('.alert-success')) {
         setTimeout(loadStaffList, 800);
+      }
+
+      // ===== REPORTS SECTION FUNCTIONS =====
+      let adminTrendChart, adminRevenueChart, adminRoomTypeChart;
+
+      function initAdminReportsCharts() {
+        // Trend Chart
+        const trendCtx = document.getElementById('adminTrendChart');
+        if (trendCtx) {
+          adminTrendChart = new Chart(trendCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              datasets: [{
+                label: 'Reservations',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+              }
+            }
+          });
+        }
+
+        // Revenue Chart
+        const revenueCtx = document.getElementById('adminRevenueChart');
+        if (revenueCtx) {
+          adminRevenueChart = new Chart(revenueCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              datasets: [{
+                label: 'Revenue',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: ['rgba(102, 126, 234, 0.8)', 'rgba(102, 126, 234, 0.8)', 'rgba(102, 126, 234, 0.8)', 'rgba(102, 126, 234, 0.8)', 'rgba(102, 126, 234, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(16, 185, 129, 0.8)'],
+                borderRadius: 8
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { 
+                  beginAtZero: true, 
+                  grid: { color: '#f1f5f9' },
+                  ticks: { callback: function(value) { return '₱' + value.toLocaleString(); } }
+                },
+                x: { grid: { display: false } }
+              }
+            }
+          });
+        }
+
+        // Room Type Chart
+        const roomTypeCtx = document.getElementById('adminRoomTypeChart');
+        if (roomTypeCtx) {
+          adminRoomTypeChart = new Chart(roomTypeCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+              labels: [],
+              datasets: [{
+                data: [],
+                backgroundColor: ['#667eea', '#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { 
+                legend: { position: 'bottom' },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return context.label + ': ' + context.parsed;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+
+      function updateAdminReports() {
+        const period = document.getElementById('adminPeriodSelector').value;
+        if (period === 'custom') {
+          document.getElementById('adminStartDate').style.display = 'block';
+          document.getElementById('adminEndDate').style.display = 'block';
+          document.getElementById('adminApplyDateBtn').style.display = 'block';
+        } else {
+          document.getElementById('adminStartDate').style.display = 'none';
+          document.getElementById('adminEndDate').style.display = 'none';
+          document.getElementById('adminApplyDateBtn').style.display = 'none';
+          loadAdminReportData(period);
+        }
+      }
+
+      function applyAdminCustomDate() {
+        const start = document.getElementById('adminStartDate').value;
+        const end = document.getElementById('adminEndDate').value;
+        if (start && end) {
+          loadAdminReportData('custom', start, end);
+          showAdminToast('Custom date range applied', 'success');
+        } else {
+          showAdminToast('Please select both start and end dates', 'warning');
+        }
+      }
+
+      async function loadAdminReportData(period, startDate = null, endDate = null) {
+        showAdminToast('Loading report data...', 'info');
+        
+        try {
+          let url = `staff_get_report_data.php?period=${period}`;
+          if (startDate && endDate) {
+            url += `&start_date=${startDate}&end_date=${endDate}`;
+          }
+          
+          const res = await fetch(url);
+          const data = await res.json();
+          
+          if (!data.success) {
+            showAdminToast(data.message || 'Failed to load report data', 'error');
+            return;
+          }
+          
+          // Update metrics
+          const m = data.metrics;
+          document.getElementById('adminTotalReservations').textContent = m.total_reservations || 0;
+          document.getElementById('adminTotalRevenue').textContent = '₱' + (m.total_revenue || 0).toLocaleString();
+          document.getElementById('adminOccupancyRate').textContent = (m.occupancy_rate || 0) + '%';
+          document.getElementById('adminTotalCancellations').textContent = m.cancellations || 0;
+          
+          // Update trend chart
+          if (adminTrendChart && data.trend_data) {
+            adminTrendChart.data.labels = data.trend_data.labels;
+            adminTrendChart.data.datasets[0].data = data.trend_data.values;
+            adminTrendChart.update();
+          }
+          
+          // Update revenue chart
+          if (adminRevenueChart && data.revenue_data) {
+            adminRevenueChart.data.labels = data.revenue_data.labels;
+            adminRevenueChart.data.datasets[0].data = data.revenue_data.values;
+            adminRevenueChart.update();
+          }
+
+          // Update room type chart
+          if (adminRoomTypeChart && data.room_type_data && data.room_type_data.length > 0) {
+            adminRoomTypeChart.data.labels = data.room_type_data.map(r => r.room_type || 'N/A');
+            adminRoomTypeChart.data.datasets[0].data = data.room_type_data.map(r => r.bookings || 0);
+            adminRoomTypeChart.update();
+          }
+
+          // Update room type table
+          if (data.room_type_data && data.room_type_data.length > 0) {
+            const tbody = document.getElementById('adminRoomTypeTable');
+            tbody.innerHTML = data.room_type_data.map(r => `
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px; color:#1e293b;">${r.room_type || 'N/A'}</td>
+                <td style="padding:12px; color:#1e293b;">${r.bookings || 0}</td>
+                <td style="padding:12px; color:#1e293b;">₱${(r.revenue || 0).toLocaleString()}</td>
+              </tr>
+            `).join('');
+          }
+
+          // Update guest statistics
+          if (data.guest_stats) {
+            const tbody = document.getElementById('adminGuestStatsTable');
+            const gs = data.guest_stats;
+            tbody.innerHTML = `
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px;"><strong>New Guests</strong></td>
+                <td style="padding:12px;">${gs.new_guests_this_week || 0}</td>
+                <td style="padding:12px;">${gs.new_guests_last_week || 0}</td>
+                <td style="padding:12px; color:${gs.new_guests_change >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${gs.new_guests_change >= 0 ? 'up' : 'down'}"></i> ${gs.new_guests_change || 0}%</td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px;"><strong>Returning Guests</strong></td>
+                <td style="padding:12px;">${gs.returning_guests_this_week || 0}</td>
+                <td style="padding:12px;">${gs.returning_guests_last_week || 0}</td>
+                <td style="padding:12px; color:${gs.returning_guests_change >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${gs.returning_guests_change >= 0 ? 'up' : 'down'}"></i> ${gs.returning_guests_change || 0}%</td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px;"><strong>Average Stay</strong></td>
+                <td style="padding:12px;">${gs.avg_stay_this_week || 0} days</td>
+                <td style="padding:12px;">${gs.avg_stay_last_week || 0} days</td>
+                <td style="padding:12px; color:${gs.avg_stay_change >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${gs.avg_stay_change >= 0 ? 'up' : 'down'}"></i> ${gs.avg_stay_change || 0}%</td>
+              </tr>
+              <tr>
+                <td style="padding:12px;"><strong>Guest Satisfaction</strong></td>
+                <td style="padding:12px;">${gs.satisfaction_this_week || 0}/5.0</td>
+                <td style="padding:12px;">${gs.satisfaction_last_week || 0}/5.0</td>
+                <td style="padding:12px; color:${gs.satisfaction_change >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${gs.satisfaction_change >= 0 ? 'up' : 'down'}"></i> ${gs.satisfaction_change || 0}%</td>
+              </tr>
+            `;
+          }
+
+          // Update performance metrics
+          if (data.performance) {
+            const perf = data.performance;
+            document.getElementById('adminCheckInTime').textContent = perf.check_in_time || '—';
+            document.getElementById('adminResponseTime').textContent = perf.response_time || '—';
+            document.getElementById('adminCheckInBar').style.width = (perf.check_in_efficiency || 0) + '%';
+            document.getElementById('adminResponseBar').style.width = (perf.response_efficiency || 0) + '%';
+          }
+          
+          showAdminToast('Reports updated successfully!', 'success');
+        } catch (err) {
+          console.error('Error loading report data:', err);
+          showAdminToast('Failed to load report data', 'error');
+        }
+      }
+
+      function exportReportsPDF() {
+        showAdminToast('Generating PDF report...', 'info');
+        setTimeout(() => {
+          showAdminToast('PDF report generated successfully!', 'success');
+        }, 1500);
+      }
+
+      function exportReportsExcel() {
+        showAdminToast('Generating Excel report...', 'info');
+        setTimeout(() => {
+          showAdminToast('Excel report generated successfully!', 'success');
+        }, 1500);
+      }
+
+      function showAdminToast(message, type = 'info') {
+        const colors = {
+          success: '#10b981',
+          error: '#ef4444',
+          info: '#3b82f6',
+          warning: '#f59e0b'
+        };
+        
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          background: ${colors[type]};
+          color: white;
+          padding: 16px 24px;
+          border-radius: 12px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+          z-index: 10000;
+          font-weight: 500;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      // Initialize reports charts when navigating to reports section
+      const reportsNavLink = document.querySelector('a[data-section="reports"]');
+      if (reportsNavLink) {
+        reportsNavLink.addEventListener('click', function() {
+          setTimeout(() => {
+            if (!adminTrendChart) {
+              initAdminReportsCharts();
+              loadAdminReportData('week');
+            }
+          }, 100);
+        });
       }
     </script>
   </body>

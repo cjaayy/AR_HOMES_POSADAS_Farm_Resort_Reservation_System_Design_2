@@ -38,7 +38,669 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       }
     };
   </script>
-  <style>.reservations-actions{display:flex;gap:8px;align-items:center}.small{font-size:13px}</style>
+  <style>
+    /* Enhanced Reservations Page Styles */
+    .reservations-actions{display:flex;gap:8px;align-items:center}.small{font-size:13px}
+    
+    /* Stats Cards */
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card-res {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card-res::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100px;
+      height: 100px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      transform: translate(30px, -30px);
+    }
+    
+    .stat-card-res.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25); }
+    .stat-card-res.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25); }
+    .stat-card-res.red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25); }
+    
+    .stat-card-res-icon {
+      font-size: 32px;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+    
+    .stat-card-res-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    
+    .stat-card-res-label {
+      font-size: 14px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Enhanced Table */
+    .users-table tbody tr {
+      transition: all 0.2s ease;
+    }
+    
+    .users-table tbody tr:hover {
+      background: #f8fafc;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    /* Status Badges with Icons */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-badge::before {
+      content: '';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+    }
+    
+    .status-badge.pending::before { content: '\f017'; }
+    .status-badge.confirmed::before { content: '\f058'; }
+    .status-badge.completed::before { content: '\f00c'; }
+    .status-badge.canceled::before { content: '\f057'; }
+    
+    /* Enhanced Action Buttons */
+    .btn-action {
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      transform: scale(1);
+    }
+    
+    .btn-action:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Enhanced Modal */
+    #createModal .form-group input,
+    #createModal .form-group select {
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      transition: all 0.2s ease;
+    }
+    
+    #createModal .form-group input:focus,
+    #createModal .form-group select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Filter Section Enhancement */
+    .filter-section {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    /* Action Buttons Enhancement */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    
+    /* Loading Animation */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .loading-row {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    /* Quick Filter Chips */
+    /* Enhanced Filter Chips */
+    .quick-filters-enhanced {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    
+    .filter-chip-enhanced {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .filter-chip-enhanced::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      transition: width 0.3s ease;
+    }
+
+    .filter-chip-enhanced:hover::before {
+      width: 100%;
+    }
+
+    .filter-chip-enhanced:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .filter-chip-enhanced.active {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-color: #667eea;
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    .filter-chip-enhanced.active::before {
+      display: none;
+    }
+
+    .filter-chip-enhanced .chip-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .filter-chip-enhanced:hover .chip-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .filter-chip-enhanced span {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569;
+      position: relative;
+      z-index: 1;
+      transition: color 0.3s ease;
+    }
+
+    .filter-chip-enhanced.active span {
+      color: white;
+    }
+
+    .filter-chip-enhanced .chip-count {
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      position: relative;
+      z-index: 1;
+      min-width: 32px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .filter-chip-enhanced.active .chip-count {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+    }
+
+    /* Date Filter Styles */
+    .date-filter-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .date-filter-wrapper label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .date-filter-wrapper label i {
+      color: #667eea;
+    }
+
+    .date-filter-wrapper input[type="date"] {
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      background: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .date-filter-wrapper input[type="date"]:hover {
+      border-color: #cbd5e1;
+    }
+
+    .date-filter-wrapper input[type="date"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .date-filter-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+
+    .date-filter-wrapper input[type="date"]::-webkit-calendar-picker-indicator:hover {
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    /* Responsive Design for Filters */
+    @media (max-width: 768px) {
+      .quick-filters-enhanced {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .filter-chip-enhanced {
+        padding: 12px;
+      }
+
+      .filter-chip-enhanced .chip-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+
+      .filter-chip-enhanced span {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .quick-filters-enhanced {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      padding: 10px 20px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: #667eea;
+      color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .btn-secondary i {
+      transition: transform 0.3s ease;
+    }
+
+    .btn-secondary:hover i {
+      transform: rotate(180deg);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideOutRight {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .users-table thead {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .users-table thead th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    .users-table tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .users-table tbody tr:hover {
+      background: #f8fafc;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    }
+
+    .users-table tbody td {
+      padding: 16px;
+      font-size: 14px;
+      color: #475569;
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: capitalize;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-badge.confirmed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.completed {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-badge.canceled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .btn-action {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-approve {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-cancel {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    .btn-view {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 24px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #475569;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group label i {
+      color: #667eea;
+      width: 16px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      padding: 20px 24px;
+      border-top: 2px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: #f8fafc;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .modal-footer .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
 </head>
 <body>
   <div class="admin-container">
@@ -46,9 +708,98 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
 
     <main class="main-content">
       <section class="content-section active">
-        <div class="section-header">
-          <h2>Reservations</h2>
-          <p>View and manage reservations assigned to your team.</p>
+        <div class="section-header" style="margin-bottom:30px;">
+          <div>
+            <h2 style="font-size:32px; font-weight:700; color:#1e293b; margin-bottom:8px;">Reservations Management</h2>
+            <p style="color:#64748b; font-size:16px;">View and manage all resort reservations efficiently</p>
+          </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+          <div class="stat-card-res">
+            <div class="stat-card-res-icon"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-card-res-value" id="totalReservations">0</div>
+            <div class="stat-card-res-label">Total Reservations</div>
+          </div>
+          <div class="stat-card-res green">
+            <div class="stat-card-res-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-card-res-value" id="confirmedCount">0</div>
+            <div class="stat-card-res-label">Confirmed</div>
+          </div>
+          <div class="stat-card-res orange">
+            <div class="stat-card-res-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-card-res-value" id="pendingCount">0</div>
+            <div class="stat-card-res-label">Pending</div>
+          </div>
+          <div class="stat-card-res red">
+            <div class="stat-card-res-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-card-res-value" id="canceledCount">0</div>
+            <div class="stat-card-res-label">Canceled</div>
+          </div>
+        </div>
+
+        <!-- Enhanced Filters Section -->
+        <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="margin:0; font-size:16px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:8px;">
+              <i class="fas fa-filter" style="color:#667eea;"></i> Filter Reservations
+            </h3>
+            <button onclick="clearFilters()" style="padding:6px 14px; background:#f1f5f9; border:none; border-radius:6px; font-size:13px; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.2s;">
+              <i class="fas fa-redo"></i> Clear Filters
+            </button>
+          </div>
+
+          <!-- Quick Status Filters -->
+          <div class="quick-filters-enhanced">
+            <div class="filter-chip-enhanced active" onclick="quickFilter('all')" id="chip-all">
+              <div class="chip-icon" style="background:linear-gradient(135deg, #667eea, #764ba2);">
+                <i class="fas fa-list"></i>
+              </div>
+              <span>All</span>
+              <div class="chip-count" id="count-all">0</div>
+            </div>
+            <div class="filter-chip-enhanced" onclick="quickFilter('pending')" id="chip-pending">
+              <div class="chip-icon" style="background:linear-gradient(135deg, #f59e0b, #d97706);">
+                <i class="fas fa-clock"></i>
+              </div>
+              <span>Pending</span>
+              <div class="chip-count" id="count-pending">0</div>
+            </div>
+            <div class="filter-chip-enhanced" onclick="quickFilter('confirmed')" id="chip-confirmed">
+              <div class="chip-icon" style="background:linear-gradient(135deg, #10b981, #059669);">
+                <i class="fas fa-check"></i>
+              </div>
+              <span>Confirmed</span>
+              <div class="chip-count" id="count-confirmed">0</div>
+            </div>
+            <div class="filter-chip-enhanced" onclick="quickFilter('completed')" id="chip-completed">
+              <div class="chip-icon" style="background:linear-gradient(135deg, #3b82f6, #2563eb);">
+                <i class="fas fa-flag-checkered"></i>
+              </div>
+              <span>Completed</span>
+              <div class="chip-count" id="count-completed">0</div>
+            </div>
+            <div class="filter-chip-enhanced" onclick="quickFilter('canceled')" id="chip-canceled">
+              <div class="chip-icon" style="background:linear-gradient(135deg, #ef4444, #dc2626);">
+                <i class="fas fa-ban"></i>
+              </div>
+              <span>Canceled</span>
+              <div class="chip-count" id="count-canceled">0</div>
+            </div>
+          </div>
+
+          <!-- Date Range Filter -->
+          <div style="display:flex; gap:12px; margin-top:16px; padding-top:16px; border-top:2px solid #f1f5f9;">
+            <div class="date-filter-wrapper">
+              <label><i class="fas fa-calendar-day"></i> From Date</label>
+              <input type="date" id="filterFrom" onchange="applyFilters()">
+            </div>
+            <div class="date-filter-wrapper">
+              <label><i class="fas fa-calendar-day"></i> To Date</label>
+              <input type="date" id="filterTo" onchange="applyFilters()">
+            </div>
+          </div>
         </div>
 
         <div class="users-container">
@@ -57,31 +808,23 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
               <i class="fas fa-search"></i>
               <input id="searchBox" placeholder="Search guest, room, or contact" oninput="applyFilters()" />
             </div>
-              <div class="filter-options">
-              <select id="filterStatus" onchange="applyFilters()">
-                <option value="">All</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="canceled">Canceled</option>
-              </select>
-
-              <!-- Styled date inputs: From / To -->
-              <div class="input-wrapper" style="min-width:170px;">
-                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
-                <input type="date" id="filterFrom" onchange="applyFilters()" aria-label="Filter from date">
-              </div>
-
-              <div class="input-wrapper" style="min-width:170px;">
-                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
-                <input type="date" id="filterTo" onchange="applyFilters()" aria-label="Filter to date">
-              </div>
-            </div>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:12px;">
-            <button class="btn-primary" onclick="showCreateForm()"><i class="fas fa-plus"></i> Add Walk-in</button>
-            <button class="btn-primary" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+          <div class="action-bar">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button class="btn-secondary" onclick="fetchAllReservations()" style="display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+              <span style="color:#64748b; font-size:14px;" id="lastUpdate">Last updated: Just now</span>
+            </div>
+            <div class="btn-group">
+              <button class="btn-primary" onclick="showCreateForm()" style="display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-plus"></i> Add Walk-in
+              </button>
+              <button class="btn-primary" onclick="exportCSV()" style="background:linear-gradient(135deg, #10b981, #059669); display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-file-excel"></i> Export
+              </button>
+            </div>
           </div>
 
           <div class="table-container">
@@ -110,16 +853,42 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
           </div>
         </div>
 
-        <!-- Simple modal/create form -->
-        <div id="createModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-          <div style="background:#fff; padding:18px; border-radius:8px; width:480px;">
-            <h3>Create Walk-in / Phone Reservation</h3>
+        <!-- Enhanced modal/create form -->
+        <div id="createModal" class="modal-overlay">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3><i class="fas fa-calendar-plus"></i> Create New Reservation</h3>
+              <button type="button" onclick="hideCreateForm()" class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
             <form id="createForm" onsubmit="return submitCreate(event)">
-              <div class="form-group"><label>Guest Name</label><input name="guest_name" required></div>
-              <div class="form-group"><label>Phone</label><input name="guest_phone"></div>
-              <div class="form-group"><label>Room</label><input name="room"></div>
-              <div class="form-group" style="display:flex;gap:8px;"><div><label>Check-in</label><input type="date" name="check_in_date"></div><div><label>Check-out</label><input type="date" name="check_out_date"></div></div>
-              <div style="display:flex;gap:8px; justify-content:flex-end; margin-top:12px;"><button type="button" onclick="hideCreateForm()" class="btn-secondary">Cancel</button><button class="btn-primary">Create</button></div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label><i class="fas fa-user"></i> Guest Name *</label>
+                  <input name="guest_name" required placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-phone"></i> Phone Number</label>
+                  <input name="guest_phone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-door-open"></i> Room Assignment</label>
+                  <input name="room" placeholder="e.g., Room 101">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label><i class="fas fa-calendar-check"></i> Check-in Date</label>
+                    <input type="date" name="check_in_date">
+                  </div>
+                  <div class="form-group">
+                    <label><i class="fas fa-calendar-times"></i> Check-out Date</label>
+                    <input type="date" name="check_out_date">
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" onclick="hideCreateForm()" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Create Reservation</button>
+              </div>
             </form>
           </div>
         </div>
@@ -134,6 +903,75 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     let filteredReservations = [];
     let currentPage = 1;
     const pageSize = 12;
+    let currentQuickFilter = 'all';
+
+    // Quick filter function
+    function quickFilter(status) {
+      currentQuickFilter = status;
+      
+      // Update chip active states
+      document.querySelectorAll('.filter-chip-enhanced').forEach(chip => chip.classList.remove('active'));
+      document.getElementById('chip-' + status).classList.add('active');
+      
+      // Update the search based on status
+      if(status === 'all') {
+        // Show all reservations
+        applyFilters();
+      } else {
+        // Filter by specific status
+        applyFilters();
+      }
+    }
+
+    // Clear all filters
+    function clearFilters() {
+      // Reset quick filter
+      currentQuickFilter = 'all';
+      document.querySelectorAll('.filter-chip-enhanced').forEach(chip => chip.classList.remove('active'));
+      document.getElementById('chip-all').classList.add('active');
+      
+      // Clear search box
+      document.getElementById('searchBox').value = '';
+      
+      // Clear date filters
+      document.getElementById('filterFrom').value = '';
+      document.getElementById('filterTo').value = '';
+      
+      // Reapply filters
+      applyFilters();
+      
+      showNotification('Filters cleared', 'info');
+    }
+
+    // Update stats cards with actual data
+    function updateStatsCards() {
+      const total = allReservations.length;
+      const confirmed = allReservations.filter(r => r.status === 'confirmed').length;
+      const pending = allReservations.filter(r => r.status === 'pending').length;
+      const canceled = allReservations.filter(r => r.status === 'canceled').length;
+      const completed = allReservations.filter(r => r.status === 'completed').length;
+      
+      // Update main stats cards
+      document.getElementById('totalReservations').textContent = total;
+      document.getElementById('confirmedCount').textContent = confirmed;
+      document.getElementById('pendingCount').textContent = pending;
+      document.getElementById('canceledCount').textContent = canceled;
+      
+      // Update filter chip counts
+      document.getElementById('count-all').textContent = total;
+      document.getElementById('count-pending').textContent = pending;
+      document.getElementById('count-confirmed').textContent = confirmed;
+      document.getElementById('count-completed').textContent = completed;
+      document.getElementById('count-canceled').textContent = canceled;
+    }
+
+    // Update last update time
+    function updateLastUpdateTime() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('lastUpdate').textContent = `Last updated: ${hours}:${minutes}`;
+    }
 
     async function fetchAllReservations(){
       const url = `staff_get_reservations.php?limit=1000`;
@@ -142,20 +980,26 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
         const data = await res.json();
         if(!data.success){ console.error('Failed to load reservations', data.message); return; }
         allReservations = data.reservations || [];
+        updateStatsCards();
+        updateLastUpdateTime();
         applyFilters();
       }catch(err){ console.error('Error fetching reservations', err); document.getElementById('reservationsBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#b00;">Error loading reservations</td></tr>`; }
     }
 
     function applyFilters(){
-      const status = document.getElementById('filterStatus').value;
       const from = document.getElementById('filterFrom').value;
       const to = document.getElementById('filterTo').value;
       const q = (document.getElementById('searchBox').value || '').toLowerCase();
 
       filteredReservations = allReservations.filter(r => {
-        if(status && String(r.status) !== status) return false;
+        // Apply quick filter status
+        if(currentQuickFilter !== 'all' && String(r.status) !== currentQuickFilter) return false;
+        
+        // Apply date filters
         if(from && r.check_in_date && r.check_in_date < from) return false;
         if(to && r.check_in_date && r.check_in_date > to) return false;
+        
+        // Apply search query
         if(q){
           const hay = ((r.guest_name||'') + ' ' + (r.room||'') + ' ' + (r.guest_phone||'') + ' ' + (r.guest_email||'')).toLowerCase();
           if(!hay.includes(q)) return false;
@@ -183,15 +1027,32 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       const start = (currentPage - 1) * pageSize;
       const pageRows = filteredReservations.slice(start, start + pageSize);
 
-      const rowsHtml = pageRows.map(r => `
-        <tr>
-          <td>${r.reservation_id}</td>
-          <td>${escapeHtml(r.guest_name||'')}</td>
-          <td>${escapeHtml(r.guest_phone||'')}<br/><small>${escapeHtml(r.guest_email||'')}</small></td>
-          <td>${escapeHtml(r.room||'')}</td>
-          <td>${r.check_in_date||''}</td>
-          <td>${r.check_out_date||''}</td>
-          <td>${r.created_at||''}</td>
+      const rowsHtml = pageRows.map((r, index) => `
+        <tr style="animation: fadeIn 0.3s ease-in-out ${index * 0.05}s backwards;">
+          <td style="text-align:center; font-weight:600; color:#64748b;">#${r.reservation_id}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:40px; height:40px; background:linear-gradient(135deg, #667eea, #764ba2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:16px;">
+                ${escapeHtml((r.guest_name||'U')[0].toUpperCase())}
+              </div>
+              <div>
+                <div style="font-weight:600; color:#1e293b;">${escapeHtml(r.guest_name||'')}</div>
+                <div style="font-size:12px; color:#64748b;"><i class="fas fa-phone"></i> ${escapeHtml(r.guest_phone||'N/A')}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="display:flex; align-items:center; gap:6px; color:#475569;">
+              <i class="fas fa-calendar-check" style="color:#667eea;"></i>
+              <span>${r.check_in_date||'N/A'}</span>
+            </div>
+          </td>
+          <td>
+            <div style="display:flex; align-items:center; gap:6px; color:#475569;">
+              <i class="fas fa-calendar-times" style="color:#ef4444;"></i>
+              <span>${r.check_out_date||'N/A'}</span>
+            </div>
+          </td>
           <td><span class="status-badge ${r.status||''}">${escapeHtml(r.status||'')}</span></td>
           <td style="text-align:center">
             <div class="action-buttons">
@@ -234,18 +1095,86 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     function viewReservation(id){
       const r = allReservations.find(x => Number(x.reservation_id) === Number(id));
       if(!r) return showNotification('Reservation not found','error');
+      
       const html = `
-        <div style="padding:1rem; max-width:640px;">
-          <h3>Reservation #${r.reservation_id}</h3>
-          <p><strong>Guest:</strong> ${escapeHtml(r.guest_name||'')}</p>
-          <p><strong>Contact:</strong> ${escapeHtml(r.guest_phone||'')} / ${escapeHtml(r.guest_email||'')}</p>
-          <p><strong>Room:</strong> ${escapeHtml(r.room||'')}</p>
-          <p><strong>Check-in:</strong> ${r.check_in_date||''} — <strong>Check-out:</strong> ${r.check_out_date||''}</p>
-          <p><strong>Status:</strong> ${escapeHtml(r.status||'')}</p>
-          <p><strong>Created:</strong> ${r.created_at||''}</p>
+        <div style="padding:20px;">
+          <div style="text-align:center; margin-bottom:24px;">
+            <div style="width:80px; height:80px; background:linear-gradient(135deg, #667eea, #764ba2); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:white; font-size:36px; font-weight:700; margin-bottom:12px;">
+              ${escapeHtml((r.guest_name||'U')[0].toUpperCase())}
+            </div>
+            <h3 style="margin:0; font-size:24px; color:#1e293b;">${escapeHtml(r.guest_name||'')}</h3>
+            <p style="color:#64748b; margin:4px 0;">Reservation #${r.reservation_id}</p>
+          </div>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div style="padding:16px; background:#f8fafc; border-radius:8px;">
+              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">PHONE</div>
+              <div style="color:#1e293b; font-weight:600;"><i class="fas fa-phone" style="color:#667eea; margin-right:8px;"></i>${escapeHtml(r.guest_phone||'N/A')}</div>
+            </div>
+            <div style="padding:16px; background:#f8fafc; border-radius:8px;">
+              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">EMAIL</div>
+              <div style="color:#1e293b; font-weight:600;"><i class="fas fa-envelope" style="color:#667eea; margin-right:8px;"></i>${escapeHtml(r.guest_email||'N/A')}</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div style="padding:16px; background:#f8fafc; border-radius:8px;">
+              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">CHECK-IN</div>
+              <div style="color:#1e293b; font-weight:600;"><i class="fas fa-calendar-check" style="color:#10b981; margin-right:8px;"></i>${r.check_in_date||'N/A'}</div>
+            </div>
+            <div style="padding:16px; background:#f8fafc; border-radius:8px;">
+              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">CHECK-OUT</div>
+              <div style="color:#1e293b; font-weight:600;"><i class="fas fa-calendar-times" style="color:#ef4444; margin-right:8px;"></i>${r.check_out_date||'N/A'}</div>
+            </div>
+          </div>
+
+          <div style="padding:16px; background:#f8fafc; border-radius:8px; margin-bottom:20px;">
+            <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">ROOM ASSIGNMENT</div>
+            <div style="color:#1e293b; font-weight:600;"><i class="fas fa-door-open" style="color:#667eea; margin-right:8px;"></i>${escapeHtml(r.room||'Not assigned')}</div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:8px;">
+            <div>
+              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">STATUS</div>
+              <span class="status-badge ${r.status||''}">${escapeHtml(r.status||'')}</span>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">CREATED</div>
+              <div style="color:#475569; font-size:13px;">${r.created_at||'N/A'}</div>
+            </div>
+          </div>
         </div>
       `;
       showModal('Reservation Details', html);
+    }
+
+    function showModal(title, htmlContent) {
+      const existingModal = document.getElementById('viewModal');
+      if (existingModal) existingModal.remove();
+      
+      const modal = document.createElement('div');
+      modal.id = 'viewModal';
+      modal.className = 'modal-overlay';
+      modal.style.display = 'flex';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3><i class="fas fa-info-circle"></i> ${title}</h3>
+            <button type="button" onclick="document.getElementById('viewModal').remove()" class="modal-close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            ${htmlContent}
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      
+      // Close on background click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
     }
 
     function exportCSV(){
@@ -267,24 +1196,31 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       const a = document.createElement('a'); a.href = url; a.download = 'reservations_export.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
-    // small toast notification helper
+    // Enhanced toast notification helper
     function showNotification(msg, type='info'){
-      const colors = { success:'#27ae60', error:'#e74c3c', info:'#3498db', warning:'#f39c12' };
-      const n = document.createElement('div'); n.style.cssText = `position:fixed; right:20px; bottom:20px; background:${colors[type]||'#333'}; color:#fff; padding:10px 14px; border-radius:8px; z-index:9999;`; n.textContent = msg; document.body.appendChild(n); setTimeout(()=>n.remove(),3000);
+      const colors = { 
+        success: 'linear-gradient(135deg, #10b981, #059669)', 
+        error: 'linear-gradient(135deg, #ef4444, #dc2626)', 
+        info: 'linear-gradient(135deg, #3b82f6, #2563eb)', 
+        warning: 'linear-gradient(135deg, #f59e0b, #d97706)' 
+      };
+      const icons = { success: 'check-circle', error: 'times-circle', info: 'info-circle', warning: 'exclamation-triangle' };
+      const n = document.createElement('div'); 
+      n.style.cssText = `
+        position:fixed; right:20px; bottom:20px; 
+        background:${colors[type]||colors.info}; 
+        color:#fff; padding:16px 20px; border-radius:12px; 
+        box-shadow:0 8px 24px rgba(0,0,0,0.2); 
+        z-index:9999; display:flex; align-items:center; gap:12px;
+        animation: slideInRight 0.3s ease;
+      `; 
+      n.innerHTML = `<i class="fas fa-${icons[type]||'info-circle'}" style="font-size:20px;"></i><span style="font-weight:600;">${msg}</span>`;
+      document.body.appendChild(n); 
+      setTimeout(()=>{
+        n.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(()=>n.remove(), 300);
+      }, 3000);
     }
-
-    // modal utility (reuses the user-modal styles from admin-script.js via showModal)
-    function showModal(title, content){
-      // reuse the existing showModal function if present
-      if(typeof window.showModal === 'function') return window.showModal(title, content);
-      // fallback small modal
-      const modal = document.createElement('div'); modal.className = 'user-modal'; modal.innerHTML = `
-        <div class="user-modal-overlay" onclick="closeUserModal()"></div>
-        <div class="user-modal-content"><div class="user-modal-header"><h3>${title}</h3><button onclick="closeUserModal()">×</button></div><div class="user-modal-body">${content}</div></div>
-      `; document.body.appendChild(modal); document.body.style.overflow='hidden';
-    }
-
-    function closeUserModal(){ const m = document.querySelector('.user-modal'); if(m){ m.remove(); document.body.style.overflow=''; } }
 
     document.addEventListener('DOMContentLoaded', function(){ fetchAllReservations(); });
   </script>
