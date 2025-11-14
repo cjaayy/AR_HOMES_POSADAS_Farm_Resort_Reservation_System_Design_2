@@ -131,11 +131,11 @@ function closePopup() {
 // Load user data from PHP session (passed via userData global variable)
 function loadUserData() {
   // Check if userData exists (from PHP session)
-  if (typeof userData !== "undefined" && userData.userId) {
+  if (typeof userData !== "undefined" && userData.user_id) {
     return {
-      name: userData.fullName,
+      name: userData.full_name,
       email: userData.email,
-      phone: userData.phone,
+      phone: userData.phone_number,
       totalReservations: 0, // Will be loaded from database
       pendingReservations: 0,
       approvedReservations: 0,
@@ -252,14 +252,21 @@ document.addEventListener("DOMContentLoaded", function () {
   setupEventListeners();
   setupFormValidation();
 
-  // Test if the function is available
-  console.log("🧪 Testing showPopup function:", typeof showPopup);
+  // Show dashboard section by default
+  const dashboardSection = document.getElementById("dashboard-section");
+  if (dashboardSection) {
+    dashboardSection.style.display = "block";
+    dashboardSection.classList.add("active");
+    console.log("✅ Dashboard section displayed");
+  }
 
-  // Show dashboard content by default
-  setTimeout(() => {
-    console.log("⏰ Attempting to show default dashboard...");
-    showPopup("dashboard");
-  }, 500);
+  // Hide all other sections
+  document.querySelectorAll(".content-section").forEach((section) => {
+    if (section.id !== "dashboard-section") {
+      section.style.display = "none";
+      section.classList.remove("active");
+    }
+  });
 });
 
 // ===== DASHBOARD INITIALIZATION =====
@@ -388,10 +395,30 @@ function setupEventListeners() {
     );
     button.addEventListener("click", (e) => {
       e.preventDefault();
-      console.log("🖱️ Button clicked!", button.getAttribute("data-section"));
       const section = button.getAttribute("data-section");
+      console.log("🖱️ Button clicked!", section);
+
       if (section) {
-        showPopup(section);
+        // Remove active class from all buttons
+        navButtons.forEach((btn) => btn.classList.remove("active"));
+        // Add active to clicked button
+        button.classList.add("active");
+
+        // Hide all content sections
+        document.querySelectorAll(".content-section").forEach((sec) => {
+          sec.classList.remove("active");
+          sec.style.display = "none";
+        });
+
+        // Show selected section
+        const targetSection = document.getElementById(section + "-section");
+        if (targetSection) {
+          targetSection.classList.add("active");
+          targetSection.style.display = "block";
+          console.log("✅ Showing section:", section);
+        } else {
+          console.error("❌ Section not found:", section + "-section");
+        }
       }
     });
   });
@@ -1166,37 +1193,190 @@ class ResortGallery {
     this.touchStartX = 0;
     this.touchEndX = 0;
     this.isTransitioning = false;
+    this.isDragging = false;
 
     this.init();
   }
 
   init() {
+    console.log("🔍 Looking for gallery elements...");
+
     this.galleryWrapper = document.getElementById("galleryWrapper");
     this.prevBtn = document.getElementById("prevBtn");
     this.nextBtn = document.getElementById("nextBtn");
     this.indicators = document.getElementById("galleryIndicators");
 
-    if (!this.galleryWrapper) return;
+    console.log("Gallery elements found:", {
+      wrapper: !!this.galleryWrapper,
+      prevBtn: !!this.prevBtn,
+      nextBtn: !!this.nextBtn,
+      indicators: !!this.indicators,
+    });
 
-    this.slides = document.querySelectorAll(".gallery-slide");
+    if (!this.galleryWrapper) {
+      console.error("❌ Gallery wrapper not found");
+      return;
+    }
+
+    this.slides = this.galleryWrapper.querySelectorAll(".gallery-slide");
     this.totalSlides = this.slides.length;
 
+    console.log("📸 Found", this.totalSlides, "slides");
+
+    if (this.totalSlides === 0) {
+      console.error("❌ No gallery slides found");
+      return;
+    }
+
+    // Force display first slide immediately
+    this.showSlide(0);
     this.setupEventListeners();
     this.startAutoPlay();
 
     console.log(
-      "%c🖼️ Resort Gallery Initialized",
+      "%c✅ Resort Gallery Initialized with " + this.totalSlides + " slides",
       "color: #4CAF50; font-weight: bold;"
     );
   }
 
+  showSlide(index) {
+    if (!this.galleryWrapper || this.totalSlides === 0) {
+      console.error("❌ Cannot show slide - wrapper or slides missing");
+      return;
+    }
+
+    // Debug dimensions
+    const wrapperWidth = this.galleryWrapper.offsetWidth;
+    const wrapperScrollWidth = this.galleryWrapper.scrollWidth;
+    console.log(
+      `📏 Wrapper width: ${wrapperWidth}px, scroll width: ${wrapperScrollWidth}px`
+    );
+    console.log(
+      `📏 Expected scroll width: ${wrapperWidth * this.totalSlides}px`
+    );
+
+    this.currentSlide = index;
+    const translateX = -this.currentSlide * 100;
+
+    console.log(`📍 Attempting to show slide ${index + 1}/${this.totalSlides}`);
+    console.log(`   Transform value: translateX(${translateX}%)`);
+
+    // Remove any inline transition first to prevent conflicts
+    this.galleryWrapper.style.transition = "none";
+
+    // Force browser reflow
+    void this.galleryWrapper.offsetWidth;
+
+    // Re-enable transition
+    this.galleryWrapper.style.transition =
+      "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+
+    // Apply transform
+    this.galleryWrapper.style.transform = `translateX(${translateX}%)`;
+
+    // Verify transform was applied
+    setTimeout(() => {
+      const actualTransform = window.getComputedStyle(
+        this.galleryWrapper
+      ).transform;
+      const wrapperRect = this.galleryWrapper.getBoundingClientRect();
+      console.log(
+        `   ✅ Applied transform:`,
+        this.galleryWrapper.style.transform
+      );
+      console.log(`   📊 Computed transform:`, actualTransform);
+      console.log(`   📐 Wrapper position: left=${wrapperRect.left}px`);
+
+      // Check each slide's visibility
+      const slides = this.galleryWrapper.querySelectorAll(".gallery-slide");
+      slides.forEach((slide, i) => {
+        const slideRect = slide.getBoundingClientRect();
+        const isVisible = slideRect.left >= 0 && slideRect.left < wrapperWidth;
+        console.log(
+          `   Slide ${i}: left=${slideRect.left.toFixed(0)}px ${
+            isVisible ? "✅ VISIBLE" : "❌ hidden"
+          }`
+        );
+      });
+
+      // Check if transform actually moved
+      if (
+        actualTransform === "none" ||
+        actualTransform === "matrix(1, 0, 0, 1, 0, 0)"
+      ) {
+        console.error("⚠️ Transform not applied! Checking for conflicts...");
+        console.log("Wrapper computed styles:", {
+          display: window.getComputedStyle(this.galleryWrapper).display,
+          position: window.getComputedStyle(this.galleryWrapper).position,
+          overflow: window.getComputedStyle(this.galleryWrapper).overflow,
+          width: window.getComputedStyle(this.galleryWrapper).width,
+        });
+      }
+    }, 100);
+
+    this.updateIndicators();
+  }
+
   setupEventListeners() {
+    console.log("🎛️ Setting up gallery controls...");
+
     // Button controls
     if (this.prevBtn) {
-      this.prevBtn.addEventListener("click", () => this.prevSlide());
+      console.log("Previous button element:", this.prevBtn);
+      console.log("Previous button computed style:", {
+        zIndex: window.getComputedStyle(this.prevBtn).zIndex,
+        pointerEvents: window.getComputedStyle(this.prevBtn).pointerEvents,
+        display: window.getComputedStyle(this.prevBtn).display,
+      });
+
+      this.prevBtn.addEventListener(
+        "click",
+        (e) => {
+          console.log("⬅️ Previous button clicked!", e);
+          e.preventDefault();
+          e.stopPropagation();
+          this.prevSlide();
+        },
+        true
+      );
+
+      // Also add mousedown for testing
+      this.prevBtn.addEventListener("mousedown", () => {
+        console.log("🖱️ Previous button mousedown detected");
+      });
+
+      console.log("✅ Previous button ready");
+    } else {
+      console.error("❌ Previous button not found!");
     }
+
     if (this.nextBtn) {
-      this.nextBtn.addEventListener("click", () => this.nextSlide());
+      console.log("Next button element:", this.nextBtn);
+      console.log("Next button computed style:", {
+        zIndex: window.getComputedStyle(this.nextBtn).zIndex,
+        pointerEvents: window.getComputedStyle(this.nextBtn).pointerEvents,
+        display: window.getComputedStyle(this.nextBtn).display,
+      });
+
+      this.nextBtn.addEventListener(
+        "click",
+        (e) => {
+          console.log("➡️ Next button clicked!", e);
+          e.preventDefault();
+          e.stopPropagation();
+          this.nextSlide();
+        },
+        true
+      );
+
+      // Also add mousedown for testing
+      this.nextBtn.addEventListener("mousedown", () => {
+        console.log("🖱️ Next button mousedown detected");
+      });
+
+      console.log("✅ Next button ready");
+    } else {
+      console.error("❌ Next button not found!");
     }
 
     // Indicator controls
@@ -1204,9 +1384,11 @@ class ResortGallery {
       this.indicators.addEventListener("click", (e) => {
         if (e.target.classList.contains("indicator")) {
           const slideIndex = parseInt(e.target.dataset.slide);
+          console.log("🎯 Indicator clicked:", slideIndex);
           this.goToSlide(slideIndex);
         }
       });
+      console.log("✅ Indicators ready");
     }
 
     // Touch/swipe events
@@ -1250,19 +1432,32 @@ class ResortGallery {
     // Pause auto-play on hover
     const galleryContainer = document.querySelector(".gallery-container");
     if (galleryContainer) {
-      galleryContainer.addEventListener("mouseenter", () =>
-        this.pauseAutoPlay()
-      );
-      galleryContainer.addEventListener("mouseleave", () =>
-        this.startAutoPlay()
-      );
+      galleryContainer.addEventListener("mouseenter", () => {
+        console.log("🖱️ Mouse entered gallery - pausing auto-play");
+        this.pauseAutoPlay();
+      });
+      galleryContainer.addEventListener("mouseleave", () => {
+        console.log("🖱️ Mouse left gallery - resuming auto-play");
+        this.startAutoPlay();
+      });
+      console.log("✅ Hover pause/resume ready");
     }
 
     // Keyboard navigation
     document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft") this.prevSlide();
-      if (e.key === "ArrowRight") this.nextSlide();
+      if (e.key === "ArrowLeft") {
+        console.log("⌨️ Left arrow pressed");
+        this.prevSlide();
+      }
+      if (e.key === "ArrowRight") {
+        console.log("⌨️ Right arrow pressed");
+        this.nextSlide();
+      }
     });
+    console.log("✅ Keyboard navigation ready");
+
+    // Debug: Log all setup complete
+    console.log("🎉 All event listeners setup complete!");
   }
 
   handleTouchStart(e) {
@@ -1322,75 +1517,197 @@ class ResortGallery {
   }
 
   goToSlide(index) {
-    if (this.isTransitioning || index === this.currentSlide) return;
+    if (!this.galleryWrapper) {
+      console.error("❌ Gallery wrapper not found in goToSlide");
+      return;
+    }
 
-    this.isTransitioning = true;
-    this.currentSlide = index;
+    // Prevent going to the same slide
+    if (index === this.currentSlide) return;
 
-    const translateX = -this.currentSlide * 100;
-    this.galleryWrapper.style.transform = `translateX(${translateX}%)`;
-
-    this.updateIndicators();
-    this.updateSlideStates();
-
-    setTimeout(() => {
-      this.isTransitioning = false;
-    }, 400);
+    console.log(`🔄 Going to slide ${index + 1}/${this.totalSlides}`);
+    this.showSlide(index);
   }
 
   nextSlide() {
     const nextIndex = (this.currentSlide + 1) % this.totalSlides;
+    console.log("➡️ Next slide:", nextIndex);
     this.goToSlide(nextIndex);
   }
 
   prevSlide() {
     const prevIndex =
       (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+    console.log("⬅️ Previous slide:", prevIndex);
     this.goToSlide(prevIndex);
   }
 
   updateIndicators() {
-    const indicators = document.querySelectorAll(".indicator");
+    if (!this.indicators) return;
+
+    const indicators = this.indicators.querySelectorAll(".indicator");
     indicators.forEach((indicator, index) => {
       indicator.classList.toggle("active", index === this.currentSlide);
     });
   }
 
-  updateSlideStates() {
-    this.slides.forEach((slide, index) => {
-      slide.classList.toggle("active", index === this.currentSlide);
-    });
-  }
-
   startAutoPlay() {
+    console.log("▶️ Starting auto-play (5 seconds per slide)");
     this.pauseAutoPlay();
     this.autoPlayInterval = setInterval(() => {
+      console.log("⏰ Auto-advancing to next slide");
       this.nextSlide();
-    }, 5000); // Change slide every 5 seconds
+    }, 5000);
   }
 
   pauseAutoPlay() {
     if (this.autoPlayInterval) {
+      console.log("⏸️ Pausing auto-play");
       clearInterval(this.autoPlayInterval);
       this.autoPlayInterval = null;
     }
   }
 
   destroy() {
+    console.log("🛑 Destroying gallery");
     this.pauseAutoPlay();
     // Remove event listeners if needed
   }
 }
 
-// Initialize gallery when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  // Wait a bit for other initializations to complete
-  setTimeout(() => {
-    window.resortGallery = new ResortGallery();
-  }, 100);
+// Backup initialization - try again after page fully loads
+window.addEventListener("load", () => {
+  if (!window.resortGallery) {
+    console.log("🔄 Gallery not initialized, trying backup initialization...");
+    setTimeout(initGallery, 100);
+  }
 });
 
-console.log("%c🖼️ Gallery System Ready", "color: #2196F3; font-weight: bold;");
+// Manual test function - call testGallery() in console to test
+window.testGallery = function () {
+  const wrapper = document.getElementById("galleryWrapper");
+  const slides = document.querySelectorAll(".gallery-slide");
+
+  console.log("=== GALLERY TEST ===");
+  console.log("Wrapper found:", !!wrapper);
+  console.log("Number of slides:", slides.length);
+  console.log("Current transform:", wrapper ? wrapper.style.transform : "N/A");
+
+  if (wrapper && slides.length > 0) {
+    console.log("Testing slide to position 1...");
+    wrapper.style.transition = "transform 0.6s ease";
+    wrapper.style.transform = "translateX(-100%)";
+    console.log("✅ Transform applied: translateX(-100%)");
+
+    setTimeout(() => {
+      console.log("Testing slide to position 2...");
+      wrapper.style.transform = "translateX(-200%)";
+      console.log("✅ Transform applied: translateX(-200%)");
+
+      setTimeout(() => {
+        console.log("Testing back to position 0...");
+        wrapper.style.transform = "translateX(0%)";
+        console.log("✅ Transform applied: translateX(0%)");
+      }, 2000);
+    }, 2000);
+  } else {
+    console.error("❌ Gallery elements not found!");
+  }
+};
+
+// Initialize gallery when DOM is loaded
+function initGallery() {
+  console.log(
+    "%c🖼️ Initializing Gallery...",
+    "color: #2196F3; font-weight: bold;"
+  );
+
+  // Check if gallery wrapper exists
+  const wrapper = document.getElementById("galleryWrapper");
+  if (!wrapper) {
+    console.error("❌ Gallery wrapper not found! Retrying in 500ms...");
+    setTimeout(initGallery, 500);
+    return;
+  }
+
+  console.log("✅ Gallery wrapper found, creating ResortGallery instance");
+  window.resortGallery = new ResortGallery();
+}
+
+// Gallery debug function - available immediately
+window.testGalleryButtons = function () {
+  console.log("\n🧪 Testing gallery button accessibility...");
+
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  if (!prevBtn || !nextBtn) {
+    console.error("❌ Buttons not found!");
+    console.log("Looking for prevBtn:", prevBtn);
+    console.log("Looking for nextBtn:", nextBtn);
+    return;
+  }
+
+  console.log("✅ Buttons found");
+  console.log("Previous button:", prevBtn);
+  console.log("Next button:", nextBtn);
+
+  // Check if buttons are visible and clickable
+  const prevRect = prevBtn.getBoundingClientRect();
+  const nextRect = nextBtn.getBoundingClientRect();
+
+  console.log("Previous button position:", prevRect);
+  console.log("Next button position:", nextRect);
+
+  // Check z-index and pointer events
+  const prevStyle = window.getComputedStyle(prevBtn);
+  const nextStyle = window.getComputedStyle(nextBtn);
+
+  console.log("Previous button styles:", {
+    zIndex: prevStyle.zIndex,
+    pointerEvents: prevStyle.pointerEvents,
+    display: prevStyle.display,
+    visibility: prevStyle.visibility,
+    opacity: prevStyle.opacity,
+  });
+
+  console.log("Next button styles:", {
+    zIndex: nextStyle.zIndex,
+    pointerEvents: nextStyle.pointerEvents,
+    display: nextStyle.display,
+    visibility: nextStyle.visibility,
+    opacity: nextStyle.opacity,
+  });
+
+  // Check what element is on top
+  const nextCenter = {
+    x: nextRect.left + nextRect.width / 2,
+    y: nextRect.top + nextRect.height / 2,
+  };
+  const elementAtPoint = document.elementFromPoint(nextCenter.x, nextCenter.y);
+  console.log("Element at next button center:", elementAtPoint);
+  console.log(
+    "Is it the button or its child?",
+    elementAtPoint === nextBtn || nextBtn.contains(elementAtPoint)
+  );
+
+  // Try to click programmatically
+  console.log("🖱️ Attempting programmatic click on next button...");
+  nextBtn.click();
+};
+
+console.log("✅ testGalleryButtons function registered");
+
+// Initialize immediately or wait for DOM
+if (document.readyState === "loading") {
+  console.log("⏳ Waiting for DOM to load...");
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(initGallery, 300);
+  });
+} else {
+  console.log("✅ DOM already loaded");
+  setTimeout(initGallery, 300);
+}
 
 // ===== POPUP CONTENT SYSTEM =====
 class PopupContentManager {
@@ -1673,66 +1990,232 @@ class PopupContentManager {
   }
 }
 
-// Initialize popup system when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("🚀 DOM loaded, starting initialization...");
-
-  // First, let's check if basic elements exist
-  const navButtons = document.querySelectorAll(".nav-btn");
-  const popupArea = document.getElementById("popupContentArea");
-
-  console.log("🔍 Found elements:", {
-    navButtons: navButtons.length,
-    popupArea: !!popupArea,
-  });
-
-  // Add immediate click listeners to test
-  navButtons.forEach((btn, index) => {
-    console.log(`🔧 Setting up button ${index}: ${btn.dataset.section}`);
-    btn.onclick = function () {
-      console.log(`✅ Button ${index} clicked: ${btn.dataset.section}`);
-      alert(`Button clicked: ${btn.dataset.section}`);
-    };
-  });
-
-  setTimeout(() => {
-    try {
-      window.popupManager = new PopupContentManager();
-      console.log("✅ Popup manager initialized successfully");
-    } catch (error) {
-      console.error("❌ Error initializing popup manager:", error);
-    }
-  }, 150);
-});
-
-// Add CSS animations for notifications
-const notificationStyles = document.createElement("style");
-notificationStyles.textContent = `
-  @keyframes slideInRight {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideOutRight {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-  }
-`;
-document.head.appendChild(notificationStyles);
+// Note: PopupContentManager removed as navigation is now handled directly
+// Navigation is managed by setupEventListeners() function
 
 console.log(
   "%c🎯 Popup Content System Ready",
   "color: #9C27B0; font-weight: bold;"
+);
+
+// ===== QUICK ACTIONS FUNCTIONS =====
+function quickAction(action) {
+  switch (action) {
+    case "book":
+      showSection("my-reservations");
+      updateActiveNavigation("my-reservations");
+      showNotification("Opening booking page...", "info");
+      break;
+    case "view":
+      showSection("bookings-history");
+      updateActiveNavigation("bookings-history");
+      showNotification("Loading your bookings...", "info");
+      break;
+    case "promo":
+      showSection("promotions");
+      updateActiveNavigation("promotions");
+      showNotification("Check out our latest promotions!", "success");
+      break;
+    case "support":
+      showNotification("Customer support: +63 917 123 4567", "info", 5000);
+      break;
+  }
+}
+
+// ===== BOOKING HISTORY FUNCTIONS =====
+function viewBookingDetails(bookingId) {
+  showNotification(`Loading details for booking ${bookingId}...`, "info");
+  // In production, this would fetch and display full booking details
+}
+
+function leaveReview(bookingId) {
+  showSection("reviews");
+  updateActiveNavigation("reviews");
+  showNotification("Write a review for your stay!", "success");
+  // In production, this would open a review form for that specific booking
+}
+
+function bookAgain(packageType) {
+  showSection("my-reservations");
+  updateActiveNavigation("my-reservations");
+  showNotification(`Pre-filling ${packageType} package...`, "info");
+  // In production, this would pre-fill the booking form
+}
+
+function modifyBooking(bookingId) {
+  showNotification(`Opening modification form for ${bookingId}...`, "info");
+  // In production, this would open an editable booking form
+}
+
+function cancelBooking(bookingId) {
+  if (
+    confirm(
+      "Are you sure you want to cancel this booking? This action cannot be undone."
+    )
+  ) {
+    showNotification(`Cancelling booking ${bookingId}...`, "warning");
+    // In production, this would call an API to cancel the booking
+    setTimeout(() => {
+      showNotification("Booking cancelled successfully.", "success");
+    }, 1500);
+  }
+}
+
+function completePayment(bookingId) {
+  showNotification(`Redirecting to payment page for ${bookingId}...`, "info");
+  // In production, this would redirect to payment gateway
+}
+
+// Filter booking history
+document.addEventListener("DOMContentLoaded", function () {
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  const bookingCards = document.querySelectorAll(".booking-history-card");
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      // Remove active from all buttons
+      filterButtons.forEach((btn) => btn.classList.remove("active"));
+      // Add active to clicked button
+      this.classList.add("active");
+
+      const filter = this.getAttribute("data-filter");
+
+      bookingCards.forEach((card) => {
+        if (filter === "all") {
+          card.style.display = "block";
+        } else {
+          const status = card.getAttribute("data-status");
+          card.style.display = status === filter ? "block" : "none";
+        }
+      });
+    });
+  });
+
+  // Search functionality
+  const searchInput = document.getElementById("bookingSearch");
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      const searchTerm = this.value.toLowerCase();
+      bookingCards.forEach((card) => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(searchTerm) ? "block" : "none";
+      });
+    });
+  }
+});
+
+// ===== NOTIFICATIONS FUNCTIONS =====
+function markAllAsRead() {
+  const unreadNotifications = document.querySelectorAll(
+    ".notification-item.unread"
+  );
+  unreadNotifications.forEach((notif) => {
+    notif.classList.remove("unread");
+  });
+
+  // Update notification count
+  const badge = document.getElementById("notificationCount");
+  if (badge) {
+    badge.textContent = "0";
+    badge.style.display = "none";
+  }
+
+  showNotification("All notifications marked as read.", "success");
+}
+
+function dismissNotification(button) {
+  const notificationItem = button.closest(".notification-item");
+  notificationItem.style.animation = "slideOutRight 0.3s ease";
+  setTimeout(() => {
+    notificationItem.remove();
+
+    // Update count
+    const unreadCount = document.querySelectorAll(
+      ".notification-item.unread"
+    ).length;
+    const badge = document.getElementById("notificationCount");
+    if (badge) {
+      badge.textContent = unreadCount;
+      if (unreadCount === 0) {
+        badge.style.display = "none";
+      }
+    }
+  }, 300);
+}
+
+// ===== REWARDS FUNCTIONS =====
+function redeemReward(points, rewardType) {
+  const currentPoints = 2500; // This would come from user data
+
+  if (currentPoints < points) {
+    showNotification("Insufficient points for this reward.", "error");
+    return;
+  }
+
+  if (confirm(`Redeem this reward for ${points} points?`)) {
+    showNotification(
+      `Redeeming reward... ${points} points will be deducted.`,
+      "info"
+    );
+
+    setTimeout(() => {
+      showNotification(
+        "Reward redeemed successfully! Check your email for details.",
+        "success"
+      );
+      // In production, this would update the points balance
+    }, 1500);
+  }
+}
+
+// ===== REVIEWS FUNCTIONS =====
+function writeNewReview() {
+  showNotification("Opening review form...", "info");
+  // In production, this would show a modal with review form
+  setTimeout(() => {
+    alert(
+      "Review form would appear here!\n\nFeatures:\n- Rating stars\n- Text area for review\n- Photo upload\n- Submit button"
+    );
+  }, 500);
+}
+
+function editReview(reviewId) {
+  showNotification(`Loading review ${reviewId} for editing...`, "info");
+  // In production, this would open the review in edit mode
+}
+
+function deleteReview(reviewId) {
+  if (
+    confirm(
+      "Are you sure you want to delete this review? This action cannot be undone."
+    )
+  ) {
+    showNotification("Deleting review...", "warning");
+
+    setTimeout(() => {
+      showNotification("Review deleted successfully.", "success");
+      // In production, this would remove the review from the list
+      document.querySelector(`[data-review-id="${reviewId}"]`)?.remove();
+    }, 1000);
+  }
+}
+
+// ===== GLOBAL FUNCTION EXPORTS =====
+window.quickAction = quickAction;
+window.viewBookingDetails = viewBookingDetails;
+window.leaveReview = leaveReview;
+window.bookAgain = bookAgain;
+window.modifyBooking = modifyBooking;
+window.cancelBooking = cancelBooking;
+window.completePayment = completePayment;
+window.markAllAsRead = markAllAsRead;
+window.dismissNotification = dismissNotification;
+window.redeemReward = redeemReward;
+window.writeNewReview = writeNewReview;
+window.editReview = editReview;
+window.deleteReview = deleteReview;
+
+console.log(
+  "%c✨ Enhanced Features Loaded",
+  "color: #4CAF50; font-weight: bold;"
 );

@@ -186,7 +186,7 @@ try {
         
         $emailSent = $mailer->sendEmailVerificationEmail(
             $email,
-            $fullName,
+            $givenName,
             $verificationLink,
             $verificationExpiresAt
         );
