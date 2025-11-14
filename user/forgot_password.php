@@ -103,15 +103,12 @@ try {
     $updateStmt->bindParam(':user_id', $user['user_id'], PDO::PARAM_INT);
     $updateStmt->execute();
 
-    // Create reset link
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'];
+    // Create reset link using ngrok if configured
+    require_once '../config/ngrok.php';
     
-    // Get the base path dynamically from the current request
-    $scriptName = $_SERVER['SCRIPT_NAME']; // e.g., /Design_2.../user/forgot_password.php
-    $basePath = dirname(dirname($scriptName)); // Go up two levels to get the base directory
-    
-    $resetLink = "{$protocol}://{$host}{$basePath}/reset_password.html?token={$resetToken}";
+    $projectPath = 'AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2';
+    $resetPath = "{$projectPath}/reset_password.html?token={$resetToken}";
+    $resetLink = buildVerificationUrl($resetPath);
 
     // Log the reset link for development
     $logDir = __DIR__ . '/password_resets';

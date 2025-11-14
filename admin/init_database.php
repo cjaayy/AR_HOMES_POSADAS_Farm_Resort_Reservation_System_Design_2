@@ -30,6 +30,7 @@ try {
         email VARCHAR(100) NOT NULL UNIQUE,
         password_hash VARCHAR(255) NOT NULL,
         full_name VARCHAR(100) NOT NULL,
+        position VARCHAR(100) DEFAULT NULL,
         role ENUM('super_admin', 'admin', 'staff') DEFAULT 'admin',
         is_active TINYINT(1) DEFAULT 1,
         last_login DATETIME DEFAULT NULL,
@@ -56,13 +57,14 @@ try {
         $defaultEmail = 'admin@resort.com';
         $defaultPassword = 'admin123'; // Change this in production!
         $defaultFullName = 'Administrator';
+        $defaultPosition = 'System Administrator';
         $passwordHash = password_hash($defaultPassword, PASSWORD_DEFAULT);
 
         $insertAdmin = "
         INSERT INTO admin_users 
-        (username, email, password_hash, full_name, role, is_active) 
+        (username, email, password_hash, full_name, position, role, is_active) 
         VALUES 
-        (:username, :email, :password_hash, :full_name, 'super_admin', 1)
+        (:username, :email, :password_hash, :full_name, :position, 'super_admin', 1)
         ";
 
         $stmt = $conn->prepare($insertAdmin);
@@ -70,6 +72,7 @@ try {
         $stmt->bindParam(':email', $defaultEmail);
         $stmt->bindParam(':password_hash', $passwordHash);
         $stmt->bindParam(':full_name', $defaultFullName);
+        $stmt->bindParam(':position', $defaultPosition);
         $stmt->execute();
 
         echo "✓ Default admin account created successfully<br><br>";

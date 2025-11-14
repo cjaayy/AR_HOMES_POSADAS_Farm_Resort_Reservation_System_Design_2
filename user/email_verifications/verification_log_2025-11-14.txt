@@ -1,0 +1,82 @@
+
+================================================================================
+Email Verification Request
+Time: 2025-11-14 14:13:43
+User: Mandani, Christian Jay Cereza (cjay15)
+Email: mjhayxinadnam@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=564fc61ffb8f5d066672da2aed0ec85f766b61ecad0eddfe2d09a1d32c1d27a5
+Expires: 2025-11-15 14:13:38
+================================================================================
+
+================================================================================
+Email Verification Completed
+Time: 2025-11-14 14:14:02
+User: Mandani, Christian Jay Cereza (cjay15)
+Email: mjhayxinadnam@gmail.com
+================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-11-14 14:19:22
+User: Facun, Aienne Joy Ramos (ayen15)
+Email: cerezajonalyn31@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=924b6ed680fb7aa58164b79a2d9e79285dcfb0acf63323ca587585f733087adf
+Expires: 2025-11-15 14:19:17
+================================================================================
+
+================================================================================
+Email Verification Completed
+Time: 2025-11-14 14:20:22
+User: Facun, Aienne Joy Ramos (ayen15)
+Email: cerezajonalyn31@gmail.com
+================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-11-14 14:22:14
+User: Facun, Aienne Joy Cereza (ayen15)
+Email: cerezajonalyn31@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=972c7de2ef013e8af0b07203f540613d869108d01154ca7d4cd42872f7a605fd
+Expires: 2025-11-15 14:22:08
+================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-11-14 14:25:27
+User: Facun, Aienne Joy Ramos (ayen15)
+Email: cerezajonalyn31@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=fcb4414102b63d15b358db6427d1ed1bd775b97b637cc1f911ea9e58c9fc6a4d
+Expires: 2025-11-15 14:25:22
+================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-11-14 14:27:35
+User: Facun, Aienne Joy Ramos (ayen15)
+Email: cerezajonalyn31@gmail.com
+Verification Link: http://localhost/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=8310bb385d4013375117828d04ec3e68f862ae86c677808dd8324392ede13d5a
+Expires: 2025-11-15 14:27:31
+================================================================================
+
+================================================================================
+Email Verification Completed
+Time: 2025-11-14 14:28:27
+User: Facun, Aienne Joy Ramos (ayen15)
+Email: cerezajonalyn31@gmail.com
+================================================================================
+
+================================================================================
+Email Verification Request
+Time: 2025-11-14 14:56:28
+User: dsds, dsds dsds (mandani1)
+Email: mandanichristian137@gmail.com
+Verification Link: https://sally-interimperial-pura.ngrok-free.dev/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=4f56b913f3e648e66d7daa97a94efc3f93f58b57cfe016c379faa4f32c2adf8c
+Expires: 2025-11-15 14:56:23
+================================================================================
+
+================================================================================
+Email Verification Completed
+Time: 2025-11-14 14:57:18
+User: dsds, dsds dsds (mandani1)
+Email: mandanichristian137@gmail.com
+================================================================================

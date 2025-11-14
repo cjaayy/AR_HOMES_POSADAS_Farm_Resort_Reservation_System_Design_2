@@ -155,12 +155,12 @@ try {
     
     file_put_contents(__DIR__ . '/registration_debug.log', date('Y-m-d H:i:s') . " - SUCCESS: User ID $userId created\n", FILE_APPEND);
 
-    // Create verification link
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'];
-    $scriptName = $_SERVER['SCRIPT_NAME'];
-    $basePath = dirname(dirname($scriptName));
-    $verificationLink = "{$protocol}://{$host}{$basePath}/user/verify_email.php?token={$verificationToken}";
+    // Create verification link using ngrok if configured
+    require_once '../config/ngrok.php';
+    
+    $projectPath = 'AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2';
+    $verificationPath = "{$projectPath}/user/verify_email.php?token={$verificationToken}";
+    $verificationLink = buildVerificationUrl($verificationPath);
 
     // Send email verification email
     try {

@@ -190,7 +190,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
     <title>Admin Dashboard - AR Homes Posadas Farm Resort</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="../favicon.ico" type="image/x-icon" />
     <link
       rel="icon"
       type="image/png"
@@ -212,7 +211,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       rel="shortcut icon"
       href="../logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
     />
-    <link rel="manifest" href="../site.webmanifest" />
 
     <!-- Meta tags -->
     <meta name="theme-color" content="#667eea" />

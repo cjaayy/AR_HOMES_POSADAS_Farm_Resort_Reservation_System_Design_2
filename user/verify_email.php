@@ -18,7 +18,6 @@ require_once '../config/connection.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Verification - AR Homes Posadas Farm Resort</title>
     
-    <link rel="icon" href="../favicon.ico" type="image/x-icon" />
     <link rel="icon" type="image/png" sizes="32x32" href="../logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png" />
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
