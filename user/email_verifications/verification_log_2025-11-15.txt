@@ -1,0 +1,16 @@
+
+================================================================================
+Email Verification Request
+Time: 2025-11-15 18:07:25
+User: Mandani, Christian James Cereza (jaymes22)
+Email: cjmandani2005@gmail.com
+Verification Link: https://sally-interimperial-pura.ngrok-free.dev/AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2/user/verify_email.php?token=cf5d320fd57cbb86f7887a8c7a7b2c528b70ba66d497fa2126165ef5197f8ad5
+Expires: 2025-11-16 18:07:21
+================================================================================
+
+================================================================================
+Email Verification Completed
+Time: 2025-11-15 18:08:06
+User: Mandani, Christian James Cereza (jaymes22)
+Email: cjmandani2005@gmail.com
+================================================================================
