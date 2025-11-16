@@ -643,6 +643,308 @@ This is an automated message, please do not reply to this email.
     }
 
     /**
+     * Send booking confirmation email
+     * 
+     * @param string $recipientEmail
+     * @param string $recipientName
+     * @param array $reservationDetails
+     * @return bool
+     */
+    public function sendBookingConfirmationEmail($recipientEmail, $recipientName, $reservationDetails) {
+        try {
+            $this->mail->addAddress($recipientEmail, $recipientName);
+            $this->mail->addReplyTo(MAIL_FROM_EMAIL, MAIL_FROM_NAME);
+            
+            $this->mail->isHTML(true);
+            $this->mail->Subject = 'Booking Confirmed - Reservation #' . $reservationDetails['reservation_id'] . ' - ' . APP_NAME;
+            
+            $emailBody = $this->getBookingConfirmationTemplate($recipientName, $reservationDetails);
+            $this->mail->Body = $emailBody;
+            
+            $this->mail->AltBody = $this->getBookingConfirmationPlainText($recipientName, $reservationDetails);
+            
+            $result = $this->mail->send();
+            
+            $this->mail->clearAddresses();
+            $this->mail->clearAttachments();
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            $this->error = "Message could not be sent. Mailer Error: {$this->mail->ErrorInfo}";
+            error_log($this->error);
+            return false;
+        }
+    }
+    
+    /**
+     * Get booking confirmation email HTML template
+     */
+    private function getBookingConfirmationTemplate($recipientName, $details) {
+        $checkInDate = date('F j, Y', strtotime($details['check_in_date']));
+        $checkOutDate = isset($details['check_out_date']) ? date('F j, Y', strtotime($details['check_out_date'])) : 'N/A';
+        $checkInTime = date('g:i A', strtotime($details['check_in_time']));
+        $checkOutTime = date('g:i A', strtotime($details['check_out_time']));
+        
+        return "
+        <!DOCTYPE html>
+        <html lang='en'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Booking Confirmed</title>
+            <style>
+                body {
+                    font-family: 'Arial', 'Helvetica', sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+                .email-container {
+                    max-width: 600px;
+                    margin: 30px auto;
+                    background: #ffffff;
+                    border-radius: 10px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+                .email-header {
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    color: #ffffff;
+                    padding: 40px 20px;
+                    text-align: center;
+                }
+                .email-header .icon {
+                    font-size: 60px;
+                    margin-bottom: 15px;
+                }
+                .email-header h1 {
+                    margin: 0;
+                    font-size: 28px;
+                    font-weight: 600;
+                }
+                .email-body {
+                    padding: 40px 30px;
+                }
+                .email-body h2 {
+                    color: #28a745;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                }
+                .email-body p {
+                    margin-bottom: 15px;
+                    font-size: 16px;
+                    color: #666;
+                }
+                .success-box {
+                    background-color: #d4edda;
+                    border-left: 4px solid #28a745;
+                    padding: 20px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .info-section {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    margin: 20px 0;
+                    border-radius: 8px;
+                }
+                .info-row {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 10px 0;
+                    border-bottom: 1px solid #e0e0e0;
+                }
+                .info-row:last-child {
+                    border-bottom: none;
+                }
+                .info-label {
+                    font-weight: 600;
+                    color: #333;
+                }
+                .info-value {
+                    color: #666;
+                    text-align: right;
+                }
+                .total-row {
+                    background-color: #667eea;
+                    color: white;
+                    padding: 15px 20px;
+                    margin: 20px 0;
+                    border-radius: 8px;
+                    font-size: 18px;
+                    font-weight: 600;
+                }
+                .warning-box {
+                    background-color: #fff3cd;
+                    border-left: 4px solid #ffc107;
+                    padding: 15px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .footer {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    text-align: center;
+                    font-size: 14px;
+                    color: #666;
+                }
+                .footer p {
+                    margin: 5px 0;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-container'>
+                <div class='email-header'>
+                    <div class='icon'>✅</div>
+                    <h1>Booking Confirmed!</h1>
+                    <p>Your reservation has been approved</p>
+                </div>
+                <div class='email-body'>
+                    <div class='success-box'>
+                        <h2 style='margin: 0 0 10px 0; color: #28a745;'>🎉 Congratulations!</h2>
+                        <p style='margin: 0; font-size: 18px; color: #333;'>Your payment has been verified and your reservation is now <strong>CONFIRMED</strong>!</p>
+                    </div>
+                    
+                    <p>Dear <strong>" . htmlspecialchars($recipientName) . "</strong>,</p>
+                    <p>Great news! Your downpayment has been verified by our team, and your reservation is now confirmed and locked.</p>
+                    
+                    <div class='info-section'>
+                        <h3 style='margin-top: 0; color: #333;'>📋 Reservation Details</h3>
+                        <div class='info-row'>
+                            <span class='info-label'>Reservation ID:</span>
+                            <span class='info-value'>#" . htmlspecialchars($details['reservation_id']) . "</span>
+                        </div>
+                        <div class='info-row'>
+                            <span class='info-label'>Booking Type:</span>
+                            <span class='info-value'>" . htmlspecialchars(ucfirst($details['booking_type'])) . "</span>
+                        </div>
+                        <div class='info-row'>
+                            <span class='info-label'>Package:</span>
+                            <span class='info-value'>" . htmlspecialchars($details['package_type']) . "</span>
+                        </div>
+                        <div class='info-row'>
+                            <span class='info-label'>Check-in Date:</span>
+                            <span class='info-value'>" . $checkInDate . "</span>
+                        </div>
+                        <div class='info-row'>
+                            <span class='info-label'>Check-in Time:</span>
+                            <span class='info-value'>" . $checkInTime . "</span>
+                        </div>
+                        <div class='info-row'>
+                            <span class='info-label'>Check-out Date:</span>
+                            <span class='info-value'>" . $checkOutDate . "</span>
+                        </div>
+                        <div class='info-row'>
+                            <span class='info-label'>Check-out Time:</span>
+                            <span class='info-value'>" . $checkOutTime . "</span>
+                        </div>
+                        <div class='info-row'>
+                            <span class='info-label'>Number of Guests:</span>
+                            <span class='info-value'>" . htmlspecialchars($details['number_of_guests']) . "</span>
+                        </div>
+                    </div>
+                    
+                    <div class='total-row'>
+                        <div style='display: flex; justify-content: space-between;'>
+                            <span>Total Amount:</span>
+                            <span>₱" . number_format($details['total_amount'], 2) . "</span>
+                        </div>
+                        <div style='display: flex; justify-content: space-between; font-size: 14px; font-weight: normal; margin-top: 5px;'>
+                            <span>Downpayment Paid:</span>
+                            <span>₱" . number_format($details['downpayment_amount'], 2) . "</span>
+                        </div>
+                        <div style='display: flex; justify-content: space-between; font-size: 14px; font-weight: normal; margin-top: 5px;'>
+                            <span>Balance Due:</span>
+                            <span>₱" . number_format($details['remaining_balance'], 2) . "</span>
+                        </div>
+                    </div>
+                    
+                    <div class='warning-box'>
+                        <p style='margin: 0 0 10px 0;'><strong>⚠️ Important Reminders:</strong></p>
+                        <ul style='margin: 0; padding-left: 20px;'>
+                            <li>Your date is now <strong>LOCKED</strong> and secured exclusively for you</li>
+                            <li>Please pay the remaining balance of <strong>₱" . number_format($details['remaining_balance'], 2) . "</strong> before check-in</li>
+                            <li>Don't forget to bring this confirmation and a valid ID</li>
+                            <li>Security bond: ₱" . number_format($details['security_bond'], 2) . " (refundable)</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>What to bring:</strong></p>
+                    <ul>
+                        <li>This booking confirmation (printed or digital)</li>
+                        <li>Valid government-issued ID</li>
+                        <li>Remaining balance payment</li>
+                        <li>Security bond (cash)</li>
+                    </ul>
+                    
+                    <p>If you have any questions or need to make changes to your reservation, please contact us at:</p>
+                    <p><strong>📞 Phone:</strong> +63 917 123 4567<br>
+                    <strong>✉️ Email:</strong> " . MAIL_FROM_EMAIL . "</p>
+                    
+                    <p>We look forward to welcoming you!</p>
+                </div>
+                <div class='footer'>
+                    <p>&copy; " . date('Y') . " " . APP_NAME . ". All rights reserved.</p>
+                    <p>This is an automated message, please do not reply to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+    }
+    
+    /**
+     * Get booking confirmation plain text version
+     */
+    private function getBookingConfirmationPlainText($recipientName, $details) {
+        $checkInDate = date('F j, Y', strtotime($details['check_in_date']));
+        $checkOutDate = isset($details['check_out_date']) ? date('F j, Y', strtotime($details['check_out_date'])) : 'N/A';
+        
+        return "
+" . APP_NAME . "
+
+BOOKING CONFIRMED!
+
+Dear " . $recipientName . ",
+
+Great news! Your payment has been verified and your reservation is now CONFIRMED and LOCKED!
+
+Reservation Details:
+- Reservation ID: #" . $details['reservation_id'] . "
+- Booking Type: " . ucfirst($details['booking_type']) . "
+- Package: " . $details['package_type'] . "
+- Check-in: " . $checkInDate . " at " . date('g:i A', strtotime($details['check_in_time'])) . "
+- Check-out: " . $checkOutDate . " at " . date('g:i A', strtotime($details['check_out_time'])) . "
+- Guests: " . $details['number_of_guests'] . "
+
+Payment Summary:
+- Total Amount: ₱" . number_format($details['total_amount'], 2) . "
+- Downpayment Paid: ₱" . number_format($details['downpayment_amount'], 2) . "
+- Balance Due: ₱" . number_format($details['remaining_balance'], 2) . "
+- Security Bond: ₱" . number_format($details['security_bond'], 2) . "
+
+IMPORTANT REMINDERS:
+- Your date is now LOCKED and secured exclusively for you
+- Please pay the remaining balance before check-in
+- Bring this confirmation and a valid ID
+- Security bond is refundable
+
+Contact us:
+Phone: +63 917 123 4567
+Email: " . MAIL_FROM_EMAIL . "
+
+We look forward to welcoming you!
+
+---
+© " . date('Y') . " " . APP_NAME . ". All rights reserved.
+        ";
+    }
+
+    /**
      * Get last error message
      */
     public function getError() {

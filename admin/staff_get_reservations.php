@@ -31,7 +31,30 @@ try {
         exit;
     }
 
-    $sql = "SELECT reservation_id, guest_name, guest_email, guest_phone, room, check_in_date, check_out_date, status, created_at FROM reservations";
+    $sql = "SELECT 
+                reservation_id, 
+                user_id,
+                guest_name, 
+                guest_email, 
+                guest_phone, 
+                room,
+                booking_type,
+                package_type,
+                check_in_date, 
+                check_in_time,
+                check_out_date, 
+                check_out_time,
+                number_of_days,
+                number_of_nights,
+                total_amount,
+                downpayment_amount,
+                downpayment_paid,
+                full_payment_paid,
+                payment_method,
+                security_bond_paid,
+                status, 
+                created_at 
+            FROM reservations";
     $params = [];
     if ($status) {
         $sql .= " WHERE status = :status";

@@ -288,6 +288,10 @@
                 <i class="fas fa-user-cog"></i>
                 <span>Profile</span>
               </button>
+              <button class="nav-btn" data-section="my-bookings">
+                <i class="fas fa-clipboard-list"></i>
+                <span>My Bookings</span>
+              </button>
               <button class="nav-btn" data-section="bookings-history">
                 <i class="fas fa-history"></i>
                 <span>Booking History</span>
@@ -295,7 +299,12 @@
               <button class="nav-btn" data-section="notifications">
                 <i class="fas fa-bell"></i>
                 <span>Notifications</span>
-                <span class="notification-badge" id="notificationCount">3</span>
+                <span
+                  class="notification-badge"
+                  id="notificationCount"
+                  style="display: none"
+                  >0</span
+                >
               </button>
               <button class="nav-btn" data-section="reviews">
                 <i class="fas fa-star"></i>
@@ -456,291 +465,619 @@
 
           <!-- Make Reservation Content -->
           <div class="content-section" id="my-reservations-section">
-            <!-- Resort Access + Room Selection -->
-            <div class="resort-access-header">
-              <h2>🏖️ Complete Resort Access + Room Selection</h2>
-              <p class="access-description">
-                <strong>✨ ALL GUESTS GET FULL RESORT ACCESS ✨</strong><br />
-                Enjoy exclusive access to all pools, facilities, and outdoor
-                areas.<br />
-                Choose which rooms your group wants to use for accommodation.
-              </p>
-              <div class="included-facilities">
-                <div class="facility-badge">🏊‍♂️ All Pools</div>
-                <div class="facility-badge">🍽️ BBQ Areas</div>
-                <div class="facility-badge">🏐 Sports Facilities</div>
-                <div class="facility-badge">🌿 Gardens</div>
-                <div class="facility-badge">🚗 Parking</div>
-                <div class="facility-badge">📶 WiFi</div>
+            <!-- Booking Policy Notice -->
+            <div class="policy-notice">
+              <h2>📋 Booking Policy</h2>
+              <div class="policy-highlights">
+                <div class="policy-item">
+                  <i class="fas fa-check-circle"></i>
+                  <span><strong>First to Pay, First to Reserve</strong></span>
+                </div>
+                <div class="policy-item">
+                  <i class="fas fa-wallet"></i>
+                  <span
+                    ><strong>50% Downpayment Required</strong> to confirm
+                    reservation</span
+                  >
+                </div>
+                <div class="policy-item">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span
+                    ><strong>Non-Refundable</strong> - Rebooking only (within 3
+                    months)</span
+                  >
+                </div>
+                <div class="policy-item">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span
+                    ><strong>Rebooking allowed</strong> 7 days prior to
+                    schedule</span
+                  >
+                </div>
+                <div class="policy-item">
+                  <i class="fas fa-shield-alt"></i>
+                  <span
+                    ><strong>₱2,000 Security Bond</strong> upon check-in
+                    (refundable)</span
+                  >
+                </div>
               </div>
-              <p class="selection-instruction">
-                <strong>Now select your room package below:</strong>
-              </p>
             </div>
-            <div class="room-packages-grid">
-              <!-- All Rooms Package -->
-              <div class="room-package-card featured" data-package="all-rooms">
-                <div class="package-header">
-                  <h3>All Rooms Package</h3>
-                  <div class="package-badge premium">Most Popular</div>
-                </div>
-                <div class="package-content">
-                  <div class="package-price">
-                    ₱25,000 <span>per night</span>
-                  </div>
-                  <div class="package-price-day">
-                    ₱15,000 <span>per day</span>
-                  </div>
 
-                  <div class="included-rooms">
-                    <h4>Included Accommodations:</h4>
-                    <div class="room-list">
-                      <div class="room-item">
-                        <img
-                          src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
-                          alt="Deluxe Room"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Deluxe Room</span>
-                          <span class="room-features"
-                            >AC • King Bed • 2 guests</span
-                          >
-                        </div>
+            <!-- Step 1: Select Booking Type -->
+            <div class="booking-step active" id="step1">
+              <h2>Step 1: Choose Your Booking Type</h2>
+              <div class="booking-types-grid">
+                <!-- DAYTIME Booking -->
+                <div class="booking-type-card" data-type="daytime">
+                  <div class="booking-type-header">
+                    <div class="booking-icon sun">
+                      <i class="fas fa-sun"></i>
+                    </div>
+                    <h3>DAYTIME</h3>
+                    <p class="booking-hours">9:00 AM - 5:00 PM</p>
+                  </div>
+                  <div class="booking-type-body">
+                    <div class="time-info">
+                      <div class="time-row">
+                        <span class="time-label">Check-in:</span>
+                        <span class="time-value">9:00 AM</span>
                       </div>
-                      <div class="room-item">
-                        <img
-                          src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
-                          alt="Executive Suite"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Executive Suite</span>
-                          <span class="room-features"
-                            >AC • Living Area • 4 guests</span
-                          >
-                        </div>
-                      </div>
-                      <div class="room-item">
-                        <img
-                          src="images/546238992_684641691315373_7119956179300816560_n.jpg"
-                          alt="Family Room"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Family Room</span>
-                          <span class="room-features"
-                            >AC • 2 Queen Beds • 6 guests</span
-                          >
-                        </div>
-                      </div>
-                      <div class="room-item">
-                        <img
-                          src="images/547374912_659920707160374_2419929377794463667_n.jpg"
-                          alt="Private Villa"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Private Villa</span>
-                          <span class="room-features"
-                            >AC • Private Pool • 8 guests</span
-                          >
-                        </div>
+                      <div class="time-row">
+                        <span class="time-label">Check-out:</span>
+                        <span class="time-value">5:00 PM</span>
                       </div>
                     </div>
-                    <div class="total-capacity">Total: Up to 20 guests</div>
+                    <div class="booking-features">
+                      <div class="feature-item">
+                        <i class="fas fa-swimming-pool"></i>
+                        <span>Full resort access</span>
+                      </div>
+                      <div class="feature-item">
+                        <i class="fas fa-utensils"></i>
+                        <span>BBQ areas available</span>
+                      </div>
+                      <div class="feature-item">
+                        <i class="fas fa-clock"></i>
+                        <span>8-hour access</span>
+                      </div>
+                    </div>
+                    <div class="policy-details">
+                      <h4>Policies:</h4>
+                      <ul>
+                        <li>₱500/hour for exceeding hours</li>
+                        <li>₱2,000 security bond required</li>
+                        <li>Noise curfew at 10:00 PM</li>
+                        <li>No smoking - ₱5,000 penalty</li>
+                      </ul>
+                    </div>
                   </div>
                   <button
-                    class="select-package-btn"
-                    onclick="selectRoomPackage('all-rooms', '₱25,000', '₱15,000')"
+                    class="select-booking-type-btn"
+                    onclick="selectBookingType('daytime')"
                   >
-                    Select All Rooms Package
+                    <i class="fas fa-check"></i> Select Daytime
                   </button>
                 </div>
-              </div>
 
-              <!-- Aircon Rooms Only Package -->
-              <div class="room-package-card" data-package="aircon-rooms">
-                <div class="package-header">
-                  <h3>Aircon Rooms Package</h3>
-                  <div class="package-badge comfort">Comfort</div>
-                </div>
-                <div class="package-content">
-                  <div class="package-price">
-                    ₱20,000 <span>per night</span>
+                <!-- NIGHTTIME Booking -->
+                <div class="booking-type-card featured" data-type="nighttime">
+                  <div class="booking-ribbon">Popular</div>
+                  <div class="booking-type-header">
+                    <div class="booking-icon moon">
+                      <i class="fas fa-moon"></i>
+                    </div>
+                    <h3>NIGHTTIME</h3>
+                    <p class="booking-hours">7:00 PM - 7:00 AM</p>
                   </div>
-                  <div class="package-price-day">
-                    ₱12,000 <span>per day</span>
-                  </div>
-
-                  <div class="included-rooms">
-                    <h4>Air-Conditioned Rooms:</h4>
-                    <div class="room-list">
-                      <div class="room-item">
-                        <img
-                          src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
-                          alt="Deluxe Room"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Deluxe Room</span>
-                          <span class="room-features"
-                            >❄️ AC • King Bed • 2 guests</span
-                          >
-                        </div>
+                  <div class="booking-type-body">
+                    <div class="time-info">
+                      <div class="time-row">
+                        <span class="time-label">Check-in:</span>
+                        <span class="time-value">7:00 PM</span>
                       </div>
-                      <div class="room-item">
-                        <img
-                          src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
-                          alt="Executive Suite"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Executive Suite</span>
-                          <span class="room-features"
-                            >❄️ AC • Living Area • 4 guests</span
-                          >
-                        </div>
-                      </div>
-                      <div class="room-item">
-                        <img
-                          src="images/546238992_684641691315373_7119956179300816560_n.jpg"
-                          alt="Family Room"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Family Room</span>
-                          <span class="room-features"
-                            >❄️ AC • 2 Queen Beds • 6 guests</span
-                          >
-                        </div>
+                      <div class="time-row">
+                        <span class="time-label">Check-out:</span>
+                        <span class="time-value">7:00 AM</span>
                       </div>
                     </div>
-                    <div class="total-capacity">Total: Up to 12 guests</div>
+                    <div class="booking-features">
+                      <div class="feature-item">
+                        <i class="fas fa-bed"></i>
+                        <span>Overnight stay included</span>
+                      </div>
+                      <div class="feature-item">
+                        <i class="fas fa-swimming-pool"></i>
+                        <span>Full resort access</span>
+                      </div>
+                      <div class="feature-item">
+                        <i class="fas fa-clock"></i>
+                        <span>12-hour access</span>
+                      </div>
+                    </div>
+                    <div class="policy-details">
+                      <h4>Policies:</h4>
+                      <ul>
+                        <li>₱500/hour early check-in fee</li>
+                        <li>₱1,000/hour for exceeding hours</li>
+                        <li>₱2,000 security bond required</li>
+                        <li>No smoking - ₱5,000 penalty</li>
+                      </ul>
+                    </div>
                   </div>
                   <button
-                    class="select-package-btn"
-                    onclick="selectRoomPackage('aircon-rooms', '₱20,000', '₱12,000')"
+                    class="select-booking-type-btn"
+                    onclick="selectBookingType('nighttime')"
                   >
-                    Select Aircon Rooms
+                    <i class="fas fa-check"></i> Select Nighttime
                   </button>
                 </div>
-              </div>
 
-              <!-- Basic Rooms Package -->
-              <div class="room-package-card" data-package="basic-rooms">
-                <div class="package-header">
-                  <h3>Basic Rooms Package</h3>
-                  <div class="package-badge budget">Budget Friendly</div>
-                </div>
-                <div class="package-content">
-                  <div class="package-price">
-                    ₱12,000 <span>per night</span>
+                <!-- 22 HOURS Booking -->
+                <div class="booking-type-card" data-type="22hours">
+                  <div class="booking-type-header">
+                    <div class="booking-icon extended">
+                      <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <h3>22 HOURS</h3>
+                    <p class="booking-hours">2:00 PM - 12:00 NN (Next Day)</p>
                   </div>
-                  <div class="package-price-day">
-                    ₱8,000 <span>per day</span>
-                  </div>
-
-                  <div class="included-rooms">
-                    <h4>Basic Accommodations:</h4>
-                    <div class="room-list">
-                      <div class="room-item">
-                        <img
-                          src="images/546238992_684641691315373_7119956179300816560_n.jpg"
-                          alt="Fan Room"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Fan Room 1</span>
-                          <span class="room-features"
-                            >🌀 Fan • Double Bed • 4 guests</span
-                          >
-                        </div>
+                  <div class="booking-type-body">
+                    <div class="time-info">
+                      <div class="time-row">
+                        <span class="time-label">Check-in:</span>
+                        <span class="time-value">2:00 PM</span>
                       </div>
-                      <div class="room-item">
-                        <img
-                          src="images/546238992_684641691315373_7119956179300816560_n.jpg"
-                          alt="Fan Room"
-                        />
-                        <div class="room-info">
-                          <span class="room-name">Fan Room 2</span>
-                          <span class="room-features"
-                            >🌀 Fan • Double Bed • 4 guests</span
-                          >
-                        </div>
+                      <div class="time-row">
+                        <span class="time-label">Check-out:</span>
+                        <span class="time-value">12:00 NN</span>
                       </div>
                     </div>
-                    <div class="total-capacity">Total: Up to 8 guests</div>
-                  </div>
-                  <button
-                    class="select-package-btn"
-                    onclick="selectRoomPackage('basic-rooms', '₱12,000', '₱8,000')"
-                  >
-                    Select Basic Rooms
-                  </button>
-                </div>
-              </div>
-
-              <!-- Custom Room Selection -->
-              <div class="room-package-card custom" data-package="custom">
-                <div class="package-header">
-                  <h3>Custom Room Selection</h3>
-                  <div class="package-badge custom">Flexible</div>
-                </div>
-                <div class="package-content">
-                  <div class="package-price">
-                    Varies <span>based on selection</span>
-                  </div>
-
-                  <div class="custom-selection">
-                    <h4>Choose Your Rooms:</h4>
-                    <p>Select exactly which rooms you want to use.</p>
-                    <div class="custom-options">
-                      <label class="custom-option">
-                        <input
-                          type="checkbox"
-                          name="customRoom"
-                          value="deluxe"
-                        />
-                        <span>Deluxe Room (₱3,500/night)</span>
-                      </label>
-                      <label class="custom-option">
-                        <input
-                          type="checkbox"
-                          name="customRoom"
-                          value="suite"
-                        />
-                        <span>Executive Suite (₱5,500/night)</span>
-                      </label>
-                      <label class="custom-option">
-                        <input
-                          type="checkbox"
-                          name="customRoom"
-                          value="family"
-                        />
-                        <span>Family Room (₱4,200/night)</span>
-                      </label>
-                      <label class="custom-option">
-                        <input
-                          type="checkbox"
-                          name="customRoom"
-                          value="villa"
-                        />
-                        <span>Private Villa (₱8,500/night)</span>
-                      </label>
+                    <div class="booking-features">
+                      <div class="feature-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Extended 22-hour stay</span>
+                      </div>
+                      <div class="feature-item">
+                        <i class="fas fa-bed"></i>
+                        <span>Overnight included</span>
+                      </div>
+                      <div class="feature-item">
+                        <i class="fas fa-swimming-pool"></i>
+                        <span>Full resort access</span>
+                      </div>
+                    </div>
+                    <div class="policy-details">
+                      <h4>Policies:</h4>
+                      <ul>
+                        <li>₱500/hour for exceeding hours</li>
+                        <li>₱2,000 security bond required</li>
+                        <li>Noise curfew at 10:00 PM</li>
+                        <li>No smoking - ₱5,000 penalty</li>
+                      </ul>
                     </div>
                   </div>
                   <button
-                    class="select-package-btn"
-                    onclick="selectCustomRooms()"
+                    class="select-booking-type-btn"
+                    onclick="selectBookingType('22hours')"
                   >
-                    Select Custom Package
+                    <i class="fas fa-check"></i> Select 22 Hours
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Resort Access Reminder -->
-            <div class="resort-access-reminder">
-              <h3>🎉 Remember: All packages include FULL RESORT ACCESS!</h3>
-              <p>
-                No matter which room package you choose, your entire group gets
-                complete access to: all swimming pools, BBQ areas, sports
-                facilities, gardens, parking, and WiFi. The room selection only
-                determines your sleeping accommodations.
+            <!-- Step 2: Select Room Package -->
+            <div class="booking-step" id="step2" style="display: none">
+              <h2>Step 2: Choose Your Room Package</h2>
+              <p class="step-description">
+                <strong>✨ ALL PACKAGES INCLUDE FULL RESORT ACCESS ✨</strong
+                ><br />
+                Select the accommodation that best suits your group size.
               </p>
+              <div class="room-packages-grid" id="roomPackagesGrid">
+                <!-- All Rooms Package -->
+                <div
+                  class="room-package-card featured"
+                  data-package="all-rooms"
+                >
+                  <div class="package-header">
+                    <h3>All Rooms Package</h3>
+                    <div class="package-badge premium">Most Popular</div>
+                  </div>
+                  <div class="package-content">
+                    <div class="package-price-display">
+                      <div class="package-price">
+                        ₱<span id="all-rooms-price">25,000</span>
+                        <span class="price-period"></span>
+                      </div>
+                    </div>
+
+                    <div class="included-rooms">
+                      <h4>Included Accommodations:</h4>
+                      <div class="room-list">
+                        <div class="room-item">
+                          <img
+                            src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
+                            alt="Deluxe Room"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Deluxe Room</span>
+                            <span class="room-features"
+                              >AC • King Bed • 2 guests</span
+                            >
+                          </div>
+                        </div>
+                        <div class="room-item">
+                          <img
+                            src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
+                            alt="Executive Suite"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Executive Suite</span>
+                            <span class="room-features"
+                              >AC • Living Area • 4 guests</span
+                            >
+                          </div>
+                        </div>
+                        <div class="room-item">
+                          <img
+                            src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                            alt="Family Room"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Family Room</span>
+                            <span class="room-features"
+                              >AC • 2 Queen Beds • 6 guests</span
+                            >
+                          </div>
+                        </div>
+                        <div class="room-item">
+                          <img
+                            src="images/547374912_659920707160374_2419929377794463667_n.jpg"
+                            alt="Private Villa"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Private Villa</span>
+                            <span class="room-features"
+                              >AC • Private Pool • 8 guests</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                      <div class="total-capacity">Total: Up to 20 guests</div>
+                    </div>
+                    <button
+                      class="select-package-btn"
+                      onclick="selectRoomPackage('all-rooms')"
+                    >
+                      Select All Rooms Package
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Aircon Rooms Only Package -->
+                <div class="room-package-card" data-package="aircon-rooms">
+                  <div class="package-header">
+                    <h3>Aircon Rooms Package</h3>
+                    <div class="package-badge comfort">Comfort</div>
+                  </div>
+                  <div class="package-content">
+                    <div class="package-price-display">
+                      <div class="package-price">
+                        ₱<span id="aircon-rooms-price">20,000</span>
+                        <span class="price-period"></span>
+                      </div>
+                    </div>
+
+                    <div class="included-rooms">
+                      <h4>Air-Conditioned Rooms:</h4>
+                      <div class="room-list">
+                        <div class="room-item">
+                          <img
+                            src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
+                            alt="Deluxe Room"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Deluxe Room</span>
+                            <span class="room-features"
+                              >❄️ AC • King Bed • 2 guests</span
+                            >
+                          </div>
+                        </div>
+                        <div class="room-item">
+                          <img
+                            src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
+                            alt="Executive Suite"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Executive Suite</span>
+                            <span class="room-features"
+                              >❄️ AC • Living Area • 4 guests</span
+                            >
+                          </div>
+                        </div>
+                        <div class="room-item">
+                          <img
+                            src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                            alt="Family Room"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Family Room</span>
+                            <span class="room-features"
+                              >❄️ AC • 2 Queen Beds • 6 guests</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                      <div class="total-capacity">Total: Up to 12 guests</div>
+                    </div>
+                    <button
+                      class="select-package-btn"
+                      onclick="selectRoomPackage('aircon-rooms')"
+                    >
+                      Select Aircon Rooms
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Basic Rooms Package -->
+                <div class="room-package-card" data-package="basic-rooms">
+                  <div class="package-header">
+                    <h3>Basic Rooms Package</h3>
+                    <div class="package-badge budget">Budget Friendly</div>
+                  </div>
+                  <div class="package-content">
+                    <div class="package-price-display">
+                      <div class="package-price">
+                        ₱<span id="basic-rooms-price">12,000</span>
+                        <span class="price-period"></span>
+                      </div>
+                    </div>
+
+                    <div class="included-rooms">
+                      <h4>Basic Accommodations:</h4>
+                      <div class="room-list">
+                        <div class="room-item">
+                          <img
+                            src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                            alt="Fan Room"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Fan Room 1</span>
+                            <span class="room-features"
+                              >🌀 Fan • Double Bed • 4 guests</span
+                            >
+                          </div>
+                        </div>
+                        <div class="room-item">
+                          <img
+                            src="images/546238992_684641691315373_7119956179300816560_n.jpg"
+                            alt="Fan Room"
+                          />
+                          <div class="room-info">
+                            <span class="room-name">Fan Room 2</span>
+                            <span class="room-features"
+                              >🌀 Fan • Double Bed • 4 guests</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                      <div class="total-capacity">Total: Up to 8 guests</div>
+                    </div>
+                    <button
+                      class="select-package-btn"
+                      onclick="selectRoomPackage('basic-rooms')"
+                    >
+                      Select Basic Rooms
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="booking-actions">
+                <button
+                  type="button"
+                  class="btn-back"
+                  onclick="goBackToStep(1)"
+                >
+                  <i class="fas fa-arrow-left"></i> Back
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 3: Booking Details -->
+            <div class="booking-step" id="step3" style="display: none">
+              <h2>Step 3: Complete Your Booking</h2>
+
+              <!-- Selected Booking Summary -->
+              <div class="selected-summary" id="selectedSummary">
+                <h3>Your Selection:</h3>
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <span class="label">Booking Type:</span>
+                    <span class="value" id="summaryBookingType">-</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Package:</span>
+                    <span class="value" id="summaryPackage">-</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Check-in:</span>
+                    <span class="value" id="summaryCheckInTime">-</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Check-out:</span>
+                    <span class="value" id="summaryCheckOutTime">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Booking Form -->
+              <form id="reservationForm" class="reservation-form">
+                <div class="form-section">
+                  <h3>Select Dates</h3>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="checkInDate">Check-in Date *</label>
+                      <input
+                        type="date"
+                        id="checkInDate"
+                        name="checkInDate"
+                        required
+                      />
+                    </div>
+                    <div class="form-group" id="durationGroup">
+                      <label for="duration">Duration *</label>
+                      <select id="duration" name="duration" required>
+                        <option value="">Select duration</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h3>Group Details</h3>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="groupSize">Group Size *</label>
+                      <select id="groupSize" name="groupSize" required>
+                        <option value="">Select group size</option>
+                        <option value="5-10">5-10 people</option>
+                        <option value="11-20">11-20 people</option>
+                        <option value="21-30">21-30 people</option>
+                        <option value="31-40">31-40 people</option>
+                        <option value="41-50">41-50 people</option>
+                        <option value="50+">50+ people</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="groupType">Group Type *</label>
+                      <select id="groupType" name="groupType" required>
+                        <option value="">Select type</option>
+                        <option value="family">Family Reunion</option>
+                        <option value="friends">Friends Getaway</option>
+                        <option value="corporate">Corporate Event</option>
+                        <option value="celebration">Special Celebration</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="specialRequests"
+                      >Special Requests (Optional)</label
+                    >
+                    <textarea
+                      id="specialRequests"
+                      name="specialRequests"
+                      rows="3"
+                      placeholder="Any special requests, dietary requirements, or additional services needed..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <!-- Price Summary -->
+                <div class="price-summary">
+                  <h3>Price Breakdown</h3>
+                  <div class="price-row">
+                    <span>Base Price:</span>
+                    <span id="priceBase">₱0.00</span>
+                  </div>
+                  <div class="price-row">
+                    <span>Duration:</span>
+                    <span id="priceDuration">0 day(s)</span>
+                  </div>
+                  <div class="price-row total">
+                    <span>Total Amount:</span>
+                    <span id="priceTotal">₱0.00</span>
+                  </div>
+                  <div class="price-row downpayment">
+                    <span>50% Downpayment Required:</span>
+                    <span id="priceDownpayment">₱0.00</span>
+                  </div>
+                  <div class="price-row">
+                    <span>Remaining Balance:</span>
+                    <span id="priceBalance">₱0.00</span>
+                  </div>
+                  <div class="price-row security">
+                    <span>Security Bond (at check-in):</span>
+                    <span>₱2,000.00</span>
+                  </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-section">
+                  <h3>Payment Method</h3>
+                  <div class="payment-methods">
+                    <label class="payment-option">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="gcash"
+                        required
+                      />
+                      <div class="payment-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>GCash</span>
+                        <small>Pay via GCash</small>
+                      </div>
+                    </label>
+                    <label class="payment-option">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="otc"
+                        required
+                      />
+                      <div class="payment-card">
+                        <i class="fas fa-store"></i>
+                        <span>Over the Counter</span>
+                        <small>Pay at resort</small>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="form-section">
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      id="agreeTerms"
+                      name="agreeTerms"
+                      required
+                    />
+                    <span
+                      >I agree to the
+                      <a href="#" onclick="showBookingPolicy(); return false;"
+                        >booking policies</a
+                      >
+                      and house rules</span
+                    >
+                  </label>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="booking-actions">
+                  <button
+                    type="button"
+                    class="btn-back"
+                    onclick="goBackToStep(2)"
+                  >
+                    <i class="fas fa-arrow-left"></i> Back
+                  </button>
+                  <button type="submit" class="btn-submit">
+                    <i class="fas fa-check"></i> Submit Reservation
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 
@@ -1281,6 +1618,59 @@
             </div>
           </div>
 
+          <!-- My Bookings Section (Active Reservations) -->
+          <div class="content-section" id="my-bookings-section">
+            <div class="section-header-inline">
+              <h2><i class="fas fa-clipboard-list"></i> My Bookings</h2>
+              <button class="btn-primary" onclick="loadMyBookings()">
+                <i class="fas fa-sync"></i> Refresh
+              </button>
+            </div>
+
+            <!-- Loading State -->
+            <div
+              id="bookingsLoadingState"
+              style="text-align: center; padding: 40px"
+            >
+              <i
+                class="fas fa-spinner fa-spin"
+                style="font-size: 48px; color: #667eea"
+              ></i>
+              <p style="margin-top: 20px; color: #6c757d">
+                Loading your bookings...
+              </p>
+            </div>
+
+            <!-- Bookings Grid -->
+            <div
+              id="myBookingsGrid"
+              class="bookings-grid"
+              style="display: none"
+            ></div>
+
+            <!-- Empty State -->
+            <div
+              id="bookingsEmptyState"
+              style="display: none; text-align: center; padding: 60px 20px"
+            >
+              <i
+                class="fas fa-calendar-times"
+                style="font-size: 64px; color: #ddd"
+              ></i>
+              <h3 style="margin-top: 20px; color: #6c757d">
+                No Bookings Found
+              </h3>
+              <p style="color: #adb5bd">You don't have any reservations yet.</p>
+              <button
+                class="btn-primary"
+                onclick="quickAction('book')"
+                style="margin-top: 20px"
+              >
+                <i class="fas fa-calendar-plus"></i> Make a Reservation
+              </button>
+            </div>
+          </div>
+
           <!-- Booking History Section -->
           <div class="content-section" id="bookings-history-section">
             <div class="section-header-inline">
@@ -1417,94 +1807,14 @@
                 <i class="fas fa-check-double"></i> Mark all as read
               </button>
             </div>
-            <div class="notifications-list">
-              <div class="notification-item unread">
-                <div class="notification-icon booking">
-                  <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="notification-content">
-                  <h4>Booking Confirmed!</h4>
-                  <p>
-                    Your VIP Suite booking for Dec 20-23, 2025 has been
-                    confirmed.
-                  </p>
-                  <span class="notification-time">2 hours ago</span>
-                </div>
-                <button
-                  class="notification-close"
-                  onclick="dismissNotification(this)"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <div class="notification-item unread">
-                <div class="notification-icon promo">
-                  <i class="fas fa-tag"></i>
-                </div>
-                <div class="notification-content">
-                  <h4>New Promotion Available!</h4>
-                  <p>
-                    Save 30% on weekend bookings this month. Use code WEEKEND30.
-                  </p>
-                  <span class="notification-time">5 hours ago</span>
-                </div>
-                <button
-                  class="notification-close"
-                  onclick="dismissNotification(this)"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <div class="notification-item">
-                <div class="notification-icon reward">
-                  <i class="fas fa-gift"></i>
-                </div>
-                <div class="notification-content">
-                  <h4>Reward Points Earned!</h4>
-                  <p>
-                    You've earned 500 points from your recent stay. Total: 2,500
-                    points.
-                  </p>
-                  <span class="notification-time">1 day ago</span>
-                </div>
-                <button
-                  class="notification-close"
-                  onclick="dismissNotification(this)"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <div class="notification-item">
-                <div class="notification-icon reminder">
-                  <i class="fas fa-clock"></i>
-                </div>
-                <div class="notification-content">
-                  <h4>Check-in Reminder</h4>
-                  <p>Your check-in for VIP Suite is tomorrow at 2:00 PM.</p>
-                  <span class="notification-time">2 days ago</span>
-                </div>
-                <button
-                  class="notification-close"
-                  onclick="dismissNotification(this)"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <div class="notification-item">
-                <div class="notification-icon system">
-                  <i class="fas fa-info-circle"></i>
-                </div>
-                <div class="notification-content">
-                  <h4>Profile Updated</h4>
-                  <p>Your profile information has been successfully updated.</p>
-                  <span class="notification-time">1 week ago</span>
-                </div>
-                <button
-                  class="notification-close"
-                  onclick="dismissNotification(this)"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
+            <div class="notifications-list" id="notificationsList">
+              <!-- Notifications will be loaded dynamically from database -->
+              <div style="text-align: center; padding: 40px; color: #999">
+                <i
+                  class="fas fa-spinner fa-spin"
+                  style="font-size: 32px; margin-bottom: 10px"
+                ></i>
+                <p>Loading notifications...</p>
               </div>
             </div>
           </div>
@@ -1768,6 +2078,269 @@
       </div>
     </div>
 
+    <!-- Payment Proof Upload Modal -->
+    <div class="modal-overlay" id="paymentUploadModal" style="display: none">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3><i class="fas fa-upload"></i> Upload Payment Proof</h3>
+          <button class="modal-close" onclick="closePaymentUploadModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="paymentUploadForm" enctype="multipart/form-data">
+            <input
+              type="hidden"
+              id="paymentReservationId"
+              name="reservation_id"
+            />
+            <input type="hidden" id="paymentType" name="payment_type" />
+
+            <div class="form-group">
+              <label>Payment For:</label>
+              <p
+                id="paymentForLabel"
+                style="color: #667eea; font-weight: 600"
+              ></p>
+            </div>
+
+            <div class="form-group">
+              <label for="paymentMethod">Payment Method *</label>
+              <select id="paymentMethod" name="payment_method" required>
+                <option value="">Select payment method</option>
+                <option value="gcash">GCash</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="online_banking">Online Banking</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="referenceNumber">Reference Number *</label>
+              <input
+                type="text"
+                id="referenceNumber"
+                name="reference_number"
+                placeholder="e.g., REF123456789"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="paymentProofFile"
+                >Payment Screenshot/Receipt * (Max 5MB)</label
+              >
+              <input
+                type="file"
+                id="paymentProofFile"
+                name="payment_proof"
+                accept="image/*,application/pdf"
+                required
+              />
+              <small style="color: #6c757d; display: block; margin-top: 8px">
+                <i class="fas fa-info-circle"></i> Accepted: JPG, PNG, GIF, PDF
+                (Max 5MB)
+              </small>
+            </div>
+
+            <div
+              class="form-group"
+              style="
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                border-left: 4px solid #667eea;
+              "
+            >
+              <p style="margin: 0; color: #495057; font-size: 14px">
+                <i class="fas fa-exclamation-circle" style="color: #667eea"></i>
+                <strong>Note:</strong> After uploading, your payment will be
+                verified by our admin. You'll receive a confirmation once
+                approved.
+              </p>
+            </div>
+
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="closePaymentUploadModal()"
+              >
+                <i class="fas fa-times"></i> Cancel
+              </button>
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-upload"></i> Upload Payment Proof
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rebooking Request Modal -->
+    <div class="modal-overlay" id="rebookingModal" style="display: none">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3><i class="fas fa-calendar-alt"></i> Request Rebooking</h3>
+          <button class="modal-close" onclick="closeRebookingModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="rebookingForm">
+            <input
+              type="hidden"
+              id="rebookReservationId"
+              name="reservation_id"
+            />
+
+            <div class="form-group">
+              <label>Current Check-in Date:</label>
+              <p
+                id="currentCheckInDate"
+                style="color: #667eea; font-weight: 600"
+              ></p>
+            </div>
+
+            <div class="form-group">
+              <label for="newCheckInDate">New Check-in Date *</label>
+              <input type="date" id="newCheckInDate" name="new_date" required />
+              <small style="color: #6c757d; display: block; margin-top: 8px">
+                <i class="fas fa-info-circle"></i> Rebooking must be requested
+                at least 7 days before your current check-in date.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="rebookReason">Reason for Rebooking *</label>
+              <textarea
+                id="rebookReason"
+                name="reason"
+                rows="4"
+                placeholder="Please provide a reason for changing your reservation date..."
+                required
+              ></textarea>
+            </div>
+
+            <div
+              class="form-group"
+              style="
+                background: #fff3cd;
+                padding: 15px;
+                border-radius: 8px;
+                border-left: 4px solid #ffc107;
+              "
+            >
+              <p style="margin: 0; color: #856404; font-size: 14px">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Rebooking Policy:</strong>
+              </p>
+              <ul style="margin: 10px 0 0 20px; color: #856404">
+                <li>Must be requested 7+ days before check-in</li>
+                <li>Requires admin approval</li>
+                <li>No additional fees if approved</li>
+                <li>Original payment will be transferred to new date</li>
+              </ul>
+            </div>
+
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="closeRebookingModal()"
+              >
+                <i class="fas fa-times"></i> Cancel
+              </button>
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> Submit Request
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancellation Confirmation Modal -->
+    <div class="modal-overlay" id="cancelModal" style="display: none">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>
+            <i class="fas fa-exclamation-triangle"></i> Cancel Reservation
+          </h3>
+          <button class="modal-close" onclick="closeCancelModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="cancelForm">
+            <input
+              type="hidden"
+              id="cancelReservationId"
+              name="reservation_id"
+            />
+
+            <div
+              style="
+                background: #fee;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #dc3545;
+                margin-bottom: 20px;
+              "
+            >
+              <p
+                style="
+                  margin: 0;
+                  color: #721c24;
+                  font-size: 16px;
+                  font-weight: 600;
+                "
+              >
+                <i class="fas fa-exclamation-circle"></i> Warning: This action
+                cannot be undone
+              </p>
+              <ul style="margin: 15px 0 0 20px; color: #721c24">
+                <li><strong>Your downpayment will NOT be refunded</strong></li>
+                <li>The reservation will be cancelled immediately</li>
+                <li>The date will be available for other guests</li>
+              </ul>
+            </div>
+
+            <div class="form-group">
+              <label for="cancelReason">Reason for Cancellation *</label>
+              <textarea
+                id="cancelReason"
+                name="reason"
+                rows="4"
+                placeholder="Please tell us why you're cancelling..."
+                required
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="acknowledgeNoRefund" required />
+                <span>I understand that my downpayment is non-refundable</span>
+              </label>
+            </div>
+
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="closeCancelModal()"
+              >
+                <i class="fas fa-arrow-left"></i> Go Back
+              </button>
+              <button type="submit" class="btn-danger">
+                <i class="fas fa-times-circle"></i> Confirm Cancellation
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- Logout Popup -->
     <div class="logout-popup-overlay" id="logoutPopupOverlay">
       <div class="logout-popup">
@@ -1885,6 +2458,12 @@
             console.log(`✅ ${fieldId} updated:`, value);
           }
         }
+
+        // Refresh userData in dashboard-script.js if the function exists
+        if (typeof window.refreshUserData === "function") {
+          window.refreshUserData();
+          console.log("✅ Notified dashboard-script.js to refresh user data");
+        }
       }
 
       // Initialize session check when DOM is ready
@@ -1934,6 +2513,20 @@
               targetSection.classList.add("active");
               targetSection.style.display = "block";
               console.log("Showing section:", sectionName);
+
+              // Load section-specific data
+              if (
+                sectionName === "bookings-history" &&
+                typeof loadMyReservations === "function"
+              ) {
+                loadMyReservations();
+              }
+              if (
+                sectionName === "notifications" &&
+                typeof loadUserNotifications === "function"
+              ) {
+                loadUserNotifications();
+              }
             } else {
               console.error("Section not found:", sectionName + "-section");
             }
@@ -2072,5 +2665,84 @@
 
     <!-- Load Dashboard Script (for additional functionality) -->
     <script src="dashboard-script.js"></script>
+
+    <!-- Load Booking Flow Script -->
+    <script src="booking-flow.js"></script>
+
+    <!-- DEBUG: Test booking buttons -->
+    <script>
+      console.log(
+        "%c🔧 BUTTON DEBUG SCRIPT LOADED",
+        "color: #FF5722; font-weight: bold; font-size: 14px;"
+      );
+
+      // Wait for DOM to be ready
+      setTimeout(() => {
+        console.log(
+          "%c📍 Testing booking type buttons...",
+          "color: #2196F3; font-weight: bold;"
+        );
+
+        // Check if function exists
+        console.log(
+          "1️⃣ window.selectBookingType exists?",
+          typeof window.selectBookingType
+        );
+
+        // Find all booking type buttons
+        const buttons = document.querySelectorAll(".select-booking-type-btn");
+        console.log("2️⃣ Found buttons:", buttons.length);
+
+        buttons.forEach((btn, index) => {
+          const onclickAttr = btn.getAttribute("onclick");
+          console.log(`Button ${index + 1} (${btn.textContent.trim()}):`, {
+            hasOnclickAttribute: !!onclickAttr,
+            onclickValue: onclickAttr,
+            isVisible: btn.offsetParent !== null,
+            dimensions: { width: btn.offsetWidth, height: btn.offsetHeight },
+            position: btn.getBoundingClientRect(),
+          });
+
+          // Test if clicking manually works
+          btn.addEventListener("click", function (e) {
+            console.log(
+              `%c🖱️ BUTTON ${index + 1} CLICKED!`,
+              "color: #4CAF50; font-weight: bold; font-size: 16px;"
+            );
+            console.log("Event target:", e.target);
+            console.log("Current target:", e.currentTarget);
+          });
+        });
+
+        // Test calling the function directly
+        console.log(
+          "%c🧪 Testing direct function call...",
+          "color: #9C27B0; font-weight: bold;"
+        );
+        try {
+          if (typeof window.selectBookingType === "function") {
+            console.log('✅ Function is accessible! Testing with "daytime"...');
+            // Don't actually call it, just verify it exists
+            console.log(
+              "Function signature:",
+              window.selectBookingType.toString().substring(0, 100) + "..."
+            );
+          } else {
+            console.error("❌ window.selectBookingType is NOT a function!");
+          }
+        } catch (err) {
+          console.error("❌ Error testing function:", err);
+        }
+
+        console.log(
+          "%c✅ Button diagnostic complete! Check console for results.",
+          "color: #4CAF50; font-weight: bold;"
+        );
+        console.log(
+          "%c👆 Try clicking a booking type button above and watch for messages!",
+          "background: #FFF3CD; color: #856404; padding: 8px; font-weight: bold;"
+        );
+      }, 2000);
+    </script>
   </body>
 </html>

@@ -833,16 +833,15 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
                 <tr>
                   <th>ID</th>
                   <th>Guest</th>
-                  <th>Contact</th>
-                  <th>Room</th>
+                  <th>Booking Details</th>
                   <th>Check-in</th>
                   <th>Check-out</th>
-                  <th>Created</th>
+                  <th>Amount</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="reservationsBody"><tr><td colspan="9" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+              <tbody id="reservationsBody"><tr><td colspan="8" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
             </table>
           </div>
 
@@ -1027,7 +1026,23 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       const start = (currentPage - 1) * pageSize;
       const pageRows = filteredReservations.slice(start, start + pageSize);
 
-      const rowsHtml = pageRows.map((r, index) => `
+      const bookingTypeLabels = {
+        'daytime': { icon: 'fa-sun', label: 'DAYTIME', color: '#f59e0b' },
+        'nighttime': { icon: 'fa-moon', label: 'NIGHTTIME', color: '#6366f1' },
+        '22hours': { icon: 'fa-clock', label: '22 HOURS', color: '#8b5cf6' }
+      };
+      
+      const packageLabels = {
+        'all_rooms': 'All Rooms',
+        'aircon': 'Aircon',
+        'basic': 'Basic'
+      };
+      
+      const rowsHtml = pageRows.map((r, index) => {
+        const bookingType = bookingTypeLabels[r.booking_type] || { icon: 'fa-calendar', label: 'N/A', color: '#64748b' };
+        const packageType = packageLabels[r.package_type] || r.package_type || 'N/A';
+        
+        return `
         <tr style="animation: fadeIn 0.3s ease-in-out ${index * 0.05}s backwards;">
           <td style="text-align:center; font-weight:600; color:#64748b;">#${r.reservation_id}</td>
           <td>
@@ -1042,18 +1057,35 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
             </div>
           </td>
           <td>
-            <div style="display:flex; align-items:center; gap:6px; color:#475569;">
-              <i class="fas fa-calendar-check" style="color:#667eea;"></i>
-              <span>${r.check_in_date||'N/A'}</span>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:${bookingType.color}20; border-radius:12px; font-size:11px; font-weight:700; color:${bookingType.color}; width:fit-content;">
+                <i class="fas ${bookingType.icon}"></i>
+                ${bookingType.label}
+              </div>
+              <div style="font-size:12px; color:#64748b;">
+                <i class="fas fa-cube" style="color:#667eea;"></i> ${packageType}
+              </div>
+              <div style="font-size:11px; color:#94a3b8;">
+                <i class="fas fa-bed"></i> ${escapeHtml(r.room||'TBD')}
+              </div>
             </div>
           </td>
           <td>
-            <div style="display:flex; align-items:center; gap:6px; color:#475569;">
-              <i class="fas fa-calendar-times" style="color:#ef4444;"></i>
-              <span>${r.check_out_date||'N/A'}</span>
+            <div style="font-weight:600; color:#1e293b; margin-bottom:2px;">${r.check_in_date||'N/A'}</div>
+            <div style="font-size:11px; color:#64748b;"><i class="fas fa-clock" style="color:#10b981;"></i> ${r.check_in_time||'N/A'}</div>
+          </td>
+          <td>
+            <div style="font-weight:600; color:#1e293b; margin-bottom:2px;">${r.check_out_date||'N/A'}</div>
+            <div style="font-size:11px; color:#64748b;"><i class="fas fa-clock" style="color:#ef4444;"></i> ${r.check_out_time||'N/A'}</div>
+          </td>
+          <td>
+            <div style="font-weight:700; color:#1e293b; font-size:15px;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+            <div style="font-size:11px; color:#64748b;">Down: ₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+            <div style="font-size:10px; color:${r.downpayment_paid ? '#10b981' : '#ef4444'}; font-weight:600;">
+              ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
             </div>
           </td>
-          <td><span class="status-badge ${r.status||''}">${escapeHtml(r.status||'')}</span></td>
+          <td><span class="status-badge ${r.status||''}">${escapeHtml(r.status||'').replace('_', ' ')}</span></td>
           <td style="text-align:center">
             <div class="action-buttons">
               <button onclick="updateStatus(${r.reservation_id}, 'confirmed')" class="btn-action btn-approve" title="Approve" aria-label="Approve reservation"><i class="fas fa-check"></i></button>
@@ -1062,7 +1094,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
             </div>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
 
       tbody.innerHTML = rowsHtml;
 
@@ -1096,51 +1128,127 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       const r = allReservations.find(x => Number(x.reservation_id) === Number(id));
       if(!r) return showNotification('Reservation not found','error');
       
+      const bookingTypeLabels = {
+        'daytime': { icon: 'fa-sun', label: 'DAYTIME (9AM-5PM)', color: '#f59e0b' },
+        'nighttime': { icon: 'fa-moon', label: 'NIGHTTIME (7PM-7AM)', color: '#6366f1' },
+        '22hours': { icon: 'fa-clock', label: '22 HOURS (2PM-12NN)', color: '#8b5cf6' }
+      };
+      
+      const packageLabels = {
+        'all_rooms': 'All Rooms Package',
+        'aircon': 'Aircon Package',
+        'basic': 'Basic Package'
+      };
+      
+      const bookingType = bookingTypeLabels[r.booking_type] || { icon: 'fa-calendar', label: 'N/A', color: '#64748b' };
+      const packageType = packageLabels[r.package_type] || r.package_type || 'N/A';
+      
       const html = `
-        <div style="padding:20px;">
-          <div style="text-align:center; margin-bottom:24px;">
-            <div style="width:80px; height:80px; background:linear-gradient(135deg, #667eea, #764ba2); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:white; font-size:36px; font-weight:700; margin-bottom:12px;">
-              ${escapeHtml((r.guest_name||'U')[0].toUpperCase())}
+        <div style="padding:0;">
+          <div style="background:linear-gradient(135deg, ${bookingType.color}ee, ${bookingType.color}); color:white; padding:28px 24px; margin:-24px -24px 24px; border-radius:16px 16px 0 0;">
+            <div style="display:flex; align-items:center; gap:20px;">
+              <div style="width:72px; height:72px; background:rgba(255,255,255,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700;">
+                ${escapeHtml((r.guest_name||'U')[0].toUpperCase())}
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:24px; font-weight:700; margin-bottom:6px;">${escapeHtml(r.guest_name||'')}</div>
+                <div style="font-size:14px; opacity:0.95; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-bookmark"></i> Reservation #${r.reservation_id}
+                </div>
+              </div>
             </div>
-            <h3 style="margin:0; font-size:24px; color:#1e293b;">${escapeHtml(r.guest_name||'')}</h3>
-            <p style="color:#64748b; margin:4px 0;">Reservation #${r.reservation_id}</p>
+          </div>
+          
+          <div style="margin-bottom:20px; padding:16px; background:${bookingType.color}10; border-left:4px solid ${bookingType.color}; border-radius:8px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+              <i class="fas ${bookingType.icon}" style="font-size:24px; color:${bookingType.color};"></i>
+              <div>
+                <div style="font-weight:700; color:#1e293b; font-size:16px;">${bookingType.label}</div>
+                <div style="font-size:13px; color:#64748b;">${packageType}</div>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+              <div>
+                <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Duration</div>
+                <div style="font-weight:600; color:#1e293b;">${r.number_of_days || r.number_of_nights ? (r.number_of_days ? r.number_of_days + ' day(s)' : r.number_of_nights + ' night(s)') : 'N/A'}</div>
+              </div>
+              <div>
+                <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Room</div>
+                <div style="font-weight:600; color:#1e293b;"><i class="fas fa-bed" style="color:#667eea; margin-right:6px;"></i>${escapeHtml(r.room||'TBD')}</div>
+              </div>
+            </div>
           </div>
           
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
-            <div style="padding:16px; background:#f8fafc; border-radius:8px;">
-              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">PHONE</div>
-              <div style="color:#1e293b; font-weight:600;"><i class="fas fa-phone" style="color:#667eea; margin-right:8px;"></i>${escapeHtml(r.guest_phone||'N/A')}</div>
+            <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #10b981;">
+              <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-calendar-check" style="color:#10b981;"></i> Check-in
+              </div>
+              <div style="color:#1e293b; font-weight:700; font-size:15px; margin-bottom:4px;">${r.check_in_date||'N/A'}</div>
+              <div style="color:#64748b; font-size:12px;"><i class="fas fa-clock"></i> ${r.check_in_time||'N/A'}</div>
             </div>
-            <div style="padding:16px; background:#f8fafc; border-radius:8px;">
-              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">EMAIL</div>
-              <div style="color:#1e293b; font-weight:600;"><i class="fas fa-envelope" style="color:#667eea; margin-right:8px;"></i>${escapeHtml(r.guest_email||'N/A')}</div>
+            <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #ef4444;">
+              <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-calendar-times" style="color:#ef4444;"></i> Check-out
+              </div>
+              <div style="color:#1e293b; font-weight:700; font-size:15px; margin-bottom:4px;">${r.check_out_date||'N/A'}</div>
+              <div style="color:#64748b; font-size:12px;"><i class="fas fa-clock"></i> ${r.check_out_time||'N/A'}</div>
             </div>
           </div>
-
+          
+          <div style="background:#f8fafc; padding:20px; border-radius:12px; margin-bottom:20px;">
+            <div style="font-weight:700; color:#1e293b; margin-bottom:16px; font-size:15px; display:flex; align-items:center; gap:8px;">
+              <i class="fas fa-money-bill-wave" style="color:#10b981;"></i> Payment Details
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div>
+                <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Total Amount</div>
+                <div style="font-size:18px; font-weight:700; color:#1e293b;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+              </div>
+              <div>
+                <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Downpayment (50%)</div>
+                <div style="font-size:18px; font-weight:700; color:#f59e0b;">₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                <div style="font-size:11px; font-weight:600; color:${r.downpayment_paid ? '#10b981' : '#ef4444'}; margin-top:4px;">
+                  ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Remaining Balance</div>
+                <div style="font-size:16px; font-weight:700; color:#667eea;">₱${parseFloat(r.remaining_balance||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+              </div>
+              <div>
+                <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Security Bond</div>
+                <div style="font-size:16px; font-weight:700; color:#8b5cf6;">₱${parseFloat(r.security_bond||2000).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                <div style="font-size:11px; font-weight:600; color:${r.security_bond_paid ? '#10b981' : '#ef4444'}; margin-top:4px;">
+                  ${r.security_bond_paid ? '✓ Paid' : '✗ Unpaid'}
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:16px; padding-top:16px; border-top:2px solid #e2e8f0;">
+              <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Payment Method</div>
+              <div style="font-weight:600; color:#1e293b; text-transform:capitalize;"><i class="fas fa-credit-card" style="color:#667eea; margin-right:6px;"></i>${r.payment_method||'N/A'}</div>
+            </div>
+          </div>
+          
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
-            <div style="padding:16px; background:#f8fafc; border-radius:8px;">
-              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">CHECK-IN</div>
-              <div style="color:#1e293b; font-weight:600;"><i class="fas fa-calendar-check" style="color:#10b981; margin-right:8px;"></i>${r.check_in_date||'N/A'}</div>
+            <div style="padding:16px; background:#f8fafc; border-radius:12px;">
+              <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:8px;"><i class="fas fa-phone"></i> Phone</div>
+              <div style="color:#1e293b; font-weight:600; font-size:14px;">${escapeHtml(r.guest_phone||'N/A')}</div>
             </div>
-            <div style="padding:16px; background:#f8fafc; border-radius:8px;">
-              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">CHECK-OUT</div>
-              <div style="color:#1e293b; font-weight:600;"><i class="fas fa-calendar-times" style="color:#ef4444; margin-right:8px;"></i>${r.check_out_date||'N/A'}</div>
+            <div style="padding:16px; background:#f8fafc; border-radius:12px;">
+              <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:8px;"><i class="fas fa-envelope"></i> Email</div>
+              <div style="color:#1e293b; font-weight:600; font-size:14px; word-break:break-all;">${escapeHtml(r.guest_email||'N/A')}</div>
             </div>
           </div>
 
-          <div style="padding:16px; background:#f8fafc; border-radius:8px; margin-bottom:20px;">
-            <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">ROOM ASSIGNMENT</div>
-            <div style="color:#1e293b; font-weight:600;"><i class="fas fa-door-open" style="color:#667eea; margin-right:8px;"></i>${escapeHtml(r.room||'Not assigned')}</div>
-          </div>
-
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:12px; border-top:3px solid ${bookingType.color};">
             <div>
-              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">STATUS</div>
-              <span class="status-badge ${r.status||''}">${escapeHtml(r.status||'')}</span>
+              <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:6px;">Status</div>
+              <span class="status-badge ${r.status||''}" style="font-size:13px;">${escapeHtml(r.status||'').replace('_', ' ')}</span>
             </div>
             <div style="text-align:right;">
-              <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:4px;">CREATED</div>
-              <div style="color:#475569; font-size:13px;">${r.created_at||'N/A'}</div>
+              <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:6px;">Created</div>
+              <div style="color:#475569; font-size:12px; font-weight:600;">${r.created_at||'N/A'}</div>
             </div>
           </div>
         </div>
