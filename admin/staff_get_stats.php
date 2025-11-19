@@ -7,8 +7,11 @@
 session_start();
 header('Content-Type: application/json');
 
-// Require staff session
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
+// Allow admin, super_admin, and staff roles
+$allowedRoles = ['admin', 'super_admin', 'staff'];
+$userRole = $_SESSION['admin_role'] ?? '';
+
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !in_array($userRole, $allowedRoles)) {
     // Optional debug logging when ?debug=1 and request from localhost
     if (isset($_GET['debug']) && $_GET['debug'] == '1' && in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1','::1'])) {
         $log = "[".date('Y-m-d H:i:s')."] Unauthorized access to staff_get_stats.php\n";

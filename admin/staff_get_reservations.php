@@ -6,9 +6,29 @@
 session_start();
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
+// Allow admin, super_admin, and staff roles to access reservations
+$allowedRoles = ['admin', 'super_admin', 'staff'];
+$userRole = $_SESSION['admin_role'] ?? '';
+$isLoggedIn = $_SESSION['admin_logged_in'] ?? false;
+
+// Debug logging (remove in production)
+error_log("staff_get_reservations.php - Session check:");
+error_log("  admin_logged_in: " . ($isLoggedIn ? 'true' : 'false'));
+error_log("  admin_role: " . $userRole);
+error_log("  session_id: " . session_id());
+
+if (!$isLoggedIn || !in_array($userRole, $allowedRoles)) {
     http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Unauthorized access',
+        'debug' => [
+            'logged_in' => $isLoggedIn,
+            'role' => $userRole,
+            'allowed_roles' => $allowedRoles,
+            'session_id' => session_id()
+        ]
+    ]);
     exit;
 }
 

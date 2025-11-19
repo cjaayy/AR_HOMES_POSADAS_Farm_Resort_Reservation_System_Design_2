@@ -236,6 +236,28 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
+    <!-- PHP Session Debug Info (Hidden) -->
+    <script id="phpSessionData" type="application/json">
+      <?php echo json_encode([
+        'admin_logged_in' => $_SESSION['admin_logged_in'] ?? false,
+        'admin_role' => $_SESSION['admin_role'] ?? '',
+        'admin_username' => $_SESSION['admin_username'] ?? '',
+        'admin_id' => $_SESSION['admin_id'] ?? '',
+        'session_id' => session_id(),
+        'all_session' => $_SESSION
+      ], JSON_PRETTY_PRINT); ?>
+    </script>
+    <script>
+      // Log PHP session data immediately
+      const phpSession = JSON.parse(document.getElementById('phpSessionData').textContent);
+      console.log('🔍 PHP SESSION DATA:', phpSession);
+      console.log('📋 Session Summary:');
+      console.log('  • Logged In:', phpSession.admin_logged_in);
+      console.log('  • Role:', phpSession.admin_role);
+      console.log('  • Username:', phpSession.admin_username);
+      console.log('  • Session ID:', phpSession.session_id);
+    </script>
+    
     <div class="admin-container">
       <!-- Header -->
       <header class="admin-header">
@@ -643,14 +665,16 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <thead style="background:linear-gradient(135deg, #667eea, #764ba2); color:white;">
                   <tr>
                     <th style="padding:18px 16px; text-align:center; width:60px;">#</th>
-                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-user"></i> Guest Information</th>
-                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-alt"></i> Check-in</th>
-                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-alt"></i> Check-out</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-user"></i> Guest</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-cube"></i> Booking Details</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-check"></i> Check-in</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-times"></i> Check-out</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-money-bill-wave"></i> Payment</th>
                     <th style="padding:18px 16px; text-align:left;"><i class="fas fa-tag"></i> Status</th>
                     <th style="padding:18px 16px; text-align:center;"><i class="fas fa-cog"></i> Actions</th>
                   </tr>
                 </thead>
-                <tbody id="adminReservationsBody"><tr><td colspan="6" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+                <tbody id="adminReservationsBody"><tr><td colspan="8" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
               </table>
             </div>
 
@@ -678,24 +702,75 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           </div>
 
           <script>
-            // Admin reservations client-side (mirrors staff reservations UI)
+            // Admin reservations client-side - Enhanced version matching staff interface
             let adminAllReservations = [];
             let adminFilteredReservations = [];
             let adminCurrentPage = 1;
-            const adminPageSize = 15;
-
+            const adminPageSize = 12;
             let adminCurrentQuickFilter = 'all';
 
             async function adminFetchAllReservations(){
               try{
+                console.log('🔄 Fetching reservations from staff_get_reservations.php...');
                 const res = await fetch('staff_get_reservations.php?limit=1000', { credentials: 'include' });
+                console.log('📡 Response status:', res.status, res.statusText);
+                
+                if (!res.ok) {
+                  console.error('❌ HTTP error:', res.status, res.statusText);
+                  
+                  // If 401, show detailed error
+                  if (res.status === 401) {
+                    const errorData = await res.json();
+                    console.error('❌ Unauthorized:', errorData);
+                    console.error('🔍 Debug Info:', {
+                      logged_in: errorData.debug?.logged_in,
+                      role: errorData.debug?.role,
+                      allowed_roles: errorData.debug?.allowed_roles,
+                      session_id: errorData.debug?.session_id
+                    });
+                    
+                    const roleText = errorData.debug?.role || 'none';
+                    const loggedInText = errorData.debug?.logged_in ? 'Yes' : 'No';
+                    const allowedRoles = errorData.debug?.allowed_roles?.join(', ') || 'admin, staff';
+                    
+                    document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;">
+                      <div style="color:#ef4444; margin-bottom:12px;"><i class="fas fa-exclamation-triangle" style="font-size:48px;"></i></div>
+                      <div style="font-weight:700; color:#1e293b; font-size:18px; margin-bottom:12px;">Authorization Failed</div>
+                      <div style="background:#fee2e2; padding:16px; border-radius:8px; border-left:4px solid #ef4444; text-align:left; max-width:500px; margin:0 auto;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:8px;"><strong>Session Info:</strong></div>
+                        <div style="color:#1e293b; font-size:14px; margin:4px 0;">• Logged In: <strong>${loggedInText}</strong></div>
+                        <div style="color:#1e293b; font-size:14px; margin:4px 0;">• Your Role: <strong>${roleText}</strong></div>
+                        <div style="color:#1e293b; font-size:14px; margin:4px 0;">• Required Roles: <strong>${allowedRoles}</strong></div>
+                        <div style="color:#1e293b; font-size:14px; margin:4px 0;">• Session ID: <strong>${errorData.debug?.session_id || 'none'}</strong></div>
+                      </div>
+                      <button onclick="location.href='../index.html'" style="margin-top:16px; padding:10px 24px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Re-Login</button>
+                      <button onclick="location.reload()" style="margin-top:16px; margin-left:8px; padding:10px 24px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Refresh</button>
+                    </td></tr>`;
+                    return;
+                  }
+                  
+                  document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#b00;">HTTP Error: ${res.status} ${res.statusText}</td></tr>`;
+                  return;
+                }
+                
                 const data = await res.json();
-                if(!data.success){ console.error('Failed to load reservations', data.message); document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#b00;">Failed to load reservations</td></tr>`; return; }
+                console.log('📊 Data received:', data);
+                
+                if(!data.success){ 
+                  console.error('❌ Failed to load reservations:', data.message); 
+                  document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#b00;">Failed: ${data.message || 'Unknown error'}</td></tr>`; 
+                  return; 
+                }
+                
                 adminAllReservations = data.reservations || [];
+                console.log('✅ Loaded', adminAllReservations.length, 'reservations');
                 adminUpdateStatsCards();
                 adminApplyFilters();
                 adminUpdateLastUpdateTime();
-              }catch(err){ console.error(err); document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#b00;">Error loading reservations</td></tr>`; }
+              }catch(err){ 
+                console.error('❌ Error loading reservations:', err); 
+                document.getElementById('adminReservationsBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#b00;">Error: ${err.message}</td></tr>`; 
+              }
             }
 
             function adminUpdateStatsCards(){
@@ -762,6 +837,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               document.getElementById('adminFilterTo').value = '';
               document.getElementById('adminSearchBox').value = '';
               adminQuickFilter('all');
+              adminShowNotification('Filters cleared', 'info');
             }
 
             function adminApplyFilters(){
@@ -783,7 +859,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             function adminRenderPage(){
               const tbody = document.getElementById('adminReservationsBody');
               if(!adminFilteredReservations || adminFilteredReservations.length===0){ 
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:3rem; color:#94a3b8;">
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:3rem; color:#94a3b8;">
                   <i class="fas fa-inbox" style="font-size:48px; margin-bottom:16px; opacity:0.5;"></i>
                   <div style="font-size:16px; font-weight:600;">No reservations found</div>
                   <div style="font-size:14px; margin-top:8px;">Try adjusting your filters</div>
@@ -799,8 +875,21 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               const start = (adminCurrentPage-1)*adminPageSize; 
               const pageRows = adminFilteredReservations.slice(start, start+adminPageSize);
               
+              const bookingTypeLabels = {
+                'daytime': { icon: 'fa-sun', label: 'DAYTIME', color: '#f59e0b' },
+                'nighttime': { icon: 'fa-moon', label: 'NIGHTTIME', color: '#6366f1' },
+                '22hours': { icon: 'fa-clock', label: '22 HOURS', color: '#8b5cf6' }
+              };
+              
+              const packageLabels = {
+                'all_rooms': 'All Rooms',
+                'aircon': 'Aircon',
+                'basic': 'Basic'
+              };
+              
               const rowsHtml = pageRows.map((r, idx)=> {
-                const initials = (r.guest_name||'?').split(' ').map(n=>n[0]).join('').substr(0,2).toUpperCase();
+                const bookingType = bookingTypeLabels[r.booking_type] || { icon: 'fa-calendar', label: 'N/A', color: '#64748b' };
+                const packageType = packageLabels[r.package_type] || r.package_type || 'N/A';
                 const statusColors = {
                   'pending': 'background:linear-gradient(135deg,#f59e0b,#d97706);',
                   'confirmed': 'background:linear-gradient(135deg,#10b981,#059669);',
@@ -810,28 +899,50 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 const statusColor = statusColors[r.status] || 'background:#94a3b8;';
                 
                 return `<tr style="animation:fadeIn 0.3s ease ${idx*0.05}s both; border-bottom:1px solid #f1f5f9;">
-                  <td style="padding:16px; text-align:center; font-weight:700; color:#64748b;">${r.reservation_id}</td>
+                  <td style="padding:16px; text-align:center; font-weight:700; color:#64748b;">#${r.reservation_id}</td>
                   <td style="padding:16px;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                      <div style="width:40px; height:40px; border-radius:50%; ${statusColor} color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;">${initials}</div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <div style="width:40px; height:40px; background:linear-gradient(135deg, #667eea, #764ba2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:16px;">
+                        ${escapeHtml((r.guest_name||'U')[0].toUpperCase())}
+                      </div>
                       <div>
-                        <div style="font-weight:600; color:#1e293b; margin-bottom:2px;">${escapeHtml(r.guest_name||'')}</div>
-                        <div style="font-size:13px; color:#64748b;"><i class="fas fa-bed" style="margin-right:6px; color:#667eea;"></i>${escapeHtml(r.room||'N/A')}</div>
-                        <div style="font-size:12px; color:#94a3b8; margin-top:2px;"><i class="fas fa-phone" style="margin-right:6px;"></i>${escapeHtml(r.guest_phone||'N/A')}</div>
+                        <div style="font-weight:600; color:#1e293b;">${escapeHtml(r.guest_name||'')}</div>
+                        <div style="font-size:12px; color:#64748b;"><i class="fas fa-phone"></i> ${escapeHtml(r.guest_phone||'N/A')}</div>
                       </div>
                     </div>
                   </td>
                   <td style="padding:16px;">
-                    <div style="font-weight:600; color:#1e293b; margin-bottom:4px;">${r.check_in_date||'N/A'}</div>
-                    <div style="font-size:12px; color:#64748b;"><i class="fas fa-clock" style="margin-right:4px;"></i>Check-in</div>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                      <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:${bookingType.color}20; border-radius:12px; font-size:11px; font-weight:700; color:${bookingType.color}; width:fit-content;">
+                        <i class="fas ${bookingType.icon}"></i>
+                        ${bookingType.label}
+                      </div>
+                      <div style="font-size:12px; color:#64748b;">
+                        <i class="fas fa-cube" style="color:#667eea;"></i> ${packageType}
+                      </div>
+                      <div style="font-size:11px; color:#94a3b8;">
+                        <i class="fas fa-bed"></i> ${escapeHtml(r.room||'TBD')}
+                      </div>
+                    </div>
                   </td>
                   <td style="padding:16px;">
-                    <div style="font-weight:600; color:#1e293b; margin-bottom:4px;">${r.check_out_date||'N/A'}</div>
-                    <div style="font-size:12px; color:#64748b;"><i class="fas fa-clock" style="margin-right:4px;"></i>Check-out</div>
+                    <div style="font-weight:600; color:#1e293b; margin-bottom:2px;">${r.check_in_date||'N/A'}</div>
+                    <div style="font-size:11px; color:#64748b;"><i class="fas fa-clock" style="color:#10b981;"></i> ${r.check_in_time||'N/A'}</div>
+                  </td>
+                  <td style="padding:16px;">
+                    <div style="font-weight:600; color:#1e293b; margin-bottom:2px;">${r.check_out_date||'N/A'}</div>
+                    <div style="font-size:11px; color:#64748b;"><i class="fas fa-clock" style="color:#ef4444;"></i> ${r.check_out_time||'N/A'}</div>
+                  </td>
+                  <td style="padding:16px;">
+                    <div style="font-weight:700; color:#1e293b; font-size:15px;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                    <div style="font-size:11px; color:#64748b;">Down: ₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                    <div style="font-size:10px; color:${r.downpayment_paid ? '#10b981' : '#ef4444'}; font-weight:600;">
+                      ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
+                    </div>
                   </td>
                   <td style="padding:16px;">
                     <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; ${statusColor} color:white; border-radius:20px; font-size:13px; font-weight:600; text-transform:capitalize;">
-                      <i class="fas fa-circle" style="font-size:6px;"></i>${escapeHtml(r.status||'')}
+                      <i class="fas fa-circle" style="font-size:6px;"></i>${escapeHtml(r.status||'').replace('_', ' ')}
                     </span>
                   </td>
                   <td style="padding:16px; text-align:center;">
@@ -845,7 +956,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               }).join('');
               
               tbody.innerHTML = rowsHtml; 
-              document.getElementById('adminPaginationInfo').textContent = `Showing ${start+1}-${Math.min(start+adminPageSize, total)} of ${total} reservations`; 
+              document.getElementById('adminPaginationInfo').textContent = `Page ${adminCurrentPage} of ${totalPages} — ${total} reservations`; 
               document.getElementById('adminPrevPage').disabled = adminCurrentPage<=1; 
               document.getElementById('adminNextPage').disabled = adminCurrentPage>=totalPages;
             }
@@ -857,104 +968,274 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             async function adminShowCreateForm(){ document.getElementById('adminCreateModal').style.display='flex'; }
             function adminHideCreateForm(){ document.getElementById('adminCreateModal').style.display='none'; }
 
-            async function adminSubmitCreate(e){ e.preventDefault(); const form = new FormData(e.target); form.append('action','create'); try{ const res = await fetch('staff_actions.php',{method:'POST', body: form, credentials:'include'}); const data = await res.json(); if(data.success){ adminHideCreateForm(); adminFetchAllReservations(); alert('Created'); } else { alert('Error: '+(data.message||'')); } }catch(err){ console.error(err); alert('Failed to create reservation'); } }
-
-            async function adminUpdateStatus(id, status){ if(!confirm('Change status?')) return; const form = new FormData(); form.append('action','update_status'); form.append('reservation_id', id); form.append('status', status); try{ const res = await fetch('staff_actions.php',{method:'POST', body: form, credentials:'include'}); const data = await res.json(); if(data.success){ adminFetchAllReservations(); alert('Status updated'); } else { alert('Error: '+(data.message||'')); } }catch(err){ console.error(err); alert('Failed to update status'); } }
-
-            function adminViewReservation(id){ 
-              const r = adminAllReservations.find(x=>Number(x.reservation_id)===Number(id)); 
-              if(!r) return alert('Not found'); 
-              
-              const statusColors = {
-                'pending': 'background:linear-gradient(135deg,#f59e0b,#d97706);',
-                'confirmed': 'background:linear-gradient(135deg,#10b981,#059669);',
-                'completed': 'background:linear-gradient(135deg,#3b82f6,#2563eb);',
-                'canceled': 'background:linear-gradient(135deg,#ef4444,#dc2626);'
-              };
-              const statusColor = statusColors[r.status] || 'background:#94a3b8;';
-              const initials = (r.guest_name||'?').split(' ').map(n=>n[0]).join('').substr(0,2).toUpperCase();
-              
-              const html = `
-                <div style="padding:0;">
-                  <div style="${statusColor} color:white; padding:32px 24px; margin:-24px -24px 24px; border-radius:16px 16px 0 0; display:flex; align-items:center; gap:20px;">
-                    <div style="width:80px; height:80px; background:rgba(255,255,255,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700;">${initials}</div>
-                    <div style="flex:1;">
-                      <div style="font-size:28px; font-weight:700; margin-bottom:8px;">${escapeHtml(r.guest_name||'')}</div>
-                      <div style="font-size:15px; opacity:0.95; display:flex; align-items:center; gap:8px;">
-                        <i class="fas fa-bookmark"></i> Reservation #${r.reservation_id}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:24px;">
-                    <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #667eea;">
-                      <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                        <i class="fas fa-phone"></i> Phone
-                      </div>
-                      <div style="font-size:15px; font-weight:600; color:#1e293b;">${escapeHtml(r.guest_phone||'N/A')}</div>
-                    </div>
-                    <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #667eea;">
-                      <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                        <i class="fas fa-envelope"></i> Email
-                      </div>
-                      <div style="font-size:15px; font-weight:600; color:#1e293b; word-break:break-all;">${escapeHtml(r.guest_email||'N/A')}</div>
-                    </div>
-                  </div>
-                  
-                  <div style="padding:20px; background:linear-gradient(135deg, #f8fafc, #ffffff); border-radius:12px; border:2px solid #e2e8f0; margin-bottom:16px;">
-                    <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center;">
-                      <div>
-                        <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-                          <i class="fas fa-calendar-check" style="color:#10b981;"></i> Check-in
-                        </div>
-                        <div style="font-size:18px; font-weight:700; color:#1e293b;">${r.check_in_date||'N/A'}</div>
-                      </div>
-                      <div style="font-size:24px; color:#cbd5e1;"><i class="fas fa-arrow-right"></i></div>
-                      <div style="text-align:right;">
-                        <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:6px; justify-content:flex-end;">
-                          <i class="fas fa-calendar-times" style="color:#ef4444;"></i> Check-out
-                        </div>
-                        <div style="font-size:18px; font-weight:700; color:#1e293b;">${r.check_out_date||'N/A'}</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px;">
-                    <div style="padding:16px; background:#f8fafc; border-radius:12px;">
-                      <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                        <i class="fas fa-bed"></i> Room
-                      </div>
-                      <div style="font-size:16px; font-weight:700; color:#1e293b;">${escapeHtml(r.room||'N/A')}</div>
-                    </div>
-                    <div style="padding:16px; background:#f8fafc; border-radius:12px;">
-                      <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                        <i class="fas fa-tag"></i> Status
-                      </div>
-                      <div>
-                        <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; ${statusColor} color:white; border-radius:20px; font-size:13px; font-weight:600; text-transform:capitalize;">
-                          <i class="fas fa-circle" style="font-size:6px;"></i>${escapeHtml(r.status||'')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style="margin-top:20px; padding-top:20px; border-top:2px solid #f1f5f9; font-size:13px; color:#64748b; display:flex; align-items:center; gap:6px;">
-                    <i class="fas fa-clock"></i>
-                    Created: ${r.created_at||'N/A'}
-                  </div>
-                </div>
-              `; 
-              
-              if(typeof window.showModal==='function'){ 
-                window.showModal('Reservation Details', html); 
-              } else { 
-                alert('Reservation:\n'+JSON.stringify(r)); 
+            async function adminSubmitCreate(e){ 
+              e.preventDefault(); 
+              const form = new FormData(e.target); 
+              form.append('action','create'); 
+              try{ 
+                const res = await fetch('staff_actions.php',{method:'POST', body: form, credentials:'include'}); 
+                const data = await res.json(); 
+                if(data.success){ 
+                  adminHideCreateForm(); 
+                  await adminFetchAllReservations(); 
+                  adminShowNotification('Reservation created', 'success'); 
+                } else { 
+                  adminShowNotification('Error: '+(data.message||''),'error'); 
+                } 
+              }catch(err){ 
+                console.error(err); 
+                adminShowNotification('Failed to create reservation','error'); 
               } 
             }
 
-            function adminExportCSV(){ if(!adminFilteredReservations || adminFilteredReservations.length===0) return alert('No reservations to export'); const rows = adminFilteredReservations.map(r=>({ id:r.reservation_id, guest:r.guest_name, phone:r.guest_phone, email:r.guest_email, room:r.room, check_in:r.check_in_date, check_out:r.check_out_date, status:r.status, created_at:r.created_at })); const csv = [Object.keys(rows[0]).join(',')].concat(rows.map(r=>Object.values(r).map(v=>'"'+String((v||'')).replace(/"/g,'""')+'"').join(','))).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='admin_reservations_export.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+            async function adminUpdateStatus(id, status){ 
+              if(!confirm('Change status?')) return; 
+              const form = new FormData(); 
+              form.append('action','update_status'); 
+              form.append('reservation_id', id); 
+              form.append('status', status); 
+              try{ 
+                const res = await fetch('staff_actions.php',{method:'POST', body: form, credentials: 'include'}); 
+                const data = await res.json(); 
+                if(data.success){ 
+                  await adminFetchAllReservations(); 
+                  adminShowNotification('Status updated','success'); 
+                } else { 
+                  adminShowNotification('Error: '+(data.message||''),'error'); 
+                } 
+              }catch(err){ 
+                console.error(err); 
+                adminShowNotification('Failed to update status','error'); 
+              } 
+            }
+
+            function adminViewReservation(id){ 
+              const r = adminAllReservations.find(x=>Number(x.reservation_id)===Number(id)); 
+              if(!r) return adminShowNotification('Reservation not found','error');
+              
+              const bookingTypeLabels = {
+                'daytime': { icon: 'fa-sun', label: 'DAYTIME (9AM-5PM)', color: '#f59e0b' },
+                'nighttime': { icon: 'fa-moon', label: 'NIGHTTIME (7PM-7AM)', color: '#6366f1' },
+                '22hours': { icon: 'fa-clock', label: '22 HOURS (2PM-12NN)', color: '#8b5cf6' }
+              };
+              
+              const packageLabels = {
+                'all_rooms': 'All Rooms Package',
+                'aircon': 'Aircon Package',
+                'basic': 'Basic Package'
+              };
+              
+              const bookingType = bookingTypeLabels[r.booking_type] || { icon: 'fa-calendar', label: 'N/A', color: '#64748b' };
+              const packageType = packageLabels[r.package_type] || r.package_type || 'N/A';
+              
+              const html = `
+                <div style="padding:0;">
+                  <div style="background:linear-gradient(135deg, ${bookingType.color}ee, ${bookingType.color}); color:white; padding:28px 24px; margin:-24px -24px 24px; border-radius:16px 16px 0 0;">
+                    <div style="display:flex; align-items:center; gap:20px;">
+                      <div style="width:72px; height:72px; background:rgba(255,255,255,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700;">
+                        ${escapeHtml((r.guest_name||'U')[0].toUpperCase())}
+                      </div>
+                      <div style="flex:1;">
+                        <div style="font-size:24px; font-weight:700; margin-bottom:6px;">${escapeHtml(r.guest_name||'')}</div>
+                        <div style="font-size:14px; opacity:0.95; display:flex; align-items:center; gap:8px;">
+                          <i class="fas fa-bookmark"></i> Reservation #${r.reservation_id}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="margin-bottom:20px; padding:16px; background:${bookingType.color}10; border-left:4px solid ${bookingType.color}; border-radius:8px;">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                      <i class="fas ${bookingType.icon}" style="font-size:24px; color:${bookingType.color};"></i>
+                      <div>
+                        <div style="font-weight:700; color:#1e293b; font-size:16px;">${bookingType.label}</div>
+                        <div style="font-size:13px; color:#64748b;">${packageType}</div>
+                      </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+                      <div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Duration</div>
+                        <div style="font-weight:600; color:#1e293b;">${r.number_of_days || r.number_of_nights ? (r.number_of_days ? r.number_of_days + ' day(s)' : r.number_of_nights + ' night(s)') : 'N/A'}</div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Room</div>
+                        <div style="font-weight:600; color:#1e293b;"><i class="fas fa-bed" style="color:#667eea; margin-right:6px;"></i>${escapeHtml(r.room||'TBD')}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                    <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #10b981;">
+                      <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-calendar-check" style="color:#10b981;"></i> Check-in
+                      </div>
+                      <div style="color:#1e293b; font-weight:700; font-size:15px; margin-bottom:4px;">${r.check_in_date||'N/A'}</div>
+                      <div style="color:#64748b; font-size:12px;"><i class="fas fa-clock"></i> ${r.check_in_time||'N/A'}</div>
+                    </div>
+                    <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #ef4444;">
+                      <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-calendar-times" style="color:#ef4444;"></i> Check-out
+                      </div>
+                      <div style="color:#1e293b; font-weight:700; font-size:15px; margin-bottom:4px;">${r.check_out_date||'N/A'}</div>
+                      <div style="color:#64748b; font-size:12px;"><i class="fas fa-clock"></i> ${r.check_out_time||'N/A'}</div>
+                    </div>
+                  </div>
+                  
+                  <div style="background:#f8fafc; padding:20px; border-radius:12px; margin-bottom:20px;">
+                    <div style="font-weight:700; color:#1e293b; margin-bottom:16px; font-size:15px; display:flex; align-items:center; gap:8px;">
+                      <i class="fas fa-money-bill-wave" style="color:#10b981;"></i> Payment Details
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                      <div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Total Amount</div>
+                        <div style="font-size:18px; font-weight:700; color:#1e293b;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Downpayment (50%)</div>
+                        <div style="font-size:18px; font-weight:700; color:#f59e0b;">₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                        <div style="font-size:11px; font-weight:600; color:${r.downpayment_paid ? '#10b981' : '#ef4444'}; margin-top:4px;">
+                          ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
+                        </div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Remaining Balance</div>
+                        <div style="font-size:16px; font-weight:700; color:#667eea;">₱${parseFloat(r.remaining_balance||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Security Bond</div>
+                        <div style="font-size:16px; font-weight:700; color:#8b5cf6;">₱${parseFloat(r.security_bond||2000).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                        <div style="font-size:11px; font-weight:600; color:${r.security_bond_paid ? '#10b981' : '#ef4444'}; margin-top:4px;">
+                          ${r.security_bond_paid ? '✓ Paid' : '✗ Unpaid'}
+                        </div>
+                      </div>
+                    </div>
+                    <div style="margin-top:16px; padding-top:16px; border-top:2px solid #e2e8f0;">
+                      <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Payment Method</div>
+                      <div style="font-weight:600; color:#1e293b; text-transform:capitalize;"><i class="fas fa-credit-card" style="color:#667eea; margin-right:6px;"></i>${r.payment_method||'N/A'}</div>
+                    </div>
+                  </div>
+                  
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                    <div style="padding:16px; background:#f8fafc; border-radius:12px;">
+                      <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:8px;"><i class="fas fa-phone"></i> Phone</div>
+                      <div style="color:#1e293b; font-weight:600; font-size:14px;">${escapeHtml(r.guest_phone||'N/A')}</div>
+                    </div>
+                    <div style="padding:16px; background:#f8fafc; border-radius:12px;">
+                      <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:8px;"><i class="fas fa-envelope"></i> Email</div>
+                      <div style="color:#1e293b; font-weight:600; font-size:14px; word-break:break-all;">${escapeHtml(r.guest_email||'N/A')}</div>
+                    </div>
+                  </div>
+
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:12px; border-top:3px solid ${bookingType.color};">
+                    <div>
+                      <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:6px;">Status</div>
+                      <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#10b981,#059669); color:white; border-radius:20px; font-size:13px; font-weight:600; text-transform:capitalize;">
+                        <i class="fas fa-circle" style="font-size:6px;"></i>${escapeHtml(r.status||'').replace('_', ' ')}
+                      </span>
+                    </div>
+                    <div style="text-align:right;">
+                      <div style="color:#64748b; font-size:11px; font-weight:600; text-transform:uppercase; margin-bottom:6px;">Created</div>
+                      <div style="color:#475569; font-size:12px; font-weight:600;">${r.created_at||'N/A'}</div>
+                    </div>
+                  </div>
+                </div>
+              `;
+              adminShowModal('Reservation Details', html);
+            }
+
+            function adminShowModal(title, htmlContent) {
+              const existingModal = document.getElementById('adminViewModal');
+              if (existingModal) existingModal.remove();
+              
+              const modal = document.createElement('div');
+              modal.id = 'adminViewModal';
+              modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:10000; animation:fadeIn 0.3s ease;';
+              modal.innerHTML = `
+                <div style="background:white; border-radius:16px; max-width:700px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                  <div style="padding:20px 24px; border-bottom:2px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:white; z-index:1;">
+                    <h3 style="margin:0; font-size:20px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:10px;">
+                      <i class="fas fa-info-circle" style="color:#667eea;"></i> ${title}
+                    </h3>
+                    <button onclick="document.getElementById('adminViewModal').remove()" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#64748b; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#64748b';">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <div style="padding:24px;">
+                    ${htmlContent}
+                  </div>
+                </div>
+              `;
+              document.body.appendChild(modal);
+              
+              modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+              });
+            }
+
+            function adminExportCSV(){ 
+              if(!adminFilteredReservations || adminFilteredReservations.length===0) return adminShowNotification('No reservations to export','warning');
+              const rows = adminFilteredReservations.map(r=>({ 
+                id:r.reservation_id, 
+                guest:r.guest_name, 
+                phone:r.guest_phone, 
+                email:r.guest_email, 
+                room:r.room, 
+                booking_type:r.booking_type,
+                package_type:r.package_type,
+                check_in:r.check_in_date, 
+                check_out:r.check_out_date, 
+                total_amount:r.total_amount,
+                downpayment:r.downpayment_amount,
+                status:r.status, 
+                created_at:r.created_at 
+              })); 
+              const csv = [Object.keys(rows[0]).join(',')].concat(rows.map(r=>Object.values(r).map(v=>'"'+String((v||'')).replace(/"/g,'""')+'"').join(','))).join('\n'); 
+              const blob=new Blob([csv],{type:'text/csv'}); 
+              const url=URL.createObjectURL(blob); 
+              const a=document.createElement('a'); 
+              a.href=url; 
+              a.download='admin_reservations_export.csv'; 
+              document.body.appendChild(a); 
+              a.click(); 
+              a.remove(); 
+              URL.revokeObjectURL(url); 
+            }
+
+            function adminShowNotification(msg, type='info'){
+              const colors = { 
+                success: 'linear-gradient(135deg, #10b981, #059669)', 
+                error: 'linear-gradient(135deg, #ef4444, #dc2626)', 
+                info: 'linear-gradient(135deg, #3b82f6, #2563eb)', 
+                warning: 'linear-gradient(135deg, #f59e0b, #d97706)' 
+              };
+              const icons = { success: 'check-circle', error: 'times-circle', info: 'info-circle', warning: 'exclamation-triangle' };
+              const n = document.createElement('div'); 
+              n.style.cssText = `
+                position:fixed; right:20px; bottom:20px; 
+                background:${colors[type]||colors.info}; 
+                color:#fff; padding:16px 20px; border-radius:12px; 
+                box-shadow:0 8px 24px rgba(0,0,0,0.2); 
+                z-index:9999; display:flex; align-items:center; gap:12px;
+                animation: slideInRight 0.3s ease;
+              `; 
+              n.innerHTML = `<i class="fas fa-${icons[type]||'info-circle'}" style="font-size:20px;"></i><span style="font-weight:600;">${msg}</span>`;
+              document.body.appendChild(n); 
+              setTimeout(()=>{
+                n.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(()=>n.remove(), 300);
+              }, 3000);
+            }
 
             document.addEventListener('DOMContentLoaded', adminFetchAllReservations);
+            
+            // Add animation keyframes
+            const adminReservationStyle = document.createElement('style');
+            adminReservationStyle.textContent = `
+              @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+              @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+              @keyframes slideOutRight { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100px); } }
+            `;
+            document.head.appendChild(adminReservationStyle);
           </script>
         </section>
 
@@ -1599,10 +1880,16 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         
         // Load dashboard statistics
         function loadDashboardStats() {
-            console.log('📊 Loading dashboard statistics...');
+            console.log('📊 Loading dashboard statistics from get_dashboard_stats.php...');
             
             fetch('get_dashboard_stats.php')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('📡 Dashboard stats response status:', response.status, response.statusText);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     console.log('📈 Dashboard data received:', data);
                     
@@ -1948,8 +2235,8 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         window.connectionCheckInterval = setInterval(checkDatabaseConnection, 3000);
         
         // Add CSS animations
-        const style = document.createElement('style');
-        style.textContent = `
+        const dashboardAnimationStyle = document.createElement('style');
+        dashboardAnimationStyle.textContent = `
             @keyframes fadeIn {
                 from { opacity: 0; }
                 to { opacity: 1; }
@@ -1965,7 +2252,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 }
             }
         `;
-        document.head.appendChild(style);
+        document.head.appendChild(dashboardAnimationStyle);
     </script>
     
     <script src="../admin-script.js"></script>

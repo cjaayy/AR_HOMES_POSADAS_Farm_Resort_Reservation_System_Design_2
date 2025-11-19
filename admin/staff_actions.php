@@ -4,7 +4,12 @@
  */
 session_start();
 header('Content-Type: application/json');
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
+
+// Allow admin, super_admin, and staff roles
+$allowedRoles = ['admin', 'super_admin', 'staff'];
+$userRole = $_SESSION['admin_role'] ?? '';
+
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !in_array($userRole, $allowedRoles)) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
