@@ -185,4 +185,3 @@ function getTimeAgo($timestamp) {
         return $months . ' month' . ($months > 1 ? 's' : '') . ' ago';
     }
 }
-?>

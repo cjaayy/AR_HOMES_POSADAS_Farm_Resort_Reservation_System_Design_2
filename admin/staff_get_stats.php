@@ -12,13 +12,6 @@ $allowedRoles = ['admin', 'super_admin', 'staff'];
 $userRole = $_SESSION['admin_role'] ?? '';
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !in_array($userRole, $allowedRoles)) {
-    // Optional debug logging when ?debug=1 and request from localhost
-    if (isset($_GET['debug']) && $_GET['debug'] == '1' && in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1','::1'])) {
-        $log = "[".date('Y-m-d H:i:s')."] Unauthorized access to staff_get_stats.php\n";
-        $log .= "REMOTE_ADDR=".($_SERVER['REMOTE_ADDR'] ?? 'n/a')."\n";
-        $log .= "SESSION=".print_r($_SESSION, true)."\n";
-        @file_put_contents(__DIR__.DIRECTORY_SEPARATOR.'stats_debug.log', $log, FILE_APPEND);
-    }
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;

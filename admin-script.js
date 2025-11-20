@@ -56,7 +56,6 @@ function showSection(sectionId, skipSave = false) {
 
   // Load data when switching to specific sections
   if (sectionId === "users") {
-    console.log("📊 Users section opened - loading user data...");
     // Load users when users section is opened
     if (typeof loadUsers === "function") {
       loadUsers();
@@ -153,7 +152,6 @@ function removeSidebarOverlay() {
 
 // Make functions globally accessible
 window.logout = function logout() {
-  console.log("🚪 Logout button clicked");
   // Show logout modal instead of confirm dialog
   showLogoutModal();
 };
@@ -163,13 +161,11 @@ window.showLogoutModal = function showLogoutModal() {
   const modal = document.getElementById("logoutModal");
 
   if (!modal) {
-    console.error("❌ Logout modal not found! Logging out directly...");
     // If modal doesn't exist, logout directly
     confirmLogout();
     return;
   }
 
-  console.log("✅ Showing logout modal");
   modal.classList.add("show");
   modal.style.display = "flex";
 
@@ -188,11 +184,8 @@ window.hideLogoutModal = function hideLogoutModal() {
   const modal = document.getElementById("logoutModal");
 
   if (!modal) {
-    console.warn("⚠️ Modal not found when trying to hide");
     return;
   }
-
-  console.log("👋 Hiding logout modal");
 
   // Add hide animation
   modal.classList.add("hide");
@@ -216,14 +209,11 @@ window.hideLogoutModal = function hideLogoutModal() {
       overlay.onclick = null;
     }
 
-    console.log("✅ Modal fully hidden and reset");
-  }, 300);
+    }, 300);
 };
 
 // Confirm logout action
 window.confirmLogout = function confirmLogout() {
-  console.log("✅ Logout confirmed, processing...");
-
   // Hide modal first (if it exists)
   const modal = document.getElementById("logoutModal");
   if (modal) {
@@ -249,12 +239,6 @@ window.confirmLogout = function confirmLogout() {
     const isInAdminFolder = currentPath.includes("/admin/");
     const logoutPath = isInAdminFolder ? "logout.php" : "admin/logout.php";
 
-    console.log("🔓 Logging out...", {
-      currentPath,
-      isInAdminFolder,
-      logoutPath,
-    });
-
     fetch(logoutPath, {
       method: "POST",
       headers: {
@@ -262,11 +246,9 @@ window.confirmLogout = function confirmLogout() {
       },
     })
       .then((response) => {
-        console.log("Logout response status:", response.status);
         return response.json();
       })
       .then((data) => {
-        console.log("Logout response:", data);
         // Clear any stored session data
         localStorage.removeItem("adminSession");
         localStorage.removeItem("adminActiveSection"); // Clear saved section so Dashboard shows on next login
@@ -274,17 +256,13 @@ window.confirmLogout = function confirmLogout() {
 
         // Redirect to login page - adjust path based on current location
         const indexPath = isInAdminFolder ? "../index.html" : "index.html";
-        console.log("Redirecting to:", indexPath);
-
         setTimeout(() => {
           window.location.href = indexPath;
         }, 500);
       })
       .catch((error) => {
-        console.error("Logout error:", error);
         // Redirect anyway - adjust path based on current location
         const indexPath = isInAdminFolder ? "../index.html" : "index.html";
-        console.log("Error occurred, redirecting to:", indexPath);
         window.location.href = indexPath;
       });
   }, 100);
@@ -518,8 +496,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Global error handler
 window.addEventListener("error", function (e) {
-  console.error("Dashboard Error:", e.error);
-
   // Show user-friendly error message
   const errorMessage = document.createElement("div");
   errorMessage.className = "error-toast";
@@ -988,13 +964,11 @@ document.addEventListener("DOMContentLoaded", function () {
       e.stopPropagation();
 
       if (window.__debugAdminScript) {
-        console.log("🖱️ Logout triggered via selector:", usedSelector);
-      }
+        }
 
       // Ensure button is not disabled
       if (this.disabled) {
-        if (window.__debugAdminScript) console.warn("⚠️ Button is disabled, ignoring click");
-        return;
+        if (window.__debugAdminScript) return;
       }
 
       logout();
@@ -1019,10 +993,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
-
-console.log(
-  "🏨 AR Homes Posadas Farm Resort - Admin Dashboard Loaded Successfully!"
-);
 
 // ===== USER MANAGEMENT FUNCTIONALITY =====
 
@@ -1052,8 +1022,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Fetch users from the server
 async function loadUsers() {
-  console.log("Loading users from database...");
-
   const tableBody = document.getElementById("usersTableBody");
 
   // Show loading state
@@ -1074,8 +1042,6 @@ async function loadUsers() {
       allUsers = data.users;
       filteredUsers = [...allUsers];
 
-      console.log(`Loaded ${allUsers.length} users successfully`);
-
       // Update statistics
       updateUserStatistics();
 
@@ -1085,7 +1051,6 @@ async function loadUsers() {
       showError("Failed to load users: " + data.message);
     }
   } catch (error) {
-    console.error("Error loading users:", error);
     showError("Error loading users. Please check the console for details.");
   }
 }
@@ -1114,10 +1079,7 @@ function updateUserStatistics() {
   animateCountUp("manageVipUsersCount", vipUsers);
   animateCountUp("manageNewUsersCount", newUsers);
 
-  console.log(
-    `📊 User Statistics Updated - Total: ${totalUsers}, Active: ${activeUsers}, VIP: ${vipUsers}, New This Month: ${newUsers}`
-  );
-}
+  }
 
 // Animate counter from current value to target value
 function animateCountUp(elementId, targetValue) {
@@ -1502,7 +1464,6 @@ function editUser(userId) {
           showNotification("Error: " + result.message, "error");
         }
       } catch (error) {
-        console.error("Error updating user:", error);
         showNotification("Failed to update user. Please try again.", "error");
       }
     });
@@ -1534,7 +1495,6 @@ function toggleUserStatus(userId, currentStatus) {
         }
       })
       .catch((error) => {
-        console.error("Error updating user status:", error);
         showNotification(
           "Failed to update user status. Please try again.",
           "error"
@@ -1572,7 +1532,6 @@ function deleteUser(userId) {
         }
       })
       .catch((error) => {
-        console.error("Error deleting user:", error);
         showNotification("Failed to delete user. Please try again.", "error");
       });
   }
@@ -1709,4 +1668,3 @@ window.toggleUserStatus = toggleUserStatus;
 window.deleteUser = deleteUser;
 window.closeUserModal = closeUserModal;
 
-console.log("✅ User Management System Loaded");

@@ -470,28 +470,26 @@
               <h2>📋 Booking Policy</h2>
               <div class="policy-highlights">
                 <div class="policy-item">
-                  <i class="fas fa-check-circle"></i>
-                  <span><strong>First to Pay, First to Reserve</strong></span>
+                  <i class="fas fa-calendar-check"></i>
+                  <span><strong>Single booking only per slot</strong></span>
+                </div>
+                <div class="policy-item">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span
+                    ><strong
+                      >Down payment is strictly non-refundable</strong
+                    ></span
+                  >
+                </div>
+                <div class="policy-item">
+                  <i class="fas fa-ban"></i>
+                  <span><strong>No cancellation once confirmed</strong></span>
                 </div>
                 <div class="policy-item">
                   <i class="fas fa-wallet"></i>
                   <span
                     ><strong>50% Downpayment Required</strong> to confirm
                     reservation</span
-                  >
-                </div>
-                <div class="policy-item">
-                  <i class="fas fa-exclamation-triangle"></i>
-                  <span
-                    ><strong>Non-Refundable</strong> - Rebooking only (within 3
-                    months)</span
-                  >
-                </div>
-                <div class="policy-item">
-                  <i class="fas fa-calendar-alt"></i>
-                  <span
-                    ><strong>Rebooking allowed</strong> 7 days prior to
-                    schedule</span
                   >
                 </div>
                 <div class="policy-item">
@@ -504,391 +502,901 @@
               </div>
             </div>
 
-            <!-- Step 1: Select Booking Type -->
+            <!-- Step 1: Select Package (Combined Booking Type & Package) -->
             <div class="booking-step active" id="step1">
-              <h2>Step 1: Choose Your Booking Type</h2>
-              <div class="booking-types-grid">
-                <!-- DAYTIME Booking -->
-                <div class="booking-type-card" data-type="daytime">
-                  <div class="booking-type-header">
-                    <div class="booking-icon sun">
-                      <i class="fas fa-sun"></i>
-                    </div>
-                    <h3>DAYTIME</h3>
-                    <p class="booking-hours">9:00 AM - 5:00 PM</p>
-                  </div>
-                  <div class="booking-type-body">
-                    <div class="time-info">
-                      <div class="time-row">
-                        <span class="time-label">Check-in:</span>
-                        <span class="time-value">9:00 AM</span>
-                      </div>
-                      <div class="time-row">
-                        <span class="time-label">Check-out:</span>
-                        <span class="time-value">5:00 PM</span>
-                      </div>
-                    </div>
-                    <div class="booking-features">
-                      <div class="feature-item">
-                        <i class="fas fa-swimming-pool"></i>
-                        <span>Full resort access</span>
-                      </div>
-                      <div class="feature-item">
-                        <i class="fas fa-utensils"></i>
-                        <span>BBQ areas available</span>
-                      </div>
-                      <div class="feature-item">
-                        <i class="fas fa-clock"></i>
-                        <span>8-hour access</span>
-                      </div>
-                    </div>
-                    <div class="policy-details">
-                      <h4>Policies:</h4>
-                      <ul>
-                        <li>₱500/hour for exceeding hours</li>
-                        <li>₱2,000 security bond required</li>
-                        <li>Noise curfew at 10:00 PM</li>
-                        <li>No smoking - ₱5,000 penalty</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <button
-                    class="select-booking-type-btn"
-                    onclick="selectBookingType('daytime')"
-                  >
-                    <i class="fas fa-check"></i> Select Daytime
-                  </button>
-                </div>
-
-                <!-- NIGHTTIME Booking -->
-                <div class="booking-type-card featured" data-type="nighttime">
-                  <div class="booking-ribbon">Popular</div>
-                  <div class="booking-type-header">
-                    <div class="booking-icon moon">
-                      <i class="fas fa-moon"></i>
-                    </div>
-                    <h3>NIGHTTIME</h3>
-                    <p class="booking-hours">7:00 PM - 7:00 AM</p>
-                  </div>
-                  <div class="booking-type-body">
-                    <div class="time-info">
-                      <div class="time-row">
-                        <span class="time-label">Check-in:</span>
-                        <span class="time-value">7:00 PM</span>
-                      </div>
-                      <div class="time-row">
-                        <span class="time-label">Check-out:</span>
-                        <span class="time-value">7:00 AM</span>
-                      </div>
-                    </div>
-                    <div class="booking-features">
-                      <div class="feature-item">
-                        <i class="fas fa-bed"></i>
-                        <span>Overnight stay included</span>
-                      </div>
-                      <div class="feature-item">
-                        <i class="fas fa-swimming-pool"></i>
-                        <span>Full resort access</span>
-                      </div>
-                      <div class="feature-item">
-                        <i class="fas fa-clock"></i>
-                        <span>12-hour access</span>
-                      </div>
-                    </div>
-                    <div class="policy-details">
-                      <h4>Policies:</h4>
-                      <ul>
-                        <li>₱500/hour early check-in fee</li>
-                        <li>₱1,000/hour for exceeding hours</li>
-                        <li>₱2,000 security bond required</li>
-                        <li>No smoking - ₱5,000 penalty</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <button
-                    class="select-booking-type-btn"
-                    onclick="selectBookingType('nighttime')"
-                  >
-                    <i class="fas fa-check"></i> Select Nighttime
-                  </button>
-                </div>
-
-                <!-- 22 HOURS Booking -->
-                <div class="booking-type-card" data-type="22hours">
-                  <div class="booking-type-header">
-                    <div class="booking-icon extended">
-                      <i class="fas fa-calendar-day"></i>
-                    </div>
-                    <h3>22 HOURS</h3>
-                    <p class="booking-hours">2:00 PM - 12:00 NN (Next Day)</p>
-                  </div>
-                  <div class="booking-type-body">
-                    <div class="time-info">
-                      <div class="time-row">
-                        <span class="time-label">Check-in:</span>
-                        <span class="time-value">2:00 PM</span>
-                      </div>
-                      <div class="time-row">
-                        <span class="time-label">Check-out:</span>
-                        <span class="time-value">12:00 NN</span>
-                      </div>
-                    </div>
-                    <div class="booking-features">
-                      <div class="feature-item">
-                        <i class="fas fa-clock"></i>
-                        <span>Extended 22-hour stay</span>
-                      </div>
-                      <div class="feature-item">
-                        <i class="fas fa-bed"></i>
-                        <span>Overnight included</span>
-                      </div>
-                      <div class="feature-item">
-                        <i class="fas fa-swimming-pool"></i>
-                        <span>Full resort access</span>
-                      </div>
-                    </div>
-                    <div class="policy-details">
-                      <h4>Policies:</h4>
-                      <ul>
-                        <li>₱500/hour for exceeding hours</li>
-                        <li>₱2,000 security bond required</li>
-                        <li>Noise curfew at 10:00 PM</li>
-                        <li>No smoking - ₱5,000 penalty</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <button
-                    class="select-booking-type-btn"
-                    onclick="selectBookingType('22hours')"
-                  >
-                    <i class="fas fa-check"></i> Select 22 Hours
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 2: Select Room Package -->
-            <div class="booking-step" id="step2" style="display: none">
-              <h2>Step 2: Choose Your Room Package</h2>
+              <h2>Step 1: Choose Your Package</h2>
               <p class="step-description">
                 <strong>✨ ALL PACKAGES INCLUDE FULL RESORT ACCESS ✨</strong
                 ><br />
-                Select the accommodation that best suits your group size.
+                Select the package that best fits your schedule and needs.
               </p>
               <div class="room-packages-grid" id="roomPackagesGrid">
-                <!-- All Rooms Package -->
-                <div
-                  class="room-package-card featured"
-                  data-package="all-rooms"
-                >
+                <!-- Daytime Package -->
+                <div class="room-package-card" data-package="daytime">
                   <div class="package-header">
-                    <h3>All Rooms Package</h3>
-                    <div class="package-badge premium">Most Popular</div>
-                  </div>
-                  <div class="package-content">
-                    <div class="package-price-display">
-                      <div class="package-price">
-                        ₱<span id="all-rooms-price">25,000</span>
-                        <span class="price-period"></span>
-                      </div>
-                    </div>
-
-                    <div class="included-rooms">
-                      <h4>Included Accommodations:</h4>
-                      <div class="room-list">
-                        <div class="room-item">
-                          <img
-                            src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
-                            alt="Deluxe Room"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Deluxe Room</span>
-                            <span class="room-features"
-                              >AC • King Bed • 2 guests</span
-                            >
-                          </div>
-                        </div>
-                        <div class="room-item">
-                          <img
-                            src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
-                            alt="Executive Suite"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Executive Suite</span>
-                            <span class="room-features"
-                              >AC • Living Area • 4 guests</span
-                            >
-                          </div>
-                        </div>
-                        <div class="room-item">
-                          <img
-                            src="images/546238992_684641691315373_7119956179300816560_n.jpg"
-                            alt="Family Room"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Family Room</span>
-                            <span class="room-features"
-                              >AC • 2 Queen Beds • 6 guests</span
-                            >
-                          </div>
-                        </div>
-                        <div class="room-item">
-                          <img
-                            src="images/547374912_659920707160374_2419929377794463667_n.jpg"
-                            alt="Private Villa"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Private Villa</span>
-                            <span class="room-features"
-                              >AC • Private Pool • 8 guests</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="total-capacity">Total: Up to 20 guests</div>
-                    </div>
-                    <button
-                      class="select-package-btn"
-                      onclick="selectRoomPackage('all-rooms')"
-                    >
-                      Select All Rooms Package
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Aircon Rooms Only Package -->
-                <div class="room-package-card" data-package="aircon-rooms">
-                  <div class="package-header">
-                    <h3>Aircon Rooms Package</h3>
-                    <div class="package-badge comfort">Comfort</div>
-                  </div>
-                  <div class="package-content">
-                    <div class="package-price-display">
-                      <div class="package-price">
-                        ₱<span id="aircon-rooms-price">20,000</span>
-                        <span class="price-period"></span>
-                      </div>
-                    </div>
-
-                    <div class="included-rooms">
-                      <h4>Air-Conditioned Rooms:</h4>
-                      <div class="room-list">
-                        <div class="room-item">
-                          <img
-                            src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
-                            alt="Deluxe Room"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Deluxe Room</span>
-                            <span class="room-features"
-                              >❄️ AC • King Bed • 2 guests</span
-                            >
-                          </div>
-                        </div>
-                        <div class="room-item">
-                          <img
-                            src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
-                            alt="Executive Suite"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Executive Suite</span>
-                            <span class="room-features"
-                              >❄️ AC • Living Area • 4 guests</span
-                            >
-                          </div>
-                        </div>
-                        <div class="room-item">
-                          <img
-                            src="images/546238992_684641691315373_7119956179300816560_n.jpg"
-                            alt="Family Room"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Family Room</span>
-                            <span class="room-features"
-                              >❄️ AC • 2 Queen Beds • 6 guests</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="total-capacity">Total: Up to 12 guests</div>
-                    </div>
-                    <button
-                      class="select-package-btn"
-                      onclick="selectRoomPackage('aircon-rooms')"
-                    >
-                      Select Aircon Rooms
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Basic Rooms Package -->
-                <div class="room-package-card" data-package="basic-rooms">
-                  <div class="package-header">
-                    <h3>Basic Rooms Package</h3>
+                    <h3>Daytime Package</h3>
                     <div class="package-badge budget">Budget Friendly</div>
                   </div>
                   <div class="package-content">
                     <div class="package-price-display">
                       <div class="package-price">
-                        ₱<span id="basic-rooms-price">12,000</span>
-                        <span class="price-period"></span>
+                        ₱<span id="daytime-price-main">6,000</span>
+                      </div>
+                      <div class="package-time">9:00 AM - 5:00 PM</div>
+                    </div>
+
+                    <div class="included-rooms">
+                      <button
+                        class="view-inclusions-btn"
+                        onclick="openInclusionsModal('daytime')"
+                        style="
+                          width: 100%;
+                          padding: 12px;
+                          background: #f8f9fa;
+                          border: 2px solid #e2e8f0;
+                          border-radius: 8px;
+                          cursor: pointer;
+                          font-weight: 600;
+                          color: #475569;
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          transition: all 0.3s;
+                        "
+                      >
+                        <span>📋 View Full Inclusions & Rooms</span>
+                        <i
+                          class="fas fa-external-link-alt"
+                          style="font-size: 0.9em"
+                        ></i>
+                      </button>
+                      <div
+                        class="inclusions-content"
+                        id="inclusions-daytime"
+                        style="display: none"
+                      >
+                        <h4>Inclusions:</h4>
+                        <ul
+                          style="
+                            text-align: left;
+                            padding-left: 20px;
+                            margin: 15px 0;
+                            font-size: 0.9em;
+                          "
+                        >
+                          <li>
+                            Free unlimited use of videoke until 10:00 PM only
+                          </li>
+                          <li>Free purified water</li>
+                          <li>Free WiFi</li>
+                          <li>Access to all pools</li>
+                          <li>
+                            Free use of kitchen, kitchenware, and barbecue area
+                          </li>
+                        </ul>
+                        <h4 style="margin-top: 20px">Rooms:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room with VideoOke.jpg"
+                              alt="Room with Videoke"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Room with Videoke</span>
+                              <span class="room-features">✅ Included</span>
+                              <button
+                                class="view-image-btn"
+                                onclick="openImageLightbox('images/Rooms/Room with VideoOke.jpg', 'Room with Videoke')"
+                              >
+                                <i class="fas fa-search-plus"></i> View Image
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Swimming Pools:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Swimming Pools/Big Pool.jpg"
+                              alt="Big Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Big Pool</span>
+                              <span class="room-features">Access included</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Swimming Pools/Jacuzzi Pool.jpg"
+                              alt="Jacuzzi Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Jacuzzi Pool</span>
+                              <span class="room-features">Access included</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Kitchen Areas:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Kitchen/Kitchen 1.jpg"
+                              alt="Kitchen 1"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kitchen Area 1</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Kitchen/Kitchen 2.jpg"
+                              alt="Kitchen 2"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kitchen Area 2</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Barbecue Area:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Barbecue Area/Barbeque Area.jpg"
+                              alt="Barbecue Area"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Barbecue Area</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          style="
+                            margin-top: 15px;
+                            padding: 10px;
+                            background: #fff3cd;
+                            border-radius: 8px;
+                            border-left: 4px solid #ffc107;
+                          "
+                        >
+                          <strong style="font-size: 0.9em"
+                            >NOT Included:</strong
+                          >
+                          <ul
+                            style="
+                              margin: 5px 0;
+                              padding-left: 20px;
+                              font-size: 0.85em;
+                            "
+                          >
+                            <li>Triangle Room 1 & 2</li>
+                            <li>Room Under the Pool</li>
+                            <li>Kubo Room</li>
+                            <li>Aircon Room</li>
+                          </ul>
+                        </div>
+                        <div class="total-capacity" style="margin-top: 15px">
+                          Minimum: 10 pax • No maximum limit
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      class="select-package-btn"
+                      onclick="selectRoomPackageDirect('daytime')"
+                    >
+                      Select Daytime Package
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Nighttime Package -->
+                <div
+                  class="room-package-card featured"
+                  data-package="nighttime"
+                >
+                  <div class="package-header">
+                    <h3>Nighttime Package</h3>
+                    <div class="package-badge premium">Most Popular</div>
+                  </div>
+                  <div class="package-content">
+                    <div class="package-price-display">
+                      <div class="package-price">
+                        ₱<span id="nighttime-price-main">10,000</span>
+                      </div>
+                      <div class="package-time">7:00 PM - 7:00 AM</div>
+                    </div>
+
+                    <div class="included-rooms">
+                      <button
+                        class="view-inclusions-btn"
+                        onclick="openInclusionsModal('nighttime')"
+                        style="
+                          width: 100%;
+                          padding: 12px;
+                          background: #f8f9fa;
+                          border: 2px solid #e2e8f0;
+                          border-radius: 8px;
+                          cursor: pointer;
+                          font-weight: 600;
+                          color: #475569;
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          transition: all 0.3s;
+                        "
+                      >
+                        <span>📋 View Full Inclusions & Rooms</span>
+                        <i
+                          class="fas fa-external-link-alt"
+                          style="font-size: 0.9em"
+                        ></i>
+                      </button>
+                      <div
+                        class="inclusions-content"
+                        id="inclusions-nighttime"
+                        style="display: none"
+                      >
+                        <h4>Inclusions:</h4>
+                        <ul
+                          style="
+                            text-align: left;
+                            padding-left: 20px;
+                            margin: 15px 0;
+                            font-size: 0.9em;
+                          "
+                        >
+                          <li>
+                            Free unlimited use of videoke until 10:00 PM only
+                          </li>
+                          <li>Full access to all amenities</li>
+                          <li>Access to barbecue area</li>
+                          <li>Free WiFi and purified water</li>
+                        </ul>
+                        <h4 style="margin-top: 20px">Rooms:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Triangle 1.jpg"
+                              alt="Triangle Room 1"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Triangle Room 1</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Triangle 2.jpg"
+                              alt="Triangle Room 2"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Triangle Room 2</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Under Pool.jpg"
+                              alt="Room Under the Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Room Under Pool</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Kubo Room.jpg"
+                              alt="Kubo Room"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kubo Room</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Aircon Room - Capacity of 12 to 15  with CR.jpg"
+                              alt="Aircon Room"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Aircon Room</span>
+                              <span class="room-features">12-15 pax</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room with VideoOke.jpg"
+                              alt="Room with Videoke"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Room with Videoke</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Swimming Pools:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Swimming Pools/Big Pool.jpg"
+                              alt="Big Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Big Pool</span>
+                              <span class="room-features">Access included</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Swimming Pools/Jacuzzi Pool.jpg"
+                              alt="Jacuzzi Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Jacuzzi Pool</span>
+                              <span class="room-features">Access included</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Kitchen Areas:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Kitchen/Kitchen 1.jpg"
+                              alt="Kitchen 1"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kitchen Area 1</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Kitchen/Kitchen 2.jpg"
+                              alt="Kitchen 2"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kitchen Area 2</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Barbecue Area:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Barbecue Area/Barbeque Area.jpg"
+                              alt="Barbecue Area"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Barbecue Area</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      class="select-package-btn"
+                      onclick="selectRoomPackageDirect('nighttime')"
+                    >
+                      Select Nighttime Package
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 22 Hours Package -->
+                <div class="room-package-card" data-package="22hours">
+                  <div class="package-header">
+                    <h3>22 Hours Package</h3>
+                    <div class="package-badge comfort">Extended Stay</div>
+                  </div>
+                  <div class="package-content">
+                    <div class="package-price-display">
+                      <div class="package-price">
+                        ₱<span id="22hours-price-main">18,000</span>
+                      </div>
+                      <div class="package-time">
+                        2:00 PM - 12:00 NN (Next Day)
                       </div>
                     </div>
 
                     <div class="included-rooms">
-                      <h4>Basic Accommodations:</h4>
-                      <div class="room-list">
-                        <div class="room-item">
-                          <img
-                            src="images/546238992_684641691315373_7119956179300816560_n.jpg"
-                            alt="Fan Room"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Fan Room 1</span>
-                            <span class="room-features"
-                              >🌀 Fan • Double Bed • 4 guests</span
-                            >
+                      <button
+                        class="view-inclusions-btn"
+                        onclick="openInclusionsModal('22hours')"
+                        style="
+                          width: 100%;
+                          padding: 12px;
+                          background: #f8f9fa;
+                          border: 2px solid #e2e8f0;
+                          border-radius: 8px;
+                          cursor: pointer;
+                          font-weight: 600;
+                          color: #475569;
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          transition: all 0.3s;
+                        "
+                      >
+                        <span>📋 View Full Inclusions & Rooms</span>
+                        <i
+                          class="fas fa-external-link-alt"
+                          style="font-size: 0.9em"
+                        ></i>
+                      </button>
+                      <div
+                        class="inclusions-content"
+                        id="inclusions-22hours"
+                        style="display: none"
+                      >
+                        <h4>Inclusions:</h4>
+                        <ul
+                          style="
+                            text-align: left;
+                            padding-left: 20px;
+                            margin: 15px 0;
+                            font-size: 0.9em;
+                          "
+                        >
+                          <li>
+                            Free unlimited use of videoke until 10:00 PM only
+                          </li>
+                          <li>All-access to all amenities and all rooms</li>
+                          <li>Includes barbecue area</li>
+                          <li>Ideal for extended stays</li>
+                          <li>Free WiFi and purified water</li>
+                        </ul>
+                        <h4 style="margin-top: 20px">Rooms:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Triangle 1.jpg"
+                              alt="Triangle Room 1"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Triangle Room 1</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Triangle 2.jpg"
+                              alt="Triangle Room 2"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Triangle Room 2</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Under Pool.jpg"
+                              alt="Room Under the Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Room Under Pool</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Kubo Room.jpg"
+                              alt="Kubo Room"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kubo Room</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Aircon Room - Capacity of 12 to 15  with CR.jpg"
+                              alt="Aircon Room"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Aircon Room</span>
+                              <span class="room-features">12-15 pax</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room with VideoOke.jpg"
+                              alt="Room with Videoke"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Room with Videoke</span>
+                            </div>
                           </div>
                         </div>
-                        <div class="room-item">
-                          <img
-                            src="images/546238992_684641691315373_7119956179300816560_n.jpg"
-                            alt="Fan Room"
-                          />
-                          <div class="room-info">
-                            <span class="room-name">Fan Room 2</span>
-                            <span class="room-features"
-                              >🌀 Fan • Double Bed • 4 guests</span
-                            >
+                        <h4 style="margin-top: 20px">Swimming Pools:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Swimming Pools/Big Pool.jpg"
+                              alt="Big Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Big Pool</span>
+                              <span class="room-features">Access included</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Swimming Pools/Jacuzzi Pool.jpg"
+                              alt="Jacuzzi Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Jacuzzi Pool</span>
+                              <span class="room-features">Access included</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Kitchen Areas:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Kitchen/Kitchen 1.jpg"
+                              alt="Kitchen 1"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kitchen Area 1</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Kitchen/Kitchen 2.jpg"
+                              alt="Kitchen 2"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kitchen Area 2</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Barbecue Area:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Barbecue Area/Barbeque Area.jpg"
+                              alt="Barbecue Area"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Barbecue Area</span>
+                              <span class="room-features">Free use</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div class="total-capacity">Total: Up to 8 guests</div>
                     </div>
                     <button
                       class="select-package-btn"
-                      onclick="selectRoomPackage('basic-rooms')"
+                      onclick="selectRoomPackageDirect('22hours')"
                     >
-                      Select Basic Rooms
+                      Select 22 Hours Package
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Venue for All Occasions Package -->
+                <div class="room-package-card" data-package="venue">
+                  <div class="package-header">
+                    <h3>Venue for All Occasions</h3>
+                    <div
+                      class="package-badge premium"
+                      style="
+                        background: linear-gradient(
+                          135deg,
+                          #f093fb 0%,
+                          #f5576c 100%
+                        );
+                      "
+                    >
+                      Special Events
+                    </div>
+                  </div>
+                  <div class="package-content">
+                    <div class="package-price-display">
+                      <div class="package-price">
+                        <span style="font-size: 0.7em">Starting at</span><br />
+                        ₱<span id="venue-price-main">6,000</span>
+                      </div>
+                      <div class="package-time">Based on Time Slot</div>
+                    </div>
+
+                    <div class="included-rooms">
+                      <button
+                        class="view-inclusions-btn"
+                        onclick="openInclusionsModal('venue')"
+                        style="
+                          width: 100%;
+                          padding: 12px;
+                          background: #f8f9fa;
+                          border: 2px solid #e2e8f0;
+                          border-radius: 8px;
+                          cursor: pointer;
+                          font-weight: 600;
+                          color: #475569;
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          transition: all 0.3s;
+                        "
+                      >
+                        <span>📋 View Full Inclusions & Rooms</span>
+                        <i
+                          class="fas fa-external-link-alt"
+                          style="font-size: 0.9em"
+                        ></i>
+                      </button>
+                      <div
+                        class="inclusions-content"
+                        id="inclusions-venue"
+                        style="display: none"
+                      >
+                        <h4>Perfect For:</h4>
+                        <ul
+                          style="
+                            text-align: left;
+                            padding-left: 20px;
+                            margin: 15px 0;
+                            font-size: 0.9em;
+                          "
+                        >
+                          <li>🎉 Birthday Parties</li>
+                          <li>💍 Wedding Receptions</li>
+                          <li>🎊 Corporate Events</li>
+                          <li>👨‍👩‍👧‍👦 Family Reunions</li>
+                          <li>🎓 Graduation Celebrations</li>
+                          <li>🎈 Any Special Occasion</li>
+                        </ul>
+                        <h4 style="margin-top: 20px">Inclusions:</h4>
+                        <ul
+                          style="
+                            text-align: left;
+                            padding-left: 20px;
+                            margin: 15px 0;
+                            font-size: 0.9em;
+                          "
+                        >
+                          <li>
+                            Free unlimited use of videoke until 10:00 PM only
+                          </li>
+                          <li>Full access to all amenities</li>
+                          <li>Access to barbecue area</li>
+                          <li>Free WiFi and purified water</li>
+                        </ul>
+                        <h4 style="margin-top: 15px; font-size: 0.95em">
+                          Pricing Options:
+                        </h4>
+                        <div
+                          style="
+                            background: #f8f9fa;
+                            padding: 10px;
+                            border-radius: 6px;
+                            margin: 10px 0;
+                          "
+                        >
+                          <div
+                            style="
+                              display: grid;
+                              grid-template-columns: repeat(3, 1fr);
+                              gap: 6px;
+                              text-align: center;
+                            "
+                          >
+                            <div
+                              style="
+                                padding: 6px;
+                                background: white;
+                                border-radius: 4px;
+                                border: 2px solid #ffd93d;
+                              "
+                            >
+                              <strong style="color: #f59e0b; font-size: 0.75em"
+                                >Daytime</strong
+                              >
+                              <div
+                                style="
+                                  font-size: 0.95em;
+                                  font-weight: bold;
+                                  color: #1e293b;
+                                  margin-top: 2px;
+                                "
+                              >
+                                ₱6,000
+                              </div>
+                              <div style="font-size: 0.65em; color: #64748b">
+                                9AM - 5PM
+                              </div>
+                            </div>
+                            <div
+                              style="
+                                padding: 6px;
+                                background: white;
+                                border-radius: 4px;
+                                border: 2px solid #667eea;
+                              "
+                            >
+                              <strong style="color: #667eea; font-size: 0.75em"
+                                >Nighttime</strong
+                              >
+                              <div
+                                style="
+                                  font-size: 0.95em;
+                                  font-weight: bold;
+                                  color: #1e293b;
+                                  margin-top: 2px;
+                                "
+                              >
+                                ₱10,000
+                              </div>
+                              <div style="font-size: 0.65em; color: #64748b">
+                                7PM - 7AM
+                              </div>
+                            </div>
+                            <div
+                              style="
+                                padding: 6px;
+                                background: white;
+                                border-radius: 4px;
+                                border: 2px solid #f093fb;
+                              "
+                            >
+                              <strong style="color: #f093fb; font-size: 0.75em"
+                                >22 Hours</strong
+                              >
+                              <div
+                                style="
+                                  font-size: 0.95em;
+                                  font-weight: bold;
+                                  color: #1e293b;
+                                  margin-top: 2px;
+                                "
+                              >
+                                ₱18,000
+                              </div>
+                              <div style="font-size: 0.65em; color: #64748b">
+                                2PM - 12NN
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Rooms:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Triangle 1.jpg"
+                              alt="Triangle Room 1"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Triangle Room 1</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Triangle 2.jpg"
+                              alt="Triangle Room 2"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Triangle Room 2</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room Under Pool.jpg"
+                              alt="Room Under the Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Room Under Pool</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Kubo Room.jpg"
+                              alt="Kubo Room"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kubo Room</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Aircon Room - Capacity of 12 to 15  with CR.jpg"
+                              alt="Aircon Room"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Aircon Room</span>
+                              <span class="room-features">12-15 pax</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Rooms/Room with VideoOke.jpg"
+                              alt="Room with Videoke"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Room with Videoke</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Swimming Pools:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Swimming Pools/Big Pool.jpg"
+                              alt="Big Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Big Pool</span>
+                              <span class="room-features">Access included</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Swimming Pools/Jacuzzi Pool.jpg"
+                              alt="Jacuzzi Pool"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Jacuzzi Pool</span>
+                              <span class="room-features">Access included</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Kitchen Areas:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Kitchen/Kitchen 1.jpg"
+                              alt="Kitchen 1"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kitchen Area 1</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                          <div class="room-item">
+                            <img
+                              src="images/Kitchen/Kitchen 2.jpg"
+                              alt="Kitchen 2"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Kitchen Area 2</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                        </div>
+                        <h4 style="margin-top: 20px">Barbecue Area:</h4>
+                        <div class="room-list">
+                          <div class="room-item">
+                            <img
+                              src="images/Barbecue Area/Barbeque Area.jpg"
+                              alt="Barbecue Area"
+                            />
+                            <div class="room-info">
+                              <span class="room-name">Barbecue Area</span>
+                              <span class="room-features">Free use</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      class="select-package-btn"
+                      onclick="openVenueTimeSelector()"
+                      style="
+                        background: linear-gradient(
+                          135deg,
+                          #f093fb 0%,
+                          #f5576c 100%
+                        );
+                      "
+                    >
+                      Select Venue Package
                     </button>
                   </div>
                 </div>
               </div>
-
-              <div class="booking-actions">
-                <button
-                  type="button"
-                  class="btn-back"
-                  onclick="goBackToStep(1)"
-                >
-                  <i class="fas fa-arrow-left"></i> Back
-                </button>
-              </div>
             </div>
 
-            <!-- Step 3: Booking Details -->
-            <div class="booking-step" id="step3" style="display: none">
-              <h2>Step 3: Complete Your Booking</h2>
+            <!-- Step 2: Booking Details (was Step 3) -->
+            <div class="booking-step" id="step2" style="display: none">
+              <h2>Step 2: Complete Your Booking</h2>
 
               <!-- Selected Booking Summary -->
               <div class="selected-summary" id="selectedSummary">
@@ -1069,7 +1577,7 @@
                   <button
                     type="button"
                     class="btn-back"
-                    onclick="goBackToStep(2)"
+                    onclick="goBackToRooms()"
                   >
                     <i class="fas fa-arrow-left"></i> Back
                   </button>
@@ -2260,6 +2768,86 @@
       </div>
     </div>
 
+    <!-- Package Inclusions Modal -->
+    <div class="modal-overlay" id="inclusionsModal" style="display: none">
+      <div class="modal-container" style="max-width: 900px">
+        <div class="modal-header">
+          <h3 id="inclusionsModalTitle">
+            <i class="fas fa-list-check"></i> Package Details
+          </h3>
+          <button class="modal-close" onclick="closeInclusionsModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div
+          class="modal-body"
+          id="inclusionsModalContent"
+          style="max-height: 70vh; overflow-y: auto"
+        >
+          <!-- Content will be dynamically inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div
+      class="modal-overlay"
+      id="imageLightbox"
+      style="display: none; z-index: 10000; background: rgba(0, 0, 0, 0.9)"
+      onclick="closeImageLightbox()"
+    >
+      <div
+        style="
+          position: relative;
+          max-width: 95%;
+          max-height: 95vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        "
+        onclick="event.stopPropagation()"
+      >
+        <button
+          onclick="closeImageLightbox()"
+          style="
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+          "
+          onmouseover="this.style.background='#fff'; this.style.transform='scale(1.15)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.4)';"
+          onmouseout="this.style.background='rgba(255,255,255,0.95)'; this.style.transform='scale(1)'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.3)';"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+        <img
+          id="lightboxImage"
+          src=""
+          alt=""
+          style="
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            object-fit: contain;
+          "
+        />
+      </div>
+    </div>
+
     <!-- Cancellation Confirmation Modal -->
     <div class="modal-overlay" id="cancelModal" style="display: none">
       <div class="modal-container">
@@ -2743,6 +3331,153 @@
           "background: #FFF3CD; color: #856404; padding: 8px; font-weight: bold;"
         );
       }, 2000);
+    </script>
+
+    <!-- Image Lightbox Script -->
+    <script>
+      // Make it global so it can be called from anywhere
+      window.openImageLightbox = function (imageSrc, imageAlt) {
+        console.log("Opening lightbox for:", imageSrc);
+        const lightbox = document.getElementById("imageLightbox");
+        const lightboxImage = document.getElementById("lightboxImage");
+        lightboxImage.src = imageSrc;
+        lightboxImage.alt = imageAlt;
+        lightbox.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      };
+
+      window.closeImageLightbox = function () {
+        const lightbox = document.getElementById("imageLightbox");
+        lightbox.style.display = "none";
+        document.body.style.overflow = "auto";
+      };
+
+      // Make BOTH images and buttons clickable - EVENT DELEGATION on document
+      document.addEventListener(
+        "click",
+        function (e) {
+          // Check if clicked on view-image-btn or its children
+          const btn = e.target.closest(".view-image-btn");
+          if (btn) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            let imgSrc = btn.dataset.imgSrc;
+            let imgAlt = btn.dataset.imgAlt;
+
+            // If data attributes are missing, find the image in the same room-item
+            if (!imgSrc) {
+              const roomItem = btn.closest(".room-item");
+              if (roomItem) {
+                const img = roomItem.querySelector("img");
+                if (img) {
+                  imgSrc = img.src;
+                  imgAlt = img.alt;
+                }
+              }
+            }
+
+            console.log("View button clicked!", imgSrc);
+            if (imgSrc) {
+              window.openImageLightbox(imgSrc, imgAlt || "Image");
+            }
+            return;
+          }
+
+          // Check if clicked on a room-item image
+          if (e.target.tagName === "IMG" && e.target.closest(".room-item")) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.log("Image clicked directly!", e.target.src);
+            window.openImageLightbox(e.target.src, e.target.alt);
+          }
+        },
+        true
+      ); // Use capture phase for immediate response
+
+      // Add View Image buttons and style images
+      document.addEventListener("DOMContentLoaded", function () {
+        window.addButtonsAndStyle = function () {
+          try {
+            const roomItems = document.querySelectorAll(".room-item");
+
+            roomItems.forEach((item, index) => {
+              const img = item.querySelector("img");
+              const roomInfo = item.querySelector(".room-info");
+
+              if (!img || !roomInfo) return;
+
+              // Style image
+              img.style.cursor = "pointer";
+              img.style.transition = "all 0.3s ease";
+              img.title = "Click to enlarge";
+
+              // Add hover effect to image (only once)
+              if (!img.dataset.hoverAdded) {
+                img.addEventListener("mouseenter", function () {
+                  this.style.transform = "scale(1.05)";
+                  this.style.boxShadow = "0 4px 12px rgba(102, 126, 234, 0.4)";
+                });
+
+                img.addEventListener("mouseleave", function () {
+                  this.style.transform = "scale(1)";
+                  this.style.boxShadow = "none";
+                });
+                img.dataset.hoverAdded = "true";
+              }
+
+              // Check if button already exists
+              if (roomInfo.querySelector(".view-image-btn")) return;
+
+              // Create View Image button
+              const viewBtn = document.createElement("button");
+              viewBtn.className = "view-image-btn";
+              viewBtn.type = "button";
+              viewBtn.innerHTML =
+                '<i class="fas fa-search-plus"></i> View Image';
+
+              // Store image data in button's dataset
+              viewBtn.dataset.imgSrc = img.src;
+              viewBtn.dataset.imgAlt = img.alt;
+
+              // Append button to room-info
+              roomInfo.appendChild(viewBtn);
+            });
+          } catch (error) {
+            console.error("Error in addButtonsAndStyle:", error);
+          }
+        };
+
+        // Initial call
+        requestAnimationFrame(window.addButtonsAndStyle);
+
+        // Re-add when modal content changes (debounced)
+        let debounceTimer;
+        const observer = new MutationObserver(function (mutations) {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function () {
+            requestAnimationFrame(window.addButtonsAndStyle);
+          }, 50);
+        });
+
+        const inclusionsContent = document.getElementById(
+          "inclusionsModalContent"
+        );
+        if (inclusionsContent) {
+          observer.observe(inclusionsContent, {
+            childList: true,
+            subtree: true,
+          });
+        }
+      });
+
+      // Close lightbox on Escape key
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          window.closeImageLightbox();
+        }
+      });
     </script>
   </body>
 </html>

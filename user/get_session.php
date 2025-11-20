@@ -55,4 +55,3 @@ echo json_encode([
         'loyaltyLevel' => 'Regular'
     ]
 ]);
-?>

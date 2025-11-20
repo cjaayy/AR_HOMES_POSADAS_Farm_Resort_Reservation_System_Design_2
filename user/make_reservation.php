@@ -42,14 +42,11 @@ try {
     
     // Get POST data
     $raw_input = file_get_contents('php://input');
-    error_log('Reservation raw input: ' . $raw_input);
     $data = json_decode($raw_input, true);
     
     if (json_last_error() !== JSON_ERROR_NONE) {
         throw new Exception('Invalid JSON: ' . json_last_error_msg());
     }
-    
-    error_log('Reservation parsed data: ' . print_r($data, true));
     
     // Validate required fields
     $required = ['booking_type', 'package_type', 'check_in_date', 'payment_method'];
@@ -141,12 +138,26 @@ try {
     
     // Calculate pricing based on package
     $package_prices = [
-        'all-rooms-night' => 25000.00,
-        'all-rooms-day' => 15000.00,
-        'aircon-rooms-night' => 20000.00,
-        'aircon-rooms-day' => 12000.00,
-        'basic-rooms-night' => 12000.00,
-        'basic-rooms-day' => 8000.00,
+        'daytime-day' => 6000.00,
+        'daytime-night' => 6000.00,
+        'nighttime-night' => 10000.00,
+        'nighttime-day' => 10000.00,
+        '22hours-night' => 18000.00,
+        '22hours-day' => 18000.00,
+        // Venue packages
+        'venue-daytime-day' => 6000.00,
+        'venue-daytime-night' => 6000.00,
+        'venue-nighttime-night' => 10000.00,
+        'venue-nighttime-day' => 10000.00,
+        'venue-22hours-night' => 18000.00,
+        'venue-22hours-day' => 18000.00,
+        // Legacy support for old package names
+        'all-rooms-night' => 10000.00,
+        'all-rooms-day' => 6000.00,
+        'aircon-rooms-night' => 10000.00,
+        'aircon-rooms-day' => 6000.00,
+        'basic-rooms-night' => 18000.00,
+        'basic-rooms-day' => 18000.00,
         'custom' => isset($data['custom_price']) ? (float)$data['custom_price'] : 0
     ];
     
@@ -182,8 +193,6 @@ try {
     
     $group_type = isset($data['group_type']) ? $data['group_type'] : null;
     $special_requests = isset($data['special_requests']) ? $data['special_requests'] : null;
-    
-    error_log('Processed number_of_guests: ' . $number_of_guests . ' from input: ' . $group_size_input);
     
     // Get guest information from session
     $guest_name = $_SESSION['user_full_name'] ?? ($_SESSION['user_given_name'] . ' ' . $_SESSION['user_last_name']);
@@ -244,16 +253,14 @@ try {
     
 } catch (PDOException $e) {
     error_log('Reservation PDO Error: ' . $e->getMessage());
-    error_log('Stack trace: ' . $e->getTraceAsString());
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'message' => 'Database error: ' . $e->getMessage(),
+        'message' => 'Database error occurred. Please try again.',
         'error_type' => 'database'
     ]);
 } catch (Exception $e) {
     error_log('Reservation Error: ' . $e->getMessage());
-    error_log('Stack trace: ' . $e->getTraceAsString());
     http_response_code(400);
     echo json_encode([
         'success' => false,
@@ -261,4 +268,3 @@ try {
         'error_type' => 'validation'
     ]);
 }
-?>

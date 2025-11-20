@@ -11,8 +11,6 @@
  * Load user's reservations
  */
 async function loadMyBookings() {
-  console.log("📋 Loading user bookings...");
-
   const loadingState = document.getElementById("bookingsLoadingState");
   const emptyState = document.getElementById("bookingsEmptyState");
   const bookingsGrid = document.getElementById("myBookingsGrid");
@@ -32,8 +30,6 @@ async function loadMyBookings() {
     });
 
     const data = await response.json();
-    console.log("📦 Bookings data:", data);
-
     if (loadingState) loadingState.style.display = "none";
 
     if (data.success && data.reservations && data.reservations.length > 0) {
@@ -47,7 +43,6 @@ async function loadMyBookings() {
       if (emptyState) emptyState.style.display = "block";
     }
   } catch (error) {
-    console.error("❌ Error loading bookings:", error);
     if (loadingState) loadingState.style.display = "none";
     if (emptyState) {
       emptyState.style.display = "block";
@@ -246,12 +241,6 @@ function renderBookingActions(booking) {
  * Open payment upload modal
  */
 function openPaymentUploadModal(reservationId, paymentType, amount) {
-  console.log("💳 Opening payment upload modal:", {
-    reservationId,
-    paymentType,
-    amount,
-  });
-
   document.getElementById("paymentReservationId").value = reservationId;
   document.getElementById("paymentType").value = paymentType;
 
@@ -297,8 +286,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         const data = await response.json();
-        console.log("📤 Upload response:", data);
-
         if (data.success) {
           alert("✅ " + data.message);
           closePaymentUploadModal();
@@ -307,7 +294,6 @@ document.addEventListener("DOMContentLoaded", function () {
           alert("❌ " + data.message);
         }
       } catch (error) {
-        console.error("❌ Upload error:", error);
         alert("Error uploading payment proof: " + error.message);
       } finally {
         submitBtn.disabled = false;
@@ -325,11 +311,6 @@ document.addEventListener("DOMContentLoaded", function () {
  * Open rebooking modal
  */
 function openRebookingModal(reservationId, currentCheckInDate) {
-  console.log("📅 Opening rebooking modal:", {
-    reservationId,
-    currentCheckInDate,
-  });
-
   document.getElementById("rebookReservationId").value = reservationId;
   document.getElementById("currentCheckInDate").textContent =
     formatDate(currentCheckInDate);
@@ -379,8 +360,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         const data = await response.json();
-        console.log("📅 Rebooking response:", data);
-
         if (data.success) {
           alert(
             "✅ " +
@@ -396,7 +375,6 @@ document.addEventListener("DOMContentLoaded", function () {
           alert("❌ " + data.message);
         }
       } catch (error) {
-        console.error("❌ Rebooking error:", error);
         alert("Error submitting rebooking request: " + error.message);
       } finally {
         submitBtn.disabled = false;
@@ -414,7 +392,6 @@ document.addEventListener("DOMContentLoaded", function () {
  * Open cancel modal
  */
 function openCancelModal(reservationId) {
-  console.log("🚫 Opening cancel modal:", reservationId);
   document.getElementById("cancelReservationId").value = reservationId;
   document.getElementById("cancelModal").style.display = "flex";
 }
@@ -465,8 +442,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         const data = await response.json();
-        console.log("🚫 Cancellation response:", data);
-
         if (data.success) {
           alert("✅ " + data.message);
           closeCancelModal();
@@ -475,7 +450,6 @@ document.addEventListener("DOMContentLoaded", function () {
           alert("❌ " + data.message);
         }
       } catch (error) {
-        console.error("❌ Cancellation error:", error);
         alert("Error cancelling reservation: " + error.message);
       } finally {
         submitBtn.disabled = false;
@@ -493,8 +467,6 @@ document.addEventListener("DOMContentLoaded", function () {
  * Check date availability before booking
  */
 async function checkDateAvailability(checkInDate, bookingType) {
-  console.log("🔍 Checking availability:", { checkInDate, bookingType });
-
   try {
     const response = await fetch("user/check_availability.php", {
       method: "POST",
@@ -506,8 +478,6 @@ async function checkDateAvailability(checkInDate, bookingType) {
     });
 
     const data = await response.json();
-    console.log("📅 Availability:", data);
-
     if (data.locked) {
       return {
         available: false,
@@ -530,7 +500,6 @@ async function checkDateAvailability(checkInDate, bookingType) {
       locked: false,
     };
   } catch (error) {
-    console.error("❌ Availability check error:", error);
     return {
       available: false,
       message: "Error checking availability: " + error.message,
@@ -684,4 +653,3 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-console.log("✅ Booking Flow Frontend Loaded");

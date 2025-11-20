@@ -1,17 +1,14 @@
 <?php
 /**
- * User Login Handler (WITH DEBUG LOGGING)
+ * User Login Handler
  * AR Homes Posadas Farm Resort Reservation System
  */
 
-// Enable error reporting
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 session_start();
-
-// Log the request
-file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Login attempt started\n", FILE_APPEND);
 
 require_once '../config/connection.php';
 
@@ -33,13 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Get JSON input
 $rawInput = file_get_contents('php://input');
-file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Raw input: " . $rawInput . "\n", FILE_APPEND);
-
 $input = json_decode($rawInput, true);
 
 if (json_last_error() !== JSON_ERROR_NONE) {
     $response['message'] = 'Invalid JSON: ' . json_last_error_msg();
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - ERROR: JSON decode failed\n", FILE_APPEND);
     echo json_encode($response);
     exit;
 }
@@ -48,15 +42,12 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 $usernameField = isset($input['usernameOrEmail']) ? 'usernameOrEmail' : 'username';
 if (!isset($input[$usernameField]) || !isset($input['password'])) {
     $response['message'] = 'Username and password are required';
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - ERROR: Missing credentials\n", FILE_APPEND);
     echo json_encode($response);
     exit;
 }
 
 $username = trim($input[$usernameField]);
 $password = trim($input['password']);
-
-file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Credentials: username='$username', password length=" . strlen($password) . "\n", FILE_APPEND);
 
 // Validate not empty
 if (empty($username) || empty($password)) {
@@ -66,13 +57,9 @@ if (empty($username) || empty($password)) {
 }
 
 try {
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Connecting to database\n", FILE_APPEND);
-    
     // Create database connection
     $database = new Database();
     $conn = $database->getConnection();
-    
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Database connected\n", FILE_APPEND);
 
     // Prepare SQL statement to prevent SQL injection
     $sql = "SELECT user_id, username, email, password_hash, full_name, last_name, given_name, middle_name, 
@@ -85,31 +72,23 @@ try {
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
     $stmt->bindParam(':email', $username, PDO::PARAM_STR);
     $stmt->execute();
-    
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Query executed, rows found: " . $stmt->rowCount() . "\n", FILE_APPEND);
 
     // Check if user exists
     if ($stmt->rowCount() === 0) {
         $response['message'] = 'Invalid username or password';
-        file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - ERROR: User not found\n", FILE_APPEND);
         echo json_encode($response);
         exit;
     }
 
     // Fetch user data
     $user = $stmt->fetch();
-    
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - User found: ID={$user['user_id']}, username={$user['username']}, email={$user['email']}, email_verified={$user['email_verified']}\n", FILE_APPEND);
 
     // Check if account is active
     if ($user['is_active'] != 1) {
         $response['message'] = 'Account is inactive. Please contact support.';
-        file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - ERROR: Account inactive\n", FILE_APPEND);
         echo json_encode($response);
         exit;
     }
-    
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Account is active\n", FILE_APPEND);
 
     // Check if email is verified
     if (!isset($user['email_verified']) || $user['email_verified'] != 1) {
@@ -118,24 +97,16 @@ try {
             'email_verified' => false,
             'email' => $user['email']
         ];
-        file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - ERROR: Email not verified\n", FILE_APPEND);
         echo json_encode($response);
         exit;
     }
-    
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Email is verified\n", FILE_APPEND);
 
     // Verify password
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Verifying password\n", FILE_APPEND);
-    
     if (!password_verify($password, $user['password_hash'])) {
         $response['message'] = 'Invalid username or password';
-        file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - ERROR: Password verification failed\n", FILE_APPEND);
         echo json_encode($response);
         exit;
     }
-    
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Password verified successfully\n", FILE_APPEND);
 
     // Update last login time
     $updateSql = "UPDATE users SET last_login = NOW() WHERE user_id = :user_id";
@@ -158,8 +129,6 @@ try {
 
     // Regenerate session ID to prevent session fixation
     session_regenerate_id(true);
-    
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - Session created successfully\n", FILE_APPEND);
 
     // Prepare success response
     $response['success'] = true;
@@ -174,18 +143,15 @@ try {
         'middle_name' => $user['middle_name'],
         'phone_number' => $user['phone_number']
     ];
-
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - SUCCESS: Sending response\n", FILE_APPEND);
     
     echo json_encode($response);
 
 } catch (PDOException $e) {
-    $response['message'] = 'Database error: ' . $e->getMessage();
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - PDO ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
+    $response['message'] = 'Database error occurred. Please try again.';
+    error_log('Login PDO Error: ' . $e->getMessage());
     echo json_encode($response);
 } catch (Exception $e) {
-    $response['message'] = 'Error: ' . $e->getMessage();
-    file_put_contents(__DIR__ . '/login_debug.log', date('Y-m-d H:i:s') . " - EXCEPTION: " . $e->getMessage() . "\n", FILE_APPEND);
+    $response['message'] = 'An error occurred. Please try again.';
+    error_log('Login Exception: ' . $e->getMessage());
     echo json_encode($response);
 }
-?>

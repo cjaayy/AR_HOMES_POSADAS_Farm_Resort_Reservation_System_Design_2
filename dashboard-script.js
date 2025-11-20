@@ -2,27 +2,21 @@
 
 // Test function to verify popup works
 window.testPopup = function () {
-  console.log("🧪 Testing popup functionality...");
   const popup = document.getElementById("popupContentArea");
   const content = document.getElementById("popupBody");
   const title = document.getElementById("popupTitle");
 
   if (!popup) {
-    console.error("❌ Popup element not found!");
     return false;
   }
 
   if (!content) {
-    console.error("❌ Popup body not found!");
     return false;
   }
 
   if (!title) {
-    console.error("❌ Popup title not found!");
     return false;
   }
-
-  console.log("✅ All popup elements found");
 
   // Set test content
   title.textContent = "TEST POPUP";
@@ -33,27 +27,16 @@ window.testPopup = function () {
   popup.classList.add("active");
   popup.style.display = "block";
 
-  console.log("🎯 Popup should be visible now");
-
   return true;
 };
 
 // Simple popup function - MUST BE FIRST
 function showPopup(section) {
-  console.log("🔍 showPopup called with section:", section);
-
   const popup = document.getElementById("popupContentArea");
   const content = document.getElementById("popupBody");
   const title = document.getElementById("popupTitle");
 
-  console.log("📋 Elements found:", {
-    popup: !!popup,
-    content: !!content,
-    title: !!title,
-  });
-
   if (!popup || !content || !title) {
-    console.error("❌ Required popup elements not found");
     alert("Error: Popup elements not found. Check the console.");
     return;
   }
@@ -65,26 +48,18 @@ function showPopup(section) {
   let contentHTML = "";
   let titleText = "";
 
-  console.log("🎯 Processing section:", section);
-
   // Simplified content loading - try to get content from templates
   const contentElement = document.getElementById(section + "-content");
-  console.log("� Content element found:", !!contentElement);
-
   if (contentElement) {
     titleText = getTitleForSection(section);
     contentHTML = contentElement.innerHTML;
-    console.log("✅ Got content from template");
   } else {
     titleText = "Content Not Available";
     contentHTML =
       '<div style="padding: 2rem; text-align: center;"><h3>Section: ' +
       section +
       "</h3><p>Content template not found, but popup is working!</p></div>";
-    console.log("⚠️ Using fallback content");
   }
-
-  console.log("✏️ Setting content:", titleText);
 
   // Set title and content
   title.textContent = titleText;
@@ -101,10 +76,7 @@ function showPopup(section) {
   const targetBtn = document.querySelector(`[data-section="${section}"]`);
   if (targetBtn) {
     targetBtn.classList.add("active");
-    console.log("🎯 Updated active button");
   }
-
-  console.log("✅ Popup should be visible now");
 }
 
 function getTitleForSection(section) {
@@ -120,7 +92,6 @@ function getTitleForSection(section) {
 
 // Close popup function
 function closePopup() {
-  console.log("closePopup called");
   const popup = document.getElementById("popupContentArea");
   if (popup) {
     popup.classList.remove("active");
@@ -150,9 +121,6 @@ function loadUserData() {
   }
 
   // If no session data, DON'T redirect here (dashboard.html handles auth check)
-  console.warn(
-    "⚠️ window.userData not yet loaded - waiting for session check..."
-  );
   // Return default values and let dashboard.html handle authentication
   return {
     name: "Guest",
@@ -175,7 +143,6 @@ function refreshUserData() {
   const newData = loadUserData();
   if (newData) {
     userData = newData;
-    console.log("✅ User data refreshed:", userData);
   }
 }
 
@@ -258,8 +225,6 @@ const mobileToggle = document.querySelector(".mobile-toggle");
 
 // ===== INITIALIZATION =====
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("🚀 Dashboard initializing...");
-
   initializeDashboard();
   updateUserData();
   setupEventListeners();
@@ -270,7 +235,6 @@ document.addEventListener("DOMContentLoaded", function () {
   if (dashboardSection) {
     dashboardSection.style.display = "block";
     dashboardSection.classList.add("active");
-    console.log("✅ Dashboard section displayed");
   }
 
   // Hide all other sections
@@ -294,10 +258,6 @@ function initializeDashboard() {
   if (checkOutDate) checkOutDate.min = today;
 
   // Console welcome message
-  console.log(
-    "%c🏨 AR Homes Posadas Farm Resort Dashboard Loaded",
-    "color: #667eea; font-size: 16px; font-weight: bold;"
-  );
 }
 
 // ===== USER DATA MANAGEMENT =====
@@ -343,9 +303,7 @@ function checkAndShowDemoWelcome() {
           sessionStorage.setItem("demoWelcomeShown", "true");
         }, 1500);
       }
-    } catch (e) {
-      console.log("Error parsing demo user data");
-    }
+    } catch (e) {}
   }
 }
 
@@ -395,12 +353,8 @@ function updateProfileForm() {
 
 // ===== NAVIGATION MANAGEMENT =====
 function setupEventListeners() {
-  console.log("🔧 Setting up event listeners...");
-
   // Set up navigation button click events
   const navButtons = document.querySelectorAll(".nav-btn");
-  console.log("🔘 Found nav buttons:", navButtons.length);
-
   navButtons.forEach((button, index) => {
     console.log(
       `🎯 Setting up button ${index}:`,
@@ -409,8 +363,6 @@ function setupEventListeners() {
     button.addEventListener("click", (e) => {
       e.preventDefault();
       const section = button.getAttribute("data-section");
-      console.log("🖱️ Button clicked!", section);
-
       if (section) {
         // Remove active class from all buttons
         navButtons.forEach((btn) => btn.classList.remove("active"));
@@ -428,9 +380,7 @@ function setupEventListeners() {
         if (targetSection) {
           targetSection.classList.add("active");
           targetSection.style.display = "block";
-          console.log("✅ Showing section:", section);
         } else {
-          console.error("❌ Section not found:", section + "-section");
         }
       }
     });
@@ -438,7 +388,6 @@ function setupEventListeners() {
 
   // Set up close popup button
   const closePopupBtn = document.getElementById("closePopup");
-  console.log("❌ Close popup button found:", !!closePopupBtn);
   if (closePopupBtn) {
     closePopupBtn.addEventListener("click", closePopup);
   }
@@ -486,8 +435,6 @@ function setupEventListeners() {
       closePopup();
     }
   });
-
-  console.log("✅ Event listeners setup complete");
 }
 
 function showSection(sectionId) {
@@ -531,12 +478,10 @@ function updateActiveNavigation(activeSection) {
 
 function toggleSidebar() {
   // No longer needed with new layout, but keeping for compatibility
-  console.log("Sidebar toggle - using new popup system");
 }
 
 function closeSidebar() {
   // No longer needed with new layout, but keeping for compatibility
-  console.log("Sidebar close - using new popup system");
 }
 
 // ===== FORM MANAGEMENT =====
@@ -899,11 +844,6 @@ notificationStyles.textContent = `
 document.head.appendChild(notificationStyles);
 
 // ===== PERFORMANCE MONITORING =====
-console.log(
-  "%c✅ Dashboard JavaScript Loaded Successfully",
-  "color: #66bb6a; font-weight: bold;"
-);
-
 // Log performance metrics
 window.addEventListener("load", function () {
   setTimeout(() => {
@@ -919,7 +859,6 @@ window.addEventListener("load", function () {
 
 // ===== ERROR HANDLING =====
 window.addEventListener("error", function (e) {
-  console.error("Dashboard Error:", e.error);
   showNotification("An error occurred. Please refresh the page.", "error");
 });
 
@@ -963,15 +902,6 @@ document.addEventListener("keydown", function (e) {
 });
 
 // Show keyboard shortcuts info in console
-console.log(
-  "%c🔤 Keyboard Shortcuts Available:",
-  "color: #764ba2; font-weight: bold;"
-);
-console.log("Alt + 1: Dashboard");
-console.log("Alt + 2: Make Reservation");
-console.log("Alt + 3: My Reservations");
-console.log("Alt + 4: Promotions");
-console.log("Alt + 5: Profile");
 console.log("ESC: Close sidebar (mobile)");
 
 // ===== PROMOTIONS DATA =====
@@ -1155,7 +1085,6 @@ function removeAppliedPromo(promoCode) {
 function updateAppliedPromos() {
   // This function could update a display of currently applied promos
   // For now, we'll just log it
-  console.log("Applied Promos:", promoData.appliedPromos);
 }
 
 function initializePromotions() {
@@ -1201,11 +1130,6 @@ document.addEventListener("DOMContentLoaded", function () {
   initializePromotions(); // Add this line
 });
 
-console.log(
-  "%c🎯 Promotions System Loaded",
-  "color: #ffd700; font-weight: bold;"
-);
-
 // ===== RESORT GALLERY FUNCTIONALITY =====
 class ResortGallery {
   constructor() {
@@ -1221,32 +1145,19 @@ class ResortGallery {
   }
 
   init() {
-    console.log("🔍 Looking for gallery elements...");
-
     this.galleryWrapper = document.getElementById("galleryWrapper");
     this.prevBtn = document.getElementById("prevBtn");
     this.nextBtn = document.getElementById("nextBtn");
     this.indicators = document.getElementById("galleryIndicators");
 
-    console.log("Gallery elements found:", {
-      wrapper: !!this.galleryWrapper,
-      prevBtn: !!this.prevBtn,
-      nextBtn: !!this.nextBtn,
-      indicators: !!this.indicators,
-    });
-
     if (!this.galleryWrapper) {
-      console.error("❌ Gallery wrapper not found");
       return;
     }
 
     this.slides = this.galleryWrapper.querySelectorAll(".gallery-slide");
     this.totalSlides = this.slides.length;
 
-    console.log("📸 Found", this.totalSlides, "slides");
-
     if (this.totalSlides === 0) {
-      console.error("❌ No gallery slides found");
       return;
     }
 
@@ -1254,33 +1165,19 @@ class ResortGallery {
     this.showSlide(0);
     this.setupEventListeners();
     this.startAutoPlay();
-
-    console.log(
-      "%c✅ Resort Gallery Initialized with " + this.totalSlides + " slides",
-      "color: #4CAF50; font-weight: bold;"
-    );
   }
 
   showSlide(index) {
     if (!this.galleryWrapper || this.totalSlides === 0) {
-      console.error("❌ Cannot show slide - wrapper or slides missing");
       return;
     }
 
     // Debug dimensions
     const wrapperWidth = this.galleryWrapper.offsetWidth;
     const wrapperScrollWidth = this.galleryWrapper.scrollWidth;
-    console.log(
-      `📏 Wrapper width: ${wrapperWidth}px, scroll width: ${wrapperScrollWidth}px`
-    );
-    console.log(
-      `📏 Expected scroll width: ${wrapperWidth * this.totalSlides}px`
-    );
-
     this.currentSlide = index;
     const translateX = -this.currentSlide * 100;
 
-    console.log(`📍 Attempting to show slide ${index + 1}/${this.totalSlides}`);
     console.log(`   Transform value: translateX(${translateX}%)`);
 
     // Remove any inline transition first to prevent conflicts
@@ -1302,13 +1199,6 @@ class ResortGallery {
         this.galleryWrapper
       ).transform;
       const wrapperRect = this.galleryWrapper.getBoundingClientRect();
-      console.log(
-        `   ✅ Applied transform:`,
-        this.galleryWrapper.style.transform
-      );
-      console.log(`   📊 Computed transform:`, actualTransform);
-      console.log(`   📐 Wrapper position: left=${wrapperRect.left}px`);
-
       // Check each slide's visibility
       const slides = this.galleryWrapper.querySelectorAll(".gallery-slide");
       slides.forEach((slide, i) => {
@@ -1326,7 +1216,6 @@ class ResortGallery {
         actualTransform === "none" ||
         actualTransform === "matrix(1, 0, 0, 1, 0, 0)"
       ) {
-        console.error("⚠️ Transform not applied! Checking for conflicts...");
         console.log("Wrapper computed styles:", {
           display: window.getComputedStyle(this.galleryWrapper).display,
           position: window.getComputedStyle(this.galleryWrapper).position,
@@ -1340,11 +1229,8 @@ class ResortGallery {
   }
 
   setupEventListeners() {
-    console.log("🎛️ Setting up gallery controls...");
-
     // Button controls
     if (this.prevBtn) {
-      console.log("Previous button element:", this.prevBtn);
       console.log("Previous button computed style:", {
         zIndex: window.getComputedStyle(this.prevBtn).zIndex,
         pointerEvents: window.getComputedStyle(this.prevBtn).pointerEvents,
@@ -1354,7 +1240,6 @@ class ResortGallery {
       this.prevBtn.addEventListener(
         "click",
         (e) => {
-          console.log("⬅️ Previous button clicked!", e);
           e.preventDefault();
           e.stopPropagation();
           this.prevSlide();
@@ -1363,17 +1248,11 @@ class ResortGallery {
       );
 
       // Also add mousedown for testing
-      this.prevBtn.addEventListener("mousedown", () => {
-        console.log("🖱️ Previous button mousedown detected");
-      });
-
-      console.log("✅ Previous button ready");
+      this.prevBtn.addEventListener("mousedown", () => {});
     } else {
-      console.error("❌ Previous button not found!");
     }
 
     if (this.nextBtn) {
-      console.log("Next button element:", this.nextBtn);
       console.log("Next button computed style:", {
         zIndex: window.getComputedStyle(this.nextBtn).zIndex,
         pointerEvents: window.getComputedStyle(this.nextBtn).pointerEvents,
@@ -1383,7 +1262,6 @@ class ResortGallery {
       this.nextBtn.addEventListener(
         "click",
         (e) => {
-          console.log("➡️ Next button clicked!", e);
           e.preventDefault();
           e.stopPropagation();
           this.nextSlide();
@@ -1392,13 +1270,8 @@ class ResortGallery {
       );
 
       // Also add mousedown for testing
-      this.nextBtn.addEventListener("mousedown", () => {
-        console.log("🖱️ Next button mousedown detected");
-      });
-
-      console.log("✅ Next button ready");
+      this.nextBtn.addEventListener("mousedown", () => {});
     } else {
-      console.error("❌ Next button not found!");
     }
 
     // Indicator controls
@@ -1406,11 +1279,9 @@ class ResortGallery {
       this.indicators.addEventListener("click", (e) => {
         if (e.target.classList.contains("indicator")) {
           const slideIndex = parseInt(e.target.dataset.slide);
-          console.log("🎯 Indicator clicked:", slideIndex);
           this.goToSlide(slideIndex);
         }
       });
-      console.log("✅ Indicators ready");
     }
 
     // Touch/swipe events
@@ -1455,31 +1326,23 @@ class ResortGallery {
     const galleryContainer = document.querySelector(".gallery-container");
     if (galleryContainer) {
       galleryContainer.addEventListener("mouseenter", () => {
-        console.log("🖱️ Mouse entered gallery - pausing auto-play");
         this.pauseAutoPlay();
       });
       galleryContainer.addEventListener("mouseleave", () => {
-        console.log("🖱️ Mouse left gallery - resuming auto-play");
         this.startAutoPlay();
       });
-      console.log("✅ Hover pause/resume ready");
     }
 
     // Keyboard navigation
     document.addEventListener("keydown", (e) => {
       if (e.key === "ArrowLeft") {
-        console.log("⌨️ Left arrow pressed");
         this.prevSlide();
       }
       if (e.key === "ArrowRight") {
-        console.log("⌨️ Right arrow pressed");
         this.nextSlide();
       }
     });
-    console.log("✅ Keyboard navigation ready");
-
     // Debug: Log all setup complete
-    console.log("🎉 All event listeners setup complete!");
   }
 
   handleTouchStart(e) {
@@ -1540,27 +1403,23 @@ class ResortGallery {
 
   goToSlide(index) {
     if (!this.galleryWrapper) {
-      console.error("❌ Gallery wrapper not found in goToSlide");
       return;
     }
 
     // Prevent going to the same slide
     if (index === this.currentSlide) return;
 
-    console.log(`🔄 Going to slide ${index + 1}/${this.totalSlides}`);
     this.showSlide(index);
   }
 
   nextSlide() {
     const nextIndex = (this.currentSlide + 1) % this.totalSlides;
-    console.log("➡️ Next slide:", nextIndex);
     this.goToSlide(nextIndex);
   }
 
   prevSlide() {
     const prevIndex =
       (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
-    console.log("⬅️ Previous slide:", prevIndex);
     this.goToSlide(prevIndex);
   }
 
@@ -1577,21 +1436,18 @@ class ResortGallery {
     console.log("▶️ Starting auto-play (5 seconds per slide)");
     this.pauseAutoPlay();
     this.autoPlayInterval = setInterval(() => {
-      console.log("⏰ Auto-advancing to next slide");
       this.nextSlide();
     }, 5000);
   }
 
   pauseAutoPlay() {
     if (this.autoPlayInterval) {
-      console.log("⏸️ Pausing auto-play");
       clearInterval(this.autoPlayInterval);
       this.autoPlayInterval = null;
     }
   }
 
   destroy() {
-    console.log("🛑 Destroying gallery");
     this.pauseAutoPlay();
     // Remove event listeners if needed
   }
@@ -1600,7 +1456,6 @@ class ResortGallery {
 // Backup initialization - try again after page fully loads
 window.addEventListener("load", () => {
   if (!window.resortGallery) {
-    console.log("🔄 Gallery not initialized, trying backup initialization...");
     setTimeout(initGallery, 100);
   }
 });
@@ -1610,96 +1465,52 @@ window.testGallery = function () {
   const wrapper = document.getElementById("galleryWrapper");
   const slides = document.querySelectorAll(".gallery-slide");
 
-  console.log("=== GALLERY TEST ===");
-  console.log("Wrapper found:", !!wrapper);
-  console.log("Number of slides:", slides.length);
-  console.log("Current transform:", wrapper ? wrapper.style.transform : "N/A");
-
   if (wrapper && slides.length > 0) {
-    console.log("Testing slide to position 1...");
     wrapper.style.transition = "transform 0.6s ease";
     wrapper.style.transform = "translateX(-100%)";
     console.log("✅ Transform applied: translateX(-100%)");
 
     setTimeout(() => {
-      console.log("Testing slide to position 2...");
       wrapper.style.transform = "translateX(-200%)";
       console.log("✅ Transform applied: translateX(-200%)");
 
       setTimeout(() => {
-        console.log("Testing back to position 0...");
         wrapper.style.transform = "translateX(0%)";
         console.log("✅ Transform applied: translateX(0%)");
       }, 2000);
     }, 2000);
   } else {
-    console.error("❌ Gallery elements not found!");
   }
 };
 
 // Initialize gallery when DOM is loaded
 function initGallery() {
-  console.log(
-    "%c🖼️ Initializing Gallery...",
-    "color: #2196F3; font-weight: bold;"
-  );
-
   // Check if gallery wrapper exists
   const wrapper = document.getElementById("galleryWrapper");
   if (!wrapper) {
-    console.error("❌ Gallery wrapper not found! Retrying in 500ms...");
     setTimeout(initGallery, 500);
     return;
   }
 
-  console.log("✅ Gallery wrapper found, creating ResortGallery instance");
   window.resortGallery = new ResortGallery();
 }
 
 // Gallery debug function - available immediately
 window.testGalleryButtons = function () {
-  console.log("\n🧪 Testing gallery button accessibility...");
-
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
 
   if (!prevBtn || !nextBtn) {
-    console.error("❌ Buttons not found!");
-    console.log("Looking for prevBtn:", prevBtn);
-    console.log("Looking for nextBtn:", nextBtn);
     return;
   }
-
-  console.log("✅ Buttons found");
-  console.log("Previous button:", prevBtn);
-  console.log("Next button:", nextBtn);
 
   // Check if buttons are visible and clickable
   const prevRect = prevBtn.getBoundingClientRect();
   const nextRect = nextBtn.getBoundingClientRect();
 
-  console.log("Previous button position:", prevRect);
-  console.log("Next button position:", nextRect);
-
   // Check z-index and pointer events
   const prevStyle = window.getComputedStyle(prevBtn);
   const nextStyle = window.getComputedStyle(nextBtn);
-
-  console.log("Previous button styles:", {
-    zIndex: prevStyle.zIndex,
-    pointerEvents: prevStyle.pointerEvents,
-    display: prevStyle.display,
-    visibility: prevStyle.visibility,
-    opacity: prevStyle.opacity,
-  });
-
-  console.log("Next button styles:", {
-    zIndex: nextStyle.zIndex,
-    pointerEvents: nextStyle.pointerEvents,
-    display: nextStyle.display,
-    visibility: nextStyle.visibility,
-    opacity: nextStyle.opacity,
-  });
 
   // Check what element is on top
   const nextCenter = {
@@ -1707,27 +1518,21 @@ window.testGalleryButtons = function () {
     y: nextRect.top + nextRect.height / 2,
   };
   const elementAtPoint = document.elementFromPoint(nextCenter.x, nextCenter.y);
-  console.log("Element at next button center:", elementAtPoint);
   console.log(
     "Is it the button or its child?",
     elementAtPoint === nextBtn || nextBtn.contains(elementAtPoint)
   );
 
   // Try to click programmatically
-  console.log("🖱️ Attempting programmatic click on next button...");
   nextBtn.click();
 };
 
-console.log("✅ testGalleryButtons function registered");
-
 // Initialize immediately or wait for DOM
 if (document.readyState === "loading") {
-  console.log("⏳ Waiting for DOM to load...");
   document.addEventListener("DOMContentLoaded", () => {
     setTimeout(initGallery, 300);
   });
 } else {
-  console.log("✅ DOM already loaded");
   setTimeout(initGallery, 300);
 }
 
@@ -1745,47 +1550,24 @@ class PopupContentManager {
   }
 
   init() {
-    console.log("🔧 Initializing PopupContentManager...");
     this.popupArea = document.getElementById("popupContentArea");
     this.popupTitle = document.getElementById("popupTitle");
     this.popupBody = document.getElementById("popupBody");
     this.closeBtn = document.getElementById("closePopup");
     this.navButtons = document.querySelectorAll(".nav-btn");
 
-    console.log("📋 Elements found:", {
-      popupArea: !!this.popupArea,
-      popupTitle: !!this.popupTitle,
-      popupBody: !!this.popupBody,
-      closeBtn: !!this.closeBtn,
-      navButtons: this.navButtons.length,
-    });
-
     if (!this.popupArea) {
-      console.error("❌ Popup area not found!");
       return;
     }
 
     this.setupEventListeners();
     this.loadSectionContent("dashboard"); // Load default content
-
-    console.log(
-      "%c🚀 Popup Content System Initialized",
-      "color: #4CAF50; font-weight: bold;"
-    );
   }
 
   setupEventListeners() {
-    console.log("🎯 Setting up event listeners...");
-
     // Navigation button clicks
-    console.log(`Found ${this.navButtons.length} navigation buttons`);
     this.navButtons.forEach((btn, index) => {
-      console.log(
-        `Setting up listener for button ${index}:`,
-        btn.dataset.section
-      );
       btn.addEventListener("click", (e) => {
-        console.log("🖱️ Navigation button clicked:", btn.dataset.section);
         const section = btn.dataset.section;
         this.showSection(section);
         this.setActiveNavButton(btn);
@@ -1794,19 +1576,15 @@ class PopupContentManager {
 
     // Close button
     if (this.closeBtn) {
-      console.log("✅ Setting up close button listener");
       this.closeBtn.addEventListener("click", () => {
-        console.log("🖱️ Close button clicked");
         this.hidePopup();
       });
     } else {
-      console.log("❌ Close button not found");
     }
 
     // Close on overlay click (outside popup content)
     document.addEventListener("click", (e) => {
       if (e.target === this.popupArea) {
-        console.log("🖱️ Overlay clicked, hiding popup");
         this.hidePopup();
       }
     });
@@ -1814,20 +1592,15 @@ class PopupContentManager {
     // Close on Escape key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && this.popupArea.classList.contains("active")) {
-        console.log("⌨️ Escape key pressed, hiding popup");
         this.hidePopup();
       }
     });
-
-    console.log("✅ Event listeners setup complete");
   }
 
   showSection(sectionName) {
-    console.log("📂 Showing section:", sectionName);
     this.loadSectionContent(sectionName);
     this.showPopup();
     this.currentSection = sectionName;
-    console.log("✅ Section shown successfully");
   }
 
   loadSectionContent(sectionName) {
@@ -2015,11 +1788,6 @@ class PopupContentManager {
 // Note: PopupContentManager removed as navigation is now handled directly
 // Navigation is managed by setupEventListeners() function
 
-console.log(
-  "%c🎯 Popup Content System Ready",
-  "color: #9C27B0; font-weight: bold;"
-);
-
 // ===== QUICK ACTIONS FUNCTIONS =====
 function quickAction(action) {
   switch (action) {
@@ -2104,7 +1872,6 @@ async function loadMyReservations() {
       );
     }
   } catch (error) {
-    console.error("Error loading reservations:", error);
     showNotification("Failed to load reservations", "error");
   }
 }
@@ -2441,7 +2208,6 @@ async function handlePaymentUpload(e) {
       submitBtn.disabled = false;
     }
   } catch (error) {
-    console.error("Error uploading payment:", error);
     showNotification("Failed to upload payment proof", "error");
     submitBtn.innerHTML = originalText;
     submitBtn.disabled = false;
@@ -2477,7 +2243,6 @@ async function cancelReservation(reservationId) {
       );
     }
   } catch (error) {
-    console.error("Error cancelling reservation:", error);
     showNotification("Failed to cancel reservation", "error");
   }
 }
@@ -2540,9 +2305,7 @@ async function initNotificationBadge() {
         updateNotificationBadge(result.unread_count);
       }
     }
-  } catch (error) {
-    console.error("Error initializing notification badge:", error);
-  }
+  } catch (error) {}
 }
 
 // Load user notifications from database
@@ -2555,18 +2318,14 @@ async function loadUserNotifications() {
     }
 
     const result = await response.json();
-    console.log("Notifications API Response:", result);
-
     if (result.success) {
       displayNotifications(result.notifications);
       updateNotificationBadge(result.unread_count);
 
       // Show message if table doesn't exist
       if (result.message) {
-        console.warn(result.message);
       }
     } else {
-      console.error("Error loading notifications:", result.message);
       const notificationsList = document.getElementById("notificationsList");
       if (notificationsList) {
         notificationsList.innerHTML = `
@@ -2579,7 +2338,6 @@ async function loadUserNotifications() {
       }
     }
   } catch (error) {
-    console.error("Error loading notifications:", error);
     const notificationsList = document.getElementById("notificationsList");
     if (notificationsList) {
       notificationsList.innerHTML = `
@@ -2595,12 +2353,8 @@ async function loadUserNotifications() {
 
 // Display notifications in the UI
 function displayNotifications(notifications) {
-  console.log("displayNotifications called with:", notifications);
   const notificationsList = document.getElementById("notificationsList");
-  console.log("notificationsList element:", notificationsList);
-
   if (!notificationsList) {
-    console.error("Notifications list container not found");
     return;
   }
 
@@ -2725,7 +2479,6 @@ async function markAllAsRead() {
       showNotification("Failed to mark notifications as read.", "error");
     }
   } catch (error) {
-    console.error("Error marking notifications as read:", error);
     showNotification("Failed to mark notifications as read.", "error");
   }
 }
@@ -2769,7 +2522,6 @@ async function dismissNotification(button) {
       showNotification("Failed to dismiss notification.", "error");
     }
   } catch (error) {
-    console.error("Error dismissing notification:", error);
     showNotification("Failed to dismiss notification.", "error");
   }
 }
@@ -2856,53 +2608,76 @@ window.reservationData = {
 // Booking type configurations
 window.bookingTypes = {
   daytime: {
-    label: "DAYTIME",
+    label: "DAYTIME PACKAGE",
     checkInTime: "9:00 AM",
     checkOutTime: "5:00 PM",
     durationLabel: "day(s)",
     prices: {
-      "all-rooms": 15000,
-      "aircon-rooms": 12000,
-      "basic-rooms": 8000,
+      daytime: 6000,
+      nighttime: 10000,
+      "22hours": 18000,
+      venue: 6000,
     },
   },
   nighttime: {
-    label: "NIGHTTIME",
+    label: "NIGHTTIME PACKAGE",
     checkInTime: "7:00 PM",
     checkOutTime: "7:00 AM",
     durationLabel: "night(s)",
     prices: {
-      "all-rooms": 25000,
-      "aircon-rooms": 20000,
-      "basic-rooms": 12000,
+      daytime: 6000,
+      nighttime: 10000,
+      "22hours": 18000,
+      venue: 10000,
     },
   },
   "22hours": {
-    label: "22 HOURS",
+    label: "22 HOURS PACKAGE",
     checkInTime: "2:00 PM",
     checkOutTime: "12:00 NN",
+    durationLabel: "session(s)",
+    prices: {
+      daytime: 6000,
+      nighttime: 10000,
+      "22hours": 18000,
+      venue: 18000,
+    },
+  },
+  "venue-daytime": {
+    label: "VENUE FOR ALL OCCASIONS - DAYTIME",
+    checkInTime: "9:00 AM",
+    checkOutTime: "5:00 PM",
+    durationLabel: "day(s)",
+    prices: {
+      venue: 6000,
+    },
+  },
+  "venue-nighttime": {
+    label: "VENUE FOR ALL OCCASIONS - NIGHTTIME",
+    checkInTime: "7:00 PM",
+    checkOutTime: "7:00 AM",
     durationLabel: "night(s)",
     prices: {
-      "all-rooms": 25000,
-      "aircon-rooms": 20000,
-      "basic-rooms": 12000,
+      venue: 10000,
+    },
+  },
+  "venue-22hours": {
+    label: "VENUE FOR ALL OCCASIONS - 22 HOURS",
+    checkInTime: "2:00 PM",
+    checkOutTime: "12:00 NN",
+    durationLabel: "session(s)",
+    prices: {
+      venue: 18000,
     },
   },
 };
 
 // Select booking type and show room selection
 function selectBookingType(type) {
-  console.log("🎯 selectBookingType called with type:", type);
-  console.log("📋 bookingTypes object:", window.bookingTypes);
-  console.log("✅ Function is working!");
-
   if (!window.bookingTypes[type]) {
-    console.error("❌ Invalid booking type:", type);
     showNotification("Invalid booking type", "error");
     return;
   }
-
-  console.log("📦 Storing booking data...");
 
   // Store booking type
   window.reservationData.bookingType = type;
@@ -2911,12 +2686,12 @@ function selectBookingType(type) {
 
   // Update prices in room packages
   const prices = window.bookingTypes[type].prices;
-  document.getElementById("all-rooms-price").textContent =
-    prices["all-rooms"].toLocaleString();
-  document.getElementById("aircon-rooms-price").textContent =
-    prices["aircon-rooms"].toLocaleString();
-  document.getElementById("basic-rooms-price").textContent =
-    prices["basic-rooms"].toLocaleString();
+  document.getElementById("daytime-price").textContent =
+    prices["daytime"].toLocaleString();
+  document.getElementById("nighttime-price").textContent =
+    prices["nighttime"].toLocaleString();
+  document.getElementById("22hours-price").textContent =
+    prices["22hours"].toLocaleString();
 
   // Update price period labels
   const periodLabel =
@@ -2937,10 +2712,206 @@ function selectBookingType(type) {
   );
 }
 
-// Select room package and show booking form
-function selectRoomPackage(packageType) {
-  console.log("Selected package:", packageType);
+// Open venue time slot selector
+function openVenueTimeSelector() {
+  const modalHTML = `
+    <div id="venueTimeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+      <div style="background: white; padding: 30px; border-radius: 16px; max-width: 600px; width: 90%;">
+        <h2 style="margin-top: 0; color: #1e293b;">Select Time Slot for Venue</h2>
+        <p style="color: #64748b; margin-bottom: 25px;">Choose your preferred time slot for the event venue</p>
+        
+        <div style="display: grid; gap: 15px;">
+          <div onclick="selectVenueTime('venue-daytime')" style="cursor: pointer; padding: 20px; border: 2px solid #ffd93d; border-radius: 12px; background: linear-gradient(135deg, #fff9e6 0%, #fff 100%); transition: all 0.3s;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #f59e0b;">☀️ Daytime</h3>
+                <p style="margin: 0; color: #64748b; font-size: 0.9em;">9:00 AM - 5:00 PM</p>
+              </div>
+              <div style="font-size: 1.5em; font-weight: bold; color: #1e293b;">₱6,000</div>
+            </div>
+          </div>
+          
+          <div onclick="selectVenueTime('venue-nighttime')" style="cursor: pointer; padding: 20px; border: 2px solid #667eea; border-radius: 12px; background: linear-gradient(135deg, #e6e9ff 0%, #fff 100%); transition: all 0.3s;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #667eea;">🌙 Nighttime</h3>
+                <p style="margin: 0; color: #64748b; font-size: 0.9em;">7:00 PM - 7:00 AM</p>
+              </div>
+              <div style="font-size: 1.5em; font-weight: bold; color: #1e293b;">₱10,000</div>
+            </div>
+          </div>
+          
+          <div onclick="selectVenueTime('venue-22hours')" style="cursor: pointer; padding: 20px; border: 2px solid #f093fb; border-radius: 12px; background: linear-gradient(135deg, #ffe6f7 0%, #fff 100%); transition: all 0.3s;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #f093fb;">⏰ 22 Hours</h3>
+                <p style="margin: 0; color: #64748b; font-size: 0.9em;">2:00 PM - 12:00 NN (Next Day)</p>
+              </div>
+              <div style="font-size: 1.5em; font-weight: bold; color: #1e293b;">₱18,000</div>
+            </div>
+          </div>
+        </div>
+        
+        <button onclick="closeVenueTimeModal()" style="margin-top: 20px; width: 100%; padding: 12px; background: #e2e8f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: #475569;">Cancel</button>
+      </div>
+    </div>
+  `;
 
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+}
+
+function closeVenueTimeModal() {
+  const modal = document.getElementById("venueTimeModal");
+  if (modal) modal.remove();
+}
+
+function selectVenueTime(venueType) {
+  closeVenueTimeModal();
+  selectRoomPackageDirect(venueType);
+}
+
+// Direct package selection (combines booking type and package in one step)
+// Open inclusions modal
+function openInclusionsModal(packageType) {
+  const modal = document.getElementById("inclusionsModal");
+  const modalTitle = document.getElementById("inclusionsModalTitle");
+  const modalContent = document.getElementById("inclusionsModalContent");
+
+  // Get the content from the hidden div
+  const content = document.getElementById(`inclusions-${packageType}`);
+
+  // Set title based on package type
+  const titles = {
+    daytime: "Daytime Package - Full Details",
+    nighttime: "Nighttime Package - Full Details",
+    "22hours": "22 Hours Package - Full Details",
+    venue: "Venue for All Occasions - Full Details",
+  };
+
+  modalTitle.innerHTML = `<i class="fas fa-list-check"></i> ${
+    titles[packageType] || "Package Details"
+  }`;
+
+  // Clone the content and display it in modal
+  modalContent.innerHTML = content.innerHTML;
+
+  // Show modal first
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+
+  // Add View Image buttons after a frame to prevent blocking
+  requestAnimationFrame(function () {
+    try {
+      if (typeof window.addButtonsAndStyle === "function") {
+        window.addButtonsAndStyle();
+      }
+    } catch (error) {}
+  });
+}
+
+// Close inclusions modal
+function closeInclusionsModal() {
+  const modal = document.getElementById("inclusionsModal");
+  modal.style.display = "none";
+  document.body.style.overflow = "auto";
+}
+
+// Close modal when clicking outside
+document.addEventListener("click", function (event) {
+  const modal = document.getElementById("inclusionsModal");
+  if (event.target === modal) {
+    closeInclusionsModal();
+  }
+});
+
+// Go back to package selection (Step 1)
+function goBackToRooms() {
+  const step1 = document.getElementById("step1");
+  const step2 = document.getElementById("step2");
+
+  if (step1 && step2) {
+    // Hide step 2, show step 1
+    step2.style.display = "none";
+    step1.style.display = "block";
+
+    // Reset form data
+    if (window.reservationData) {
+      window.reservationData.bookingType = null;
+      window.reservationData.packageType = null;
+    }
+
+    // Scroll to top of the reservation section
+    const reservationSection = document.getElementById("reservation-section");
+    if (reservationSection) {
+      reservationSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (typeof showNotification === "function") {
+      showNotification("Returned to package selection", "info");
+    }
+  } else {
+  }
+}
+
+function selectRoomPackageDirect(packageType) {
+  // Package type is the same as booking type in the new structure
+  const type = packageType;
+
+  // Store booking type and package type
+  window.reservationData.bookingType = type;
+  window.reservationData.packageType = packageType;
+  window.reservationData.checkInTime = window.bookingTypes[type].checkInTime;
+  window.reservationData.checkOutTime = window.bookingTypes[type].checkOutTime;
+  window.reservationData.basePrice =
+    window.bookingTypes[type].prices[
+      packageType.includes("venue") ? "venue" : packageType
+    ];
+
+  // Update summary
+  const packageNames = {
+    daytime: "Daytime Package",
+    nighttime: "Nighttime Package",
+    "22hours": "22 Hours Package",
+    "venue-daytime": "Venue for All Occasions - Daytime",
+    "venue-nighttime": "Venue for All Occasions - Nighttime",
+    "venue-22hours": "Venue for All Occasions - 22 Hours",
+  };
+
+  document.getElementById("summaryBookingType").textContent =
+    window.bookingTypes[type].label;
+  document.getElementById("summaryPackage").textContent =
+    packageNames[packageType];
+  document.getElementById("summaryCheckInTime").textContent =
+    window.bookingTypes[type].checkInTime;
+  document.getElementById("summaryCheckOutTime").textContent =
+    window.bookingTypes[type].checkOutTime;
+
+  // Update duration label
+  const durationGroup = document.getElementById("durationGroup");
+  const durationLabel = durationGroup.querySelector("label");
+  durationLabel.textContent =
+    window.bookingTypes[type].durationLabel === "day(s)"
+      ? "Number of Days *"
+      : window.bookingTypes[type].durationLabel === "night(s)"
+      ? "Number of Nights *"
+      : "Number of Sessions *";
+
+  // Update price summary
+  updatePriceSummary();
+
+  // Hide step 1, show step 2 (booking details)
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").style.display = "block";
+
+  // Set minimum date to today
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("checkInDate").min = today;
+
+  showNotification(`${packageNames[packageType]} selected`, "success");
+}
+
+// Select room package and show booking form (legacy function, kept for compatibility)
+function selectRoomPackage(packageType) {
   const type = window.reservationData.bookingType;
   if (!type) {
     showNotification("Please select a booking type first", "error");
@@ -2954,9 +2925,9 @@ function selectRoomPackage(packageType) {
 
   // Update summary
   const packageNames = {
-    "all-rooms": "All Rooms Package",
-    "aircon-rooms": "Aircon Rooms Package",
-    "basic-rooms": "Basic Rooms Package",
+    daytime: "Daytime Package",
+    nighttime: "Nighttime Package",
+    "22hours": "22 Hours Package",
   };
 
   document.getElementById("summaryBookingType").textContent =
@@ -2979,9 +2950,9 @@ function selectRoomPackage(packageType) {
   // Update price summary
   updatePriceSummary();
 
-  // Hide step 2, show step 3
-  document.getElementById("step2").style.display = "none";
-  document.getElementById("step3").style.display = "block";
+  // Hide step 1, show step 2
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").style.display = "block";
 
   // Set minimum date to today
   const today = new Date().toISOString().split("T")[0];
@@ -3064,17 +3035,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const paymentMethod = formData.get("paymentMethod");
       const agreeTerms = formData.get("agreeTerms"); // checkbox returns 'on' if checked, null if not
 
-      console.log("📋 Form data collected:", {
-        checkInDate,
-        duration,
-        groupSize,
-        groupType,
-        paymentMethod,
-        agreeTerms,
-        hasBookingType: !!window.reservationData.bookingType,
-        hasPackageType: !!window.reservationData.packageType,
-      });
-
       // Validate required fields
       if (!checkInDate) {
         showNotification("Please select a check-in date", "error");
@@ -3118,13 +3078,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const packageSuffix = bookingType === "daytime" ? "-day" : "-night";
       const packageType = packageBase + packageSuffix;
 
-      console.log("📦 Formatting package type:", {
-        bookingType,
-        packageBase,
-        packageSuffix,
-        final: packageType,
-      });
-
       // Prepare reservation data
       const reservationPayload = {
         booking_type: bookingType,
@@ -3138,8 +3091,6 @@ document.addEventListener("DOMContentLoaded", function () {
         special_requests: specialRequests,
         payment_method: paymentMethod,
       };
-
-      console.log("🚀 Sending reservation payload:", reservationPayload);
 
       // Show loading
       const submitBtn = reservationForm.querySelector(".btn-submit");
@@ -3158,20 +3109,12 @@ document.addEventListener("DOMContentLoaded", function () {
           body: JSON.stringify(reservationPayload),
         });
 
-        console.log("📡 Response status:", response.status);
-        console.log("📡 Response OK:", response.ok);
-
         // Try to parse response as JSON
         let result;
         const responseText = await response.text();
-        console.log("📡 Raw response:", responseText);
-
         try {
           result = JSON.parse(responseText);
-          console.log("📦 Response data:", result);
         } catch (parseError) {
-          console.error("❌ Failed to parse JSON response:", parseError);
-          console.error("Response text:", responseText);
           throw new Error(
             "Server returned invalid JSON: " + responseText.substring(0, 100)
           );
@@ -3212,7 +3155,6 @@ document.addEventListener("DOMContentLoaded", function () {
             updateActiveNavigation("bookings-history");
           }, 1500);
         } else {
-          console.error("❌ Reservation failed:", result);
           showNotification(
             result.message || "Failed to create reservation",
             "error"
@@ -3220,11 +3162,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Show detailed error in alert for debugging
           if (result.error_type) {
-            console.error("Error type:", result.error_type);
           }
         }
       } catch (error) {
-        console.error("❌ Reservation error:", error);
         showNotification(
           "Network error. Please check console for details.",
           "error"
@@ -3312,35 +3252,10 @@ window.goBackToStep = goBackToStep;
 window.showBookingPolicy = showBookingPolicy;
 window.refreshUserData = refreshUserData;
 
-console.log(
-  "%c✨ Enhanced Features Loaded",
-  "color: #4CAF50; font-weight: bold;"
-);
-
-console.log(
-  "%c🎫 Reservation System Loaded",
-  "color: #2196F3; font-weight: bold;"
-);
-
 // Debug: Verify functions are accessible
-console.log(
-  "%c🔍 DEBUGGING: Checking if selectBookingType is accessible...",
-  "color: #FF9800; font-weight: bold;"
-);
-console.log(
-  "typeof window.selectBookingType:",
-  typeof window.selectBookingType
-);
-console.log("typeof selectBookingType:", typeof selectBookingType);
-console.log("typeof window.bookingTypes:", typeof window.bookingTypes);
-console.log(
-  '✅ If you see "function" and "object" above, the buttons should work!'
-);
-
 // Test button onclick attributes
 setTimeout(() => {
   const buttons = document.querySelectorAll(".select-booking-type-btn");
-  console.log("🔘 Found booking type buttons:", buttons.length);
   buttons.forEach((btn, index) => {
     console.log(`Button ${index + 1}:`, {
       onclick: btn.getAttribute("onclick"),
@@ -3351,11 +3266,6 @@ setTimeout(() => {
 
 // BACKUP: Add direct event listeners in case onclick doesn't work
 document.addEventListener("DOMContentLoaded", function () {
-  console.log(
-    "%c🔧 Adding backup event listeners to booking buttons...",
-    "color: #9C27B0; font-weight: bold;"
-  );
-
   setTimeout(() => {
     // Find buttons by their onclick attribute
     const daytimeBtn = document.querySelector(
@@ -3372,52 +3282,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (daytimeBtn) {
       daytimeBtn.addEventListener("click", function (e) {
-        console.log(
-          "%c☀️ Daytime button backup listener triggered!",
-          "color: #FF9800; font-weight: bold;"
-        );
         selectBookingType("daytime");
       });
       addedListeners++;
-      console.log("✅ Daytime button backup listener added");
     }
 
     if (nighttimeBtn) {
       nighttimeBtn.addEventListener("click", function (e) {
-        console.log(
-          "%c🌙 Nighttime button backup listener triggered!",
-          "color: #2196F3; font-weight: bold;"
-        );
         selectBookingType("nighttime");
       });
       addedListeners++;
-      console.log("✅ Nighttime button backup listener added");
     }
 
     if (hours22Btn) {
       hours22Btn.addEventListener("click", function (e) {
-        console.log(
-          "%c⏰ 22 Hours button backup listener triggered!",
-          "color: #4CAF50; font-weight: bold;"
-        );
         selectBookingType("22hours");
       });
       addedListeners++;
-      console.log("✅ 22 Hours button backup listener added");
-    }
-
-    if (addedListeners > 0) {
-      console.log(
-        `%c🎉 SUCCESS! Added ${addedListeners} backup event listeners!`,
-        "background: #4CAF50; color: white; padding: 8px; font-weight: bold;"
-      );
-      console.log(
-        "💡 Buttons should now work even if onclick attributes fail!"
-      );
-    } else {
-      console.warn(
-        '⚠️ Could not find booking type buttons. Make sure you are on the "Make Reservation" section.'
-      );
     }
   }, 1500);
 });

@@ -132,4 +132,3 @@ try {
         'message' => $e->getMessage()
     ]);
 }
-?>

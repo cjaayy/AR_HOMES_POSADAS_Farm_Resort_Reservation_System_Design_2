@@ -169,8 +169,6 @@ function handleLogin(email, password) {
   const cleanEmail = email.trim().toLowerCase();
 
   // Try admin/staff login first. If that fails, fall back to guest login.
-  console.log("🔧 Attempting admin/staff login first...");
-
   fetch("admin/login.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -187,7 +185,7 @@ function handleLogin(email, password) {
 
         setTimeout(() => {
           // If role is staff, send to staff dashboard; admins keep using admin dashboard
-          if (data.data && data.data.role === 'staff') {
+          if (data.data && data.data.role === "staff") {
             window.location.href = "admin/staff_dashboard.php";
           } else {
             window.location.href = "admin/dashboard.php";
@@ -195,12 +193,14 @@ function handleLogin(email, password) {
         }, 800);
       } else {
         // Admin login failed; try guest login
-        console.log("ℹ️ Admin login failed, falling back to guest login:", data.message);
         // Proceed to guest login
         return fetch("user/login.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ usernameOrEmail: email.trim(), password: password }),
+          body: JSON.stringify({
+            usernameOrEmail: email.trim(),
+            password: password,
+          }),
         })
           .then((res) => res.text())
           .then((text) => {
@@ -208,7 +208,7 @@ function handleLogin(email, password) {
             try {
               guestData = JSON.parse(text);
             } catch (e) {
-              throw new Error('Failed to parse guest login response');
+              throw new Error("Failed to parse guest login response");
             }
 
             if (guestData.success) {
@@ -216,20 +216,21 @@ function handleLogin(email, password) {
               loginBtn.disabled = false;
               loginBtn.classList.add("success");
               loginBtn.innerHTML = '<i class="fas fa-check"></i> Welcome Back!';
-              setTimeout(() => { window.location.href = "dashboard.html"; }, 800);
+              setTimeout(() => {
+                window.location.href = "dashboard.html";
+              }, 800);
             } else {
               loginBtn.classList.remove("loading");
               loginBtn.disabled = false;
-              showLoginError(guestData.message || 'Invalid credentials');
+              showLoginError(guestData.message || "Invalid credentials");
             }
           });
       }
     })
     .catch((err) => {
-      console.error('Login flow error:', err);
       loginBtn.classList.remove("loading");
       loginBtn.disabled = false;
-      showLoginError('Network error. Please try again.');
+      showLoginError("Network error. Please try again.");
     });
 }
 
@@ -332,10 +333,9 @@ document.querySelectorAll(".input-wrapper input").forEach((input) => {
 const rememberCheckbox = document.getElementById("remember");
 rememberCheckbox.addEventListener("change", function () {
   if (this.checked) {
-    console.log("Remember me enabled");
     // In a real application, you would set localStorage or cookie preferences here
   } else {
-    console.log("Remember me disabled");
+    // Remember me disabled
   }
 });
 
@@ -370,20 +370,6 @@ window.addEventListener("resize", function () {
     }
   }
 });
-
-// Demo credentials hint (development only)
-console.log(`
-🏖️ AR Homes Posadas Farm Resort - Login Demo
-=============================================
-This is a frontend-only demonstration.
-
-Demo credentials (for testing):
-📧 Email: demo@arhomes.com
-🔑 Password: demo123
-
-You can also use any valid email format or username.
-The form includes validation for empty fields and basic format checking.
-`);
 
 // Add a subtle animation to the logo
 const logo = document.querySelector(".logo");
@@ -471,11 +457,7 @@ function loadResortMap() {
 
   // Add load event listener to show when map is ready
   mapFrame.onload = function () {
-    console.log(
-      "🗺️ Resort map loaded successfully at coordinates:",
-      latitude,
-      longitude
-    );
+    // Map loaded successfully
   };
 }
 
@@ -667,9 +649,6 @@ pulseAnimation.textContent = `
   }
 `;
 document.head.appendChild(pulseAnimation);
-
-console.log("🗺️ Map functionality loaded successfully!");
-console.log("Click the map icon next to the logo to view resort location.");
 
 // Make functions globally available
 window.openLocationMap = openLocationMap;
@@ -985,8 +964,7 @@ function copyResetLink(link) {
       alert("Reset link copied to clipboard!");
     })
     .catch((err) => {
-      console.error("Failed to copy:", err);
-      alert("Failed to copy link. Please copy it manually from the console.");
+      alert("Failed to copy link. Please copy it manually.");
     });
 }
 
@@ -1011,5 +989,3 @@ window.openForgotPasswordModal = openForgotPasswordModal;
 window.closeForgotPasswordModal = closeForgotPasswordModal;
 window.copyResetLink = copyResetLink;
 window.closeResetLinkModal = closeResetLinkModal;
-
-console.log("🔐 Forgot Password functionality loaded successfully!");

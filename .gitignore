@@ -3,8 +3,14 @@
 
 # Sensitive Configuration Files
 config/mail.php
+config/database.php
+config/connection.php
+config/cloudflare.php
 config/.env
 .env
+.env.*
+!.env.example
+!config/*.example.php
 
 # Logs
 user/password_resets/*.txt
@@ -41,8 +47,13 @@ desktop.ini
 test_email.php
 
 # Uploaded Files (if applicable)
-uploads/*
-!uploads/.gitkeep
+uploads/payment_proofs/*
+!uploads/payment_proofs/.gitkeep
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*.gif
+uploads/*.pdf
 
 # Session Files
 sessions/*
@@ -51,3 +62,24 @@ sessions/*
 # Error Logs
 error_log
 php_errors.log
+
+# Batch Scripts (XAMPP specific)
+batch_scripts/
+
+# Backup Files
+*.backup
+backup/
+backups/
+
+# Environment-specific
+/config/local.php
+/config/dev.php
+composer.phar
+
+# Security
+*.key
+*.pem
+*.crt
+*.cer
+*.p12
+*.pfx

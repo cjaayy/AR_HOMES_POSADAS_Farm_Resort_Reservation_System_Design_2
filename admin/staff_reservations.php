@@ -1135,9 +1135,16 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       };
       
       const packageLabels = {
-        'all_rooms': 'All Rooms Package',
-        'aircon': 'Aircon Package',
-        'basic': 'Basic Package'
+        'daytime': 'Daytime Package',
+        'nighttime': 'Nighttime Package',
+        '22hours': '22 Hours Package',
+        'venue-daytime': 'Venue - Daytime',
+        'venue-nighttime': 'Venue - Nighttime',
+        'venue-22hours': 'Venue - 22 Hours',
+        // Legacy support
+        'all_rooms': 'Nighttime Package',
+        'aircon': 'Daytime Package',
+        'basic': '22 Hours Package'
       };
       
       const bookingType = bookingTypeLabels[r.booking_type] || { icon: 'fa-calendar', label: 'N/A', color: '#64748b' };

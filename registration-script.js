@@ -2,14 +2,10 @@
 console.log("🔧 registration-script.js loaded at", new Date().toISOString());
 
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("📄 Registration form DOM loaded");
-
   // Get form elements
   const form = document.getElementById("registrationForm");
   const errorContainer = document.getElementById("errorContainer");
   const errorList = document.getElementById("errorList");
-
-  console.log("📋 Form found:", form ? "YES" : "NO");
 
   // Get input fields
   const lastName = document.getElementById("lastName");
@@ -62,10 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
   addRealTimeValidation();
 
   // Handle form submission
-  console.log("🔗 Attaching submit event listener to form");
   form.addEventListener("submit", handleFormSubmission);
-  console.log("✅ Registration form ready!");
-
   /**
    * Initialize password toggle functionality
    */
@@ -281,8 +274,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleFormSubmission(e) {
     e.preventDefault();
 
-    console.log("🎯 Registration form submitted!");
-
     // Clear previous error container
     hideErrorContainer();
 
@@ -319,7 +310,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (!isFormValid) {
-      console.log("❌ Form validation failed:", errors);
       showErrorContainer(errors);
       // Scroll to the first error
       const firstErrorField = form.querySelector(".form-input.error");
@@ -330,7 +320,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    console.log("✅ Form validation passed, proceeding to registration...");
     // If form is valid, simulate registration process
     handleSuccessfulRegistration();
   }
@@ -381,9 +370,6 @@ document.addEventListener("DOMContentLoaded", function () {
       password: password.value,
     };
 
-    console.log("📤 Sending registration data:", registrationData);
-    console.log("📍 Endpoint: user/register.php");
-
     // Send registration request to backend
     // Always use the full Apache-served URL
     const registerUrl =
@@ -396,19 +382,13 @@ document.addEventListener("DOMContentLoaded", function () {
       body: JSON.stringify(registrationData),
     })
       .then((response) => {
-        console.log("📡 Response status:", response.status);
         return response.text();
       })
       .then((responseText) => {
-        console.log("📄 Raw response:", responseText);
-
         let data;
         try {
           data = JSON.parse(responseText);
-          console.log("📦 Parsed data:", data);
-        } catch (e) {
-          console.error("❌ Failed to parse JSON:", e);
-          console.error("Raw response was:", responseText);
+          } catch (e) {
           throw new Error("Invalid JSON response from server");
         }
 
@@ -421,19 +401,10 @@ document.addEventListener("DOMContentLoaded", function () {
         submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
 
         if (data.success) {
-          console.log("✅ SUCCESS! Registration response:", data);
-          console.log("🎉 User saved to database:", data.data);
-          console.log("📊 User ID created:", data.data.user_id);
-          console.log("👤 Username:", data.data.username);
-          console.log("📧 Email:", data.data.email);
-
           // Show success message
           showSuccessMessage();
 
           // TEMPORARY: Comment out redirect to see console
-          console.log(
-            "⏸️ Redirect disabled for debugging - Check console above!"
-          );
           alert(
             "✅ Registration Successful!\n\nUser ID: " +
               data.data.user_id +
@@ -447,10 +418,6 @@ document.addEventListener("DOMContentLoaded", function () {
           //   window.location.href = "index.html";
           // }, 2000);
         } else {
-          console.log("❌ REGISTRATION FAILED!");
-          console.log("Error message:", data.message);
-          console.log("Full response:", data);
-
           // Show error message
           const errors = data.errors || [
             data.message || "Registration failed. Please try again.",
@@ -459,8 +426,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       })
       .catch((error) => {
-        console.error("❌ Registration error:", error);
-
         // Reset button state
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
@@ -539,10 +504,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Store in localStorage (in real app, this would be sent to backend)
     try {
       localStorage.setItem("registeredUser", JSON.stringify(userData));
-      console.log("User registration data stored successfully:", userData);
-    } catch (error) {
-      console.error("Error storing user data:", error);
-    }
+      } catch (error) {
+      }
   }
 
   /**
@@ -618,5 +581,4 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  console.log("Registration form initialized successfully");
-});
+  });
