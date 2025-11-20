@@ -191,6 +191,7 @@ function handleLogin(email, password) {
             window.location.href = "admin/dashboard.php";
           }
         }, 800);
+        return;
       } else {
         // Admin login failed; try guest login
         // Proceed to guest login

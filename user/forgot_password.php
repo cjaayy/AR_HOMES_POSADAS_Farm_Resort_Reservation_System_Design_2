@@ -106,8 +106,7 @@ try {
     // Create reset link using ngrok if configured
     require_once '../config/cloudflare.php';
     
-    $projectPath = 'AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2';
-    $resetPath = "{$projectPath}/reset_password.html?token={$resetToken}";
+    $resetPath = "reset_password.html?token={$resetToken}";
     $resetLink = buildVerificationUrl($resetPath);
 
     // Log the reset link for development

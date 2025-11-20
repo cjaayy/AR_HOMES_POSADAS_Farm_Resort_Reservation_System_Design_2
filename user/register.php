@@ -137,8 +137,7 @@ try {
     // Create verification link using ngrok if configured
     require_once '../config/cloudflare.php';
     
-    $projectPath = 'AR_Homes_Posadas_Farm_Resort_Reservation_System_Design_2';
-    $verificationPath = "{$projectPath}/user/verify_email.php?token={$verificationToken}";
+    $verificationPath = "/user/verify_email.php?token={$verificationToken}";
     $verificationLink = buildVerificationUrl($verificationPath);
 
     // Send email verification email
