@@ -84,7 +84,6 @@ function getTitleForSection(section) {
     dashboard: "Dashboard Overview",
     "make-reservation": "Make New Reservation",
     "my-reservations": "My Reservations",
-    promotions: "Special Promotions",
     profile: "Profile Settings",
   };
   return titles[section] || "Unknown Section";
@@ -882,11 +881,6 @@ document.addEventListener("keydown", function (e) {
         showSection("my-reservations");
         updateActiveNavigation("my-reservations");
         break;
-      case "4":
-        e.preventDefault();
-        showSection("promotions");
-        updateActiveNavigation("promotions");
-        break;
       case "5":
         e.preventDefault();
         showSection("profile");
@@ -904,230 +898,12 @@ document.addEventListener("keydown", function (e) {
 // Show keyboard shortcuts info in console
 console.log("ESC: Close sidebar (mobile)");
 
-// ===== PROMOTIONS DATA =====
-const promoData = {
-  isRegularCustomer: true,
-  loyaltyLevel: "Gold",
-  availablePromos: [
-    {
-      code: "EARLYBIRD25",
-      title: "Early Bird Special",
-      discount: 25,
-      description: "Book 30 days in advance and save big!",
-      validUntil: "Dec 31, 2025",
-      active: true,
-    },
-    {
-      code: "WEEKEND20",
-      title: "Weekend Escape",
-      discount: 20,
-      description: "Perfect for weekend warriors!",
-      validUntil: "Ongoing",
-      active: true,
-    },
-    {
-      code: "FAMILY30",
-      title: "Family Package",
-      discount: 30,
-      description: "Bring the whole family!",
-      validUntil: "Dec 31, 2025",
-      active: true,
-    },
-    {
-      code: "VIPLOYALTY35",
-      title: "VIP Loyalty Bonus",
-      discount: 35,
-      description: "Exclusive for regular customers!",
-      validUntil: "Limited time",
-      active: true,
-      vipOnly: true,
-    },
-    {
-      code: "HOLIDAY40",
-      title: "Holiday Season",
-      discount: 40,
-      description: "Celebrate the holidays with us!",
-      validUntil: "Jan 15, 2026",
-      active: true,
-    },
-    {
-      code: "ROMANCE45",
-      title: "Romantic Getaway",
-      discount: 45,
-      description: "Perfect for couples!",
-      validUntil: "Feb 14, 2026",
-      active: true,
-    },
-  ],
-  appliedPromos: [],
-};
-
-// ===== PROMOTIONS MANAGEMENT =====
-function applyPromo(promoCode) {
-  const promo = promoData.availablePromos.find((p) => p.code === promoCode);
-
-  if (!promo) {
-    showNotification("Invalid promo code!", "error");
-    return;
-  }
-
-  if (!promo.active) {
-    showNotification("This promotion is no longer active.", "error");
-    return;
-  }
-
-  if (promo.vipOnly && !promoData.isRegularCustomer) {
-    showNotification(
-      "This promotion is only available for VIP members.",
-      "error"
-    );
-    return;
-  }
-
-  // Check if promo is already applied
-  if (promoData.appliedPromos.some((p) => p.code === promoCode)) {
-    showNotification("This promotion is already applied!", "warning");
-    return;
-  }
-
-  // Apply the promo
-  promoData.appliedPromos.push(promo);
-  showNotification(
-    `🎉 ${promo.title} applied! You saved ${promo.discount}%`,
-    "success"
-  );
-
-  // Update UI to show applied promo
-  updateAppliedPromos();
-
-  // Redirect to make reservation page with promo pre-applied
-  setTimeout(() => {
-    showSection("make-reservation");
-    updateActiveNavigation("make-reservation");
-
-    // Add promo info to the form (you could enhance this further)
-    const form = document.querySelector(".reservation-form");
-    if (form) {
-      let promoInfo = form.querySelector(".applied-promo-info");
-      if (!promoInfo) {
-        promoInfo = document.createElement("div");
-        promoInfo.className = "applied-promo-info";
-        promoInfo.style.cssText = `
-          background: linear-gradient(135deg, #66bb6a, #43a047);
-          color: white;
-          padding: 1rem;
-          border-radius: 8px;
-          margin-bottom: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        `;
-        form.insertBefore(promoInfo, form.firstChild);
-      }
-      promoInfo.innerHTML = `
-        <i class="fas fa-check-circle"></i>
-        <span>Promo Applied: ${promo.title} (${promo.discount}% OFF)</span>
-        <button onclick="removeAppliedPromo('${promo.code}')" style="
-          background: none;
-          border: none;
-          color: white;
-          margin-left: auto;
-          cursor: pointer;
-          font-size: 1rem;
-        ">
-          <i class="fas fa-times"></i>
-        </button>
-      `;
-    }
-  }, 1000);
-}
-
-function validatePromoCode() {
-  const input = document.getElementById("promoCodeInput");
-  const code = input.value.trim().toUpperCase();
-
-  if (!code) {
-    showNotification("Please enter a promo code.", "warning");
-    return;
-  }
-
-  const promo = promoData.availablePromos.find((p) => p.code === code);
-
-  if (promo) {
-    input.value = "";
-    applyPromo(code);
-  } else {
-    showNotification(
-      "Invalid promo code. Please check and try again.",
-      "error"
-    );
-    input.value = "";
-  }
-}
-
-function removeAppliedPromo(promoCode) {
-  const index = promoData.appliedPromos.findIndex((p) => p.code === promoCode);
-  if (index > -1) {
-    const promo = promoData.appliedPromos[index];
-    promoData.appliedPromos.splice(index, 1);
-    showNotification(`${promo.title} removed.`, "info");
-
-    // Remove from UI
-    const promoInfo = document.querySelector(".applied-promo-info");
-    if (promoInfo) {
-      promoInfo.remove();
-    }
-
-    updateAppliedPromos();
-  }
-}
-
-function updateAppliedPromos() {
-  // This function could update a display of currently applied promos
-  // For now, we'll just log it
-}
-
-function initializePromotions() {
-  // Check if user is a regular customer and update loyalty status
-  if (promoData.isRegularCustomer) {
-    const loyaltyBadge = document.querySelector(".loyalty-badge");
-    if (loyaltyBadge) {
-      // Remove moving animation - keep badge static
-      // loyaltyBadge.style.animation = "shimmer 3s linear infinite";
-    }
-
-    // Show VIP-only promotions
-    const vipPromos = document.querySelectorAll(".promo-card.exclusive");
-    vipPromos.forEach((card) => {
-      card.style.display = "block";
-    });
-  } else {
-    // Hide VIP-only promotions for non-regular customers
-    const vipPromos = document.querySelectorAll(".promo-card.exclusive");
-    vipPromos.forEach((card) => {
-      card.style.display = "none";
-    });
-
-    // Hide loyalty badge
-    const loyaltyStatus = document.getElementById("loyaltyStatus");
-    if (loyaltyStatus) {
-      loyaltyStatus.style.display = "none";
-    }
-  }
-}
-
-// ===== GLOBAL FUNCTIONS FOR PROMO MANAGEMENT =====
-window.applyPromo = applyPromo;
-window.validatePromoCode = validatePromoCode;
-window.removeAppliedPromo = removeAppliedPromo;
-
 // ===== UPDATE INITIALIZATION =====
 document.addEventListener("DOMContentLoaded", function () {
   initializeDashboard();
   updateUserData();
   setupEventListeners();
   setupFormValidation();
-  initializePromotions(); // Add this line
 });
 
 // ===== RESORT GALLERY FUNCTIONALITY =====
@@ -1609,7 +1385,6 @@ class PopupContentManager {
       dashboard: "Dashboard Overview",
       "make-reservation": "Make a Reservation",
       "my-reservations": "My Reservations",
-      promotions: "Exclusive Promotions",
       profile: "Profile Settings",
     };
 
@@ -1800,11 +1575,6 @@ function quickAction(action) {
       showSection("bookings-history");
       updateActiveNavigation("bookings-history");
       showNotification("Loading your bookings...", "info");
-      break;
-    case "promo":
-      showSection("promotions");
-      updateActiveNavigation("promotions");
-      showNotification("Check out our latest promotions!", "success");
       break;
     case "support":
       showNotification("Customer support: +63 917 123 4567", "info", 5000);
