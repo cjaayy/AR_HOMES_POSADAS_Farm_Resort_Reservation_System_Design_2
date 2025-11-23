@@ -280,6 +280,10 @@
                 <i class="fas fa-credit-card"></i>
                 <span>Booking & Payment</span>
               </button>
+              <button class="nav-btn" data-section="promotions">
+                <i class="fas fa-tags"></i>
+                <span>Promotions</span>
+              </button>
               <button class="nav-btn" data-section="profile">
                 <i class="fas fa-user-cog"></i>
                 <span>Profile</span>
@@ -325,6 +329,10 @@
                 <button class="quick-action-btn" onclick="quickAction('view')">
                   <i class="fas fa-eye"></i>
                   <span>View Bookings</span>
+                </button>
+                <button class="quick-action-btn" onclick="quickAction('promo')">
+                  <i class="fas fa-tag"></i>
+                  <span>Promotions</span>
                 </button>
                 <button
                   class="quick-action-btn"
@@ -1896,6 +1904,122 @@
             </div>
           </div>
 
+          <!-- Promotions Content -->
+          <div class="content-section" id="promotions-section">
+            <div class="promotions-grid">
+              <div class="promo-card featured">
+                <div class="promo-ribbon">Featured</div>
+                <div class="promo-header">
+                  <div class="promo-icon">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                  <h4>Early Bird Special</h4>
+                </div>
+                <div class="promo-content">
+                  <div class="discount">25% OFF</div>
+                  <p>
+                    Book 30 days in advance and save big on your next getaway!
+                  </p>
+                  <div class="promo-details">
+                    <span
+                      ><i class="fas fa-calendar"></i> Valid until Dec 31,
+                      2025</span
+                    >
+                    <span><i class="fas fa-tag"></i> Code: EARLYBIRD25</span>
+                  </div>
+                </div>
+                <button class="promo-btn">
+                  <i class="fas fa-ticket-alt"></i>
+                  Apply Promo
+                </button>
+              </div>
+              <div class="promo-card">
+                <div class="promo-header">
+                  <div class="promo-icon weekend">
+                    <i class="fas fa-moon"></i>
+                  </div>
+                  <h4>Weekend Escape</h4>
+                </div>
+                <div class="promo-content">
+                  <div class="discount">20% OFF</div>
+                  <p>Perfect for weekend warriors! Book Friday-Sunday stays.</p>
+                  <div class="promo-details">
+                    <span
+                      ><i class="fas fa-calendar"></i> Valid weekends only</span
+                    >
+                    <span><i class="fas fa-tag"></i> Code: WEEKEND20</span>
+                  </div>
+                </div>
+                <button class="promo-btn">
+                  <i class="fas fa-ticket-alt"></i>
+                  Apply Promo
+                </button>
+              </div>
+              <div class="promo-card">
+                <div class="promo-header">
+                  <div class="promo-icon family">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <h4>Family Fun Package</h4>
+                </div>
+                <div class="promo-content">
+                  <div class="discount">30% OFF</div>
+                  <p>
+                    Special rates for families with children under 12. Includes
+                    breakfast!
+                  </p>
+                  <div class="promo-details">
+                    <span><i class="fas fa-child"></i> Children under 12</span>
+                    <span><i class="fas fa-tag"></i> Code: FAMILY30</span>
+                  </div>
+                </div>
+                <button class="promo-btn">
+                  <i class="fas fa-ticket-alt"></i>
+                  Apply Promo
+                </button>
+              </div>
+              <div class="promo-card exclusive">
+                <div class="promo-ribbon exclusive">VIP Only</div>
+                <div class="promo-header">
+                  <div class="promo-icon vip">
+                    <i class="fas fa-crown"></i>
+                  </div>
+                  <h4>VIP Members Exclusive</h4>
+                </div>
+                <div class="promo-content">
+                  <div class="discount">40% OFF</div>
+                  <p>
+                    Exclusive VIP member rates with premium amenities included.
+                  </p>
+                  <div class="promo-details">
+                    <span><i class="fas fa-star"></i> VIP Members Only</span>
+                    <span><i class="fas fa-tag"></i> Code: VIP40</span>
+                  </div>
+                </div>
+                <button class="promo-btn exclusive">
+                  <i class="fas fa-star"></i>
+                  Claim VIP Rate
+                </button>
+              </div>
+            </div>
+
+            <!-- Promo Code Section -->
+            <div class="promo-code-section">
+              <h3>Have a Promo Code?</h3>
+              <div class="promo-code-input">
+                <input
+                  type="text"
+                  placeholder="Enter your promo code"
+                  id="promoCodeInput"
+                />
+                <button type="button" onclick="validatePromoCode()">
+                  <i class="fas fa-check"></i>
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Profile Content -->
           <div class="content-section" id="profile-section">
             <div class="profile-form-container">
@@ -3043,6 +3167,16 @@
       function proceedToPayment() {
         alert("Proceeding to payment...");
         // Add your payment logic here
+      }
+
+      function validatePromoCode() {
+        const promoCode = document.getElementById("promoCodeInput").value;
+        if (promoCode) {
+          alert("Validating promo code: " + promoCode);
+          // Add your validation logic here
+        } else {
+          alert("Please enter a promo code");
+        }
       }
 
       // Toggle sidebar for mobile
