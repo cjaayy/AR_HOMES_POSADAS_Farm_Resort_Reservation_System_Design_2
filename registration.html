@@ -224,11 +224,17 @@
       .header {
         text-align: center;
         margin-bottom: 30px;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
+        /* Make header background transparent so slideshow shows through */
+        background: transparent;
+        /* Remove blur so underlying image is more visible */
+        backdrop-filter: none;
         padding: 20px;
         border-radius: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        /* Remove border so header does not block the background */
+        border: none;
+        /* Ensure header is above the registration-container overlay */
+        position: relative;
+        z-index: 3;
       }
 
       .logo-container {
