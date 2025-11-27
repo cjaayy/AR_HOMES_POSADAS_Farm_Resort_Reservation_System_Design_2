@@ -1,4 +1,5 @@
 # Disable caching for development
+
 # This ensures your code changes appear immediately
 
 <IfModule mod_headers.c>
@@ -16,11 +17,13 @@
 </IfModule>
 
 # Enable mod_rewrite for clean URLs
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 </IfModule>
 
 # Security Headers
+
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
