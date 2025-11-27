@@ -2459,7 +2459,7 @@ body::before {
 }
 
 .room-package-card {
-  background: white;
+  background: #eeeeee !important;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -2467,6 +2467,16 @@ body::before {
   border: 2px solid transparent;
   position: relative;
   height: fit-content;
+}
+
+/* Make venue card match the height of other cards */
+[data-package="venue"] {
+  max-height: 650px;
+}
+
+[data-package="venue"] .package-content {
+  overflow-y: auto;
+  max-height: 500px;
 }
 
 .room-package-card:hover {
@@ -2479,18 +2489,13 @@ body::before {
   box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
 }
 
+/* Remove the top gradient line from featured cards */
 .room-package-card.featured::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: none;
 }
 
 .package-header {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  background: transparent;
   padding: 1.5rem;
   padding-right: 2.5rem;
   position: relative;
@@ -2568,6 +2573,12 @@ body::before {
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+/* Ensure all package cards have consistent single-column room list sizing */
+.room-package-card .room-list {
+  grid-template-columns: 1fr;
+  max-width: 100%;
 }
 
 .room-item {
@@ -4736,11 +4747,7 @@ body::before {
 
 /* ===== BOOKING SYSTEM STYLES ===== */
 .policy-notice {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95),
-    rgba(255, 255, 255, 0.9)
-  );
+  background: #eeeeee !important;
   border-radius: 16px;
   padding: 2rem;
   margin-bottom: 2rem;
