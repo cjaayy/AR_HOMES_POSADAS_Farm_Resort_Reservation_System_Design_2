@@ -355,10 +355,10 @@ body::before {
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: rgba(102, 126, 234, 0.15);
-  border: 1px solid rgba(102, 126, 234, 0.3);
+  background: #57564F;
+  border: 1px solid #57564F;
   border-radius: 30px;
-  color: #667eea;
+  color: #ffffff;
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
@@ -394,11 +394,11 @@ body::before {
 
 .nav-btn:hover,
 .nav-btn.active {
-  background: rgba(102, 126, 234, 0.25);
-  border-color: rgba(102, 126, 234, 0.5);
+  background: #6b6960;
+  border-color: #6b6960;
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.25);
-  color: #5a67d8;
+  box-shadow: 0 12px 30px rgba(87, 86, 79, 0.25);
+  color: #ffffff;
 }
 
 .nav-btn i {
