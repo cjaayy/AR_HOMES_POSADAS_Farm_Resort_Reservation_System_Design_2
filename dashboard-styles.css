@@ -148,7 +148,7 @@ body::before {
 /* Navigation Section */
 .navigation-section {
   width: 100%;
-  background: white;
+  background: #eeeeee;
   border-radius: 20px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -233,7 +233,7 @@ body::before {
 
 .resort-info p {
   font-size: 0.9rem;
-  color: #666;
+  color: #000000;
   font-weight: 400;
 }
 
@@ -263,7 +263,7 @@ body::before {
 .user-role {
   display: block;
   font-size: 0.8rem;
-  color: #666;
+  color: #000000;
 }
 
 .profile-avatar {
