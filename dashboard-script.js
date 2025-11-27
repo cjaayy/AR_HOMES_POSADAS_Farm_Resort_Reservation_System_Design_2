@@ -884,11 +884,6 @@ document.addEventListener("keydown", function (e) {
         break;
       case "4":
         e.preventDefault();
-        showSection("promotions");
-        updateActiveNavigation("promotions");
-        break;
-      case "5":
-        e.preventDefault();
         showSection("profile");
         updateActiveNavigation("profile");
         break;
@@ -1802,9 +1797,7 @@ function quickAction(action) {
       showNotification("Loading your bookings...", "info");
       break;
     case "promo":
-      showSection("promotions");
-      updateActiveNavigation("promotions");
-      showNotification("Check out our latest promotions!", "success");
+      showNotification("Promotions section is currently unavailable.", "info");
       break;
     case "support":
       showNotification("Customer support: +63 917 123 4567", "info", 5000);
