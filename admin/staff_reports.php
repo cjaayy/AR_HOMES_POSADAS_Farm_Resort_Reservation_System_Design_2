@@ -16,6 +16,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Reports & Analytics - Staff</title>
   <link rel="stylesheet" href="../admin-styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Bungee+Spice&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -147,7 +148,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   <div class="admin-container">
     <?php include 'staff_header.php'; ?>
 
-    <main class="main-content">
+    <main class="main-content" style="padding-top:100px;">
       <section class="content-section active">
         <div class="section-header" style="margin-bottom:24px;">
           <div style="display:flex; justify-content:space-between; align-items:center;">

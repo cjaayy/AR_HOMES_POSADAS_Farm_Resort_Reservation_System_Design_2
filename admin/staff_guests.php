@@ -26,6 +26,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Manage Guests — Staff</title>
   <link rel="stylesheet" href="../admin-styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Bungee+Spice&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     /* Stats Overview */
@@ -502,7 +503,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   <div class="admin-container">
     <?php include 'staff_header.php'; ?>
 
-    <main class="main-content">
+    <main class="main-content" style="padding-top:100px;">
       <section class="content-section active">
         <!-- Page Header -->
         <div class="section-header" style="margin-bottom:30px;">

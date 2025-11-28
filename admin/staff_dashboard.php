@@ -256,7 +256,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   <div class="admin-container">
     <?php include 'staff_header.php'; ?>
 
-  <main class="main-content" style="padding:20px;">
+  <main class="main-content" style="padding:20px; padding-top:100px;">
       <section class="content-section active">
         <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:30px;">
           <div>
