@@ -148,10 +148,10 @@ body::before {
 /* Navigation Section */
 .navigation-section {
   width: 100%;
-  background: #eeeeee;
+  background: transparent;
   border-radius: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: none;
+  box-shadow: none;
   position: relative;
   transition: all 0.3s ease;
 }
@@ -163,17 +163,12 @@ body::before {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 0, 0, 0.1),
-    transparent
-  );
+  background: transparent;
 }
 
 .navigation-section:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  transform: none;
+  box-shadow: none;
 }
 
 /* ===== HEADER STYLES ===== */
@@ -357,7 +352,7 @@ body::before {
   gap: 8px;
   padding: 12px 20px;
   background: #ffee91;
-  border: 1px solid #ffee91;
+  border: 2px solid #ffffff;
   border-radius: 30px;
   color: #333333;
   font-size: 0.9rem;
