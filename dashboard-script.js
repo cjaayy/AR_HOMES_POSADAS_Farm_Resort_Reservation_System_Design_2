@@ -380,6 +380,14 @@ function setupEventListeners() {
         if (targetSection) {
           targetSection.classList.add("active");
           targetSection.style.display = "block";
+
+          // Scroll to show content while keeping navbar visible
+          const navSection = document.querySelector(".navigation-section");
+          if (navSection) {
+            const headerHeight = 80; // Account for fixed header
+            const scrollTarget = navSection.offsetTop - headerHeight;
+            window.scrollTo({ top: scrollTarget, behavior: "smooth" });
+          }
         } else {
         }
       }
@@ -1596,6 +1604,20 @@ class PopupContentManager {
     this.loadSectionContent(sectionName);
     this.showPopup();
     this.currentSection = sectionName;
+
+    // Scroll to show content while keeping navbar visible
+    const navSection = document.querySelector(".navigation-section");
+    if (navSection) {
+      const headerHeight = 80; // Account for fixed header
+      const scrollTarget = navSection.offsetTop - headerHeight;
+      window.scrollTo({ top: scrollTarget, behavior: "smooth" });
+    }
+    if (this.popupBody) {
+      this.popupBody.scrollTop = 0;
+    }
+    if (this.popupArea) {
+      this.popupArea.scrollTop = 0;
+    }
   }
 
   loadSectionContent(sectionName) {
