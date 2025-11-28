@@ -35,7 +35,7 @@
     />
 
     <!-- Meta tags for better SEO and PWA support -->
-    <meta name="theme-color" content="#667eea" />
+    <meta name="theme-color" content="#f5c857" />
     <meta
       name="description"
       content="Register for AR Homes Posadas Farm Resort - Create your account to access premium resort reservation system."
@@ -81,7 +81,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Bungee+Spice&display=swap"
       rel="stylesheet"
     />
 
@@ -101,7 +101,7 @@
       body {
         font-family: "Poppins", sans-serif;
         min-height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #f5c857;
         overflow-x: hidden;
       }
 
@@ -133,7 +133,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0);
         z-index: 1;
       }
 
@@ -246,8 +246,8 @@
       }
 
       .logo {
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         object-fit: cover;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -259,10 +259,20 @@
       }
 
       .system-name {
+        font-family: "Dancing Script", cursive;
         font-size: 2.2rem;
         font-weight: 700;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(
+          180deg,
+          #f8b500 0%,
+          #ff6f00 35%,
+          #e53935 65%,
+          #6a1b9a 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: none;
         margin-bottom: 5px;
       }
 
@@ -282,8 +292,8 @@
       }
 
       .form-container {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: none;
         padding: 40px;
         border-radius: 20px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -347,27 +357,36 @@
       }
 
       .form-group label {
-        font-weight: 600;
-        color: #2d3748;
-        font-size: 0.95rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        display: none;
       }
 
       .form-group label i {
-        color: #667eea;
-        width: 16px;
+        display: none;
+      }
+
+      .input-wrapper {
+        position: relative;
+        width: 100%;
+      }
+
+      .input-wrapper i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ff6f00;
+        font-size: 1rem;
+        pointer-events: none;
       }
 
       .form-input {
-        padding: 15px 18px;
+        padding: 15px 18px 15px 45px;
         border: 2px solid #e2e8f0;
         border-radius: 12px;
         font-size: 1rem;
         font-family: inherit;
         transition: all 0.3s ease;
-        background: white;
+        background: #ffffff !important;
         color: #2d3748;
         width: 100%;
         box-sizing: border-box;
@@ -376,8 +395,8 @@
 
       .form-input:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #ff6f00;
+        box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
         transform: translateY(-2px);
       }
 
@@ -395,6 +414,21 @@
         position: relative;
       }
 
+      .password-input-container > i.fa-lock {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ff6f00;
+        font-size: 1rem;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .password-input-container .form-input {
+        padding-left: 45px;
+      }
+
       .password-toggle {
         position: absolute;
         right: 15px;
@@ -410,11 +444,11 @@
       }
 
       .password-toggle:hover {
-        color: #667eea;
+        color: #ff6f00;
       }
 
       .password-toggle:focus {
-        outline: 2px solid #667eea;
+        outline: 2px solid #ff6f00;
         outline-offset: 2px;
       }
 
@@ -465,7 +499,13 @@
 
       /* Register Button */
       .register-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(
+          180deg,
+          #f8b500 0%,
+          #ff6f00 35%,
+          #e53935 65%,
+          #6a1b9a 100%
+        );
         color: white;
         border: none;
         padding: 18px 30px;
@@ -486,8 +526,14 @@
 
       .register-btn:hover {
         transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        box-shadow: 0 12px 35px rgba(248, 181, 0, 0.4);
+        background: linear-gradient(
+          180deg,
+          #e5a600 0%,
+          #e56300 35%,
+          #cc3030 65%,
+          #5c1785 100%
+        );
       }
 
       .register-btn:active {
@@ -515,14 +561,14 @@
       }
 
       .login-link a {
-        color: #667eea;
+        color: #ff6f00;
         text-decoration: none;
         font-weight: 600;
         transition: color 0.3s ease;
       }
 
       .login-link a:hover {
-        color: #5a67d8;
+        color: #e53935;
         text-decoration: underline;
       }
 
@@ -718,7 +764,7 @@
         }
 
         .form-input:focus {
-          box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
+          box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.3);
         }
 
         .register-btn {
@@ -726,7 +772,7 @@
         }
 
         .register-btn:focus {
-          outline: 3px solid #667eea;
+          outline: 3px solid #ff6f00;
           outline-offset: 2px;
         }
       }
@@ -755,8 +801,8 @@
       /* Dark mode support */
       @media (prefers-color-scheme: dark) {
         .form-container {
-          background: rgba(45, 55, 72, 0.95);
-          color: #f7fafc;
+          background: rgba(255, 255, 255, 0.15) !important;
+          color: #2d3748;
         }
 
         .form-header h2 {
@@ -772,9 +818,9 @@
         }
 
         .form-input {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.2);
-          color: #f7fafc;
+          background: #ffffff !important;
+          border-color: #e2e8f0;
+          color: #2d3748;
         }
 
         .form-input::placeholder {
@@ -782,8 +828,8 @@
         }
 
         .form-input:focus {
-          border-color: #667eea;
-          background: rgba(255, 255, 255, 0.15);
+          border-color: #ff6f00;
+          background: #ffffff !important;
         }
 
         .login-link p {
@@ -835,114 +881,112 @@
             <!-- Name Fields Row -->
             <div class="form-row">
               <div class="form-group">
-                <label for="lastName">
+                <label for="lastName"> Last Name * </label>
+                <div class="input-wrapper">
                   <i class="fas fa-user"></i>
-                  Last Name *
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  class="form-input"
-                  placeholder="Enter your last name"
-                  required
-                />
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    class="form-input"
+                    placeholder="Enter your last name"
+                    required
+                  />
+                </div>
                 <span id="lastNameError" class="error-message"></span>
               </div>
 
               <div class="form-group">
-                <label for="givenName">
+                <label for="givenName"> Given Name * </label>
+                <div class="input-wrapper">
                   <i class="fas fa-user"></i>
-                  Given Name *
-                </label>
-                <input
-                  type="text"
-                  id="givenName"
-                  name="givenName"
-                  class="form-input"
-                  placeholder="Enter your given name"
-                  required
-                />
+                  <input
+                    type="text"
+                    id="givenName"
+                    name="givenName"
+                    class="form-input"
+                    placeholder="Enter your given name"
+                    required
+                  />
+                </div>
                 <span id="givenNameError" class="error-message"></span>
               </div>
             </div>
 
             <!-- Middle Name -->
             <div class="form-group">
-              <label for="middleName">
+              <label for="middleName"> Middle Name * </label>
+              <div class="input-wrapper">
                 <i class="fas fa-user"></i>
-                Middle Name *
-              </label>
-              <input
-                type="text"
-                id="middleName"
-                name="middleName"
-                class="form-input"
-                placeholder="Enter your middle name"
-                required
-              />
+                <input
+                  type="text"
+                  id="middleName"
+                  name="middleName"
+                  class="form-input"
+                  placeholder="Enter your middle name"
+                  required
+                />
+              </div>
               <span id="middleNameError" class="error-message"></span>
             </div>
 
             <!-- Email Address -->
             <div class="form-group">
-              <label for="email">
+              <label for="email"> Email Address * </label>
+              <div class="input-wrapper">
                 <i class="fas fa-envelope"></i>
-                Email Address *
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                class="form-input"
-                placeholder="Enter your email address"
-                required
-              />
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-input"
+                  placeholder="Enter your email address"
+                  required
+                />
+              </div>
               <span id="emailError" class="error-message"></span>
             </div>
 
             <!-- Phone Number -->
             <div class="form-group">
-              <label for="phoneNumber">
+              <label for="phoneNumber"> Phone Number * </label>
+              <div class="input-wrapper">
                 <i class="fas fa-phone"></i>
-                Phone Number *
-              </label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                class="form-input"
-                placeholder="Enter your phone number"
-                required
-              />
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  class="form-input"
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
               <span id="phoneNumberError" class="error-message"></span>
             </div>
 
             <!-- Username -->
             <div class="form-group">
-              <label for="username">
+              <label for="username"> Username * </label>
+              <div class="input-wrapper">
                 <i class="fas fa-user-circle"></i>
-                Username *
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                class="form-input"
-                placeholder="Choose a username (min. 5 characters, no spaces)"
-                required
-              />
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  class="form-input"
+                  placeholder="Choose a username (min. 5 characters, no spaces)"
+                  required
+                />
+              </div>
               <span id="usernameError" class="error-message"></span>
             </div>
 
             <!-- Password Fields Row -->
             <div class="form-row">
               <div class="form-group">
-                <label for="password">
-                  <i class="fas fa-lock"></i>
-                  Password *
-                </label>
+                <label for="password"> Password * </label>
                 <div class="password-input-container">
+                  <i class="fas fa-lock"></i>
                   <input
                     type="password"
                     id="password"
@@ -963,11 +1007,9 @@
               </div>
 
               <div class="form-group">
-                <label for="confirmPassword">
-                  <i class="fas fa-lock"></i>
-                  Confirm Password *
-                </label>
+                <label for="confirmPassword"> Confirm Password * </label>
                 <div class="password-input-container">
+                  <i class="fas fa-lock"></i>
                   <input
                     type="password"
                     id="confirmPassword"
@@ -1405,7 +1447,7 @@
                   <div style="
                     width: 60px;
                     height: 60px;
-                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%);
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
@@ -1422,7 +1464,7 @@
                   <p style="color: #999; font-size: 0.85rem; margin-top: 12px; font-style: italic;">Click the button below to continue</p>
                 </div>
                 <button id="closeModalBtn" style="
-                  background: linear-gradient(135deg, #667eea, #764ba2);
+                  background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%);
                   color: #fff;
                   border: none;
                   padding: 13px 36px;

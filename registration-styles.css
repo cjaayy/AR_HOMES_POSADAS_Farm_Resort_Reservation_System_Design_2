@@ -8,7 +8,7 @@
 body {
   font-family: "Poppins", sans-serif;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f5c857;
   overflow-x: hidden;
 }
 
@@ -150,7 +150,7 @@ body {
 }
 
 .form-label i {
-  color: #667eea;
+  color: #ff6f00;
   width: 16px;
 }
 
@@ -170,8 +170,8 @@ body {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #ff6f00;
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
   transform: translateY(-2px);
 }
 
@@ -204,11 +204,11 @@ body {
 }
 
 .password-toggle:hover {
-  color: #667eea;
+  color: #ff6f00;
 }
 
 .password-toggle:focus {
-  outline: 2px solid #667eea;
+  outline: 2px solid #ff6f00;
   outline-offset: 2px;
 }
 
@@ -251,7 +251,13 @@ body {
 
 /* Register Button */
 .register-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    180deg,
+    #f8b500 0%,
+    #ff6f00 35%,
+    #e53935 65%,
+    #6a1b9a 100%
+  );
   color: white;
   border: none;
   padding: 18px 30px;
@@ -272,8 +278,14 @@ body {
 
 .register-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  box-shadow: 0 12px 35px rgba(248, 181, 0, 0.4);
+  background: linear-gradient(
+    180deg,
+    #e5a600 0%,
+    #e56300 35%,
+    #cc3030 65%,
+    #5c1785 100%
+  );
 }
 
 .register-btn:active {
@@ -301,14 +313,14 @@ body {
 }
 
 .login-link a {
-  color: #667eea;
+  color: #ff6f00;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .login-link a:hover {
-  color: #5a67d8;
+  color: #e53935;
   text-decoration: underline;
 }
 
@@ -497,7 +509,7 @@ body {
   }
 
   .form-input:focus {
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.3);
   }
 
   .register-btn {
@@ -505,7 +517,7 @@ body {
   }
 
   .register-btn:focus {
-    outline: 3px solid #667eea;
+    outline: 3px solid #ff6f00;
     outline-offset: 2px;
   }
 }
@@ -561,7 +573,7 @@ body {
   }
 
   .form-input:focus {
-    border-color: #667eea;
+    border-color: #ff6f00;
     background: rgba(255, 255, 255, 0.15);
   }
 
