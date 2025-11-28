@@ -81,7 +81,7 @@ body::before {
   flex-direction: column;
   flex: 1;
   padding: 1rem;
-  padding-top: 100px; /* Account for fixed header */
+  padding-top: 70px; /* Account for fixed header */
   gap: 1rem;
   width: 100%;
   margin: 0;
@@ -176,7 +176,7 @@ body::before {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 1rem 2rem;
+  padding: 0.5rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -208,26 +208,26 @@ body::before {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .logo img {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   object-fit: cover;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .resort-info h1 {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #11224e;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.1rem;
 }
 
 .resort-info p {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #000000;
   font-weight: 400;
 }
@@ -235,13 +235,13 @@ body::before {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .profile-info {
@@ -252,18 +252,18 @@ body::before {
   display: block;
   font-weight: 600;
   color: #333;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .user-role {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #000000;
 }
 
 .profile-avatar {
-  width: 45px;
-  height: 45px;
+  width: 38px;
+  height: 38px;
   background: #11224e;
   border-radius: 50%;
   display: flex;
@@ -276,7 +276,7 @@ body::before {
 .logout-btn {
   background: #e2852e;
   color: white;
-  border: none;
+  border: 2px solid #2c3e50;
   padding: 0.7rem 1.2rem;
   border-radius: 12px;
   cursor: pointer;
