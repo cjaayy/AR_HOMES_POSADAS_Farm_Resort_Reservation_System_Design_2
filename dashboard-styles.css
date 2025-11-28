@@ -2524,18 +2524,22 @@ body::before {
 
 .package-badge.premium {
   background: linear-gradient(135deg, #667eea, #764ba2);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
 }
 
 .package-badge.comfort {
-  background: #be3d2a;
+  background: linear-gradient(135deg, #be3d2a, #d4453e);
+  box-shadow: 0 4px 15px rgba(190, 61, 42, 0.4);
 }
 
 .package-badge.budget {
   background: linear-gradient(135deg, #ffc107, #fd7e14);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.5);
 }
 
 .package-badge.custom {
-  background: #a3485a;
+  background: linear-gradient(135deg, #a3485a, #c75572);
+  box-shadow: 0 4px 15px rgba(163, 72, 90, 0.4);
 }
 
 .package-content {
