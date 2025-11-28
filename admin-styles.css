@@ -2938,18 +2938,18 @@ canvas {
 /* ===== ENHANCED RESERVATIONS SECTION STYLES ===== */
 .stat-card-res:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
 }
 
 .filter-chip-enhanced:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
   border-color: #cbd5e1 !important;
 }
 
 .filter-chip-enhanced.active:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102,126,234,0.4) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
 }
 
 #adminFilterFrom:hover,
@@ -2957,13 +2957,13 @@ canvas {
 #adminFilterFrom:focus,
 #adminFilterTo:focus {
   border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 #adminSearchBox:hover,
 #adminSearchBox:focus {
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 @keyframes fadeIn {
@@ -3039,6 +3039,6 @@ canvas {
 #loyaltyFilter:hover,
 #loyaltyFilter:focus {
   border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   outline: none;
 }
