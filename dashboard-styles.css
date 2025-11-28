@@ -388,10 +388,17 @@ body::before {
   left: 100%;
 }
 
-.nav-btn:hover,
-.nav-btn.active {
+.nav-btn:hover {
   background: #ffe666;
   border-color: #ffe666;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(255, 238, 145, 0.4);
+  color: #333333;
+}
+
+.nav-btn.active {
+  background: #ffe666;
+  border-color: #b8860b;
   transform: translateY(-3px) scale(1.02);
   box-shadow: 0 12px 30px rgba(255, 238, 145, 0.4);
   color: #333333;
