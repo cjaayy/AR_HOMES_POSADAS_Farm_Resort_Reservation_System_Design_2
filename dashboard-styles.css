@@ -2464,7 +2464,7 @@ body::before {
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  border: 2px solid #FFC50F !important;
+  border: 2px solid #ffc50f !important;
   position: relative;
   height: fit-content;
 }
@@ -2485,7 +2485,7 @@ body::before {
 }
 
 .room-package-card.featured {
-  border-color: #FFC50F;
+  border-color: #ffc50f;
   box-shadow: 0 15px 35px rgba(255, 197, 15, 0.3);
 }
 
