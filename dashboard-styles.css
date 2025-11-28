@@ -2464,7 +2464,7 @@ body::before {
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  border: 2px solid transparent;
+  border: 2px solid #FFC50F !important;
   position: relative;
   height: fit-content;
 }
@@ -2485,8 +2485,8 @@ body::before {
 }
 
 .room-package-card.featured {
-  border-color: #667eea;
-  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+  border-color: #FFC50F;
+  box-shadow: 0 15px 35px rgba(255, 197, 15, 0.3);
 }
 
 /* Remove the top gradient line from featured cards */
