@@ -220,9 +220,15 @@ body::before {
 }
 
 .resort-info h1 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #11224e;
+  font-family: "Dancing Script", cursive;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.4);
+  paint-order: stroke fill;
   margin-bottom: 0.1rem;
 }
 
@@ -274,9 +280,9 @@ body::before {
 }
 
 .logout-btn {
-  background: #e2852e;
+  background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%);
   color: white;
-  border: 2px solid #2c3e50;
+  border: none;
   padding: 0.7rem 1.2rem;
   border-radius: 12px;
   cursor: pointer;
