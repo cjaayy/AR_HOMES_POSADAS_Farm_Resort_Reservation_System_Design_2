@@ -291,41 +291,24 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       border-radius: 50%;
     }
 
-    /* Loyalty Badges */
-    .loyalty-badge {
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #f1f5f9;
-      color: #475569;
-    }
-
-    .loyalty-badge:empty {
-      display: none;
-    }
-
     /* Action Buttons */
     .action-buttons {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       justify-content: center;
     }
 
     .btn-action {
-      width: 36px;
-      height: 36px;
+      width: 28px;
+      height: 28px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.2s ease;
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .btn-action:not([disabled]):hover {
@@ -545,20 +528,12 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-              <select id="loyaltyFilter" onchange="filterUsers()">
-                <option value="all">All Loyalty Levels</option>
-                <option value="Regular">Regular</option>
-                <option value="Silver">Silver</option>
-                <option value="Gold">Gold</option>
-                <option value="VIP">VIP</option>
-              </select>
             </div>
           </div>
 
           <div class="users-stats">
             <div class="stat-card"><i class="fas fa-users"></i><div class="stat-info"><h3 id="manageTotalUsersCount">0</h3><p>Total Users</p></div></div>
             <div class="stat-card"><i class="fas fa-user-check"></i><div class="stat-info"><h3 id="manageActiveUsersCount">0</h3><p>Active Users</p></div></div>
-            <div class="stat-card"><i class="fas fa-crown"></i><div class="stat-info"><h3 id="manageVipUsersCount">0</h3><p>VIP Members</p></div></div>
             <div class="stat-card"><i class="fas fa-user-plus"></i><div class="stat-info"><h3 id="manageNewUsersCount">0</h3><p>New This Month</p></div></div>
           </div>
 
@@ -568,18 +543,17 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
                 <tr>
                   <th style="padding:14px 10px; text-align:center; width:3%; font-size:13px;">#</th>
                   <th style="padding:14px 10px; text-align:left; width:12%; font-size:13px;"><i class="fas fa-user"></i> Full Name</th>
-                  <th style="padding:14px 10px; text-align:left; width:9%; font-size:13px;"><i class="fas fa-at"></i> Username</th>
-                  <th style="padding:14px 10px; text-align:left; width:15%; font-size:13px;"><i class="fas fa-envelope"></i> Email</th>
+                  <th style="padding:14px 10px; text-align:center; width:11%; font-size:13px;"><i class="fas fa-at"></i> Username</th>
+                  <th style="padding:14px 10px; text-align:center; width:15%; font-size:13px;"><i class="fas fa-envelope"></i> Email</th>
                   <th style="padding:14px 10px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-phone"></i> Phone</th>
                   <th style="padding:14px 8px; text-align:center; width:8%; font-size:13px;"><i class="fas fa-toggle-on"></i> Status</th>
-                  <th style="padding:14px 8px; text-align:center; width:8%; font-size:13px;"><i class="fas fa-award"></i> Loyalty</th>
-                  <th style="padding:14px 8px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-calendar-alt"></i> Member Since</th>
-                  <th style="padding:14px 8px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-clock"></i> Last Login</th>
-                  <th style="padding:14px 8px; text-align:center; width:15%; font-size:13px;"><i class="fas fa-cog"></i> Actions</th>
+                  <th style="padding:14px 8px; text-align:center; width:12%; font-size:13px;"><i class="fas fa-calendar-alt"></i> Member Since</th>
+                  <th style="padding:14px 8px; text-align:center; width:12%; font-size:13px;"><i class="fas fa-clock"></i> Last Login</th>
+                  <th style="padding:14px 8px; text-align:center; width:19%; font-size:13px;"><i class="fas fa-cog"></i> Actions</th>
                 </tr>
               </thead>
               <tbody id="usersTableBody">
-                <tr><td colspan="10" style="text-align:center; padding:3rem;"><i class="fas fa-spinner fa-spin" style="font-size:48px; color:#667eea;"></i><p style="margin-top:1rem; color:#64748b; font-size:16px; font-weight:600;">Loading users...</p></td></tr>
+                <tr><td colspan="9" style="text-align:center; padding:3rem;"><i class="fas fa-spinner fa-spin" style="font-size:48px; color:#667eea;"></i><p style="margin-top:1rem; color:#64748b; font-size:16px; font-weight:600;">Loading users...</p></td></tr>
               </tbody>
             </table>
           </div>
@@ -620,40 +594,26 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     function updateUserStatistics(){
       const totalUsers = allUsers.length;
       const activeUsers = allUsers.filter(u => u.is_active == 1).length;
-      const vipUsers = allUsers.filter(u => u.loyalty_level === 'VIP').length;
       const currentDate = new Date(); const currentMonth = currentDate.getMonth(); const currentYear = currentDate.getFullYear();
       const newUsers = allUsers.filter(user => {
         const d = new Date(user.created_at); return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       }).length;
       document.getElementById('manageTotalUsersCount').textContent = totalUsers;
       document.getElementById('manageActiveUsersCount').textContent = activeUsers;
-      document.getElementById('manageVipUsersCount').textContent = vipUsers;
       document.getElementById('manageNewUsersCount').textContent = newUsers;
     }
 
     function displayUsers(){
       const tbody = document.getElementById('usersTableBody');
       if (filteredUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:3rem;"><i class="fas fa-inbox" style="font-size:48px; margin-bottom:16px; opacity:0.5; color:#94a3b8;"></i><div style="font-size:16px; font-weight:600; color:#94a3b8;">No users found</div><div style="font-size:14px; margin-top:8px; color:#cbd5e1;">Try adjusting your filters</div></td></tr>`; return;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:3rem;"><i class="fas fa-inbox" style="font-size:48px; margin-bottom:16px; opacity:0.5; color:#94a3b8;"></i><div style="font-size:16px; font-weight:600; color:#94a3b8;">No users found</div><div style="font-size:14px; margin-top:8px; color:#cbd5e1;">Try adjusting your filters</div></td></tr>`; return;
       }
       const start = (currentPage-1)*usersPerPage; const end = start + usersPerPage; const pageUsers = filteredUsers.slice(start,end);
-      
-      const getLoyaltyIcon = (level) => {
-        const icons = {
-          'Regular': '<i class="fas fa-star"></i>',
-          'Silver': '<i class="fas fa-award"></i>',
-          'Gold': '<i class="fas fa-medal"></i>',
-          'VIP': '<i class="fas fa-crown"></i>'
-        };
-        return icons[level] || '<i class="fas fa-user"></i>';
-      };
       
       const rows = pageUsers.map((u, idx) => {
         const statusClass = u.is_active == 1 ? 'active' : 'inactive';
         const statusText = u.is_active == 1 ? 'Active' : 'Inactive';
         const statusDot = u.is_active == 1 ? '<i class="fas fa-circle" style="font-size:6px; color:#10b981;"></i>' : '<i class="fas fa-circle" style="font-size:6px; color:#ef4444;"></i>';
-        const loyalty = u.loyalty_level || 'Regular';
-        const loyaltyIcon = getLoyaltyIcon(loyalty);
         
         return `
           <tr data-user-id="${u.user_id}" style="animation:fadeIn 0.3s ease ${idx*0.05}s both; border-bottom:1px solid #f1f5f9;">
@@ -661,10 +621,10 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
             <td style="padding:14px 10px;">
               <div style="font-weight:600; color:#1e293b; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(u.full_name || '')}">${escapeHtml(u.full_name || '')}</div>
             </td>
-            <td style="padding:14px 10px;">
-              <div style="font-weight:500; color:#475569; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(u.username || '')}">${escapeHtml(u.username || '')}</div>
+            <td style="padding:14px 10px; text-align:center;">
+              <div style="font-weight:500; color:#475569; font-size:13px; white-space:nowrap;" title="${escapeHtml(u.username || '')}">${escapeHtml(u.username || '')}</div>
             </td>
-            <td style="padding:14px 10px;">
+            <td style="padding:14px 10px; text-align:center;">
               <div style="font-size:12px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(u.email || '')}">${escapeHtml(u.email || '')}</div>
             </td>
             <td style="padding:14px 10px;">
@@ -676,22 +636,17 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
               </span>
             </td>
             <td style="padding:14px 8px; text-align:center;">
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:5px 10px; background:${loyalty === 'VIP' ? 'linear-gradient(135deg,#f59e0b,#d97706)' : loyalty === 'Gold' ? 'linear-gradient(135deg,#eab308,#ca8a04)' : loyalty === 'Silver' ? 'linear-gradient(135deg,#94a3b8,#64748b)' : 'linear-gradient(135deg,#667eea,#764ba2)'}; color:white; border-radius:16px; font-size:11px; font-weight:600; white-space:nowrap;">
-                ${loyaltyIcon} ${loyalty}
-              </span>
-            </td>
-            <td style="padding:14px 8px;">
-              <div style="font-weight:500; color:#475569; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(u.member_since || '')}</div>
-            </td>
-            <td style="padding:14px 8px;">
-              <div style="font-size:12px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.last_login_formatted || ''}</div>
+              <div style="font-weight:500; color:#475569; font-size:12px; white-space:nowrap;">${escapeHtml(u.member_since || '')}</div>
             </td>
             <td style="padding:14px 8px; text-align:center;">
-              <div style="display:flex; gap:5px; justify-content:center; flex-wrap:nowrap;">
-                <button onclick="viewUser(${u.user_id})" style="width:34px; height:34px; border:none; background:#f1f5f9; color:#667eea; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
-                <button disabled style="width:34px; height:34px; border:none; background:#e2e8f0; color:#94a3b8; border-radius:8px; cursor:not-allowed; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; opacity:0.5;" title="Edit (Admin Only)"><i class="fas fa-edit"></i></button>
-                <button disabled style="width:34px; height:34px; border:none; background:#e2e8f0; color:#94a3b8; border-radius:8px; cursor:not-allowed; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; opacity:0.5;" title="Toggle Status (Admin Only)"><i class="fas fa-power-off"></i></button>
-                <button disabled style="width:34px; height:34px; border:none; background:#e2e8f0; color:#94a3b8; border-radius:8px; cursor:not-allowed; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; opacity:0.5;" title="Delete (Admin Only)"><i class="fas fa-trash"></i></button>
+              <div style="font-size:12px; color:#64748b; white-space:nowrap;">${u.last_login_formatted || ''}</div>
+            </td>
+            <td style="padding:14px 12px; text-align:center; overflow:visible;">
+              <div style="display:flex; gap:6px; justify-content:center; flex-wrap:nowrap;">
+                <button onclick="viewUser(${u.user_id})" style="width:30px; height:30px; border:none; background:#f1f5f9; color:#667eea; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
+                <button disabled style="width:30px; height:30px; border:none; background:#e2e8f0; color:#94a3b8; border-radius:6px; cursor:not-allowed; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; opacity:0.5;" title="Edit (Admin Only)"><i class="fas fa-edit"></i></button>
+                <button disabled style="width:30px; height:30px; border:none; background:#e2e8f0; color:#94a3b8; border-radius:6px; cursor:not-allowed; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; opacity:0.5;" title="Toggle Status (Admin Only)"><i class="fas fa-power-off"></i></button>
+                <button disabled style="width:30px; height:30px; border:none; background:#e2e8f0; color:#94a3b8; border-radius:6px; cursor:not-allowed; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; opacity:0.5;" title="Delete (Admin Only)"><i class="fas fa-trash"></i></button>
               </div>
             </td>
           </tr>
@@ -706,12 +661,10 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     function filterUsers(){
       const q = (document.getElementById('searchUsers').value||'').toLowerCase();
       const status = document.getElementById('statusFilter').value;
-      const loyalty = document.getElementById('loyaltyFilter').value;
       filteredUsers = allUsers.filter(u => {
         const matchesSearch = (u.full_name||'').toLowerCase().includes(q) || (u.username||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q) || (u.phone_formatted||'').includes(q);
         const matchesStatus = status === 'all' || (status === 'active' && u.is_active==1) || (status === 'inactive' && u.is_active==0);
-        const matchesLoyalty = loyalty === 'all' || (u.loyalty_level === loyalty);
-        return matchesSearch && matchesStatus && matchesLoyalty;
+        return matchesSearch && matchesStatus;
       }); currentPage = 1; displayUsers();
     }
 
@@ -729,16 +682,6 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     function viewUser(userId){ 
       const u = allUsers.find(x=>x.user_id===userId); 
       if(!u) return; 
-      
-      const getLoyaltyIcon = (level) => {
-        const icons = {
-          'VIP': '<i class="fas fa-crown" style="color:#f59e0b;"></i>',
-          'Gold': '<i class="fas fa-medal" style="color:#fbbf24;"></i>',
-          'Silver': '<i class="fas fa-award" style="color:#94a3b8;"></i>',
-          'Regular': '<i class="fas fa-star" style="color:#64748b;"></i>'
-        };
-        return icons[level] || icons['Regular'];
-      };
       
       const content = `
       <div style="padding:24px;">
@@ -762,27 +705,20 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
             </div>
           </div>
           <div style="padding:20px; background:#f8fafc; border-radius:12px;">
-            <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Loyalty Level</div>
+            <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Phone Number</div>
             <div style="color:#1e293b; font-weight:600; display:flex; align-items:center; gap:8px;">
-              ${getLoyaltyIcon(u.loyalty_level)}
-              ${escapeHtml(u.loyalty_level || 'Regular')}
+              <i class="fas fa-phone" style="color:#667eea;"></i>
+              ${escapeHtml(u.phone_formatted || 'Not provided')}
             </div>
           </div>
         </div>
         
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+        <div style="display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:20px;">
           <div style="padding:20px; background:#f8fafc; border-radius:12px;">
             <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Email Address</div>
             <div style="color:#1e293b; font-weight:600; display:flex; align-items:center; gap:8px; word-break:break-all;">
               <i class="fas fa-envelope" style="color:#667eea;"></i>
               ${escapeHtml(u.email || 'N/A')}
-            </div>
-          </div>
-          <div style="padding:20px; background:#f8fafc; border-radius:12px;">
-            <div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Phone Number</div>
-            <div style="color:#1e293b; font-weight:600; display:flex; align-items:center; gap:8px;">
-              <i class="fas fa-phone" style="color:#667eea;"></i>
-              ${escapeHtml(u.phone_formatted || 'Not provided')}
             </div>
           </div>
         </div>

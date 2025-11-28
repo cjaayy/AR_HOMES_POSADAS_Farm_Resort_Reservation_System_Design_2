@@ -35,12 +35,6 @@ try {
     $stmt->execute();
     $activeUsers = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-    // Get VIP users count
-    $vipUsersQuery = "SELECT COUNT(*) as total FROM users WHERE loyalty_level = 'VIP'";
-    $stmt = $conn->prepare($vipUsersQuery);
-    $stmt->execute();
-    $vipUsers = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
     // Get new users this month
     $newUsersQuery = "SELECT COUNT(*) as total FROM users 
                       WHERE MONTH(created_at) = MONTH(CURRENT_DATE()) 
@@ -138,7 +132,6 @@ try {
             'total_users' => $totalUsers,
             'active_users' => $activeUsers,
             'inactive_users' => $totalUsers - $activeUsers,
-            'vip_users' => $vipUsers,
             'new_users_this_month' => $newUsers,
             'new_users_today' => $todayUsers,
             'new_users_this_week' => $weekUsers,

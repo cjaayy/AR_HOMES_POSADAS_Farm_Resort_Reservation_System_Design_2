@@ -241,18 +241,18 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     }
 
     .guest-action-btn {
-      padding: 8px 16px;
+      padding: 6px 12px;
       background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 13px;
+      border-radius: 6px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
 
     .guest-action-btn:hover {

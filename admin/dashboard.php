@@ -344,9 +344,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       <main class="main-content">
         <!-- Dashboard Section -->
         <section id="dashboard" class="content-section active">
-          <div class="section-header" style="background:linear-gradient(135deg,#667eea,#764ba2); padding:24px; border-radius:12px; margin-bottom:24px; box-shadow:0 4px 12px rgba(102,126,234,0.25);">
-            <h2 style="color:white; font-size:28px; font-weight:700; margin:0 0 8px 0;">Dashboard Overview</h2>
-            <p style="color:rgba(255,255,255,0.95); margin:0; font-size:15px;">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Dashboard Overview</h2>
+            <p style="color:#666; margin:0; font-size:16px;">
               Welcome back, <?php echo htmlspecialchars($adminFullName); ?>! Here's what's happening at the resort
               today.
             </p>
@@ -384,23 +384,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <div class="stat-change">
                   <i class="fas fa-info-circle"></i>
                   <span id="activePercentage">0%</span> of total
-                </div>
-              </div>
-            </div>
-
-            <!-- VIP Members Card -->
-            <div class="stat-card warning">
-              <div class="stat-icon">
-                <i class="fas fa-crown"></i>
-              </div>
-              <div class="stat-content">
-                <div class="stat-value" id="vipUsersCount">
-                  <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <div class="stat-label">VIP Members</div>
-                <div class="stat-change">
-                  <i class="fas fa-star"></i>
-                  Premium members
                 </div>
               </div>
             </div>
@@ -503,17 +486,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               <div class="loading-activities">
                 <i class="fas fa-spinner fa-spin"></i>
                 <p>Loading recent activities...</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Loyalty Breakdown Section -->
-          <div class="loyalty-breakdown-section">
-            <h3><i class="fas fa-chart-pie"></i> User Loyalty Levels</h3>
-            <div class="loyalty-stats" id="loyaltyBreakdown">
-              <div class="loading-loyalty">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Loading loyalty statistics...</p>
               </div>
             </div>
           </div>
@@ -1274,15 +1246,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 </div>
               </div>
             </div>
-            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #f59e0b; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
-              <div style="display:flex; align-items:center; gap:16px;">
-                <div style="width:56px; height:56px; background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-crown"></i></div>
-                <div>
-                  <div style="font-size:28px; font-weight:700; color:#1e293b;" id="manageVipUsersCount"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:#f59e0b;"></i></div>
-                  <div style="font-size:14px; color:#64748b; font-weight:500;">VIP Members</div>
-                </div>
-              </div>
-            </div>
             <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #3b82f6; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
               <div style="display:flex; align-items:center; gap:16px;">
                 <div style="width:56px; height:56px; background:linear-gradient(135deg, #3b82f6, #2563eb); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-user-plus"></i></div>
@@ -1306,13 +1269,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-              <select id="loyaltyFilter" onchange="filterUsers()" style="padding:14px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; font-weight:500; color:#475569; background:white; cursor:pointer; transition:all 0.3s ease; min-width:160px;">
-                <option value="all">All Loyalty Levels</option>
-                <option value="Regular">Regular</option>
-                <option value="Silver">Silver</option>
-                <option value="Gold">Gold</option>
-                <option value="VIP">VIP</option>
-              </select>
             </div>
           </div>
 
@@ -1323,20 +1279,19 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <thead style="background:linear-gradient(135deg, #667eea, #764ba2); color:white;">
                   <tr>
                     <th style="padding:14px 10px; text-align:center; width:3%; font-size:13px;">#</th>
-                    <th style="padding:14px 10px; text-align:left; width:12%; font-size:13px;"><i class="fas fa-user"></i> Full Name</th>
-                    <th style="padding:14px 10px; text-align:left; width:9%; font-size:13px;"><i class="fas fa-at"></i> Username</th>
-                    <th style="padding:14px 10px; text-align:left; width:15%; font-size:13px;"><i class="fas fa-envelope"></i> Email</th>
-                    <th style="padding:14px 10px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-phone"></i> Phone</th>
+                    <th style="padding:14px 10px; text-align:left; width:14%; font-size:13px;"><i class="fas fa-user"></i> Full Name</th>
+                    <th style="padding:14px 10px; text-align:center; width:11%; font-size:13px;"><i class="fas fa-at"></i> Username</th>
+                    <th style="padding:14px 10px; text-align:center; width:15%; font-size:13px;"><i class="fas fa-envelope"></i> Email</th>
+                    <th style="padding:14px 10px; text-align:left; width:11%; font-size:13px;"><i class="fas fa-phone"></i> Phone</th>
                     <th style="padding:14px 8px; text-align:center; width:8%; font-size:13px;"><i class="fas fa-toggle-on"></i> Status</th>
-                    <th style="padding:14px 8px; text-align:center; width:8%; font-size:13px;"><i class="fas fa-award"></i> Loyalty</th>
-                    <th style="padding:14px 8px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-calendar-alt"></i> Member Since</th>
-                    <th style="padding:14px 8px; text-align:left; width:10%; font-size:13px;"><i class="fas fa-clock"></i> Last Login</th>
-                    <th style="padding:14px 8px; text-align:center; width:15%; font-size:13px;"><i class="fas fa-cog"></i> Actions</th>
+                    <th style="padding:14px 8px; text-align:center; width:12%; font-size:13px;"><i class="fas fa-calendar-alt"></i> Member Since</th>
+                    <th style="padding:14px 8px; text-align:center; width:12%; font-size:13px;"><i class="fas fa-clock"></i> Last Login</th>
+                    <th style="padding:14px 16px 14px 8px; text-align:center; width:14%; font-size:13px;"><i class="fas fa-cog"></i> Actions</th>
                   </tr>
                 </thead>
                 <tbody id="usersTableBody">
                   <tr>
-                    <td colspan="10" style="text-align: center; padding: 3rem;">
+                    <td colspan="9" style="text-align: center; padding: 3rem;">
                       <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #667eea;"></i>
                       <p style="margin-top: 1rem; color: #64748b; font-size:16px; font-weight:600;">Loading users...</p>
                     </td>
@@ -1918,7 +1873,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             // Update stat cards with animation
             updateStatCard('totalUsersCount', stats.total_users);
             updateStatCard('activeUsersCount', stats.active_users);
-            updateStatCard('vipUsersCount', stats.vip_users);
             updateStatCard('newUsersToday', stats.new_users_today);
             updateStatCard('totalReservationsCount', stats.total_reservations);
             updateStatCard('pendingReservationsCount', stats.pending_reservations);
@@ -1937,9 +1891,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             
             // Update recent activities
             updateRecentActivities(data.recent_activities);
-            
-            // Update loyalty breakdown
-            updateLoyaltyBreakdown(data.loyalty_breakdown);
             
             // Update timestamp
             const lastUpdated = new Date(data.timestamp);
@@ -2006,52 +1957,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             container.innerHTML = activitiesHTML;
         }
         
-        function updateLoyaltyBreakdown(loyaltyData) {
-            const container = document.getElementById('loyaltyBreakdown');
-            
-            if (!loyaltyData || loyaltyData.length === 0) {
-                container.innerHTML = `
-                    <div class="no-data">
-                        <i class="fas fa-chart-pie"></i>
-                        <p>No loyalty data available</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Define colors for each loyalty level
-            const loyaltyColors = {
-                'Regular': '#6c757d',
-                'Silver': '#c0c0c0',
-                'Gold': '#ffd700',
-                'VIP': '#8b00ff'
-            };
-            
-            const loyaltyIcons = {
-                'Regular': 'fa-user',
-                'Silver': 'fa-medal',
-                'Gold': 'fa-trophy',
-                'VIP': 'fa-crown'
-            };
-            
-            const loyaltyHTML = loyaltyData.map(item => `
-                <div class="loyalty-item" style="border-left: 4px solid ${loyaltyColors[item.loyalty_level] || '#667eea'}">
-                    <div class="loyalty-icon" style="color: ${loyaltyColors[item.loyalty_level] || '#667eea'}">
-                        <i class="fas ${loyaltyIcons[item.loyalty_level] || 'fa-star'}"></i>
-                    </div>
-                    <div class="loyalty-info">
-                        <h4>${item.loyalty_level}</h4>
-                        <div class="loyalty-count">${item.count} ${item.count === 1 ? 'member' : 'members'}</div>
-                    </div>
-                </div>
-            `).join('');
-            
-            container.innerHTML = loyaltyHTML;
-        }
-        
         function showErrorState() {
             // Show error message in stat cards
-            const statCards = ['totalUsersCount', 'activeUsersCount', 'vipUsersCount', 'newUsersToday',
+            const statCards = ['totalUsersCount', 'activeUsersCount', 'newUsersToday',
                                'totalReservationsCount', 'pendingReservationsCount', 
                                'confirmedReservationsCount', 'completedReservationsCount'];
             

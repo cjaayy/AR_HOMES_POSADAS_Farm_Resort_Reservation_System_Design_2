@@ -2,7 +2,9 @@
 
 // Get DOM elements
 // Support both admin (`#sidebar`) and staff (`#staff-sidebar`) markup
-const sidebar = document.getElementById("sidebar") || document.getElementById("staff-sidebar");
+const sidebar =
+  document.getElementById("sidebar") ||
+  document.getElementById("staff-sidebar");
 const navLinks = document.querySelectorAll(".nav-link");
 const contentSections = document.querySelectorAll(".content-section");
 
@@ -13,21 +15,24 @@ document.addEventListener("DOMContentLoaded", function () {
   // Staff pages use a different layout and rely on server-side PHP to
   // mark the active nav item and content; running the SPA initializer
   // there caused all content sections to be hidden on staff pages.
-  if (document.getElementById('dashboard')) {
+  if (document.getElementById("dashboard")) {
     // Check if there's a saved section in localStorage
-    const savedSection = localStorage.getItem('adminActiveSection');
-    const targetSection = savedSection && document.getElementById(savedSection) ? savedSection : 'dashboard';
-    
+    const savedSection = localStorage.getItem("adminActiveSection");
+    const targetSection =
+      savedSection && document.getElementById(savedSection)
+        ? savedSection
+        : "dashboard";
+
     // Show the saved section or dashboard by default (admin dashboard layout)
     showSection(targetSection, true); // Pass true to skip saving to localStorage on initial load
   } else {
     // If this is a non-admin/staff page, ensure at least one content
     // section remains visible. Many staff pages already render a
     // <section class="content-section active"> server-side.
-    const existingActive = document.querySelector('.content-section.active');
+    const existingActive = document.querySelector(".content-section.active");
     if (!existingActive) {
-      const first = document.querySelector('.content-section');
-      if (first) first.classList.add('active');
+      const first = document.querySelector(".content-section");
+      if (first) first.classList.add("active");
     }
   }
 });
@@ -48,7 +53,7 @@ function showSection(sectionId, skipSave = false) {
 
   // Save current section to localStorage (unless it's the initial page load)
   if (!skipSave) {
-    localStorage.setItem('adminActiveSection', sectionId);
+    localStorage.setItem("adminActiveSection", sectionId);
   }
 
   // Update active navigation item
@@ -208,8 +213,7 @@ window.hideLogoutModal = function hideLogoutModal() {
     if (overlay) {
       overlay.onclick = null;
     }
-
-    }, 300);
+  }, 300);
 };
 
 // Confirm logout action
@@ -939,7 +943,7 @@ document.addEventListener("DOMContentLoaded", function () {
     "#logoutBtn",
     "[data-logout]",
     ".logout-btn",
-    'a[href*="logout.php"]'
+    'a[href*="logout.php"]',
   ];
 
   let logoutButton = null;
@@ -964,7 +968,7 @@ document.addEventListener("DOMContentLoaded", function () {
       e.stopPropagation();
 
       if (window.__debugAdminScript) {
-        }
+      }
 
       // Ensure button is not disabled
       if (this.disabled) {
@@ -984,12 +988,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (window.__debugAdminScript) {
-      console.log("✅ Logout button event listener attached (selector: " + usedSelector + ")");
+      console.log(
+        "✅ Logout button event listener attached (selector: " +
+          usedSelector +
+          ")"
+      );
     }
   } else {
     // Avoid noisy console warnings in production; only notify when debugging is enabled
     if (window.__debugAdminScript) {
-      console.warn("⚠️ Logout button not found (tried selectors):", logoutSelectors.join(", "));
+      console.warn(
+        "⚠️ Logout button not found (tried selectors):",
+        logoutSelectors.join(", ")
+      );
     }
   }
 });
@@ -1027,7 +1038,7 @@ async function loadUsers() {
   // Show loading state
   tableBody.innerHTML = `
     <tr>
-      <td colspan="10" style="text-align: center; padding: 2rem;">
+      <td colspan="9" style="text-align: center; padding: 2rem;">
         <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
         <p style="margin-top: 1rem; color: #666;">Loading users...</p>
       </td>
@@ -1059,7 +1070,6 @@ async function loadUsers() {
 function updateUserStatistics() {
   const totalUsers = allUsers.length;
   const activeUsers = allUsers.filter((u) => u.is_active == 1).length;
-  const vipUsers = allUsers.filter((u) => u.loyalty_level === "VIP").length;
 
   // Count new users this month
   const currentDate = new Date();
@@ -1076,10 +1086,8 @@ function updateUserStatistics() {
   // Update UI in Manage Users section with animation
   animateCountUp("manageTotalUsersCount", totalUsers);
   animateCountUp("manageActiveUsersCount", activeUsers);
-  animateCountUp("manageVipUsersCount", vipUsers);
   animateCountUp("manageNewUsersCount", newUsers);
-
-  }
+}
 
 // Animate counter from current value to target value
 function animateCountUp(elementId, targetValue) {
@@ -1114,7 +1122,7 @@ function displayUsers() {
   if (filteredUsers.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="10" style="text-align: center; padding: 2rem;">
+        <td colspan="9" style="text-align: center; padding: 2rem;">
           <i class="fas fa-users" style="font-size: 2rem; color: #999;"></i>
           <p style="margin-top: 1rem; color: #666;">No users found</p>
         </td>
@@ -1131,49 +1139,90 @@ function displayUsers() {
   // Generate table rows
   const rows = usersToDisplay
     .map((user, idx) => {
-      const statusClass = user.is_active == 1 ? "active" : "inactive";
       const statusText = user.is_active == 1 ? "Active" : "Inactive";
-      const loyaltyClass = user.loyalty_level.toLowerCase();
-      const loyaltyIcon = user.loyalty_level === 'Regular' ? '' : getLoyaltyIcon(user.loyalty_level);
-      const statusDot = user.is_active == 1 ? '<i class="fas fa-circle" style="font-size:6px; color:#10b981;"></i>' : '';
+      const statusDot =
+        user.is_active == 1
+          ? '<i class="fas fa-circle" style="font-size:6px; color:#10b981;"></i>'
+          : "";
 
       return `
-      <tr data-user-id="${user.user_id}" style="animation:fadeIn 0.3s ease ${idx*0.05}s both; border-bottom:1px solid #f1f5f9;">
-        <td style="padding:14px 12px; text-align:center; font-weight:700; color:#64748b; font-size:13px;">${user.user_id}</td>
+      <tr data-user-id="${user.user_id}" style="animation:fadeIn 0.3s ease ${
+        idx * 0.05
+      }s both; border-bottom:1px solid #f1f5f9;">
+        <td style="padding:14px 12px; text-align:center; font-weight:700; color:#64748b; font-size:13px;">${
+          user.user_id
+        }</td>
         <td style="padding:14px 12px;">
-          <div style="font-weight:600; color:#1e293b; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(user.full_name)}">${escapeHtml(user.full_name)}</div>
+          <div style="font-weight:600; color:#1e293b; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(
+            user.full_name
+          )}">${escapeHtml(user.full_name)}</div>
+        </td>
+        <td style="padding:14px 12px; text-align:center;">
+          <div style="font-weight:500; color:#475569; font-size:13px; white-space:nowrap;" title="${escapeHtml(
+            user.username
+          )}">${escapeHtml(user.username)}</div>
+        </td>
+        <td style="padding:14px 12px; text-align:center;">
+          <div style="font-size:12px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(
+            user.email
+          )}">${escapeHtml(user.email)}</div>
         </td>
         <td style="padding:14px 12px;">
-          <div style="font-weight:500; color:#475569; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(user.username)}">${escapeHtml(user.username)}</div>
-        </td>
-        <td style="padding:14px 12px;">
-          <div style="font-size:12px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(user.email)}">${escapeHtml(user.email)}</div>
-        </td>
-        <td style="padding:14px 12px;">
-          <div style="font-weight:500; color:#475569; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(user.phone_formatted)}</div>
+          <div style="font-weight:500; color:#475569; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(
+            user.phone_formatted
+          )}</div>
         </td>
         <td style="padding:14px 8px; text-align:center;">
-          <span style="display:inline-flex; align-items:center; gap:${statusDot ? '4px' : '0'}; padding:5px 10px; background:${user.is_active == 1 ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#ef4444,#dc2626)'}; color:white; border-radius:16px; font-size:11px; font-weight:600; white-space:nowrap;">
-            ${statusDot}${statusDot ? ' ' : ''}${statusText}
+          <span style="display:inline-flex; align-items:center; gap:${
+            statusDot ? "4px" : "0"
+          }; padding:5px 10px; background:${
+        user.is_active == 1
+          ? "linear-gradient(135deg,#10b981,#059669)"
+          : "linear-gradient(135deg,#ef4444,#dc2626)"
+      }; color:white; border-radius:16px; font-size:11px; font-weight:600; white-space:nowrap;">
+            ${statusDot}${statusDot ? " " : ""}${statusText}
           </span>
         </td>
-        <td style="padding:14px 8px; text-align:center;">
-          <span style="display:inline-flex; align-items:center; gap:${loyaltyIcon ? '4px' : '0'}; padding:5px 10px; background:${user.loyalty_level === 'VIP' ? 'linear-gradient(135deg,#f59e0b,#d97706)' : user.loyalty_level === 'Gold' ? 'linear-gradient(135deg,#eab308,#ca8a04)' : user.loyalty_level === 'Silver' ? 'linear-gradient(135deg,#94a3b8,#64748b)' : 'linear-gradient(135deg,#667eea,#764ba2)'}; color:white; border-radius:16px; font-size:11px; font-weight:600; white-space:nowrap;">
-            ${loyaltyIcon}${loyaltyIcon ? ' ' : ''}${user.loyalty_level}
-          </span>
+        <td style="padding:14px 10px; text-align:center;">
+          <div style="font-weight:500; color:#475569; font-size:12px; white-space:nowrap;">${
+            user.member_since
+          }</div>
         </td>
-        <td style="padding:14px 10px;">
-          <div style="font-weight:500; color:#475569; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${user.member_since}</div>
+        <td style="padding:14px 10px; text-align:center;">
+          <div style="font-size:12px; color:#64748b; white-space:nowrap;">${
+            user.last_login_formatted
+          }</div>
         </td>
-        <td style="padding:14px 10px;">
-          <div style="font-size:12px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${user.last_login_formatted}</div>
-        </td>
-        <td style="padding:14px 8px; text-align:center;">
-          <div style="display:flex; gap:5px; justify-content:center; flex-wrap:nowrap;">
-            <button onclick="viewUser(${user.user_id})" style="width:34px; height:34px; border:none; background:#f1f5f9; color:#667eea; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
-            <button onclick="editUser(${user.user_id})" style="width:34px; height:34px; border:none; background:#f1f5f9; color:#3b82f6; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="Edit User" onmouseover="this.style.background='linear-gradient(135deg,#3b82f6,#2563eb)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#3b82f6';"><i class="fas fa-edit"></i></button>
-            <button onclick="toggleUserStatus(${user.user_id}, ${user.is_active})" style="width:34px; height:34px; border:none; background:${user.is_active == 1 ? '#f1f5f9' : 'linear-gradient(135deg,#ef4444,#dc2626)'}; color:${user.is_active == 1 ? '#10b981' : 'white'}; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="${user.is_active == 1 ? 'Deactivate User' : 'Activate User'}" onmouseover="this.style.background='linear-gradient(135deg,${user.is_active == 1 ? '#10b981,#059669' : '#10b981,#059669'})'; this.style.color='white';" onmouseout="this.style.background='${user.is_active == 1 ? '#f1f5f9' : 'linear-gradient(135deg,#ef4444,#dc2626)'}'; this.style.color='${user.is_active == 1 ? '#10b981' : 'white'}';"><i class="fas fa-power-off"></i></button>
-            <button onclick="deleteUser(${user.user_id})" style="width:34px; height:34px; border:none; background:#f1f5f9; color:#ef4444; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px;" title="Delete User" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-trash"></i></button>
+        <td style="padding:14px 16px 14px 8px; text-align:center;">
+          <div style="display:flex; gap:4px; justify-content:center; flex-wrap:nowrap;">
+            <button onclick="viewUser(${
+              user.user_id
+            })" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#667eea; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
+            <button onclick="editUser(${
+              user.user_id
+            })" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#3b82f6; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="Edit User" onmouseover="this.style.background='linear-gradient(135deg,#3b82f6,#2563eb)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#3b82f6';"><i class="fas fa-edit"></i></button>
+            <button onclick="toggleUserStatus(${user.user_id}, ${
+        user.is_active
+      })" style="width:28px; height:28px; border:none; background:${
+        user.is_active == 1
+          ? "#f1f5f9"
+          : "linear-gradient(135deg,#ef4444,#dc2626)"
+      }; color:${
+        user.is_active == 1 ? "#10b981" : "white"
+      }; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="${
+        user.is_active == 1 ? "Deactivate User" : "Activate User"
+      }" onmouseover="this.style.background='linear-gradient(135deg,${
+        user.is_active == 1 ? "#10b981,#059669" : "#10b981,#059669"
+      })'; this.style.color='white';" onmouseout="this.style.background='${
+        user.is_active == 1
+          ? "#f1f5f9"
+          : "linear-gradient(135deg,#ef4444,#dc2626)"
+      }'; this.style.color='${
+        user.is_active == 1 ? "#10b981" : "white"
+      }';"><i class="fas fa-power-off"></i></button>
+            <button onclick="deleteUser(${
+              user.user_id
+            })" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#ef4444; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="Delete User" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-trash"></i></button>
           </div>
         </td>
       </tr>
@@ -1187,22 +1236,10 @@ function displayUsers() {
   updatePagination();
 }
 
-// Get loyalty level icon
-function getLoyaltyIcon(level) {
-  const icons = {
-    Regular: '<i class="fas fa-user"></i>',
-    Silver: '<i class="fas fa-medal"></i>',
-    Gold: '<i class="fas fa-star"></i>',
-    VIP: '<i class="fas fa-crown"></i>',
-  };
-  return icons[level] || '<i class="fas fa-user"></i>';
-}
-
 // Filter users based on search and filters
 function filterUsers() {
   const searchTerm = document.getElementById("searchUsers").value.toLowerCase();
   const statusFilter = document.getElementById("statusFilter").value;
-  const loyaltyFilter = document.getElementById("loyaltyFilter").value;
 
   filteredUsers = allUsers.filter((user) => {
     // Search filter
@@ -1218,11 +1255,7 @@ function filterUsers() {
       (statusFilter === "active" && user.is_active == 1) ||
       (statusFilter === "inactive" && user.is_active == 0);
 
-    // Loyalty filter
-    const matchesLoyalty =
-      loyaltyFilter === "all" || user.loyalty_level === loyaltyFilter;
-
-    return matchesSearch && matchesStatus && matchesLoyalty;
+    return matchesSearch && matchesStatus;
   });
 
   // Reset to first page
@@ -1335,12 +1368,6 @@ function viewUser(userId) {
           <span>${escapeHtml(user.phone_number)}</span>
         </div>
         <div>
-          <strong>Loyalty Level:</strong><br>
-          <span class="loyalty-badge ${user.loyalty_level.toLowerCase()}">
-            ${getLoyaltyIcon(user.loyalty_level)} ${user.loyalty_level}
-          </span>
-        </div>
-        <div>
           <strong>Member Since:</strong><br>
           <span>${user.member_since}</span>
         </div>
@@ -1397,23 +1424,6 @@ function editUser(userId) {
           )}" 
                  style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
         </div>
-        <div>
-          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Loyalty Level:</label>
-          <select id="edit_loyalty" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
-            <option value="Regular" ${
-              user.loyalty_level === "Regular" ? "selected" : ""
-            }>Regular</option>
-            <option value="Silver" ${
-              user.loyalty_level === "Silver" ? "selected" : ""
-            }>Silver</option>
-            <option value="Gold" ${
-              user.loyalty_level === "Gold" ? "selected" : ""
-            }>Gold</option>
-            <option value="VIP" ${
-              user.loyalty_level === "VIP" ? "selected" : ""
-            }>VIP</option>
-          </select>
-        </div>
         <div style="display: flex; gap: 1rem; margin-top: 1rem;">
           <button type="button" onclick="closeUserModal()" 
                   style="flex: 1; padding: 0.75rem; background: #e0e0e0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
@@ -1442,7 +1452,6 @@ function editUser(userId) {
         username: document.getElementById("edit_username").value,
         email: document.getElementById("edit_email").value,
         phone_number: document.getElementById("edit_phone").value,
-        loyalty_level: document.getElementById("edit_loyalty").value,
       };
 
       try {
@@ -1667,4 +1676,3 @@ window.editUser = editUser;
 window.toggleUserStatus = toggleUserStatus;
 window.deleteUser = deleteUser;
 window.closeUserModal = closeUserModal;
-

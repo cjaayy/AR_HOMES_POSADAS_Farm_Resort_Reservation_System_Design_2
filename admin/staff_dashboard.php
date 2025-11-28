@@ -24,213 +24,194 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      /* Enhanced Staff Dashboard Styles */
-      .staff-quick-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-        gap: 20px; 
-        margin-bottom: 30px;
+      /* Staff Dashboard Styles - Matching User Dashboard Design */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
       }
-      
-      .staff-card { 
-        padding: 24px; 
-        border-radius: 16px; 
-        background: #fff; 
-        box-shadow: 0 8px 24px rgba(15,23,42,0.08); 
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .staff-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-      }
-      
-      .stat-centered {
+
+      .stats-card {
+        background: #eeeeee;
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 1rem;
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 0.75rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
       }
-      
-      .stat-icon {
-        width: 56px;
-        height: 56px;
+
+      .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .stats-icon {
+        width: 50px;
+        height: 50px;
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
-        color: #fff;
+        font-size: 1.25rem;
+        color: white;
+        background: #11224e;
+      }
+
+      .stats-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0;
+        line-height: 1;
+      }
+
+      .stats-content p {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 500;
+        margin-top: 0.1rem;
+        line-height: 1.2;
+      }
+
+      /* Recent Activity Section */
+      .recent-activity {
+        background: #eeeeee;
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 2rem;
+      }
+
+      .recent-activity h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1.5rem;
+      }
+
+      .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: transparent;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+      }
+
+      .activity-item:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: #11224e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.9rem;
         flex-shrink: 0;
       }
-      
-      .stat-value {
-        font-size: 32px;
-        font-weight: 700;
-        color: #1e293b;
-        line-height: 1;
-        margin-top: 8px;
+
+      .activity-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.3rem;
       }
-      
-      .staff-card h3 { 
-        margin: 0 0 4px; 
-        font-size: 14px; 
-        color: #64748b;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+
+      .activity-content p {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.3rem;
       }
-      
+
+      .activity-date {
+        font-size: 0.8rem;
+        color: #999;
+      }
+
+      /* Dashboard Grid for Charts/Notifications */
       .dashboard-grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 24px;
         margin-top: 24px;
       }
-      
+
       .chart-card {
-        background: #fff;
+        background: #eeeeee;
         padding: 24px;
         border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
       }
-      
+
       .chart-card h3 {
         font-size: 18px;
         font-weight: 600;
-        color: #1e293b;
+        color: #333;
         margin-bottom: 20px;
       }
-      
+
       .notification-item {
         padding: 16px;
         border-radius: 12px;
-        background: #f8fafc;
+        background: rgba(255, 255, 255, 0.5);
         margin-bottom: 12px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #11224e;
         cursor: pointer;
       }
-      
+
       .notification-item:hover {
-        background: #f1f5f9;
+        background: rgba(255, 255, 255, 0.8);
       }
-      
+
       .notification-header {
         display: flex;
         justify-content: space-between;
         align-items: start;
         margin-bottom: 8px;
       }
-      
+
       .notification-title {
         font-weight: 600;
-        color: #1e293b;
+        color: #333;
         font-size: 14px;
       }
-      
+
       .notification-time {
         font-size: 12px;
-        color: #94a3b8;
+        color: #999;
       }
-      
+
       .notification-body {
         font-size: 13px;
-        color: #64748b;
+        color: #666;
         line-height: 1.5;
       }
-      
-      .quick-action-card {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: #fff;
-        padding: 20px;
-        border-radius: 12px;
-        text-align: center;
-        cursor: pointer;
-        text-decoration: none;
-        display: block;
-      }
-      
-      .quick-action-card:hover {
-        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-      }
-      
-      .quick-action-icon {
-        font-size: 32px;
-        margin-bottom: 12px;
-      }
-      
-      .quick-action-title {
-        font-weight: 600;
-        font-size: 16px;
-      }
-      
-      .activity-feed {
-        max-height: 400px;
-        overflow-y: auto;
-      }
-      
-      .activity-item {
-        display: flex;
-        gap: 12px;
-        padding: 12px 0;
-        border-bottom: 1px solid #f1f5f9;
-      }
-      
-      .activity-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        flex-shrink: 0;
-      }
-      
-      .activity-content {
-        flex: 1;
-      }
-      
-      .activity-title {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 14px;
-        margin-bottom: 4px;
-      }
-      
-      .activity-desc {
-        font-size: 13px;
-        color: #64748b;
-      }
-      
-      .activity-time {
-        font-size: 12px;
-        color: #94a3b8;
-        margin-top: 4px;
-      }
-      
+
       .notifications { margin-top: 12px; }
-      
-      .stat-trend {
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        margin-top: 4px;
-      }
-      
-      .stat-trend.up {
-        color: #10b981;
-      }
-      
-      .stat-trend.down {
-        color: #ef4444;
+
+      @media (max-width: 1024px) {
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
     <script>
@@ -260,78 +241,87 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       <section class="content-section active">
         <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:30px;">
           <div>
-            <h2 style="font-size:32px; font-weight:700; color:#1e293b; margin-bottom:8px;">Welcome back, <?php echo htmlspecialchars($staffName); ?>! 👋</h2>
-            <p style="margin-top:6px; color:#64748b; font-size:16px;">Here's what's happening with your resort today</p>
+            <h2 style="font-size:32px; font-weight:700; color:#333; margin-bottom:8px;">Welcome back, <?php echo htmlspecialchars($staffName); ?>! 👋</h2>
+            <p style="margin-top:6px; color:#666; font-size:16px;">Here's what's happening with your resort today</p>
           </div>
           <div style="display:flex; gap:12px;">
-            <button onclick="refreshDashboard()" class="btn-primary" style="display:flex; align-items:center; gap:8px; background:linear-gradient(135deg, #667eea, #764ba2); border:none;">
+            <button onclick="refreshDashboard()" class="btn-primary" style="display:flex; align-items:center; gap:8px; background:#11224e; border:none; color:white; padding:10px 20px; border-radius:8px; cursor:pointer;">
               <i class="fas fa-sync-alt"></i> Refresh
             </button>
           </div>
         </div>
 
-        <!-- Enhanced Stats Cards -->
-        <div class="staff-quick-grid">
-          <div class="staff-card">
-            <div class="stat-centered">
-              <div class="stat-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);">
-                <i class="fas fa-calendar-day"></i>
-              </div>
-              <div style="flex:1;">
-                <h3>Today's Reservations</h3>
-                <div id="statTodayReservations" class="stat-value">—</div>
-              </div>
+        <!-- Stats Cards - User Dashboard Style -->
+        <div class="stats-grid">
+          <div class="stats-card">
+            <div class="stats-icon">
+              <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stats-content">
+              <h3 id="statTodayReservations">—</h3>
+              <p>Today's Reservations</p>
             </div>
           </div>
 
-          <div class="staff-card">
-            <div class="stat-centered">
-              <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
-                <i class="fas fa-user-check"></i>
-              </div>
-              <div style="flex:1;">
-                <h3>Check-ins Today</h3>
-                <div id="statArrivals" class="stat-value">—</div>
-              </div>
+          <div class="stats-card">
+            <div class="stats-icon">
+              <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stats-content">
+              <h3 id="statArrivals">—</h3>
+              <p>Check-ins Today</p>
             </div>
           </div>
 
-          <div class="staff-card">
-            <div class="stat-centered">
-              <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
-                <i class="fas fa-door-open"></i>
-              </div>
-              <div style="flex:1;">
-                <h3>Check-outs Today</h3>
-                <div id="statCheckouts" class="stat-value">—</div>
-              </div>
+          <div class="stats-card">
+            <div class="stats-icon">
+              <i class="fas fa-door-open"></i>
+            </div>
+            <div class="stats-content">
+              <h3 id="statCheckouts">—</h3>
+              <p>Check-outs Today</p>
             </div>
           </div>
 
-          <div class="staff-card">
-            <div class="stat-centered">
-              <div class="stat-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
-                <i class="fas fa-clock"></i>
-              </div>
-              <div style="flex:1;">
-                <h3>Pending Requests</h3>
-                <div id="statPending" class="stat-value">—</div>
-              </div>
+          <div class="stats-card">
+            <div class="stats-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stats-content">
+              <h3 id="statPending">—</h3>
+              <p>Pending Requests</p>
             </div>
           </div>
         </div>
 
         <div id="statsError" style="display:none; margin-top:8px;"></div>
 
+        <!-- Recent Activity Section - User Dashboard Style -->
+        <div class="recent-activity">
+          <h3>Recent Activity</h3>
+          <div class="activity-list" id="activityFeed">
+            <div class="activity-item">
+              <div class="activity-icon">
+                <i class="fas fa-spinner fa-spin"></i>
+              </div>
+              <div class="activity-content">
+                <h4>Loading activities...</h4>
+                <p>Please wait while we fetch recent activity</p>
+                <span class="activity-date">Just now</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Main Dashboard Grid -->
         <div class="dashboard-grid">
-          <!-- Left Column: Charts and Activity -->
+          <!-- Left Column: Charts -->
           <div>
             <!-- Reservations Chart -->
             <div class="chart-card">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3 style="margin:0;">Reservation Trends</h3>
-                <select id="chartPeriod" onchange="updateChart()" style="padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0;">
+                <select id="chartPeriod" onchange="updateChart()" style="padding:8px 12px; border-radius:8px; border:1px solid #ddd; background:#fff;">
                   <option value="week">This Week</option>
                   <option value="month">This Month</option>
                   <option value="year">This Year</option>
@@ -339,30 +329,15 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
               </div>
               <canvas id="reservationsChart" height="100"></canvas>
             </div>
-
-            <!-- Recent Activity -->
-            <div class="chart-card" style="margin-top:24px;">
-              <h3>Recent Activity</h3>
-              <div class="activity-feed" id="activityFeed">
-                <div class="activity-item">
-                  <div class="activity-icon" style="background:#dbeafe; color:#3b82f6;">
-                    <i class="fas fa-spinner fa-spin"></i>
-                  </div>
-                  <div class="activity-content">
-                    <div class="activity-title">Loading activities...</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <!-- Right Column: Notifications and Quick Actions -->
+          <!-- Right Column: Notifications and Quick Stats -->
           <div>
             <!-- Notifications -->
             <div class="chart-card">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h3 style="margin:0;">Notifications <span id="notifBadge" style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:12px; font-size:12px; margin-left:8px;">0</span></h3>
-                <button onclick="markAllRead()" style="background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; cursor:pointer; font-size:13px; padding:6px 12px; border-radius:8px; font-weight:600;">Mark all read</button>
+                <h3 style="margin:0;">Notifications <span id="notifBadge" style="background:#11224e; color:#fff; padding:2px 8px; border-radius:12px; font-size:12px; margin-left:8px;">0</span></h3>
+                <button onclick="markAllRead()" style="background:#11224e; border:none; color:#fff; cursor:pointer; font-size:13px; padding:6px 12px; border-radius:8px; font-weight:600;">Mark all read</button>
               </div>
               <div id="notifications" class="notifications">Loading...</div>
             </div>
@@ -371,20 +346,20 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
             <div class="chart-card" style="margin-top:24px;">
               <h3>Today's Summary</h3>
               <div style="margin-top:16px;">
-                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #f1f5f9;">
-                  <span style="color:#64748b;">Occupied Rooms</span>
+                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #ddd;">
+                  <span style="color:#666;">Occupied Rooms</span>
                   <strong id="occupiedRooms">—</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #f1f5f9;">
-                  <span style="color:#64748b;">Available Rooms</span>
+                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #ddd;">
+                  <span style="color:#666;">Available Rooms</span>
                   <strong id="availableRooms">—</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #f1f5f9;">
-                  <span style="color:#64748b;">Occupancy Rate</span>
+                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #ddd;">
+                  <span style="color:#666;">Occupancy Rate</span>
                   <strong id="occupancyRate">—</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between; padding:12px 0;">
-                  <span style="color:#64748b;">Active Guests</span>
+                  <span style="color:#666;">Active Guests</span>
                   <strong id="activeGuests">—</strong>
                 </div>
               </div>
