@@ -223,7 +223,13 @@ body::before {
   font-family: "Dancing Script", cursive;
   font-size: 2.5rem;
   font-weight: 700;
-  background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%);
+  background: linear-gradient(
+    180deg,
+    #f8b500 0%,
+    #ff6f00 35%,
+    #e53935 65%,
+    #6a1b9a 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -280,7 +286,13 @@ body::before {
 }
 
 .logout-btn {
-  background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%);
+  background: linear-gradient(
+    180deg,
+    #f8b500 0%,
+    #ff6f00 35%,
+    #e53935 65%,
+    #6a1b9a 100%
+  );
   color: white;
   border: none;
   padding: 0.7rem 1.2rem;
