@@ -2527,7 +2527,7 @@ body::before {
 }
 
 .package-badge.comfort {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: #be3d2a;
 }
 
 .package-badge.budget {
@@ -2535,7 +2535,7 @@ body::before {
 }
 
 .package-badge.custom {
-  background: linear-gradient(135deg, #6f42c1, #e83e8c);
+  background: #a3485a;
 }
 
 .package-content {
