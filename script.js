@@ -16,12 +16,14 @@ function initSlideshow() {
   // Start automatic slideshow
   startSlideshow();
 
-  // Add click handlers to indicators
-  indicators.forEach((indicator, index) => {
-    indicator.addEventListener("click", () => {
-      goToSlide(index);
+  // Add click handlers to indicators (if they exist)
+  if (indicators.length > 0) {
+    indicators.forEach((indicator, index) => {
+      indicator.addEventListener("click", () => {
+        goToSlide(index);
+      });
     });
-  });
+  }
 }
 
 // Start automatic slideshow
@@ -40,7 +42,9 @@ function stopSlideshow() {
 function goToSlide(index) {
   // Remove active class from current slide and indicator
   slides[currentSlide].classList.remove("active");
-  indicators[currentSlide].classList.remove("active");
+  if (indicators.length > 0) {
+    indicators[currentSlide].classList.remove("active");
+  }
 
   // Add flash transition effect
   slides[currentSlide].classList.add("flash-transition");
@@ -55,7 +59,9 @@ function goToSlide(index) {
 
   // Add active class to new slide and indicator
   slides[currentSlide].classList.add("active");
-  indicators[currentSlide].classList.add("active");
+  if (indicators.length > 0) {
+    indicators[currentSlide].classList.add("active");
+  }
 
   // Restart slideshow timer
   stopSlideshow();
