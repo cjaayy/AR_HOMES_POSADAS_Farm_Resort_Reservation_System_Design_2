@@ -2629,7 +2629,7 @@ body::before {
 .view-image-btn {
   margin-top: 0.5rem;
   padding: 0.4rem 0.8rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #bca71b;
   color: white;
   border: none;
   border-radius: 6px;
@@ -2642,18 +2642,18 @@ body::before {
   justify-content: center;
   gap: 0.3rem;
   width: 100%;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 4px rgba(188, 167, 27, 0.3);
 }
 
 .view-image-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 4px 8px rgba(188, 167, 27, 0.5);
+  background: #d4bb1f;
 }
 
 .view-image-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 4px rgba(188, 167, 27, 0.3);
 }
 
 .view-image-btn i {
@@ -5673,7 +5673,7 @@ body::before {
   align-items: center;
   padding: 20px;
   border-bottom: 2px solid #f0f0f0;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #bca71b;
   border-radius: 16px 16px 0 0;
 }
 
@@ -5684,6 +5684,14 @@ body::before {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+#inclusionsModalTitle {
+  color: #ffffff !important;
+}
+
+#inclusionsModalContent h4 {
+  color: #000000 !important;
 }
 
 .modal-close {
