@@ -226,7 +226,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
     <link rel="stylesheet" href="../admin-styles.css" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Bungee+Spice&display=swap"
       rel="stylesheet"
     />
     <link
@@ -270,7 +270,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           </div>
           <div class="resort-info">
             <h1>AR Homes Posadas Farm Resort</h1>
-            <p>Administration Dashboard</p>
           </div>
         </div>
         <div class="header-right">

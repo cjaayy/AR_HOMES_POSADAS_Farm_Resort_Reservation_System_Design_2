@@ -17,7 +17,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
 <header class="admin-header">
   <div class="header-left">
     <div class="logo"><img src="../logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png" alt="Logo"></div>
-    <div class="resort-info"><h1>AR Homes Posadas Farm Resort</h1><p>Staff</p></div>
+    <div class="resort-info"><h1>AR Homes Posadas Farm Resort</h1></div>
   </div>
   <div class="header-right">
     <div class="admin-profile">
@@ -31,17 +31,17 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
 
 <!-- Logout Confirmation Modal -->
 <div id="logoutModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
-  <div style="background: #fff; padding: 32px 28px; border-radius: 16px; max-width: 420px; width: 90vw; box-shadow: 0 8px 32px rgba(0,0,0,0.2); text-align: center; animation: modalSlideIn 0.3s ease-out;" onclick="event.stopPropagation()">
-    <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #fff; font-size: 32px;">
+  <div style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 32px 28px; border-radius: 20px; max-width: 420px; width: 90vw; box-shadow: 0 12px 40px rgba(0,0,0,0.2); text-align: center; animation: modalSlideIn 0.3s ease-out; border: 1px solid rgba(255,255,255,0.3);" onclick="event.stopPropagation()">
+    <div style="width: 64px; height: 64px; background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #fff; font-size: 32px;">
       <i class="fas fa-sign-out-alt"></i>
     </div>
     <h3 style="color: #1e293b; margin-bottom: 12px; font-size: 24px; font-weight: 700;">Confirm Logout</h3>
     <p style="color: #64748b; font-size: 15px; margin-bottom: 28px; line-height: 1.6;">Are you sure you want to logout from your staff account?</p>
     <div style="display: flex; gap: 12px; justify-content: center;">
-      <button onclick="closeLogoutModal()" style="flex: 1; padding: 12px 24px; border: 2px solid #e2e8f0; background: #fff; color: #64748b; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 15px; transition: all 0.2s;">
+      <button onclick="closeLogoutModal()" style="flex: 1; padding: 12px 24px; border: 2px solid #e2e8f0; background: #fff; color: #64748b; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 15px; transition: all 0.2s;">
         Cancel
       </button>
-      <button onclick="confirmLogout()" style="flex: 1; padding: 12px 24px; border: none; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 15px; transition: all 0.2s;">
+      <button onclick="confirmLogout()" style="flex: 1; padding: 12px 24px; border: none; background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%); color: #fff; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 15px; transition: all 0.2s;">
         Logout
       </button>
     </div>
