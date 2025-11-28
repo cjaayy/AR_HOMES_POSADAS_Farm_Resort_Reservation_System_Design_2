@@ -2707,7 +2707,7 @@ body::before {
 
 .select-package-btn {
   width: 100%;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #11224e;
   color: white;
   border: none;
   padding: 1rem 1.5rem;
@@ -2720,7 +2720,8 @@ body::before {
 
 .select-package-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 25px rgba(17, 34, 78, 0.5);
+  background: #1a3470;
 }
 
 /* Custom Room Selection */
@@ -5064,7 +5065,7 @@ body::before {
 .select-package-btn {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #11224e;
   color: white;
   border: none;
   border-radius: 10px;
@@ -5076,9 +5077,9 @@ body::before {
 }
 
 .select-package-btn:hover {
-  background: linear-gradient(135deg, #764ba2, #667eea);
+  background: #1a3470;
   transform: scale(1.02);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 25px rgba(17, 34, 78, 0.5);
 }
 
 .selected-summary {
