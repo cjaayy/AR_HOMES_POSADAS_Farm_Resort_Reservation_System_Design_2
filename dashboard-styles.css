@@ -2623,7 +2623,7 @@ body::before {
 
 .room-features {
   font-size: 0.8rem;
-  color: #8FABD4;
+  color: #8fabd4;
   font-weight: 500;
   min-height: 1.2em;
 }
@@ -2664,7 +2664,7 @@ body::before {
 
 .total-capacity {
   background: rgba(143, 171, 212, 0.1);
-  color: #8FABD4;
+  color: #8fabd4;
   padding: 0.8rem;
   border-radius: 10px;
   text-align: center;
