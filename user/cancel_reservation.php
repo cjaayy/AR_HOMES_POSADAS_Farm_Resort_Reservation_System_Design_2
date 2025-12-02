@@ -51,19 +51,20 @@ try {
         throw new Exception('Reservation not found');
     }
     
-    // Check if reservation can be cancelled
-    if (!in_array($reservation['status'], ['pending_payment', 'pending_confirmation', 'confirmed'])) {
-        throw new Exception('This reservation cannot be cancelled');
+    // Check if reservation can be cancelled (only before admin confirmation)
+    if (!in_array($reservation['status'], ['pending_payment', 'pending_confirmation'])) {
+        throw new Exception('Cannot cancel a confirmed reservation. Once confirmed by admin/staff, cancellation is not allowed.');
     }
     
     if ($reservation['checked_in'] == 1) {
         throw new Exception('Cannot cancel a reservation after check-in');
     }
     
-    // Cancel reservation: no refund policy
+    // Cancel reservation: downpayment non-refundable
     $cancellation_notes = "User cancelled reservation. Reason: " . $reason;
+    
     if ($reservation['downpayment_paid'] == 1) {
-        $cancellation_notes .= " | No refund for downpayment (₱" . $reservation['downpayment_amount'] . ")";
+        $cancellation_notes .= " | Downpayment non-refundable: ₱" . number_format($reservation['downpayment_amount'], 2);
     }
     
     $stmt = $conn->prepare("
@@ -71,18 +72,26 @@ try {
         SET status = 'cancelled',
             date_locked = 0,
             locked_until = NULL,
+            cancelled_at = NOW(),
+            cancelled_by = :user_id,
+            cancellation_reason = :reason,
             admin_notes = CONCAT(COALESCE(admin_notes, ''), '\n[', NOW(), '] ', :notes),
             updated_at = NOW()
         WHERE reservation_id = :id
     ");
     
-    $stmt->bindParam(':notes', $cancellation_notes, PDO::PARAM_STR);
-    $stmt->bindParam(':id', $reservation_id);
-    $stmt->execute();
+    $stmt->execute([
+        ':user_id' => $user_id,
+        ':reason' => $reason,
+        ':notes' => $cancellation_notes,
+        ':id' => $reservation_id
+    ]);
     
+    // Build response message
     $message = 'Reservation cancelled successfully.';
+    
     if ($reservation['downpayment_paid'] == 1) {
-        $message .= ' Please note: Downpayment is non-refundable as per booking policy.';
+        $message .= ' Downpayment (₱' . number_format($reservation['downpayment_amount'], 2) . ') is non-refundable as per booking policy.';
     }
     
     echo json_encode([

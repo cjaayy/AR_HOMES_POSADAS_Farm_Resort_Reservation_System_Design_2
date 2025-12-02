@@ -66,6 +66,7 @@ try {
     }
     
     $reservation_id = $data['reservation_id'];
+    $payment_type = $data['payment_type'] ?? 'downpayment'; // 'downpayment' or 'full_payment'
     $user_id = $_SESSION['user_id'];
     
     // Get reservation details
@@ -80,13 +81,29 @@ try {
         throw new Exception('Reservation not found');
     }
     
-    // Check if already paid
-    if ($reservation['status'] !== 'pending_payment') {
-        throw new Exception('This reservation has already been processed');
+    // Determine amount and validate based on payment type
+    if ($payment_type === 'full_payment') {
+        // For full payment, check if downpayment is verified
+        if ($reservation['status'] !== 'confirmed' || $reservation['downpayment_verified'] != 1) {
+            throw new Exception('Downpayment must be verified before paying remaining balance');
+        }
+        if ($reservation['full_payment_paid'] == 1) {
+            throw new Exception('Full payment has already been made');
+        }
+        
+        // Calculate remaining balance
+        $amount = $reservation['total_amount'] - $reservation['downpayment_amount'];
+        $payment_description = 'AR Homes Resort - Reservation #' . $reservation_id . ' - Remaining Balance';
+    } else {
+        // For downpayment
+        if ($reservation['status'] !== 'pending_payment') {
+            throw new Exception('This reservation has already been processed');
+        }
+        
+        $amount = $reservation['downpayment_amount'];
+        $payment_description = 'AR Homes Resort - Reservation #' . $reservation_id . ' - Downpayment';
     }
     
-    // Determine amount to pay (downpayment for initial payment)
-    $amount = $reservation['downpayment_amount'];
     $amount_in_centavos = (int)($amount * 100); // PayMongo requires amount in centavos
     
     // Build success URL with reservation ID
@@ -97,8 +114,8 @@ try {
         'data' => [
             'attributes' => [
                 'amount' => $amount_in_centavos,
-                'description' => 'AR Homes Resort - Reservation #' . $reservation_id . ' - Downpayment',
-                'remarks' => 'Reservation ID: ' . $reservation_id
+                'description' => $payment_description,
+                'remarks' => 'Reservation ID: ' . $reservation_id . ' - Payment Type: ' . $payment_type
             ]
         ]
     ];
@@ -136,17 +153,29 @@ try {
     // Log payment link details
     error_log('Payment Link ID: ' . $link_id);
     error_log('Reservation ID: ' . $reservation_id);
-    error_log('Downpayment Amount: ₱' . number_format($amount, 2) . ' (' . $amount_in_centavos . ' centavos)');
+    error_log('Payment Type: ' . $payment_type);
+    error_log('Amount: ₱' . number_format($amount, 2) . ' (' . $amount_in_centavos . ' centavos)');
     error_log('Checkout URL: ' . $checkout_url);
     
     // Update reservation to track payment attempt
-    $stmt = $pdo->prepare("
-        UPDATE reservations 
-        SET paymongo_source_id = ?,
-            paymongo_payment_type = 'gcash'
-        WHERE reservation_id = ?
-    ");
-    $stmt->execute([$link_id, $reservation_id]);
+    if ($payment_type === 'full_payment') {
+        // Store the payment link for full payment tracking
+        $stmt = $pdo->prepare("
+            UPDATE reservations 
+            SET paymongo_full_payment_link_id = ?
+            WHERE reservation_id = ?
+        ");
+        $stmt->execute([$link_id, $reservation_id]);
+    } else {
+        // Store for downpayment
+        $stmt = $pdo->prepare("
+            UPDATE reservations 
+            SET paymongo_source_id = ?,
+                paymongo_payment_type = 'gcash'
+            WHERE reservation_id = ?
+        ");
+        $stmt->execute([$link_id, $reservation_id]);
+    }
     
     // Return the dynamic checkout URL with correct amount
     echo json_encode([

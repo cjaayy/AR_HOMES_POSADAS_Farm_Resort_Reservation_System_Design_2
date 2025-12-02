@@ -288,12 +288,12 @@ function handleLinkPaymentPaid($pdo, $event) {
     
     error_log('Payment method detected: ' . $payment_method . ' for link: ' . $link_id);
     
-    // Find reservation with this link ID (stored in paymongo_source_id)
+    // Find reservation with this link ID - check both downpayment and full payment link fields
     $stmt = $pdo->prepare("
         SELECT * FROM reservations 
-        WHERE paymongo_source_id = ?
+        WHERE paymongo_source_id = ? OR paymongo_full_payment_link_id = ?
     ");
-    $stmt->execute([$link_id]);
+    $stmt->execute([$link_id, $link_id]);
     $reservation = $stmt->fetch();
     
     if (!$reservation) {
@@ -301,27 +301,49 @@ function handleLinkPaymentPaid($pdo, $event) {
         return;
     }
     
-    // Update reservation with payment success details - pending admin confirmation
-    $stmt = $pdo->prepare("
-        UPDATE reservations 
-        SET paymongo_payment_id = ?,
-            status = 'pending_confirmation',
-            payment_method = ?,
-            downpayment_paid = 1,
-            downpayment_reference = ?,
-            downpayment_paid_at = NOW(),
-            downpayment_verified = 0,
-            updated_at = NOW()
-        WHERE reservation_id = ?
-    ");
-    $stmt->execute([
-        $payment_id,
-        $payment_method,
-        $payment_id,
-        $reservation['reservation_id']
-    ]);
+    // Determine if this is a downpayment or full payment
+    $is_full_payment = ($reservation['paymongo_full_payment_link_id'] === $link_id);
     
-    error_log('Payment link paid - Reservation #' . $reservation['reservation_id'] . ' updated to pending_confirmation with method: ' . $payment_method);
+    if ($is_full_payment) {
+        // Update reservation with full payment success details
+        $stmt = $pdo->prepare("
+            UPDATE reservations 
+            SET full_payment_paid = 1,
+                full_payment_reference = ?,
+                full_payment_paid_at = NOW(),
+                full_payment_verified = 0,
+                updated_at = NOW()
+            WHERE reservation_id = ?
+        ");
+        $stmt->execute([
+            $payment_id,
+            $reservation['reservation_id']
+        ]);
+        
+        error_log('Full payment link paid - Reservation #' . $reservation['reservation_id'] . ' full payment marked as paid');
+    } else {
+        // Update reservation with downpayment success details - pending admin confirmation
+        $stmt = $pdo->prepare("
+            UPDATE reservations 
+            SET paymongo_payment_id = ?,
+                status = 'pending_confirmation',
+                payment_method = ?,
+                downpayment_paid = 1,
+                downpayment_reference = ?,
+                downpayment_paid_at = NOW(),
+                downpayment_verified = 0,
+                updated_at = NOW()
+            WHERE reservation_id = ?
+        ");
+        $stmt->execute([
+            $payment_id,
+            $payment_method,
+            $payment_id,
+            $reservation['reservation_id']
+        ]);
+        
+        error_log('Downpayment link paid - Reservation #' . $reservation['reservation_id'] . ' updated to pending_confirmation with method: ' . $payment_method);
+    }
 }
 
 /**

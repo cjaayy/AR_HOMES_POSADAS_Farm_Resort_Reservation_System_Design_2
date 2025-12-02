@@ -73,7 +73,21 @@ function renderBookings(bookings) {
       return `
         <div class="booking-card" data-status="${booking.status}">
           ${
-            booking.status === "confirmed" && booking.downpayment_verified == 1
+            booking.status === "confirmed" &&
+            booking.downpayment_verified == 1 &&
+            booking.full_payment_verified == 1
+              ? `
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-radius: 12px 12px 0 0; font-weight: 600;">
+            <i class="fas fa-check-double" style="font-size: 1.2em;"></i>
+            <span>Fully Paid & Verified ${
+              booking.payment_method
+                ? "via " + formatPaymentMethod(booking.payment_method)
+                : ""
+            }</span>
+          </div>
+          `
+              : booking.status === "confirmed" &&
+                booking.downpayment_verified == 1
               ? `
           <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-radius: 12px 12px 0 0; font-weight: 600;">
             <i class="fas fa-check-circle" style="font-size: 1.2em;"></i>
@@ -165,8 +179,9 @@ function renderBookings(bookings) {
 
   // Attach event listeners to payment buttons after rendering
   setTimeout(() => {
+    // Downpayment buttons
     const paymentButtons = grid.querySelectorAll(".payment-button");
-    console.log("Found payment buttons:", paymentButtons.length);
+    console.log("Found downpayment payment buttons:", paymentButtons.length);
     paymentButtons.forEach((btn) => {
       const reservationId = btn.getAttribute("data-reservation-id");
       console.log(
@@ -176,8 +191,28 @@ function renderBookings(bookings) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        console.log("Payment button clicked!", reservationId);
+        console.log("Downpayment payment button clicked!", reservationId);
         payWithPayMongo(reservationId, this);
+      });
+    });
+
+    // Full payment buttons
+    const fullPaymentButtons = grid.querySelectorAll(".payment-button-full");
+    console.log("Found full payment buttons:", fullPaymentButtons.length);
+    fullPaymentButtons.forEach((btn) => {
+      const reservationId = btn.getAttribute("data-reservation-id");
+      const amount = btn.getAttribute("data-amount");
+      console.log(
+        "Attaching listener to full payment button for reservation:",
+        reservationId,
+        "Amount:",
+        amount
+      );
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Full payment button clicked!", reservationId);
+        payFullBalanceWithPayMongo(reservationId, amount, this);
       });
     });
   }, 100);
@@ -187,6 +222,11 @@ function renderBookings(bookings) {
  * Render payment status indicators
  */
 function renderPaymentStatus(booking) {
+  // Don't show payment status for cancelled bookings
+  if (booking.status === "cancelled") {
+    return "";
+  }
+
   let html = '<div class="payment-status-section">';
 
   // Downpayment status
@@ -217,7 +257,7 @@ function renderPaymentStatus(booking) {
           : downClass === "pending"
           ? "fa-clock"
           : "fa-times-circle"
-      }}"></i>
+      }"></i>
       <div>
         <strong>Downpayment - ₱${downpaymentAmount}</strong>
         <span>${downStatus}${
@@ -239,6 +279,14 @@ function renderPaymentStatus(booking) {
         ? "pending"
         : "unpaid";
 
+    const remainingBalance = booking.total_amount - booking.downpayment_amount;
+    const remainingBalanceFormatted =
+      parseFloat(remainingBalance).toLocaleString();
+
+    const fullPaidAt = booking.full_payment_paid_at
+      ? ` on ${new Date(booking.full_payment_paid_at).toLocaleDateString()}`
+      : "";
+
     html += `
       <div class="payment-status-item ${fullClass}">
         <i class="fas ${
@@ -249,8 +297,10 @@ function renderPaymentStatus(booking) {
             : "fa-times-circle"
         }"></i>
         <div>
-          <strong>Full Payment</strong>
-          <span>${fullStatus}</span>
+          <strong>Remaining Balance - ₱${remainingBalanceFormatted}</strong>
+          <span>${fullStatus}${
+      fullClass === "verified" || fullClass === "pending" ? fullPaidAt : ""
+    }</span>
         </div>
       </div>
     `;
@@ -269,6 +319,25 @@ function renderBookingActions(booking) {
   console.log("payment_method:", booking.payment_method);
 
   let html = '<div class="booking-actions">';
+
+  // Show cancellation notice for cancelled bookings
+  if (booking.status === "cancelled" && booking.downpayment_paid == 1) {
+    html += `
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 8px; margin: 10px 0;">
+        <div style="display: flex; align-items: start; gap: 10px;">
+          <i class="fas fa-info-circle" style="color: #d97706; font-size: 1.2em; margin-top: 2px;"></i>
+          <div>
+            <strong style="color: #92400e; display: block; margin-bottom: 4px;">Cancelled Reservation</strong>
+            <p style="margin: 0; color: #78350f; font-size: 0.9em;">Downpayment of ₱${parseFloat(
+              booking.downpayment_amount
+            ).toLocaleString()} is non-refundable as per booking policy.</p>
+          </div>
+        </div>
+      </div>
+    `;
+    html += "</div>";
+    return html;
+  }
 
   // Upload downpayment
   if (booking.can_upload_downpayment) {
@@ -316,16 +385,33 @@ function renderBookingActions(booking) {
     }
   }
 
-  // Full payment info - payable at resort
+  // Full payment options - pay online or at resort
   if (booking.can_upload_full_payment) {
     const remainingBalance = booking.total_amount - booking.downpayment_amount;
     html += `
       <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #0284c7; margin: 10px 0;">
         <div style="display: flex; align-items: start; gap: 12px;">
-          <i class="fas fa-info-circle" style="color: #0284c7; font-size: 1.3em; margin-top: 2px;"></i>
-          <div>
-            <strong style="color: #0c4a6e; display: block; margin-bottom: 5px;">Remaining Balance: ₱${remainingBalance.toLocaleString()}</strong>
-            <p style="margin: 0; color: #075985; font-size: 0.9em;">Please pay the remaining balance at the resort upon check-in or during your stay.</p>
+          <i class="fas fa-wallet" style="color: #0284c7; font-size: 1.3em; margin-top: 2px;"></i>
+          <div style="flex: 1;">
+            <strong style="color: #0c4a6e; display: block; margin-bottom: 8px; font-size: 1.05em;">Remaining Balance: ₱${remainingBalance.toLocaleString()}</strong>
+            <p style="margin: 0 0 12px 0; color: #075985; font-size: 0.9em;">Choose your payment option:</p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button 
+                class="btn-primary payment-button-full" 
+                type="button" 
+                data-reservation-id="${booking.reservation_id}"
+                data-amount="${remainingBalance}"
+                style="padding: 10px 16px; font-size: 0.95em; width: 100%;">
+                <i class="fas fa-credit-card"></i> Pay Remaining Balance Online
+              </button>
+              <button 
+                class="btn-secondary" 
+                type="button" 
+                onclick="showPayAtResortInfo()"
+                style="padding: 10px 16px; font-size: 0.95em; width: 100%; background: #64748b; border-color: #64748b;">
+                <i class="fas fa-building"></i> Pay at Resort
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -341,21 +427,21 @@ function renderBookingActions(booking) {
     `;
   }
 
-  // Cancel reservation - visible always but disabled if admin approved
+  // Cancel reservation - only allowed before admin/staff confirmation
   if (
     booking.can_cancel === true ||
     booking.can_cancel === 1 ||
     booking.can_cancel === "1"
   ) {
     html += `
-      <button class="btn-danger" onclick="openCancelModal(${booking.reservation_id})">
+      <button class="btn-danger" onclick="openCancelModal('${booking.reservation_id}')">
         <i class="fas fa-times"></i> Cancel Booking
       </button>
     `;
-  } else {
-    // Show disabled button when admin has approved the booking
+  } else if (booking.status === "confirmed") {
+    // Show disabled button when confirmed by admin
     html += `
-      <button class="btn-danger" disabled style="opacity: 0.5; cursor: not-allowed;" title="Cannot cancel - booking has been approved by admin">
+      <button class="btn-danger" disabled style="opacity: 0.5; cursor: not-allowed;" title="Cannot cancel - booking has been confirmed by admin/staff">
         <i class="fas fa-times"></i> Cancel Booking
       </button>
     `;
@@ -534,8 +620,49 @@ document.addEventListener("DOMContentLoaded", function () {
  * Open cancel modal
  */
 function openCancelModal(reservationId) {
-  document.getElementById("cancelReservationId").value = reservationId;
-  document.getElementById("cancelModal").style.display = "flex";
+  try {
+    const reservationIdInput = document.getElementById("cancelReservationId");
+    const cancelModal = document.getElementById("cancelModal");
+
+    if (!reservationIdInput) {
+      console.error("cancelReservationId input not found");
+      alert("Error: Cancel form not found. Please refresh the page.");
+      return;
+    }
+
+    if (!cancelModal) {
+      console.error("cancelModal not found");
+      alert("Error: Cancel modal not found. Please refresh the page.");
+      return;
+    }
+
+    reservationIdInput.value = reservationId;
+
+    // Show cancellation policy warning
+    const refundInfo = document.getElementById("cancelRefundInfo");
+    if (refundInfo) {
+      refundInfo.innerHTML = `
+        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 6px; margin: 15px 0;">
+          <strong style="color: #92400e; display: block; margin-bottom: 5px;">
+            <i class="fas fa-exclamation-triangle"></i> Cancellation Policy
+          </strong>
+          <p style="margin: 0; color: #78350f; font-size: 0.9em;">
+            • Downpayment is <strong>non-refundable</strong> as per booking policy<br>
+            • Once confirmed by admin, cancellation is <strong>no longer allowed</strong>
+          </p>
+        </div>
+      `;
+    }
+
+    cancelModal.style.display = "flex";
+  } catch (error) {
+    console.error("Error opening cancel modal:", error);
+    alert(
+      "Error opening cancel form: " +
+        error.message +
+        ". Please refresh the page."
+    );
+  }
 }
 
 /**
@@ -555,6 +682,14 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
+      const reservationIdInput = document.getElementById("cancelReservationId");
+      const reasonInput = document.getElementById("cancelReason");
+
+      if (!reservationIdInput || !reasonInput) {
+        alert("Error: Form elements not found. Please refresh the page.");
+        return;
+      }
+
       // Double confirmation
       if (
         !confirm(
@@ -565,14 +700,19 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const submitBtn = form.querySelector('button[type="submit"]');
+      if (!submitBtn) {
+        alert("Error: Submit button not found. Please refresh the page.");
+        return;
+      }
+
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
       submitBtn.innerHTML =
         '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
 
       const formData = {
-        reservation_id: document.getElementById("cancelReservationId").value,
-        reason: document.getElementById("cancelReason").value,
+        reservation_id: reservationIdInput.value,
+        reason: reasonInput.value,
       };
 
       try {
@@ -592,6 +732,7 @@ document.addEventListener("DOMContentLoaded", function () {
           alert("❌ " + data.message);
         }
       } catch (error) {
+        console.error("Cancellation error:", error);
         alert("Error cancelling reservation: " + error.message);
       } finally {
         submitBtn.disabled = false;
@@ -885,6 +1026,110 @@ async function payWithPayMongo(reservationId, btnElement) {
 // Keep the old function name for backward compatibility
 async function payWithGCash(reservationId) {
   return payWithPayMongo(reservationId);
+}
+
+/**
+ * Pay full remaining balance with PayMongo
+ */
+async function payFullBalanceWithPayMongo(reservationId, amount, btnElement) {
+  console.log(
+    "payFullBalanceWithPayMongo called with:",
+    reservationId,
+    amount,
+    btnElement
+  );
+
+  if (
+    !confirm(
+      `You will be redirected to pay the remaining balance of ₱${parseFloat(
+        amount
+      ).toLocaleString()}. Continue?`
+    )
+  ) {
+    return;
+  }
+
+  // Determine button element
+  let btn = btnElement;
+  if (!btn && typeof event !== "undefined" && event && event.target) {
+    btn = event.target;
+  }
+
+  let originalText = "";
+  if (btn) {
+    originalText = btn.innerHTML;
+  }
+
+  try {
+    // Show loading state
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+      btn.disabled = true;
+    }
+
+    console.log("Creating payment intent for full balance:", reservationId);
+
+    // Create payment intent for full balance
+    const response = await fetch("user/create_payment_intent.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        reservation_id: reservationId,
+        payment_type: "full_payment",
+      }),
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      console.error("Payment API error response:", result);
+      throw new Error(result.message || `HTTP error ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log("Payment intent result:", result);
+
+    if (result.success && result.checkout_url) {
+      // Redirect to PayMongo checkout page
+      window.location.href = result.checkout_url;
+    } else {
+      throw new Error(result.message || "Failed to create payment");
+    }
+  } catch (error) {
+    console.error("Payment error:", error);
+
+    // Show user-friendly error message
+    let errorMsg = error.message;
+    if (errorMsg.includes("Failed to fetch")) {
+      errorMsg =
+        "Unable to connect to payment server. Please check your internet connection and try again.";
+    }
+
+    alert("Payment Error: " + errorMsg);
+
+    // Restore button
+    if (btn && originalText) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  }
+}
+
+/**
+ * Show information about paying at resort
+ */
+function showPayAtResortInfo() {
+  alert(
+    "💰 Pay at Resort\n\n" +
+      "You can pay the remaining balance at the resort upon check-in or during your stay.\n\n" +
+      "Payment methods accepted at resort:\n" +
+      "• Cash\n" +
+      "• GCash\n" +
+      "• Bank Transfer\n" +
+      "• Credit/Debit Card\n\n" +
+      "Please ensure to settle your balance before check-out."
+  );
 }
 
 // ===========================

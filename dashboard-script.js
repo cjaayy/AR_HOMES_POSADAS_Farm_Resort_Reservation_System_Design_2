@@ -868,11 +868,16 @@ window.addEventListener("load", function () {
 // ===== ERROR HANDLING =====
 window.addEventListener("error", function (e) {
   // Don't show generic error for user-handled errors
-  if (e.message && e.message.includes("payWithPayMongo")) {
+  if (
+    e.message &&
+    (e.message.includes("payWithPayMongo") ||
+      e.message.includes("openCancelModal"))
+  ) {
     // Let the function handle its own errors
     return;
   }
   console.error("Global error caught:", e);
+  console.error("Error details:", e.message, e.filename, e.lineno, e.colno);
   showNotification("An error occurred. Please refresh the page.", "error");
 });
 

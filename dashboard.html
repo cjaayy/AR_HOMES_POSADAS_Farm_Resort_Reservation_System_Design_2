@@ -2635,11 +2635,13 @@
                 cannot be undone
               </p>
               <ul style="margin: 15px 0 0 20px; color: #721c24">
-                <li><strong>Your downpayment will NOT be refunded</strong></li>
                 <li>The reservation will be cancelled immediately</li>
                 <li>The date will be available for other guests</li>
               </ul>
             </div>
+
+            <!-- Dynamic refund info will be inserted here -->
+            <div id="cancelRefundInfo"></div>
 
             <div class="form-group">
               <label for="cancelReason">Reason for Cancellation *</label>
@@ -2655,7 +2657,7 @@
             <div class="form-group">
               <label class="checkbox-label">
                 <input type="checkbox" id="acknowledgeNoRefund" required />
-                <span>I understand that my downpayment is non-refundable</span>
+                <span>I understand the cancellation and refund policy</span>
               </label>
             </div>
 

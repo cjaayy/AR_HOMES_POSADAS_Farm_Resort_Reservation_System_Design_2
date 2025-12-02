@@ -136,15 +136,9 @@ try {
             !$reservation['rebooking_requested']
         );
         
-        // Can cancel? (before check-in, not checked in, and not admin-approved)
-        // Once admin approves (status=confirmed AND downpayment_verified=1), cannot cancel
+        // Can cancel? (only before admin/staff confirmation - once confirmed cannot cancel)
         $reservation['can_cancel'] = (
             in_array($reservation['status'], ['pending_payment', 'pending_confirmation']) &&
-            !$reservation['is_past_checkin'] &&
-            $reservation['checked_in'] == 0
-        ) || (
-            $reservation['status'] === 'confirmed' &&
-            $reservation['downpayment_verified'] == 0 &&
             !$reservation['is_past_checkin'] &&
             $reservation['checked_in'] == 0
         );
@@ -155,10 +149,18 @@ try {
             $reservation['downpayment_paid'] == 0
         );
         
+        // Can show full payment options (only if not yet paid)
         $reservation['can_upload_full_payment'] = (
             $reservation['status'] === 'confirmed' &&
             $reservation['downpayment_verified'] == 1 &&
             $reservation['full_payment_paid'] == 0
+        );
+        
+        // Show payment info if already paid but not verified
+        $reservation['show_full_payment_pending'] = (
+            $reservation['status'] === 'confirmed' &&
+            $reservation['full_payment_paid'] == 1 &&
+            $reservation['full_payment_verified'] == 0
         );
         
         // Payment status labels
