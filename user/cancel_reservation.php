@@ -77,7 +77,7 @@ try {
     ");
     
     $stmt->bindParam(':notes', $cancellation_notes, PDO::PARAM_STR);
-    $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
+    $stmt->bindParam(':id', $reservation_id);
     $stmt->execute();
     
     $message = 'Reservation cancelled successfully.';

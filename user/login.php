@@ -111,7 +111,7 @@ try {
     // Update last login time
     $updateSql = "UPDATE users SET last_login = NOW() WHERE user_id = :user_id";
     $updateStmt = $conn->prepare($updateSql);
-    $updateStmt->bindParam(':user_id', $user['user_id'], PDO::PARAM_INT);
+    $updateStmt->bindParam(':user_id', $user['user_id']);
     $updateStmt->execute();
 
     // Set session variables

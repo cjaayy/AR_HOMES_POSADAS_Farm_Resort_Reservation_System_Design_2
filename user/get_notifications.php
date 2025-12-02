@@ -48,7 +48,7 @@ try {
     $sql .= " ORDER BY created_at DESC LIMIT :limit";
     
     $stmt = $db->prepare($sql);
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $user_id);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->execute();
     
@@ -56,7 +56,7 @@ try {
     
     // Get unread count
     $count_stmt = $db->prepare("SELECT COUNT(*) as count FROM notifications WHERE user_id = :user_id AND is_read = 0");
-    $count_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $count_stmt->bindParam(':user_id', $user_id);
     $count_stmt->execute();
     $unread_count = $count_stmt->fetch()['count'];
     

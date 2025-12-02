@@ -189,7 +189,7 @@ require_once '../config/connection.php';
                           WHERE user_id = :user_id";
             
             $updateStmt = $conn->prepare($updateSql);
-            $updateStmt->bindParam(':user_id', $user['user_id'], PDO::PARAM_INT);
+            $updateStmt->bindParam(':user_id', $user['user_id']);
             $updateStmt->execute();
 
             // Log the verification

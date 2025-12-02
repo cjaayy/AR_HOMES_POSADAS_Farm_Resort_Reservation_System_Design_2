@@ -31,7 +31,7 @@ if (!isset($input['user_id']) || !isset($input['status'])) {
     exit;
 }
 
-$userId = intval($input['user_id']);
+$userId = trim($input['user_id']);
 $status = intval($input['status']);
 
 try {
@@ -42,7 +42,7 @@ try {
     $query = "UPDATE users SET is_active = :status, updated_at = NOW() WHERE user_id = :user_id";
     $stmt = $conn->prepare($query);
     $stmt->bindParam(':status', $status, PDO::PARAM_INT);
-    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $userId);
     
     if ($stmt->execute()) {
         echo json_encode([

@@ -31,7 +31,7 @@ if (!isset($input['user_id'])) {
     exit;
 }
 
-$userId = intval($input['user_id']);
+$userId = trim($input['user_id']);
 
 try {
     $database = new Database();

@@ -75,6 +75,9 @@ try {
     // Create database connection
     $database = new Database();
     $conn = $database->getConnection();
+    
+    // Include ID Generator
+    require_once '../config/IDGenerator.php';
 
     // Check if email already exists
     $checkEmail = $conn->prepare("SELECT user_id FROM users WHERE email = :email");
@@ -104,6 +107,9 @@ try {
     // Create full name
     $fullName = $lastName . ', ' . $givenName . ' ' . $middleName;
 
+    // Generate new format user ID
+    $userId = IDGenerator::generateUserId($conn);
+    
     // Generate email verification token
     $verificationToken = bin2hex(random_bytes(32));
     $verificationTokenHash = hash('sha256', $verificationToken);
@@ -111,13 +117,14 @@ try {
 
     // Insert new user (email_verified = 0, requires verification)
     $sql = "INSERT INTO users 
-            (username, email, password_hash, last_name, given_name, middle_name, full_name, phone_number, 
+            (user_id, username, email, password_hash, last_name, given_name, middle_name, full_name, phone_number, 
              email_verified, email_verification_token, email_verification_expires, is_active) 
             VALUES 
-            (:username, :email, :password_hash, :last_name, :given_name, :middle_name, :full_name, :phone_number,
+            (:user_id, :username, :email, :password_hash, :last_name, :given_name, :middle_name, :full_name, :phone_number,
              0, :verification_token, :verification_expires, 1)";
     
     $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':user_id', $userId);
     $stmt->bindParam(':username', $username);
     $stmt->bindParam(':email', $email);
     $stmt->bindParam(':password_hash', $passwordHash);
@@ -130,9 +137,6 @@ try {
     $stmt->bindParam(':verification_expires', $verificationExpiresAt);
     
     $stmt->execute();
-
-    // Get the new user ID
-    $userId = $conn->lastInsertId();
 
     // Create verification link using ngrok if configured
     require_once '../config/cloudflare.php';

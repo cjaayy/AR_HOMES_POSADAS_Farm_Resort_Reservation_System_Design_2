@@ -110,7 +110,7 @@ try {
     $sql .= " ORDER BY check_in_date DESC, created_at DESC";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $user_id);
     
     if ($status_filter !== 'all') {
         $stmt->bindParam(':status', $status_filter, PDO::PARAM_STR);

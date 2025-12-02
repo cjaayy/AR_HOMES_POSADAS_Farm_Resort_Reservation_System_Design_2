@@ -79,7 +79,7 @@ try {
         ");
         
         $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
-        $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
+        $stmt->bindParam(':id', $reservation_id);
         $stmt->execute();
         
         echo json_encode([
@@ -100,7 +100,7 @@ try {
             WHERE reservation_id = :id
         ");
         
-        $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
+        $stmt->bindParam(':id', $reservation_id);
         $stmt->execute();
         
         echo json_encode([

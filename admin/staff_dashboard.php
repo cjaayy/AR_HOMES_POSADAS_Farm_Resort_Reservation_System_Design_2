@@ -500,7 +500,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
         badge.textContent = data.reservations.length;
         
         el.innerHTML = data.reservations.map(r => `
-          <div class="notification-item" onclick="viewNotification(${r.reservation_id})">
+          <div class="notification-item" onclick="viewNotification('${r.reservation_id}')">
             <div class="notification-header">
               <div class="notification-title">New ${r.status || 'pending'} reservation</div>
               <div class="notification-time">${timeAgo(r.created_at)}</div>

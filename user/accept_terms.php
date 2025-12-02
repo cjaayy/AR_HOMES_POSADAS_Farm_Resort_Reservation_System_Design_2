@@ -48,8 +48,8 @@ try {
     ");
     
     $stmt->bindParam(':ip', $ip_address, PDO::PARAM_STR);
-    $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->bindParam(':id', $reservation_id);
+    $stmt->bindParam(':user_id', $user_id);
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {

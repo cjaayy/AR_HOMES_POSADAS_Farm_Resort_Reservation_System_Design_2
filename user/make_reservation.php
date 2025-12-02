@@ -8,6 +8,7 @@ session_start();
 header('Content-Type: application/json');
 
 require_once '../config/database.php';
+require_once '../config/IDGenerator.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -17,6 +18,57 @@ if (!isset($_SESSION['user_id'])) {
         'message' => 'Please login to make a reservation'
     ]);
     exit;
+}
+
+// Fix for ID migration: If session has old integer ID, fetch new VARCHAR ID
+if (is_numeric($_SESSION['user_id']) || !preg_match('/^USR-\d{8}-[A-Z0-9]{4}$/', $_SESSION['user_id'])) {
+    try {
+        $tempPdo = new PDO(
+            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET,
+            DB_USER,
+            DB_PASS,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        
+        // Find user by username or email to get new ID
+        if (isset($_SESSION['user_username'])) {
+            $stmt = $tempPdo->prepare("SELECT user_id FROM users WHERE username = ? LIMIT 1");
+            $stmt->execute([$_SESSION['user_username']]);
+        } elseif (isset($_SESSION['user_email'])) {
+            $stmt = $tempPdo->prepare("SELECT user_id FROM users WHERE email = ? LIMIT 1");
+            $stmt->execute([$_SESSION['user_email']]);
+        } else {
+            // Can't recover, force re-login
+            http_response_code(401);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Session expired. Please login again.',
+                'force_logout' => true
+            ]);
+            exit;
+        }
+        
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $_SESSION['user_id'] = $row['user_id'];
+        } else {
+            http_response_code(401);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Session expired. Please login again.',
+                'force_logout' => true
+            ]);
+            exit;
+        }
+    } catch (PDOException $e) {
+        error_log('Session ID update error: ' . $e->getMessage());
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Session error. Please login again.',
+            'force_logout' => true
+        ]);
+        exit;
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -199,17 +251,20 @@ try {
     $guest_email = $_SESSION['user_email'] ?? null;
     $guest_phone = $_SESSION['user_phone'] ?? null;
     
+    // Generate new format reservation ID
+    $reservation_id = IDGenerator::generateReservationId($pdo);
+    
     // Insert reservation
     $stmt = $pdo->prepare("
         INSERT INTO reservations (
-            user_id, guest_name, guest_email, guest_phone,
+            reservation_id, user_id, guest_name, guest_email, guest_phone,
             booking_type, package_type, check_in_date, check_out_date,
             check_in_time, check_out_time, number_of_days, number_of_nights,
             number_of_guests, group_type, special_requests, 
             base_price, total_amount, downpayment_amount, remaining_balance, 
             payment_method, security_bond, status
         ) VALUES (
-            ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?, ?,
@@ -219,15 +274,13 @@ try {
     ");
     
     $stmt->execute([
-        $user_id, $guest_name, $guest_email, $guest_phone,
+        $reservation_id, $user_id, $guest_name, $guest_email, $guest_phone,
         $booking_type, $package_type, $check_in_date, $check_out_date,
         $check_in_time, $check_out_time, $number_of_days, $number_of_nights,
         $number_of_guests, $group_type, $special_requests,
         $base_price, $total_amount, $downpayment_amount, $remaining_balance,
         $payment_method, $config['security_bond']
     ]);
-    
-    $reservation_id = $pdo->lastInsertId();
     
     echo json_encode([
         'success' => true,

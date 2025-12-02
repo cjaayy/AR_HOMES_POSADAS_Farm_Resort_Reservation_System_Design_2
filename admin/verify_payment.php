@@ -53,7 +53,7 @@ try {
             ");
             
             $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
-            $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $reservation_id);
             $stmt->execute();
             
             // Get reservation details for email
@@ -63,7 +63,7 @@ try {
                 JOIN users u ON r.user_id = u.user_id
                 WHERE r.reservation_id = :id
             ");
-            $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $reservation_id);
             $stmt->execute();
             $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -124,7 +124,7 @@ try {
             ");
             
             $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
-            $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $reservation_id);
             $stmt->execute();
             
             $message = 'Full payment verified successfully!';
@@ -164,7 +164,7 @@ try {
         }
         
         $stmt->bindParam(':reason', $rejection_reason);
-        $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
+        $stmt->bindParam(':id', $reservation_id);
         $stmt->execute();
         
         echo json_encode([

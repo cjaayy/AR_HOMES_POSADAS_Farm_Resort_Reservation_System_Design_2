@@ -69,7 +69,7 @@ try {
     $stmt->bindParam(':staff_id', $staff_id, PDO::PARAM_INT);
     $stmt->bindParam(':bond_amount', $security_bond_collected, PDO::PARAM_STR);
     $stmt->bindParam(':notes', $notes, PDO::PARAM_STR);
-    $stmt->bindParam(':id', $reservation_id, PDO::PARAM_INT);
+    $stmt->bindParam(':id', $reservation_id);
     $stmt->execute();
     
     echo json_encode([

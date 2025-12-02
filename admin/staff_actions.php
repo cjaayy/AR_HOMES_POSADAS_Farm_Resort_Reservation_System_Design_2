@@ -80,9 +80,9 @@ try {
         echo json_encode(['success' => true, 'reservation_id' => $conn->lastInsertId()]);
         exit;
     } elseif ($action === 'update_status') {
-        $id = (int)($_POST['reservation_id'] ?? 0);
+        $id = trim($_POST['reservation_id'] ?? '');
         $status = trim($_POST['status'] ?? '');
-        if ($id <= 0 || $status === '') { echo json_encode(['success'=>false,'message'=>'Invalid']); exit; }
+        if ($id === '' || $status === '') { echo json_encode(['success'=>false,'message'=>'Invalid']); exit; }
         
         // Update status - if confirming, also verify downpayment
         if ($status === 'confirmed') {
@@ -100,13 +100,13 @@ try {
             ");
             $stmt->bindParam(':s', $status);
             $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $id);
             $stmt->execute();
         } else {
             // For other status changes, just update status
             $stmt = $conn->prepare("UPDATE reservations SET status = :s, updated_at = NOW() WHERE reservation_id = :id");
             $stmt->bindParam(':s', $status);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $id);
             $stmt->execute();
         }
         
@@ -119,7 +119,7 @@ try {
                 JOIN users u ON r.user_id = u.user_id
                 WHERE r.reservation_id = :id
             ");
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $id);
             $stmt->execute();
             $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
             

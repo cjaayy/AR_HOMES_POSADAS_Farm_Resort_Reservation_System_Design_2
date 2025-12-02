@@ -61,9 +61,13 @@ function showSection(sectionId, skipSave = false) {
 
   // Load data when switching to specific sections
   if (sectionId === "users") {
+    console.log("👥 Switching to users section");
     // Load users when users section is opened
     if (typeof loadUsers === "function") {
+      console.log("✅ loadUsers function found, calling it...");
       loadUsers();
+    } else {
+      console.error("❌ loadUsers function not found!");
     }
   }
 
@@ -1195,13 +1199,13 @@ function displayUsers() {
         </td>
         <td style="padding:14px 16px 14px 8px; text-align:center;">
           <div style="display:flex; gap:4px; justify-content:center; flex-wrap:nowrap;">
-            <button onclick="viewUser(${
+            <button onclick="viewUser('${
               user.user_id
-            })" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#667eea; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
-            <button onclick="editUser(${
+            }')" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#667eea; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
+            <button onclick="editUser('${
               user.user_id
-            })" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#3b82f6; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="Edit User" onmouseover="this.style.background='linear-gradient(135deg,#3b82f6,#2563eb)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#3b82f6';"><i class="fas fa-edit"></i></button>
-            <button onclick="toggleUserStatus(${user.user_id}, ${
+            }')" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#3b82f6; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="Edit User" onmouseover="this.style.background='linear-gradient(135deg,#3b82f6,#2563eb)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#3b82f6';"><i class="fas fa-edit"></i></button>
+            <button onclick="toggleUserStatus('${user.user_id}', ${
         user.is_active
       })" style="width:28px; height:28px; border:none; background:${
         user.is_active == 1
@@ -1220,9 +1224,9 @@ function displayUsers() {
       }'; this.style.color='${
         user.is_active == 1 ? "#10b981" : "white"
       }';"><i class="fas fa-power-off"></i></button>
-            <button onclick="deleteUser(${
+            <button onclick="deleteUser('${
               user.user_id
-            })" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#ef4444; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="Delete User" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-trash"></i></button>
+            }')" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#ef4444; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px;" title="Delete User" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-trash"></i></button>
           </div>
         </td>
       </tr>

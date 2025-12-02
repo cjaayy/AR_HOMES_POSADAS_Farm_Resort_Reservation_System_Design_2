@@ -1089,9 +1089,9 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
           <td><span class="status-badge ${r.status||''}">${escapeHtml(r.status||'').replace('_', ' ')}</span></td>
           <td style="text-align:center">
             <div class="action-buttons">
-              <button onclick="updateStatus(${r.reservation_id}, 'confirmed')" class="btn-action btn-approve" title="Approve" aria-label="Approve reservation"><i class="fas fa-check"></i></button>
-              <button onclick="updateStatus(${r.reservation_id}, 'canceled')" class="btn-action btn-cancel" title="Cancel" aria-label="Cancel reservation"><i class="fas fa-times"></i></button>
-              <button onclick="viewReservation(${r.reservation_id})" class="btn-action btn-view" title="View" aria-label="View reservation"><i class="fas fa-eye"></i></button>
+              <button onclick="updateStatus('${r.reservation_id}', 'confirmed')" class="btn-action btn-approve" title="Approve" aria-label="Approve reservation"><i class="fas fa-check"></i></button>
+              <button onclick="updateStatus('${r.reservation_id}', 'canceled')" class="btn-action btn-cancel" title="Cancel" aria-label="Cancel reservation"><i class="fas fa-times"></i></button>
+              <button onclick="viewReservation('${r.reservation_id}')" class="btn-action btn-view" title="View" aria-label="View reservation"><i class="fas fa-eye"></i></button>
             </div>
           </td>
         </tr>
@@ -1126,7 +1126,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     async function updateStatus(id, status){ if(!confirm('Change status?')) return; const form = new FormData(); form.append('action','update_status'); form.append('reservation_id', id); form.append('status', status); try{ const res = await fetch('staff_actions.php',{method:'POST', body: form, credentials: 'include'}); const data = await res.json(); if(data.success){ await fetchAllReservations(); showNotification('Status updated','success'); } else { showNotification('Error: '+(data.message||''),'error'); } }catch(err){ console.error(err); showNotification('Failed to update status','error'); } }
 
     function viewReservation(id){
-      const r = allReservations.find(x => Number(x.reservation_id) === Number(id));
+      const r = allReservations.find(x => String(x.reservation_id) === String(id));
       if(!r) return showNotification('Reservation not found','error');
       
       const bookingTypeLabels = {

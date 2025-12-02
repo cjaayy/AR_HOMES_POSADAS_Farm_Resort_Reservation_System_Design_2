@@ -100,7 +100,7 @@ try {
     $updateStmt = $conn->prepare($updateSql);
     $updateStmt->bindParam(':token', $resetTokenHash, PDO::PARAM_STR);
     $updateStmt->bindParam(':expires', $expiresAt, PDO::PARAM_STR);
-    $updateStmt->bindParam(':user_id', $user['user_id'], PDO::PARAM_INT);
+    $updateStmt->bindParam(':user_id', $user['user_id']);
     $updateStmt->execute();
 
     // Create reset link using ngrok if configured

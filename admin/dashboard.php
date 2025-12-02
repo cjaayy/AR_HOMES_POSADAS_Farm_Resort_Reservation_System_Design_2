@@ -918,9 +918,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                   </td>
                   <td style="padding:16px; text-align:center;">
                     <div style="display:flex; gap:6px; justify-content:center;">
-                      <button onclick="adminViewReservation(${r.reservation_id})" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#667eea; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
-                      <button onclick="adminUpdateStatus(${r.reservation_id}, 'confirmed')" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#10b981; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="Confirm" onmouseover="this.style.background='linear-gradient(135deg,#10b981,#059669)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#10b981';"><i class="fas fa-check"></i></button>
-                      <button onclick="adminUpdateStatus(${r.reservation_id}, 'canceled')" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#ef4444; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="Cancel" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-times"></i></button>
+                      <button onclick="adminViewReservation('${r.reservation_id}')" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#667eea; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="View Details" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';"><i class="fas fa-eye"></i></button>
+                      <button onclick="adminUpdateStatus('${r.reservation_id}', 'confirmed')" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#10b981; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="Confirm" onmouseover="this.style.background='linear-gradient(135deg,#10b981,#059669)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#10b981';"><i class="fas fa-check"></i></button>
+                      <button onclick="adminUpdateStatus('${r.reservation_id}', 'canceled')" style="width:36px; height:36px; border:none; background:#f1f5f9; color:#ef4444; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center;" title="Cancel" onmouseover="this.style.background='linear-gradient(135deg,#ef4444,#dc2626)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#ef4444';"><i class="fas fa-times"></i></button>
                     </div>
                   </td>
                 </tr>`;
@@ -981,7 +981,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             }
 
             function adminViewReservation(id){ 
-              const r = adminAllReservations.find(x=>Number(x.reservation_id)===Number(id)); 
+              const r = adminAllReservations.find(x=>String(x.reservation_id)===String(id)); 
               if(!r) return adminShowNotification('Reservation not found','error');
               
               const bookingTypeLabels = {
@@ -2905,6 +2905,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           }, 100);
         });
       }
+
     </script>
   </body>
 </html>

@@ -31,7 +31,7 @@ if (!isset($input['user_id'])) {
     exit;
 }
 
-$userId = intval($input['user_id']);
+$userId = trim($input['user_id']);
 
 try {
     $database = new Database();
@@ -40,7 +40,7 @@ try {
     // Check if user exists
     $checkQuery = "SELECT user_id, full_name FROM users WHERE user_id = :user_id";
     $checkStmt = $conn->prepare($checkQuery);
-    $checkStmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $checkStmt->bindParam(':user_id', $userId);
     $checkStmt->execute();
     
     if ($checkStmt->rowCount() === 0) {
@@ -53,9 +53,9 @@ try {
     }
 
     // Delete user
-    $query = "DELETE FROM users WHERE user_id = :user_id";
-    $stmt = $conn->prepare($query);
-    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $deleteQuery = "DELETE FROM users WHERE user_id = :user_id";
+    $stmt = $conn->prepare($deleteQuery);
+    $stmt->bindParam(':user_id', $userId);
     
     if ($stmt->execute()) {
         echo json_encode([

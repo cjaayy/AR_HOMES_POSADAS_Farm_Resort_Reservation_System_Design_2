@@ -117,7 +117,7 @@ try {
     
     $updateStmt = $conn->prepare($updateSql);
     $updateStmt->bindParam(':password_hash', $passwordHash, PDO::PARAM_STR);
-    $updateStmt->bindParam(':user_id', $user['user_id'], PDO::PARAM_INT);
+    $updateStmt->bindParam(':user_id', $user['user_id']);
     $updateStmt->execute();
 
     // Log the password reset
