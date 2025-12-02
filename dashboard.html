@@ -296,7 +296,7 @@
                   <i class="fas fa-calendar-alt"></i>
                 </div>
                 <div class="stats-content">
-                  <h3 class="stats-number" id="totalReservations">5</h3>
+                  <h3 class="stats-number" id="totalReservations">0</h3>
                   <p class="stats-label">Total Reservations</p>
                 </div>
               </div>
@@ -305,7 +305,7 @@
                   <i class="fas fa-clock"></i>
                 </div>
                 <div class="stats-content">
-                  <h3 class="stats-number" id="pendingReservations">2</h3>
+                  <h3 class="stats-number" id="pendingReservations">0</h3>
                   <p class="stats-label">Pending Reservations</p>
                 </div>
               </div>
@@ -314,7 +314,7 @@
                   <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="stats-content">
-                  <h3 class="stats-number" id="approvedReservations">3</h3>
+                  <h3 class="stats-number" id="approvedReservations">0</h3>
                   <p class="stats-label">Approved Reservations</p>
                 </div>
               </div>
@@ -323,7 +323,7 @@
                   <i class="fas fa-star"></i>
                 </div>
                 <div class="stats-content">
-                  <h3 class="stats-number" id="completedStays">8</h3>
+                  <h3 class="stats-number" id="completedStays">0</h3>
                   <p class="stats-label">Completed Stays</p>
                 </div>
               </div>
@@ -331,30 +331,17 @@
 
             <div class="recent-activity">
               <h3>Recent Activity</h3>
-              <div class="activity-list">
-                <div class="activity-item">
-                  <div class="activity-icon">
-                    <i class="fas fa-calendar-check"></i>
-                  </div>
-                  <div class="activity-content">
-                    <h4>Reservation Confirmed</h4>
-                    <p>
-                      Your booking for December 15-18, 2025 has been approved.
-                    </p>
-                    <span class="activity-date">2 days ago</span>
-                  </div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-icon">
-                    <i class="fas fa-edit"></i>
-                  </div>
-                  <div class="activity-content">
-                    <h4>Profile Updated</h4>
-                    <p>
-                      Your contact information has been successfully updated.
-                    </p>
-                    <span class="activity-date">1 week ago</span>
-                  </div>
+              <div class="activity-list" id="activityList">
+                <!-- Activity items will be loaded dynamically -->
+                <div
+                  class="activity-empty"
+                  style="text-align: center; padding: 2rem; color: #999"
+                >
+                  <i
+                    class="fas fa-inbox"
+                    style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5"
+                  ></i>
+                  <p>No recent activity to display</p>
                 </div>
               </div>
             </div>
@@ -2852,10 +2839,160 @@
         }
       }
 
+      // Load Dashboard Stats
+      async function loadDashboardStats() {
+        try {
+          const response = await fetch("user/get_my_reservations.php", {
+            method: "GET",
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to load reservations");
+          }
+
+          const data = await response.json();
+
+          if (data.success && Array.isArray(data.reservations)) {
+            const reservations = data.reservations;
+
+            // Calculate stats
+            const total = reservations.length;
+            const pending = reservations.filter(
+              (r) => r.status === "pending"
+            ).length;
+            const approved = reservations.filter(
+              (r) => r.status === "approved" || r.status === "confirmed"
+            ).length;
+            const completed = reservations.filter(
+              (r) => r.status === "completed"
+            ).length;
+
+            // Update stats display
+            document.getElementById("totalReservations").textContent = total;
+            document.getElementById("pendingReservations").textContent =
+              pending;
+            document.getElementById("approvedReservations").textContent =
+              approved;
+            document.getElementById("completedStays").textContent = completed;
+
+            // Load recent activity
+            loadRecentActivity(reservations);
+
+            console.log("✅ Dashboard stats loaded:", {
+              total,
+              pending,
+              approved,
+              completed,
+            });
+          }
+        } catch (error) {
+          console.error("❌ Error loading dashboard stats:", error);
+        }
+      }
+
+      // Load Recent Activity
+      function loadRecentActivity(reservations) {
+        const activityList = document.getElementById("activityList");
+
+        if (!reservations || reservations.length === 0) {
+          activityList.innerHTML = `
+            <div class="activity-empty" style="text-align: center; padding: 2rem; color: #999;">
+              <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+              <p>No recent activity to display</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Sort by created date (most recent first) and take top 5
+        const recentReservations = reservations
+          .sort(
+            (a, b) =>
+              new Date(b.created_at || b.booking_date) -
+              new Date(a.created_at || a.booking_date)
+          )
+          .slice(0, 5);
+
+        const activityHTML = recentReservations
+          .map((reservation) => {
+            const statusIcons = {
+              pending: "fa-clock",
+              approved: "fa-check-circle",
+              confirmed: "fa-calendar-check",
+              completed: "fa-star",
+              cancelled: "fa-times-circle",
+            };
+
+            const statusLabels = {
+              pending: "Reservation Pending",
+              approved: "Reservation Approved",
+              confirmed: "Reservation Confirmed",
+              completed: "Stay Completed",
+              cancelled: "Reservation Cancelled",
+            };
+
+            const icon = statusIcons[reservation.status] || "fa-calendar";
+            const label =
+              statusLabels[reservation.status] || "Reservation Update";
+            const checkIn =
+              reservation.check_in_date || reservation.booking_date;
+            const checkOut = reservation.check_out_date || "";
+            const dateRange = checkOut ? `${checkIn} to ${checkOut}` : checkIn;
+            const timeAgo = getTimeAgo(
+              reservation.created_at || reservation.booking_date
+            );
+
+            return `
+            <div class="activity-item">
+              <div class="activity-icon">
+                <i class="fas ${icon}"></i>
+              </div>
+              <div class="activity-content">
+                <h4>${label}</h4>
+                <p>Booking for ${dateRange}</p>
+                <span class="activity-date">${timeAgo}</span>
+              </div>
+            </div>
+          `;
+          })
+          .join("");
+
+        activityList.innerHTML = activityHTML;
+      }
+
+      // Helper function to calculate time ago
+      function getTimeAgo(dateString) {
+        if (!dateString) return "Recently";
+
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+
+        const intervals = {
+          year: 31536000,
+          month: 2592000,
+          week: 604800,
+          day: 86400,
+          hour: 3600,
+          minute: 60,
+        };
+
+        for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+          const interval = Math.floor(seconds / secondsInUnit);
+          if (interval >= 1) {
+            return `${interval} ${unit}${interval > 1 ? "s" : ""} ago`;
+          }
+        }
+
+        return "Just now";
+      }
+
       // Initialize session check when DOM is ready
       document.addEventListener("DOMContentLoaded", async () => {
         console.log("📄 DOM loaded - checking session...");
         await checkAuthAndLoadUser();
+        await loadDashboardStats();
       });
     </script>
 
