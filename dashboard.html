@@ -1429,13 +1429,16 @@
 
                 <!-- Payment Method -->
                 <div class="form-section">
-                  <h3>Payment Method</h3>
+                  <h3>✅ Payment Method (PayMongo)</h3>
                   <p style="color: #666; font-size: 14px; margin-bottom: 15px">
                     <i class="fas fa-info-circle"></i>
-                    <strong>GCash:</strong> You'll be redirected to secure
-                    payment page immediately after submission.
+                    <strong>GCash / Card / Online Banking</strong>
                     <br />
-                    <strong>Over the Counter:</strong> Pay at resort reception.
+                    All payments are processed through PayMongo's secure
+                    checkout page. After submitting your booking, you will be
+                    redirected to a safe, encrypted payment page where you can
+                    pay using GCash, debit/credit card, or supported online
+                    banking.
                   </p>
                   <div class="payment-methods">
                     <label class="payment-option">
@@ -1444,24 +1447,12 @@
                         name="paymentMethod"
                         value="gcash"
                         required
+                        checked
                       />
                       <div class="payment-card">
                         <i class="fas fa-mobile-alt"></i>
-                        <span>GCash</span>
-                        <small>Instant online payment</small>
-                      </div>
-                    </label>
-                    <label class="payment-option">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="otc"
-                        required
-                      />
-                      <div class="payment-card">
-                        <i class="fas fa-store"></i>
-                        <span>Over the Counter</span>
-                        <small>Pay at resort</small>
+                        <span>GCash / Card / Online Banking</span>
+                        <small>Secure PayMongo checkout</small>
                       </div>
                     </label>
                   </div>
@@ -1687,7 +1678,7 @@
 
               <!-- Payment Method Selection -->
               <div class="payment-method-section">
-                <h3>Select Payment Method</h3>
+                <h3>✅ Payment Method (PayMongo)</h3>
                 <div class="payment-methods">
                   <div class="payment-option" data-method="gcash">
                     <input
@@ -1696,105 +1687,24 @@
                       name="paymentMethod"
                       value="gcash"
                       required
+                      checked
                     />
                     <label for="gcash" class="payment-label">
                       <div class="payment-icon gcash">
                         <i class="fas fa-mobile-alt"></i>
                       </div>
                       <div class="payment-info">
-                        <h4>GCash</h4>
-                        <p>Pay using your GCash wallet</p>
-                        <span class="payment-badge">Online</span>
+                        <h4>GCash / Card / Online Banking</h4>
+                        <p>
+                          All payments are processed through PayMongo's secure
+                          checkout page. After submitting your booking, you will
+                          be redirected to a safe, encrypted payment page where
+                          you can pay using GCash, debit/credit card, or
+                          supported online banking.
+                        </p>
+                        <span class="payment-badge">Secure PayMongo</span>
                       </div>
                     </label>
-                  </div>
-
-                  <div class="payment-option" data-method="otc">
-                    <input
-                      type="radio"
-                      id="otc"
-                      name="paymentMethod"
-                      value="otc"
-                      required
-                    />
-                    <label for="otc" class="payment-label">
-                      <div class="payment-icon otc">
-                        <i class="fas fa-store"></i>
-                      </div>
-                      <div class="payment-info">
-                        <h4>Over the Counter</h4>
-                        <p>Pay at the resort reception</p>
-                        <span class="payment-badge">On-site</span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Payment Instructions -->
-                <div
-                  class="payment-instructions"
-                  id="paymentInstructions"
-                  style="display: none"
-                >
-                  <!-- GCash Instructions -->
-                  <div
-                    class="instruction-content"
-                    id="gcashInstructions"
-                    style="display: none"
-                  >
-                    <h4>
-                      <i class="fas fa-mobile-alt"></i> GCash Payment
-                      Instructions
-                    </h4>
-                    <div class="gcash-details">
-                      <p><strong>Send payment to:</strong></p>
-                      <div class="gcash-info">
-                        <span class="gcash-number">0917-123-4567</span>
-                        <span class="gcash-name"
-                          >AR Homes Posadas Farm Resort</span
-                        >
-                      </div>
-                      <p>
-                        <strong>Important:</strong> Please include your booking
-                        reference in the message.
-                      </p>
-                      <div class="qr-code-section">
-                        <p>Or scan QR code:</p>
-                        <div class="qr-placeholder">
-                          <i class="fas fa-qrcode"></i>
-                          <span>QR Code</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- OTC Instructions -->
-                  <div
-                    class="instruction-content"
-                    id="otcInstructions"
-                    style="display: none"
-                  >
-                    <h4>
-                      <i class="fas fa-store"></i> Over the Counter Payment
-                    </h4>
-                    <div class="otc-details">
-                      <p><strong>Payment Location:</strong></p>
-                      <address>
-                        AR Homes Posadas Farm Resort<br />
-                        Reception Desk<br />
-                        Posadas, Bohol, Philippines
-                      </address>
-                      <p><strong>Office Hours:</strong></p>
-                      <ul>
-                        <li>Monday - Sunday: 8:00 AM - 6:00 PM</li>
-                        <li>Check-in: 2:00 PM onwards</li>
-                        <li>Check-out: Until 12:00 PM</li>
-                      </ul>
-                      <p>
-                        <strong>Note:</strong> Please bring your booking
-                        confirmation and valid ID.
-                      </p>
-                    </div>
                   </div>
                 </div>
               </div>
