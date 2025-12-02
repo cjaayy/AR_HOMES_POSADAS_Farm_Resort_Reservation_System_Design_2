@@ -184,11 +184,20 @@ function renderBookingActions(booking) {
 
   // Upload downpayment
   if (booking.can_upload_downpayment) {
-    html += `
-      <button class="btn-primary" onclick="openPaymentUploadModal(${booking.reservation_id}, 'downpayment', ${booking.downpayment_amount})">
-        <i class="fas fa-upload"></i> Upload Downpayment
-      </button>
-    `;
+    // Check payment method - show GCash or Upload button
+    if (booking.payment_method === "gcash") {
+      html += `
+        <button class="btn-primary" onclick="payWithGCash(${booking.reservation_id})">
+          <i class="fas fa-mobile-alt"></i> Pay with GCash
+        </button>
+      `;
+    } else {
+      html += `
+        <button class="btn-primary" onclick="openPaymentUploadModal(${booking.reservation_id}, 'downpayment', ${booking.downpayment_amount})">
+          <i class="fas fa-upload"></i> Upload Downpayment
+        </button>
+      `;
+    }
   }
 
   // Upload full payment
@@ -640,6 +649,54 @@ function formatDate(dateString) {
 }
 
 // ===========================
+// GCASH PAYMENT VIA PAYMONGO
+// ===========================
+
+/**
+ * Pay with GCash using PayMongo
+ */
+async function payWithGCash(reservationId) {
+  if (!confirm("You will be redirected to GCash payment page. Continue?")) {
+    return;
+  }
+
+  try {
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    btn.disabled = true;
+
+    // Create payment intent
+    const response = await fetch("user/create_payment_intent.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        reservation_id: reservationId,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success && result.checkout_url) {
+      // Redirect to PayMongo GCash checkout
+      window.location.href = result.checkout_url;
+    } else {
+      throw new Error(result.message || "Failed to create payment");
+    }
+  } catch (error) {
+    alert("Error: " + error.message);
+    // Restore button
+    if (btn) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  }
+}
+
+// ===========================
 // AUTO-LOAD BOOKINGS
 // ===========================
 
@@ -652,4 +709,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
-

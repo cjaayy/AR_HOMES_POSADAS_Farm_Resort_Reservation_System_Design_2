@@ -3138,37 +3138,115 @@ document.addEventListener("DOMContentLoaded", function () {
         if (result.success) {
           showNotification("Reservation created successfully!", "success");
 
-          // Show success details
-          setTimeout(() => {
-            alert(
-              `Reservation Confirmed!\n\nReservation ID: ${
-                result.reservation_id
-              }\nTotal Amount: ₱${result.total_amount.toLocaleString("en-PH", {
-                minimumFractionDigits: 2,
-              })}\nDownpayment: ₱${result.downpayment_amount.toLocaleString(
-                "en-PH",
-                { minimumFractionDigits: 2 }
-              )}\n\nPlease pay the downpayment to confirm your booking.\n\nPayment Instructions:\n- For GCash: Send to 0917-123-4567\n- For OTC: Visit resort reception\n\nReference: ${
-                result.reservation_id
-              }`
-            );
+          // Check if payment method is GCash - redirect to PayMongo payment
+          if (paymentMethod === "gcash") {
+            // Create PayMongo payment intent for GCash
+            setTimeout(async () => {
+              try {
+                const paymentResponse = await fetch(
+                  "user/create_payment_intent.php",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      reservation_id: result.reservation_id,
+                    }),
+                  }
+                );
 
-            // Reset form and go back to step 1
-            reservationForm.reset();
-            window.reservationData = {
-              bookingType: null,
-              packageType: null,
-              basePrice: 0,
-              totalAmount: 0,
-              downpayment: 0,
-              balance: 0,
-            };
-            goBackToStep(1);
+                // Log response status for debugging
+                console.log("Payment response status:", paymentResponse.status);
 
-            // Switch to booking history
-            showSection("bookings-history");
-            updateActiveNavigation("bookings-history");
-          }, 1500);
+                const paymentResult = await paymentResponse.json();
+                console.log("Payment result:", paymentResult);
+
+                if (paymentResult.success && paymentResult.checkout_url) {
+                  // Log the checkout URL
+                  console.log(
+                    "Redirecting to PayMongo URL:",
+                    paymentResult.checkout_url
+                  );
+
+                  // Show payment info before redirecting
+                  showNotification("Redirecting to GCash payment...", "info");
+
+                  // Redirect to PayMongo checkout page (pm.link URL)
+                  setTimeout(() => {
+                    window.location.href = paymentResult.checkout_url;
+                  }, 1500);
+                } else {
+                  throw new Error(
+                    paymentResult.message || "Failed to create payment"
+                  );
+                }
+              } catch (paymentError) {
+                showNotification(
+                  "Payment setup failed. Please try again from My Bookings.",
+                  "error"
+                );
+                console.error("Payment error:", paymentError);
+                console.error("Error details:", paymentError.message);
+
+                // Still show reservation success but redirect to bookings
+                setTimeout(() => {
+                  alert(
+                    `Reservation Created!\n\nReservation ID: ${result.reservation_id}\n\nPayment setup encountered an issue. Please complete payment from My Bookings section.`
+                  );
+
+                  // Reset form and go to bookings
+                  reservationForm.reset();
+                  window.reservationData = {
+                    bookingType: null,
+                    packageType: null,
+                    basePrice: 0,
+                    totalAmount: 0,
+                    downpayment: 0,
+                    balance: 0,
+                  };
+                  goBackToStep(1);
+                  showSection("bookings-history");
+                  updateActiveNavigation("bookings-history");
+                }, 2000);
+              }
+            }, 1000);
+          } else {
+            // For OTC payment, show success details
+            setTimeout(() => {
+              alert(
+                `Reservation Confirmed!\n\nReservation ID: ${
+                  result.reservation_id
+                }\nTotal Amount: ₱${result.total_amount.toLocaleString(
+                  "en-PH",
+                  {
+                    minimumFractionDigits: 2,
+                  }
+                )}\nDownpayment: ₱${result.downpayment_amount.toLocaleString(
+                  "en-PH",
+                  { minimumFractionDigits: 2 }
+                )}\n\nPlease pay the downpayment at the resort reception to confirm your booking.\n\nReference: ${
+                  result.reservation_id
+                }`
+              );
+
+              // Reset form and go back to step 1
+              reservationForm.reset();
+              window.reservationData = {
+                bookingType: null,
+                packageType: null,
+                basePrice: 0,
+                totalAmount: 0,
+                downpayment: 0,
+                balance: 0,
+              };
+              goBackToStep(1);
+
+              // Switch to booking history
+              showSection("bookings-history");
+              updateActiveNavigation("bookings-history");
+            }, 1500);
+          }
         } else {
           showNotification(
             result.message || "Failed to create reservation",
