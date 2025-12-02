@@ -223,8 +223,8 @@ try {
     $duration = ($booking_type === 'daytime') ? $number_of_days : $number_of_nights;
     $total_amount = $base_price * $duration;
     
-    // Calculate 50% downpayment
-    $downpayment_amount = $total_amount * 0.50;
+    // Fixed downpayment amount
+    $downpayment_amount = 1000;
     $remaining_balance = $total_amount - $downpayment_amount;
     
     // Get optional fields and map to correct column names

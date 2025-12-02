@@ -3000,7 +3000,7 @@ function updatePriceSummary() {
   const type = window.reservationData.bookingType;
 
   const totalAmount = basePrice * duration;
-  const downpayment = totalAmount * 0.5;
+  const downpayment = 1000;
   const balance = totalAmount - downpayment;
 
   // Store values
