@@ -217,9 +217,9 @@ function renderPaymentStatus(booking) {
           : downClass === "pending"
           ? "fa-clock"
           : "fa-times-circle"
-      }"></i>
+      }}"></i>
       <div>
-        <strong>Downpayment (50%) - ₱${downpaymentAmount}</strong>
+        <strong>Downpayment - ₱${downpaymentAmount}</strong>
         <span>${downStatus}${
     downClass === "verified" || downClass === "pending"
       ? paymentMethod + paidAt
@@ -388,7 +388,7 @@ function openPaymentUploadModal(reservationId, paymentType, amount) {
 
   const label =
     paymentType === "downpayment"
-      ? `Downpayment (50%) - ₱${parseFloat(amount).toLocaleString()}`
+      ? `Downpayment - ₱${parseFloat(amount).toLocaleString()}`
       : `Full Payment - ₱${parseFloat(amount).toLocaleString()}`;
 
   document.getElementById("paymentForLabel").textContent = label;

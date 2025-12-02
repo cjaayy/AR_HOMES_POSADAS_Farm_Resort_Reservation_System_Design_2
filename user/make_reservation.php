@@ -296,7 +296,7 @@ try {
         'check_out_time' => $check_out_time,
         'security_bond' => $config['security_bond'],
         'policy' => [
-            'downpayment_required' => '50% of total amount',
+            'downpayment_required' => '₱1,000',
             'balance_due' => 'Before check-in',
             'security_bond' => '₱' . number_format($config['security_bond'], 2),
             'rebooking_notice' => '7 days prior',

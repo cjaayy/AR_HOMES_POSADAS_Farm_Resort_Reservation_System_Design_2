@@ -2093,7 +2093,7 @@ function showPaymentUploadModal(reservationId, paymentType) {
         <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
           <p style="margin: 0 0 10px 0;"><strong>Reservation ID:</strong> #${reservationId}</p>
           <p style="margin: 0;"><strong>Payment Type:</strong> ${
-            paymentType === "downpayment" ? "Downpayment (50%)" : "Full Payment"
+            paymentType === "downpayment" ? "Downpayment" : "Full Payment"
           }</p>
         </div>
         
@@ -3286,7 +3286,7 @@ function showBookingPolicy() {
         <h3>General Policies</h3>
         <ul>
           <li><strong>First to Pay, First to Reserve Policy</strong></li>
-          <li><strong>50% Downpayment Required</strong> to confirm reservation</li>
+          <li><strong>₱1,000 Downpayment Required</strong> to confirm reservation</li>
           <li>Remaining balance must be paid <strong>before check-in time</strong></li>
           <li>Reservation fee is <strong>non-refundable/transferable</strong></li>
           <li>We only do <strong>rebooking within 3 months</strong></li>
@@ -3318,7 +3318,7 @@ function showBookingPolicy() {
   alert(
     "BOOKING POLICY\n\n" +
       "FIRST TO PAY, FIRST TO RESERVE\n" +
-      "50% DOWNPAYMENT REQUIRED\n" +
+      "₱1,000 DOWNPAYMENT REQUIRED\n" +
       "REMAINING BALANCE BEFORE CHECK-IN\n" +
       "NON-REFUNDABLE (Rebooking only within 3 months)\n" +
       "Rebooking allowed 7 days prior\n" +

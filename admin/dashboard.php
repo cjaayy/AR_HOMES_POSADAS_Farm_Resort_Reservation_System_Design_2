@@ -1069,7 +1069,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                         <div style="font-size:18px; font-weight:700; color:#1e293b;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
                       </div>
                       <div>
-                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Downpayment (50%)</div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Downpayment</div>
                         <div style="font-size:18px; font-weight:700; color:#f59e0b;">₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
                         <div style="font-size:11px; font-weight:600; color:${r.downpayment_paid ? '#10b981' : '#ef4444'}; margin-top:4px;">
                           ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
