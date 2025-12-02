@@ -20,6 +20,16 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Check if PayMongo is configured
+if (empty(PAYMONGO_SECRET_KEY) || PAYMONGO_SECRET_KEY === 'sk_test_YOUR_SECRET_KEY_HERE') {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Payment system is not configured. Please contact the administrator.'
+    ]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
@@ -30,6 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // Log request start
+    error_log('=== Payment Intent Request Started ===');
+    error_log('User ID: ' . $_SESSION['user_id']);
+    error_log('Session data: ' . json_encode($_SESSION));
+    
     $pdo = new PDO(
         "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET,
         DB_USER,
@@ -41,7 +56,10 @@ try {
         ]
     );
     
-    $data = json_decode(file_get_contents('php://input'), true);
+    $rawInput = file_get_contents('php://input');
+    error_log('Raw input: ' . $rawInput);
+    
+    $data = json_decode($rawInput, true);
     
     if (!isset($data['reservation_id'])) {
         throw new Exception('Reservation ID is required');
@@ -90,15 +108,24 @@ try {
     
     // Log the response
     error_log('PayMongo Link Creation Response: ' . json_encode($result));
+    error_log('PayMongo HTTP Code: ' . $result['http_code']);
     
     if (!$result['success']) {
         $error_message = 'Failed to create payment link';
-        if (isset($result['data']['errors'])) {
+        
+        // Check for authentication error
+        if ($result['http_code'] == 401) {
+            $error_message = 'Payment system authentication failed. Please contact administrator.';
+        } elseif (isset($result['data']['errors'])) {
             $errors = $result['data']['errors'];
             $error_message .= ': ' . implode(', ', array_map(function($err) {
                 return $err['detail'] ?? 'Unknown error';
             }, $errors));
+        } elseif (isset($result['data']['message'])) {
+            $error_message .= ': ' . $result['data']['message'];
         }
+        
+        error_log('PayMongo Error: ' . $error_message);
         throw new Exception($error_message);
     }
     

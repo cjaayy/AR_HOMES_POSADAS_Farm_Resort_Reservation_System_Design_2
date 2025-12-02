@@ -162,6 +162,25 @@ function renderBookings(bookings) {
       `;
     })
     .join("");
+
+  // Attach event listeners to payment buttons after rendering
+  setTimeout(() => {
+    const paymentButtons = grid.querySelectorAll(".payment-button");
+    console.log("Found payment buttons:", paymentButtons.length);
+    paymentButtons.forEach((btn) => {
+      const reservationId = btn.getAttribute("data-reservation-id");
+      console.log(
+        "Attaching listener to button for reservation:",
+        reservationId
+      );
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Payment button clicked!", reservationId);
+        payWithPayMongo(reservationId, this);
+      });
+    });
+  }, 100);
 }
 
 /**
@@ -245,6 +264,10 @@ function renderPaymentStatus(booking) {
  * Render booking action buttons
  */
 function renderBookingActions(booking) {
+  console.log("Rendering actions for booking:", booking.reservation_id);
+  console.log("can_upload_downpayment:", booking.can_upload_downpayment);
+  console.log("payment_method:", booking.payment_method);
+
   let html = '<div class="booking-actions">';
 
   // Upload downpayment
@@ -261,17 +284,32 @@ function renderBookingActions(booking) {
       "otc",
     ];
 
-    if (onlinePaymentMethods.includes(booking.payment_method)) {
+    // If payment_method is set and it's an online method, show PayMongo button
+    // If payment_method is null/empty, also show PayMongo button as default
+    if (
+      !booking.payment_method ||
+      booking.payment_method === "" ||
+      onlinePaymentMethods.includes(booking.payment_method)
+    ) {
+      console.log(
+        "Rendering PayMongo button for reservation:",
+        booking.reservation_id
+      );
       // Show "Pay Now" button for online payment methods
       html += `
-        <button class="btn-primary" onclick="payWithPayMongo(${booking.reservation_id})">
+        <button 
+          class="btn-primary payment-button" 
+          type="button" 
+          data-reservation-id="${booking.reservation_id}"
+          style="pointer-events: auto !important; cursor: pointer !important; z-index: 10; position: relative;"
+        >
           <i class="fas fa-credit-card"></i> Pay Now via PayMongo
         </button>
       `;
     } else {
       // Show upload button for bank transfer or other methods
       html += `
-        <button class="btn-primary" onclick="openPaymentUploadModal(${booking.reservation_id}, 'downpayment', ${booking.downpayment_amount})">
+        <button class="btn-primary" type="button" onclick="openPaymentUploadModal(${booking.reservation_id}, 'downpayment', ${booking.downpayment_amount})">
           <i class="fas fa-upload"></i> Upload Downpayment
         </button>
       `;
@@ -771,17 +809,32 @@ function formatDate(dateString) {
 /**
  * Pay with PayMongo (supports GCash, Maya, Card, etc.)
  */
-async function payWithPayMongo(reservationId) {
+async function payWithPayMongo(reservationId, btnElement) {
+  console.log("payWithPayMongo called with:", reservationId, btnElement);
+
   if (!confirm("You will be redirected to the payment page. Continue?")) {
     return;
   }
 
+  // Determine button element
+  let btn = btnElement;
+  if (!btn && typeof event !== "undefined" && event && event.target) {
+    btn = event.target;
+  }
+
+  let originalText = "";
+  if (btn) {
+    originalText = btn.innerHTML;
+  }
+
   try {
     // Show loading state
-    const btn = event.target;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-    btn.disabled = true;
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+      btn.disabled = true;
+    }
+
+    console.log("Creating payment intent for reservation:", reservationId);
 
     // Create payment intent
     const response = await fetch("user/create_payment_intent.php", {
@@ -794,7 +847,14 @@ async function payWithPayMongo(reservationId) {
       }),
     });
 
+    if (!response.ok) {
+      const result = await response.json();
+      console.error("Payment API error response:", result);
+      throw new Error(result.message || `HTTP error ${response.status}`);
+    }
+
     const result = await response.json();
+    console.log("Payment intent result:", result);
 
     if (result.success && result.checkout_url) {
       // Redirect to PayMongo checkout page
@@ -803,9 +863,19 @@ async function payWithPayMongo(reservationId) {
       throw new Error(result.message || "Failed to create payment");
     }
   } catch (error) {
-    alert("Error: " + error.message);
+    console.error("Payment error:", error);
+
+    // Show user-friendly error message
+    let errorMsg = error.message;
+    if (errorMsg.includes("Failed to fetch")) {
+      errorMsg =
+        "Unable to connect to payment server. Please check your internet connection and try again.";
+    }
+
+    alert("Payment Error: " + errorMsg);
+
     // Restore button
-    if (btn) {
+    if (btn && originalText) {
       btn.innerHTML = originalText;
       btn.disabled = false;
     }

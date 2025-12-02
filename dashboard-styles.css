@@ -5849,6 +5849,8 @@ body::before {
   flex-direction: column;
   gap: 10px;
   margin-top: 15px;
+  position: relative;
+  z-index: 1;
 }
 
 .booking-actions button {
@@ -5858,12 +5860,15 @@ body::before {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: pointer !important;
+  pointer-events: auto !important;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  position: relative;
+  z-index: 1;
 }
 
 .checkin-countdown {

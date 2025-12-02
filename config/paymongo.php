@@ -75,13 +75,23 @@ function makePaymongoRequest($endpoint, $method = 'GET', $data = null) {
     
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
     curl_close($ch);
     
+    // Log curl errors
+    if ($curlError) {
+        error_log('PayMongo cURL Error: ' . $curlError);
+    }
+    
     $result = json_decode($response, true);
+    
+    // Log raw response for debugging
+    error_log('PayMongo Raw Response: ' . substr($response, 0, 500));
     
     return [
         'success' => $httpCode >= 200 && $httpCode < 300,
         'http_code' => $httpCode,
-        'data' => $result
+        'data' => $result,
+        'curl_error' => $curlError
     ];
 }
