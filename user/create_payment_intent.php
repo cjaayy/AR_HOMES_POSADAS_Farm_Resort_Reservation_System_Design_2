@@ -71,6 +71,9 @@ try {
     $amount = $reservation['downpayment_amount'];
     $amount_in_centavos = (int)($amount * 100); // PayMongo requires amount in centavos
     
+    // Build success URL with reservation ID
+    $success_url = PAYMONGO_SUCCESS_URL . '?reservation_id=' . $reservation_id;
+    
     // Create a dynamic PayMongo Payment Link with the correct amount
     $link_data = [
         'data' => [

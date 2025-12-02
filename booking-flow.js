@@ -72,7 +72,37 @@ function renderBookings(bookings) {
 
       return `
         <div class="booking-card" data-status="${booking.status}">
-          <div class="booking-card-header">
+          ${
+            booking.status === "confirmed" && booking.downpayment_verified == 1
+              ? `
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-radius: 12px 12px 0 0; font-weight: 600;">
+            <i class="fas fa-check-circle" style="font-size: 1.2em;"></i>
+            <span>Downpayment Paid & Verified ${
+              booking.payment_method
+                ? "via " + formatPaymentMethod(booking.payment_method)
+                : ""
+            }</span>
+          </div>
+          `
+              : booking.downpayment_paid == 1 &&
+                booking.status === "pending_confirmation"
+              ? `
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-radius: 12px 12px 0 0; font-weight: 600; margin-bottom: 15px;">
+            <i class="fas fa-clock" style="font-size: 1.2em;"></i>
+            <span>Payment Received ${
+              booking.payment_method
+                ? "via " + formatPaymentMethod(booking.payment_method)
+                : ""
+            } - Awaiting Admin Approval</span>
+          </div>
+          `
+              : ""
+          }
+          <div class="booking-card-header" style="${
+            booking.downpayment_paid == 1 || booking.downpayment_verified == 1
+              ? "margin-top: 0;"
+              : ""
+          }">
             <span class="status-badge ${statusClass}">${statusLabel}</span>
             <span class="booking-id">#${booking.reservation_id}</span>
           </div>
@@ -98,10 +128,30 @@ function renderBookings(bookings) {
                 <span>${booking.guest_name}</span>
               </div>
               <div class="detail-item">
+                <i class="fas fa-calendar-day"></i>
+                <span>${
+                  booking.booking_type === "daytime"
+                    ? booking.number_of_days
+                    : booking.number_of_nights
+                } ${
+        booking.booking_type === "daytime" ? "Day(s)" : "Night(s)"
+      }</span>
+              </div>
+              <div class="detail-item">
                 <i class="fas fa-tag"></i>
                 <span>₱${parseFloat(
-                  booking.total_price
+                  booking.total_amount
                 ).toLocaleString()}</span>
+              </div>
+              <div class="detail-item" style="grid-column: 1/-1; font-size: 0.85em; color: #64748b;">
+                <i class="fas fa-info-circle"></i>
+                <span>₱${parseFloat(booking.base_price).toLocaleString()} × ${
+        booking.booking_type === "daytime"
+          ? booking.number_of_days
+          : booking.number_of_nights
+      } ${
+        booking.booking_type === "daytime" ? "day(s)" : "night(s)"
+      } = ₱${parseFloat(booking.total_amount).toLocaleString()}</span>
               </div>
             </div>
 
@@ -129,6 +179,17 @@ function renderPaymentStatus(booking) {
       ? "pending"
       : "unpaid";
 
+  // Show amount and payment method for paid downpayments
+  const downpaymentAmount = parseFloat(
+    booking.downpayment_amount || 0
+  ).toLocaleString();
+  const paymentMethod = booking.payment_method
+    ? ` via ${formatPaymentMethod(booking.payment_method)}`
+    : "";
+  const paidAt = booking.downpayment_paid_at
+    ? ` on ${new Date(booking.downpayment_paid_at).toLocaleDateString()}`
+    : "";
+
   html += `
     <div class="payment-status-item ${downClass}">
       <i class="fas ${
@@ -139,8 +200,12 @@ function renderPaymentStatus(booking) {
           : "fa-times-circle"
       }"></i>
       <div>
-        <strong>Downpayment (50%)</strong>
-        <span>${downStatus}</span>
+        <strong>Downpayment (50%) - ₱${downpaymentAmount}</strong>
+        <span>${downStatus}${
+    downClass === "verified" || downClass === "pending"
+      ? paymentMethod + paidAt
+      : ""
+  }</span>
       </div>
     </div>
   `;
@@ -184,14 +249,27 @@ function renderBookingActions(booking) {
 
   // Upload downpayment
   if (booking.can_upload_downpayment) {
-    // Check payment method - show GCash or Upload button
-    if (booking.payment_method === "gcash") {
+    // Check payment method - show online payment or upload button
+    const onlinePaymentMethods = [
+      "gcash",
+      "paymaya",
+      "grab_pay",
+      "card",
+      "dob_bpi",
+      "dob_ubp",
+      "atome",
+      "otc",
+    ];
+
+    if (onlinePaymentMethods.includes(booking.payment_method)) {
+      // Show "Pay Now" button for online payment methods
       html += `
-        <button class="btn-primary" onclick="payWithGCash(${booking.reservation_id})">
-          <i class="fas fa-mobile-alt"></i> Pay with GCash
+        <button class="btn-primary" onclick="payWithPayMongo(${booking.reservation_id})">
+          <i class="fas fa-credit-card"></i> Pay Now via PayMongo
         </button>
       `;
     } else {
+      // Show upload button for bank transfer or other methods
       html += `
         <button class="btn-primary" onclick="openPaymentUploadModal(${booking.reservation_id}, 'downpayment', ${booking.downpayment_amount})">
           <i class="fas fa-upload"></i> Upload Downpayment
@@ -200,13 +278,19 @@ function renderBookingActions(booking) {
     }
   }
 
-  // Upload full payment
+  // Full payment info - payable at resort
   if (booking.can_upload_full_payment) {
-    const remainingBalance = booking.total_price - booking.downpayment_amount;
+    const remainingBalance = booking.total_amount - booking.downpayment_amount;
     html += `
-      <button class="btn-primary" onclick="openPaymentUploadModal(${booking.reservation_id}, 'full_payment', ${remainingBalance})">
-        <i class="fas fa-upload"></i> Upload Full Payment
-      </button>
+      <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #0284c7; margin: 10px 0;">
+        <div style="display: flex; align-items: start; gap: 12px;">
+          <i class="fas fa-info-circle" style="color: #0284c7; font-size: 1.3em; margin-top: 2px;"></i>
+          <div>
+            <strong style="color: #0c4a6e; display: block; margin-bottom: 5px;">Remaining Balance: ₱${remainingBalance.toLocaleString()}</strong>
+            <p style="margin: 0; color: #075985; font-size: 0.9em;">Please pay the remaining balance at the resort upon check-in or during your stay.</p>
+          </div>
+        </div>
+      </div>
     `;
   }
 
@@ -219,10 +303,21 @@ function renderBookingActions(booking) {
     `;
   }
 
-  // Cancel reservation
-  if (booking.can_cancel) {
+  // Cancel reservation - visible always but disabled if admin approved
+  if (
+    booking.can_cancel === true ||
+    booking.can_cancel === 1 ||
+    booking.can_cancel === "1"
+  ) {
     html += `
       <button class="btn-danger" onclick="openCancelModal(${booking.reservation_id})">
+        <i class="fas fa-times"></i> Cancel Booking
+      </button>
+    `;
+  } else {
+    // Show disabled button when admin has approved the booking
+    html += `
+      <button class="btn-danger" disabled style="opacity: 0.5; cursor: not-allowed;" title="Cannot cancel - booking has been approved by admin">
         <i class="fas fa-times"></i> Cancel Booking
       </button>
     `;
@@ -640,6 +735,27 @@ function getBookingTypeIcon(bookingType) {
 }
 
 /**
+ * Format payment method name for display
+ */
+function formatPaymentMethod(method) {
+  if (!method) return "";
+
+  const methodMap = {
+    card: "Credit/Debit Card",
+    gcash: "GCash",
+    grab_pay: "GrabPay",
+    otc: "OTC/Coins.ph",
+    paymaya: "Maya",
+    dob_bpi: "BPI Online",
+    dob_ubp: "UnionBank Online",
+    atome: "Atome",
+    bank_transfer: "Bank Transfer",
+  };
+
+  return methodMap[method.toLowerCase()] || method.toUpperCase();
+}
+
+/**
  * Format date for display
  */
 function formatDate(dateString) {
@@ -653,10 +769,10 @@ function formatDate(dateString) {
 // ===========================
 
 /**
- * Pay with GCash using PayMongo
+ * Pay with PayMongo (supports GCash, Maya, Card, etc.)
  */
-async function payWithGCash(reservationId) {
-  if (!confirm("You will be redirected to GCash payment page. Continue?")) {
+async function payWithPayMongo(reservationId) {
+  if (!confirm("You will be redirected to the payment page. Continue?")) {
     return;
   }
 
@@ -681,7 +797,7 @@ async function payWithGCash(reservationId) {
     const result = await response.json();
 
     if (result.success && result.checkout_url) {
-      // Redirect to PayMongo GCash checkout
+      // Redirect to PayMongo checkout page
       window.location.href = result.checkout_url;
     } else {
       throw new Error(result.message || "Failed to create payment");
@@ -694,6 +810,11 @@ async function payWithGCash(reservationId) {
       btn.disabled = false;
     }
   }
+}
+
+// Keep the old function name for backward compatibility
+async function payWithGCash(reservationId) {
+  return payWithPayMongo(reservationId);
 }
 
 // ===========================

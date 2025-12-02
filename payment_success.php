@@ -36,47 +36,90 @@ try {
         throw new Exception('Reservation not found');
     }
     
-    // Get source status from PayMongo
-    $source_id = $reservation['paymongo_source_id'];
-    if ($source_id) {
-        $result = makePaymongoRequest('/sources/' . $source_id, 'GET');
+    // Get link/source status from PayMongo
+    $link_id = $reservation['paymongo_source_id'];
+    if ($link_id) {
+        // Try to get payment link status
+        $result = makePaymongoRequest('/links/' . $link_id, 'GET');
         
         if ($result['success']) {
-            $source = $result['data']['data'];
-            $payment_status = $source['attributes']['status'];
+            $link = $result['data']['data'];
+            $payments = $link['attributes']['payments'] ?? [];
             
-            // Update reservation if payment is successful
-            if ($payment_status === 'chargeable' || $payment_status === 'paid') {
-                // Create payment from the source
-                $payment_data = [
-                    'data' => [
-                        'attributes' => [
-                            'amount' => (int)($reservation['downpayment_amount'] * 100),
-                            'currency' => 'PHP',
-                            'source' => [
-                                'id' => $source_id,
-                                'type' => 'source'
-                            ]
-                        ]
-                    ]
-                ];
+            // Check if there are any successful payments
+            if (!empty($payments)) {
+                $payment = $payments[0]; // Get the first (most recent) payment
+                $payment_id = $payment['id'];
+                $payment_status = $payment['attributes']['status'];
                 
-                $payment_result = makePaymongoRequest('/payments', 'POST', $payment_data);
+                // Extract payment method from payment data
+                $payment_method = 'gcash'; // default
+                $source = $payment['attributes']['source'] ?? null;
+                if ($source && isset($source['type'])) {
+                    $payment_method = strtolower($source['type']);
+                }
                 
-                if ($payment_result['success']) {
-                    $payment = $payment_result['data']['data'];
-                    $payment_id = $payment['id'];
-                    
-                    // Update reservation with payment ID and status
+                // Update reservation if payment is successful
+                if ($payment_status === 'paid') {
+                    // Update reservation with payment ID and status - pending admin confirmation
                     $stmt = $pdo->prepare("
                         UPDATE reservations 
-                        SET status = 'confirmed',
+                        SET status = 'pending_confirmation',
                             paymongo_payment_id = ?,
-                            payment_reference = ?,
-                            payment_date = NOW()
+                            payment_method = ?,
+                            downpayment_paid = 1,
+                            downpayment_reference = ?,
+                            downpayment_paid_at = NOW(),
+                            downpayment_verified = 0
                         WHERE reservation_id = ?
                     ");
-                    $stmt->execute([$payment_id, $payment_id, $reservation_id]);
+                    $stmt->execute([$payment_id, $payment_method, $payment_id, $reservation_id]);
+                }
+            }
+        } else {
+            // Fallback: Try sources API for backwards compatibility
+            $result = makePaymongoRequest('/sources/' . $link_id, 'GET');
+            
+            if ($result['success']) {
+                $source = $result['data']['data'];
+                $payment_status = $source['attributes']['status'];
+                
+                // Update reservation if payment is successful
+                if ($payment_status === 'chargeable' || $payment_status === 'paid') {
+                    // Create payment from the source
+                    $payment_data = [
+                        'data' => [
+                            'attributes' => [
+                                'amount' => (int)($reservation['downpayment_amount'] * 100),
+                                'currency' => 'PHP',
+                                'source' => [
+                                    'id' => $link_id,
+                                    'type' => 'source'
+                                ]
+                            ]
+                        ]
+                    ];
+                    
+                    $payment_result = makePaymongoRequest('/payments', 'POST', $payment_data);
+                    
+                    if ($payment_result['success']) {
+                        $payment = $payment_result['data']['data'];
+                        $payment_id = $payment['id'];
+                        
+                        // Update reservation with payment ID and status - pending admin confirmation
+                        $stmt = $pdo->prepare("
+                            UPDATE reservations 
+                            SET status = 'pending_confirmation',
+                                paymongo_payment_id = ?,
+                                payment_method = 'gcash',
+                                downpayment_paid = 1,
+                                downpayment_reference = ?,
+                                downpayment_paid_at = NOW(),
+                                downpayment_verified = 0
+                            WHERE reservation_id = ?
+                        ");
+                        $stmt->execute([$payment_id, $payment_id, $reservation_id]);
+                    }
                 }
             }
         }

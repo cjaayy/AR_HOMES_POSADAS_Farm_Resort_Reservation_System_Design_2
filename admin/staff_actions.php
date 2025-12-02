@@ -84,11 +84,31 @@ try {
         $status = trim($_POST['status'] ?? '');
         if ($id <= 0 || $status === '') { echo json_encode(['success'=>false,'message'=>'Invalid']); exit; }
         
-        // Update status
-        $stmt = $conn->prepare("UPDATE reservations SET status = :s, updated_at = NOW() WHERE reservation_id = :id");
-        $stmt->bindParam(':s', $status);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
+        // Update status - if confirming, also verify downpayment
+        if ($status === 'confirmed') {
+            $admin_id = $_SESSION['admin_id'] ?? 0;
+            $stmt = $conn->prepare("
+                UPDATE reservations 
+                SET status = :s, 
+                    downpayment_verified = 1,
+                    downpayment_verified_by = :admin_id,
+                    downpayment_verified_at = NOW(),
+                    date_locked = 1,
+                    locked_until = DATE_ADD(check_in_date, INTERVAL 1 DAY),
+                    updated_at = NOW() 
+                WHERE reservation_id = :id
+            ");
+            $stmt->bindParam(':s', $status);
+            $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+        } else {
+            // For other status changes, just update status
+            $stmt = $conn->prepare("UPDATE reservations SET status = :s, updated_at = NOW() WHERE reservation_id = :id");
+            $stmt->bindParam(':s', $status);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+        }
         
         // If status is 'confirmed', send notification and email
         if ($status === 'confirmed') {

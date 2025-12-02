@@ -128,17 +128,23 @@ try {
         $reservation['days_until_checkin'] = $diff->days;
         $reservation['is_past_checkin'] = $now > $check_in;
         
-        // Can request rebooking? (7+ days before check-in and status=confirmed)
+        // Can request rebooking? (3+ days before check-in and status=confirmed)
         $reservation['can_rebook'] = (
             $reservation['status'] === 'confirmed' && 
-            $reservation['days_until_checkin'] >= 7 &&
+            $reservation['days_until_checkin'] >= 3 &&
             !$reservation['is_past_checkin'] &&
             !$reservation['rebooking_requested']
         );
         
-        // Can cancel? (before check-in and not checked in)
+        // Can cancel? (before check-in, not checked in, and not admin-approved)
+        // Once admin approves (status=confirmed AND downpayment_verified=1), cannot cancel
         $reservation['can_cancel'] = (
-            in_array($reservation['status'], ['pending_payment', 'pending_confirmation', 'confirmed']) &&
+            in_array($reservation['status'], ['pending_payment', 'pending_confirmation']) &&
+            !$reservation['is_past_checkin'] &&
+            $reservation['checked_in'] == 0
+        ) || (
+            $reservation['status'] === 'confirmed' &&
+            $reservation['downpayment_verified'] == 0 &&
             !$reservation['is_past_checkin'] &&
             $reservation['checked_in'] == 0
         );
