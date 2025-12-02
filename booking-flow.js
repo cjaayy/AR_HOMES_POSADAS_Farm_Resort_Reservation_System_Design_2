@@ -249,7 +249,7 @@ function renderPaymentStatus(booking) {
             : "fa-times-circle"
         }"></i>
         <div>
-          <strong>Full Payment (50%)</strong>
+          <strong>Full Payment</strong>
           <span>${fullStatus}</span>
         </div>
       </div>
