@@ -1730,108 +1730,160 @@
 
           <!-- Profile Content -->
           <div class="content-section" id="profile-section">
-            <div class="profile-form-container">
-              <form class="profile-form" id="profileForm">
-                <h3 style="margin-bottom: 20px; color: #2c3e50">
-                  <i class="fas fa-user-circle"></i> Personal Information
-                </h3>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="profileGivenName">
-                      <i class="fas fa-user"></i> Given Name
-                    </label>
-                    <input
-                      type="text"
-                      id="profileGivenName"
-                      name="givenName"
-                      placeholder="Given Name"
-                      readonly
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="profileMiddleName">
-                      <i class="fas fa-user"></i> Middle Name
-                    </label>
-                    <input
-                      type="text"
-                      id="profileMiddleName"
-                      name="middleName"
-                      placeholder="Middle Name"
-                      readonly
-                    />
-                  </div>
+            <!-- Profile Stats Grid -->
+            <div class="profile-stats-grid">
+              <div class="profile-stats-card">
+                <div class="stats-icon">
+                  <i class="fas fa-calendar-check"></i>
                 </div>
-
-                <div class="form-group">
-                  <label for="profileLastName">
-                    <i class="fas fa-user"></i> Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="profileLastName"
-                    name="lastName"
-                    placeholder="Last Name"
-                    readonly
-                  />
+                <div class="stats-content">
+                  <h3 class="stats-number" id="profileTotalBookings">0</h3>
+                  <p class="stats-label">Total Bookings</p>
                 </div>
-
-                <div class="form-group">
-                  <label for="profileUsername">
-                    <i class="fas fa-user-tag"></i> Username
-                  </label>
-                  <input
-                    type="text"
-                    id="profileUsername"
-                    name="username"
-                    placeholder="Username"
-                    readonly
-                  />
+              </div>
+              <div class="profile-stats-card">
+                <div class="stats-icon pending">
+                  <i class="fas fa-star"></i>
                 </div>
-
-                <div class="form-group">
-                  <label for="profileEmail">
-                    <i class="fas fa-envelope"></i> Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="profileEmail"
-                    name="email"
-                    placeholder="Email"
-                    readonly
-                  />
+                <div class="stats-content">
+                  <h3 class="stats-number" id="profileReviewsGiven">0</h3>
+                  <p class="stats-label">Reviews Given</p>
                 </div>
-
-                <div class="form-group">
-                  <label for="profilePhone">
-                    <i class="fas fa-phone"></i> Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="profilePhone"
-                    name="phone"
-                    placeholder="Phone Number"
-                    readonly
-                  />
+              </div>
+              <div class="profile-stats-card">
+                <div class="stats-icon approved">
+                  <i class="fas fa-award"></i>
                 </div>
-
-                <div
-                  class="form-group"
-                  style="
-                    background: #f8f9fa;
-                    padding: 15px;
-                    border-radius: 8px;
-                    border: 1px solid #e9ecef;
-                  "
-                >
-                  <p style="margin: 0; color: #6c757d; font-size: 14px">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Note:</strong> Profile information is currently
-                    read-only. Contact support to update your details.
-                  </p>
+                <div class="stats-content">
+                  <h3 class="stats-number" id="profileMemberSince">2024</h3>
+                  <p class="stats-label">Member Since</p>
                 </div>
-              </form>
+              </div>
             </div>
+
+            <!-- Profile Information Cards -->
+            <div class="profile-cards-container">
+              <!-- Personal Information Card -->
+              <div class="profile-info-card">
+                <div class="profile-card-header">
+                  <h3>
+                    <i class="fas fa-user-circle"></i> Personal Information
+                  </h3>
+                </div>
+                <div class="profile-card-body">
+                  <div class="profile-info-grid">
+                    <div class="profile-info-item">
+                      <div class="profile-info-icon">
+                        <i class="fas fa-user"></i>
+                      </div>
+                      <div class="profile-info-content">
+                        <label>Given Name</label>
+                        <p id="displayGivenName">-</p>
+                      </div>
+                    </div>
+                    <div class="profile-info-item">
+                      <div class="profile-info-icon">
+                        <i class="fas fa-user"></i>
+                      </div>
+                      <div class="profile-info-content">
+                        <label>Middle Name</label>
+                        <p id="displayMiddleName">-</p>
+                      </div>
+                    </div>
+                    <div class="profile-info-item">
+                      <div class="profile-info-icon">
+                        <i class="fas fa-user"></i>
+                      </div>
+                      <div class="profile-info-content">
+                        <label>Last Name</label>
+                        <p id="displayLastName">-</p>
+                      </div>
+                    </div>
+                    <div class="profile-info-item">
+                      <div class="profile-info-icon">
+                        <i class="fas fa-user-tag"></i>
+                      </div>
+                      <div class="profile-info-content">
+                        <label>Username</label>
+                        <p id="displayUsername">-</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact Information Card -->
+              <div class="profile-info-card">
+                <div class="profile-card-header">
+                  <h3>
+                    <i class="fas fa-address-book"></i> Contact Information
+                  </h3>
+                </div>
+                <div class="profile-card-body">
+                  <div class="profile-info-grid">
+                    <div class="profile-info-item">
+                      <div class="profile-info-icon">
+                        <i class="fas fa-envelope"></i>
+                      </div>
+                      <div class="profile-info-content">
+                        <label>Email Address</label>
+                        <p id="displayEmail">-</p>
+                      </div>
+                    </div>
+                    <div class="profile-info-item">
+                      <div class="profile-info-icon">
+                        <i class="fas fa-phone"></i>
+                      </div>
+                      <div class="profile-info-content">
+                        <label>Phone Number</label>
+                        <p id="displayPhone">-</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Account Status Card -->
+              <div class="profile-info-card">
+                <div class="profile-card-header">
+                  <h3><i class="fas fa-shield-alt"></i> Account Status</h3>
+                </div>
+                <div class="profile-card-body">
+                  <div class="account-status-grid">
+                    <div class="status-badge-item verified">
+                      <i class="fas fa-check-circle"></i>
+                      <span>Email Verified</span>
+                    </div>
+                    <div class="status-badge-item verified">
+                      <i class="fas fa-check-circle"></i>
+                      <span>Account Active</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Information Note -->
+              <div class="profile-info-notice">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                  <strong>Note:</strong> Profile information is currently
+                  read-only. To update your details, please contact our support
+                  team at
+                  <a href="mailto:support@arhomes.com">support@arhomes.com</a>
+                  or call us at <strong>(123) 456-7890</strong>.
+                </div>
+              </div>
+            </div>
+
+            <!-- Hidden form fields for backward compatibility -->
+            <form class="profile-form" id="profileForm" style="display: none">
+              <input type="text" id="profileGivenName" name="givenName" />
+              <input type="text" id="profileMiddleName" name="middleName" />
+              <input type="text" id="profileLastName" name="lastName" />
+              <input type="text" id="profileUsername" name="username" />
+              <input type="email" id="profileEmail" name="email" />
+              <input type="tel" id="profilePhone" name="phone" />
+            </form>
           </div>
 
           <!-- My Bookings Section (Active Reservations) -->
@@ -2737,7 +2789,7 @@
           console.log("✅ Header updated:", window.userData.full_name);
         }
 
-        // Update profile fields
+        // Update profile fields (hidden form)
         const profileFields = {
           profileGivenName: window.userData.given_name,
           profileMiddleName: window.userData.middle_name,
@@ -2753,6 +2805,44 @@
             element.value = value || "";
             console.log(`✅ ${fieldId} updated:`, value);
           }
+        }
+
+        // Update new profile display elements
+        const profileDisplayFields = {
+          displayGivenName: window.userData.given_name,
+          displayMiddleName: window.userData.middle_name,
+          displayLastName: window.userData.last_name,
+          displayUsername: window.userData.username,
+          displayEmail: window.userData.email,
+          displayPhone: window.userData.phone_number,
+        };
+
+        for (const [fieldId, value] of Object.entries(profileDisplayFields)) {
+          const element = document.getElementById(fieldId);
+          if (element) {
+            element.textContent = value || "-";
+            console.log(`✅ ${fieldId} display updated:`, value);
+          }
+        }
+
+        // Update profile stats (you can customize these based on actual data)
+        const totalBookingsElement = document.getElementById(
+          "profileTotalBookings"
+        );
+        const reviewsGivenElement = document.getElementById(
+          "profileReviewsGiven"
+        );
+        const memberSinceElement =
+          document.getElementById("profileMemberSince");
+
+        if (totalBookingsElement) totalBookingsElement.textContent = "0"; // Will be updated from actual data
+        if (reviewsGivenElement) reviewsGivenElement.textContent = "0"; // Will be updated from actual data
+        if (memberSinceElement) {
+          // Extract year from created_at if available, otherwise use 2024
+          const memberYear = window.userData.created_at
+            ? new Date(window.userData.created_at).getFullYear()
+            : "2024";
+          memberSinceElement.textContent = memberYear;
         }
 
         // Refresh userData in dashboard-script.js if the function exists
