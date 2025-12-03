@@ -6133,3 +6133,107 @@ button:disabled {
     opacity: 0;
   }
 }
+
+/* ===== FLATPICKR CUSTOM STYLES FOR UNAVAILABLE DATES ===== */
+.flatpickr-calendar {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  font-family: "Poppins", sans-serif;
+}
+
+/* Style for Flatpickr's built-in disabled class */
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.unavailable-date {
+  background-color: #ffebee !important;
+  color: #d32f2f !important;
+  cursor: not-allowed !important;
+  position: relative;
+  text-decoration: line-through;
+  opacity: 0.7 !important;
+  pointer-events: none !important;
+}
+
+.flatpickr-day.flatpickr-disabled:hover,
+.flatpickr-day.unavailable-date:hover {
+  background-color: #ffebee !important;
+  color: #d32f2f !important;
+  border-color: #d32f2f !important;
+}
+
+.flatpickr-day.unavailable-date .unavailable-indicator {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  font-size: 12px;
+  color: #f5576c;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.flatpickr-day.selected.unavailable-date,
+.flatpickr-day.startRange.unavailable-date,
+.flatpickr-day.endRange.unavailable-date,
+.flatpickr-day.selected.flatpickr-disabled,
+.flatpickr-day.startRange.flatpickr-disabled,
+.flatpickr-day.endRange.flatpickr-disabled {
+  background-color: #ffebee !important;
+  color: #d32f2f !important;
+  cursor: not-allowed !important;
+}
+
+/* Highlight available dates */
+.flatpickr-day:not(.unavailable-date):not(.flatpickr-disabled):not(
+    .prevMonthDay
+  ):not(.nextMonthDay) {
+  background-color: #fff;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.flatpickr-day:not(.unavailable-date):not(.flatpickr-disabled):not(
+    .prevMonthDay
+  ):not(.nextMonthDay):hover {
+  background-color: #667eea !important;
+  color: white !important;
+  border-color: #667eea !important;
+}
+
+/* Selected date styling */
+.flatpickr-day.selected:not(.unavailable-date) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border-color: #667eea !important;
+}
+
+/* Today's date styling */
+.flatpickr-day.today:not(.unavailable-date) {
+  border-color: #667eea !important;
+  font-weight: 600;
+}
+
+.flatpickr-day.today.unavailable-date {
+  border-color: #ddd !important;
+}
+
+/* Month navigation styling */
+.flatpickr-months {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+  background: transparent;
+  color: white;
+}
+
+.flatpickr-prev-month:hover svg,
+.flatpickr-next-month:hover svg {
+  fill: white !important;
+}
+
+/* Weekday styling */
+.flatpickr-weekday {
+  color: #667eea;
+  font-weight: 600;
+}

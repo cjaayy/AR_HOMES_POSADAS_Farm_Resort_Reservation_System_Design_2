@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Unavailable Dates API</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .result {
+        background: #f0f0f0;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .error {
+        background: #ffebee;
+      }
+      .success {
+        background: #e8f5e9;
+      }
+      pre {
+        background: #263238;
+        color: #aed581;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test Unavailable Dates API</h1>
+
+    <button onclick="testNighttime()">Test Nighttime Booking</button>
+    <button onclick="testDaytime()">Test Daytime Booking</button>
+
+    <div id="result"></div>
+
+    <script>
+      async function testBookingType(bookingType) {
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = "<p>Loading...</p>";
+
+        try {
+          console.log("Testing booking type:", bookingType);
+
+          const response = await fetch("user/get_unavailable_dates.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ booking_type: bookingType }),
+          });
+
+          const text = await response.text();
+          console.log("Raw response:", text);
+
+          const data = JSON.parse(text);
+          console.log("Parsed data:", data);
+
+          let html = '<div class="result success">';
+          html += "<h2>✅ Success - Booking Type: " + bookingType + "</h2>";
+          html +=
+            "<p><strong>Count:</strong> " +
+            data.count +
+            " unavailable dates</p>";
+          html += "<p><strong>Message:</strong> " + data.message + "</p>";
+
+          if (data.unavailable_dates && data.unavailable_dates.length > 0) {
+            html += "<h3>Unavailable Dates:</h3><ul>";
+            data.unavailable_dates.forEach((date) => {
+              html += "<li>" + date + "</li>";
+            });
+            html += "</ul>";
+          }
+
+          if (data.debug_reservations && data.debug_reservations.length > 0) {
+            html += "<h3>Reservation Details:</h3>";
+            data.debug_reservations.forEach((res) => {
+              html +=
+                "<p>📅 <strong>" +
+                res.date +
+                "</strong> - " +
+                res.guest +
+                " (ID: " +
+                res.reservation_id +
+                ", Status: " +
+                res.status +
+                ")</p>";
+            });
+          }
+
+          html += "<h3>Full Response:</h3>";
+          html += "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
+          html += "</div>";
+
+          resultDiv.innerHTML = html;
+        } catch (error) {
+          console.error("Error:", error);
+          resultDiv.innerHTML =
+            '<div class="result error">' +
+            "<h2>❌ Error</h2>" +
+            "<p>" +
+            error.message +
+            "</p>" +
+            "<pre>" +
+            error.stack +
+            "</pre>" +
+            "</div>";
+        }
+      }
+
+      function testNighttime() {
+        testBookingType("nighttime");
+      }
+
+      function testDaytime() {
+        testBookingType("daytime");
+      }
+
+      // Auto-test on load
+      window.onload = function () {
+        testNighttime();
+      };
+    </script>
+  </body>
+</html>

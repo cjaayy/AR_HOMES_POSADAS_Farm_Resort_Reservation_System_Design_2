@@ -2852,6 +2852,96 @@ document.addEventListener("click", function (event) {
   }
 });
 
+// Initialize date picker with unavailable dates
+let flatpickrInstance = null;
+
+async function fetchUnavailableDates(bookingType) {
+  try {
+    const response = await fetch("user/get_unavailable_dates.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ booking_type: bookingType }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      return data.unavailable_dates || [];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching unavailable dates:", error);
+    return [];
+  }
+}
+
+async function initializeDatePicker(bookingType) {
+  console.log("🗓️ Initializing date picker for booking type:", bookingType);
+
+  const checkInDateInput = document.getElementById("checkInDate");
+
+  if (!checkInDateInput) {
+    console.error("❌ Check-in date input not found");
+    return;
+  }
+
+  // Destroy existing instance if any
+  if (flatpickrInstance) {
+    console.log("🗑️ Destroying previous flatpickr instance");
+    flatpickrInstance.destroy();
+    flatpickrInstance = null;
+  }
+
+  // Fetch unavailable dates for THIS specific booking type
+  console.log("📅 Fetching unavailable dates for:", bookingType);
+  const unavailableDates = await fetchUnavailableDates(bookingType);
+  console.log(
+    "✅ Unavailable dates fetched for " + bookingType + ":",
+    unavailableDates
+  );
+  console.log("📊 Total dates blocked:", unavailableDates.length);
+  console.log(
+    "🔍 Exact dates that will be blocked:",
+    JSON.stringify(unavailableDates)
+  );
+
+  // Initialize Flatpickr with disabled dates
+  flatpickrInstance = flatpickr(checkInDateInput, {
+    minDate: "today",
+    dateFormat: "Y-m-d",
+    disable: unavailableDates,
+    onChange: function (selectedDates, dateStr, instance) {
+      console.log("📅 Date selected:", dateStr);
+      // Update price summary when date changes
+      if (typeof updatePriceSummary === "function") {
+        updatePriceSummary();
+      }
+    },
+    onDayCreate: function (dObj, dStr, fp, dayElem) {
+      // Add visual styling to unavailable dates
+      // Use local date string to avoid timezone issues
+      const year = dayElem.dateObj.getFullYear();
+      const month = String(dayElem.dateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(dayElem.dateObj.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      if (unavailableDates.includes(dateStr)) {
+        console.log("🚫 Marking date as unavailable:", dateStr);
+        dayElem.classList.add("unavailable-date");
+        dayElem.innerHTML += '<span class="unavailable-indicator">✕</span>';
+      }
+    },
+  });
+
+  console.log(
+    "✅ Flatpickr initialized with",
+    unavailableDates.length,
+    "disabled dates"
+  );
+}
+
 // Go back to package selection (Step 1)
 function goBackToRooms() {
   const step1 = document.getElementById("step1");
@@ -2914,26 +3004,15 @@ function selectRoomPackageDirect(packageType) {
   document.getElementById("summaryCheckOutTime").textContent =
     window.bookingTypes[type].checkOutTime;
 
-  // Update duration label
-  const durationGroup = document.getElementById("durationGroup");
-  const durationLabel = durationGroup.querySelector("label");
-  durationLabel.textContent =
-    window.bookingTypes[type].durationLabel === "day(s)"
-      ? "Number of Days *"
-      : window.bookingTypes[type].durationLabel === "night(s)"
-      ? "Number of Nights *"
-      : "Number of Sessions *";
-
-  // Update price summary
+  // Update price summary (single session booking)
   updatePriceSummary();
 
   // Hide step 1, show step 2 (booking details)
   document.getElementById("step1").style.display = "none";
   document.getElementById("step2").style.display = "block";
 
-  // Set minimum date to today
-  const today = new Date().toISOString().split("T")[0];
-  document.getElementById("checkInDate").min = today;
+  // Initialize date picker with unavailable dates
+  initializeDatePicker(type);
 
   showNotification(`${packageNames[packageType]} selected`, "success");
 }
@@ -2967,24 +3046,15 @@ function selectRoomPackage(packageType) {
   document.getElementById("summaryCheckOutTime").textContent =
     window.bookingTypes[type].checkOutTime;
 
-  // Update duration label
-  const durationGroup = document.getElementById("durationGroup");
-  const durationLabel = durationGroup.querySelector("label");
-  durationLabel.textContent =
-    window.bookingTypes[type].durationLabel === "day(s)"
-      ? "Number of Days *"
-      : "Number of Nights *";
-
-  // Update price summary
+  // Update price summary (single session booking)
   updatePriceSummary();
 
   // Hide step 1, show step 2
   document.getElementById("step1").style.display = "none";
   document.getElementById("step2").style.display = "block";
 
-  // Set minimum date to today
-  const today = new Date().toISOString().split("T")[0];
-  document.getElementById("checkInDate").min = today;
+  // Initialize date picker with unavailable dates
+  initializeDatePicker(type);
 
   showNotification(`${packageNames[packageType]} selected`, "success");
 }
@@ -3000,13 +3070,13 @@ function goBackToStep(stepNumber) {
   document.getElementById(`step${stepNumber}`).style.display = "block";
 }
 
-// Update price summary when duration changes
+// Update price summary - Single session booking (duration = 1)
 function updatePriceSummary() {
-  const duration = parseInt(document.getElementById("duration").value) || 0;
+  const duration = 1; // Always 1 for single session booking
   const basePrice = window.reservationData.basePrice;
   const type = window.reservationData.bookingType;
 
-  const totalAmount = basePrice * duration;
+  const totalAmount = basePrice; // No multiplication, single session only
   const downpayment = 1000;
   const balance = totalAmount - downpayment;
 
@@ -3017,11 +3087,6 @@ function updatePriceSummary() {
   window.reservationData.balance = balance;
 
   // Update UI
-  document.getElementById("priceBase").textContent =
-    "₱" + basePrice.toLocaleString("en-PH", { minimumFractionDigits: 2 });
-  document.getElementById(
-    "priceDuration"
-  ).textContent = `${duration} ${window.bookingTypes[type].durationLabel}`;
   document.getElementById("priceTotal").textContent =
     "₱" + totalAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 });
   document.getElementById("priceDownpayment").textContent =

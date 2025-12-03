@@ -72,7 +72,7 @@
     />
 
     <!-- CSS -->
-    <link rel="stylesheet" href="dashboard-styles.css?v=20251127231800" />
+    <link rel="stylesheet" href="dashboard-styles.css?v=20251203002" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -86,6 +86,12 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Flatpickr for date picker with disabled dates -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
     />
   </head>
 
@@ -407,6 +413,37 @@
                         ₱<span id="daytime-price-main">6,000</span>
                       </div>
                       <div class="package-time">9:00 AM - 5:00 PM</div>
+                      <div
+                        style="
+                          margin-top: 8px;
+                          padding: 6px 8px;
+                          background: #e3f2fd;
+                          border-radius: 6px;
+                          font-size: 0.8em;
+                          color: #1565c0;
+                          border-left: 3px solid #2196f3;
+                        "
+                      >
+                        <i
+                          class="fas fa-calendar-day"
+                          style="margin-right: 5px"
+                        ></i>
+                        <strong>Duration:</strong> 1 Day Only (Same Day)
+                      </div>
+                      <div
+                        style="
+                          margin-top: 8px;
+                          padding: 8px;
+                          background: #fff3cd;
+                          border-radius: 6px;
+                          font-size: 0.85em;
+                          color: #856404;
+                          border-left: 3px solid #ffc107;
+                        "
+                      >
+                        <i class="fas fa-clock" style="margin-right: 5px"></i>
+                        <strong>Exceeding Hours:</strong> ₱500.00/hour
+                      </div>
                     </div>
 
                     <div class="included-rooms">
@@ -592,6 +629,37 @@
                         ₱<span id="nighttime-price-main">10,000</span>
                       </div>
                       <div class="package-time">7:00 PM - 7:00 AM</div>
+                      <div
+                        style="
+                          margin-top: 8px;
+                          padding: 6px 8px;
+                          background: #e3f2fd;
+                          border-radius: 6px;
+                          font-size: 0.8em;
+                          color: #1565c0;
+                          border-left: 3px solid #2196f3;
+                        "
+                      >
+                        <i
+                          class="fas fa-calendar-day"
+                          style="margin-right: 5px"
+                        ></i>
+                        <strong>Duration:</strong> 2 Days (Night + Morning)
+                      </div>
+                      <div
+                        style="
+                          margin-top: 8px;
+                          padding: 8px;
+                          background: #fff3cd;
+                          border-radius: 6px;
+                          font-size: 0.85em;
+                          color: #856404;
+                          border-left: 3px solid #ffc107;
+                        "
+                      >
+                        <i class="fas fa-clock" style="margin-right: 5px"></i>
+                        <strong>Exceeding Hours:</strong> ₱500.00/hour
+                      </div>
                     </div>
 
                     <div class="included-rooms">
@@ -789,6 +857,37 @@
                       </div>
                       <div class="package-time">
                         2:00 PM - 12:00 NN (Next Day)
+                      </div>
+                      <div
+                        style="
+                          margin-top: 8px;
+                          padding: 6px 8px;
+                          background: #e3f2fd;
+                          border-radius: 6px;
+                          font-size: 0.8em;
+                          color: #1565c0;
+                          border-left: 3px solid #2196f3;
+                        "
+                      >
+                        <i
+                          class="fas fa-calendar-day"
+                          style="margin-right: 5px"
+                        ></i>
+                        <strong>Duration:</strong> 2 Days (22 Hours)
+                      </div>
+                      <div
+                        style="
+                          margin-top: 8px;
+                          padding: 8px;
+                          background: #fff3cd;
+                          border-radius: 6px;
+                          font-size: 0.85em;
+                          color: #856404;
+                          border-left: 3px solid #ffc107;
+                        "
+                      >
+                        <i class="fas fa-clock" style="margin-right: 5px"></i>
+                        <strong>Exceeding Hours:</strong> ₱500.00/hour
                       </div>
                     </div>
 
@@ -1329,19 +1428,13 @@
                         required
                       />
                     </div>
-                    <div class="form-group" id="durationGroup">
-                      <label for="duration">Duration *</label>
-                      <select id="duration" name="duration" required>
-                        <option value="">Select duration</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                      </select>
-                    </div>
+                    <!-- Duration field hidden - single session booking only -->
+                    <input
+                      type="hidden"
+                      id="duration"
+                      name="duration"
+                      value="1"
+                    />
                   </div>
                 </div>
 
@@ -1388,16 +1481,8 @@
                 <!-- Price Summary -->
                 <div class="price-summary">
                   <h3>Price Breakdown</h3>
-                  <div class="price-row">
-                    <span>Base Price:</span>
-                    <span id="priceBase">₱0.00</span>
-                  </div>
-                  <div class="price-row">
-                    <span>Duration:</span>
-                    <span id="priceDuration">0 day(s)</span>
-                  </div>
                   <div class="price-row total">
-                    <span>Total Amount:</span>
+                    <span>Package Price:</span>
                     <span id="priceTotal">₱0.00</span>
                   </div>
                   <div class="price-row downpayment">
@@ -3196,8 +3281,11 @@
       console.log("✅ testButtons() ready");
     </script>
 
+    <!-- Flatpickr JavaScript - Must load BEFORE dashboard-script.js -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <!-- Load Dashboard Script (for additional functionality) -->
-    <script src="dashboard-script.js?v=2.0"></script>
+    <script src="dashboard-script.js?v=20251203008"></script>
 
     <!-- Load Booking Flow Script -->
     <script src="booking-flow.js?v=2.0"></script>

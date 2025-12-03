@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flatpickr Date Test</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 8px;
+      }
+      .calendar-container {
+        margin: 20px 0;
+      }
+      pre {
+        background: #263238;
+        color: #aed581;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔬 Flatpickr Date Blocking Test</h1>
+
+    <div class="test-section">
+      <h3>Step 1: Check API Response</h3>
+      <button onclick="fetchDates()">Fetch Unavailable Dates from API</button>
+      <pre id="api-response">Click button to fetch...</pre>
+    </div>
+
+    <div class="test-section">
+      <h3>Step 2: Test Flatpickr Calendar</h3>
+      <p>This calendar will use the EXACT same data as your dashboard:</p>
+      <input
+        type="text"
+        id="testCalendar"
+        placeholder="Select date"
+        style="padding: 10px; width: 300px; font-size: 16px"
+      />
+      <pre id="flatpickr-config">Flatpickr not initialized yet...</pre>
+    </div>
+
+    <div class="test-section">
+      <h3>Step 3: Manual Date Check</h3>
+      <p>Check if specific dates are in the disabled array:</p>
+      <div id="date-checks"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+      let unavailableDates = [];
+      let fp = null;
+
+      async function fetchDates() {
+        try {
+          const response = await fetch("user/get_unavailable_dates.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ booking_type: "daytime" }),
+          });
+
+          const data = await response.json();
+          document.getElementById("api-response").textContent = JSON.stringify(
+            data,
+            null,
+            2
+          );
+
+          if (data.success && data.unavailable_dates) {
+            unavailableDates = data.unavailable_dates;
+            initCalendar();
+            checkDates();
+          }
+        } catch (error) {
+          document.getElementById("api-response").textContent =
+            "Error: " + error.message;
+        }
+      }
+
+      function initCalendar() {
+        const input = document.getElementById("testCalendar");
+
+        if (fp) {
+          fp.destroy();
+        }
+
+        console.log(
+          "Initializing Flatpickr with disabled dates:",
+          unavailableDates
+        );
+
+        fp = flatpickr(input, {
+          minDate: "today",
+          dateFormat: "Y-m-d",
+          disable: unavailableDates,
+          inline: true,
+          onDayCreate: function (dObj, dStr, fp, dayElem) {
+            const dateStr = dayElem.dateObj.toISOString().split("T")[0];
+            if (unavailableDates.includes(dateStr)) {
+              console.log("🚫 Marking as unavailable:", dateStr);
+              dayElem.style.backgroundColor = "#ffebee";
+              dayElem.style.color = "#d32f2f";
+              dayElem.style.textDecoration = "line-through";
+              dayElem.innerHTML += ' <span style="color: red;">✕</span>';
+            }
+          },
+        });
+
+        document.getElementById("flatpickr-config").textContent =
+          "Flatpickr Config:\n" +
+          "- minDate: today\n" +
+          "- dateFormat: Y-m-d\n" +
+          "- disable array: " +
+          JSON.stringify(unavailableDates) +
+          "\n- disable array length: " +
+          unavailableDates.length;
+      }
+
+      function checkDates() {
+        const testDates = [
+          "2025-12-03",
+          "2025-12-04",
+          "2025-12-05",
+          "2025-12-06",
+          "2025-12-07",
+        ];
+
+        let html = '<table style="width: 100%; border-collapse: collapse;">';
+        html +=
+          '<tr style="background: #667eea; color: white;"><th style="padding: 10px;">Date</th><th>In Disabled Array?</th><th>Array Index</th></tr>';
+
+        testDates.forEach((date) => {
+          const isDisabled = unavailableDates.includes(date);
+          const index = unavailableDates.indexOf(date);
+          const bgColor = isDisabled ? "#ffebee" : "#e8f5e9";
+          const textColor = isDisabled ? "#d32f2f" : "#2e7d32";
+
+          html += `<tr style="background: ${bgColor}; color: ${textColor};">`;
+          html += `<td style="padding: 10px; font-weight: bold;">${date}</td>`;
+          html += `<td style="padding: 10px;">${
+            isDisabled ? "❌ YES - BLOCKED" : "✅ NO - AVAILABLE"
+          }</td>`;
+          html += `<td style="padding: 10px;">${
+            index >= 0 ? index : "N/A"
+          }</td>`;
+          html += "</tr>";
+        });
+
+        html += "</table>";
+        document.getElementById("date-checks").innerHTML = html;
+      }
+
+      // Auto-run on load
+      window.onload = fetchDates;
+    </script>
+  </body>
+</html>
