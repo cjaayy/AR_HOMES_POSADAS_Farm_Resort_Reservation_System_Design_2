@@ -62,9 +62,20 @@ try {
     
     // Check if rebooking is allowed (7 days before check-in)
     $check_in = new DateTime($reservation['check_in_date']);
+    $check_in->setTime(0, 0, 0);
     $today = new DateTime();
-    $days_until_checkin = $today->diff($check_in)->days;
+    $today->setTime(0, 0, 0);
     
+    // Calculate days until check-in (positive = future, negative = past)
+    $interval = $today->diff($check_in);
+    $days_until_checkin = $interval->days * ($interval->invert ? -1 : 1);
+    
+    // Check if check-in is in the past
+    if ($days_until_checkin < 0) {
+        throw new Exception('Cannot rebook a reservation with a past check-in date.');
+    }
+    
+    // Check if within 7-day restriction
     if ($days_until_checkin < 7) {
         throw new Exception('Rebooking is only allowed 7 days or more before check-in date. You have ' . $days_until_checkin . ' days remaining.');
     }

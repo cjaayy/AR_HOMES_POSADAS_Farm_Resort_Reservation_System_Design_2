@@ -421,7 +421,7 @@ function renderBookingActions(booking) {
   // Request rebooking
   if (booking.can_rebook) {
     html += `
-      <button class="btn-secondary" onclick="openRebookingModal(${booking.reservation_id}, '${booking.check_in_date}')">
+      <button class="btn-secondary" onclick="openRebookingModal('${booking.reservation_id}', '${booking.check_in_date}')">
         <i class="fas fa-calendar-alt"></i> Request Rebooking
       </button>
     `;
@@ -539,23 +539,77 @@ document.addEventListener("DOMContentLoaded", function () {
  * Open rebooking modal
  */
 function openRebookingModal(reservationId, currentCheckInDate) {
-  document.getElementById("rebookReservationId").value = reservationId;
-  document.getElementById("currentCheckInDate").textContent =
-    formatDate(currentCheckInDate);
+  try {
+    const reservationIdInput = document.getElementById("rebookReservationId");
+    const currentCheckInElement = document.getElementById("currentCheckInDate");
+    const newCheckInElement = document.getElementById("newCheckInDate");
+    const rebookingModal = document.getElementById("rebookingModal");
 
-  // Set minimum date to today
-  const today = new Date().toISOString().split("T")[0];
-  document.getElementById("newCheckInDate").setAttribute("min", today);
+    if (
+      !reservationIdInput ||
+      !currentCheckInElement ||
+      !newCheckInElement ||
+      !rebookingModal
+    ) {
+      console.error("Rebooking modal elements not found");
+      alert("Error: Rebooking form not found. Please refresh the page.");
+      return;
+    }
 
-  document.getElementById("rebookingModal").style.display = "flex";
+    // Check if within 7-day restriction
+    const checkInDate = new Date(currentCheckInDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    checkInDate.setHours(0, 0, 0, 0);
+
+    const daysUntilCheckIn = Math.floor(
+      (checkInDate - today) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysUntilCheckIn < 0) {
+      alert("❌ Cannot rebook a reservation with a past check-in date.");
+      return;
+    }
+
+    if (daysUntilCheckIn < 7) {
+      alert(
+        `❌ Rebooking must be requested at least 7 days before check-in.\n\nYou have only ${daysUntilCheckIn} day(s) remaining.\n\nPlease contact us directly for assistance.`
+      );
+      return;
+    }
+
+    reservationIdInput.value = reservationId;
+    currentCheckInElement.textContent = formatDate(currentCheckInDate);
+
+    // Set minimum date to today
+    const todayStr = new Date().toISOString().split("T")[0];
+    newCheckInElement.setAttribute("min", todayStr);
+
+    rebookingModal.style.display = "flex";
+  } catch (error) {
+    console.error("Error opening rebooking modal:", error);
+    alert("An error occurred. Please refresh the page and try again.");
+  }
 }
 
 /**
  * Close rebooking modal
  */
 function closeRebookingModal() {
-  document.getElementById("rebookingModal").style.display = "none";
-  document.getElementById("rebookingForm").reset();
+  try {
+    const rebookingModal = document.getElementById("rebookingModal");
+    const rebookingForm = document.getElementById("rebookingForm");
+
+    if (rebookingModal) {
+      rebookingModal.style.display = "none";
+    }
+
+    if (rebookingForm) {
+      rebookingForm.reset();
+    }
+  } catch (error) {
+    console.error("Error closing rebooking modal:", error);
+  }
 }
 
 /**

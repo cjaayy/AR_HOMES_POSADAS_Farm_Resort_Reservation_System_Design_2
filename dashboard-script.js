@@ -871,7 +871,9 @@ window.addEventListener("error", function (e) {
   if (
     e.message &&
     (e.message.includes("payWithPayMongo") ||
-      e.message.includes("openCancelModal"))
+      e.message.includes("openCancelModal") ||
+      e.message.includes("openRebookingModal") ||
+      e.message.includes("openPaymentUploadModal"))
   ) {
     // Let the function handle its own errors
     return;

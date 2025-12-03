@@ -123,16 +123,21 @@ try {
     foreach ($reservations as &$reservation) {
         // Calculate days until check-in
         $check_in = new DateTime($reservation['check_in_date']);
+        $check_in->setTime(0, 0, 0);
         $now = new DateTime();
-        $diff = $now->diff($check_in);
-        $reservation['days_until_checkin'] = $diff->days;
-        $reservation['is_past_checkin'] = $now > $check_in;
+        $now->setTime(0, 0, 0);
         
-        // Can request rebooking? (3+ days before check-in and status=confirmed)
+        // Calculate interval and determine direction
+        $diff = $now->diff($check_in);
+        // If invert=1, check-in is in the past (now > check_in), so make it negative
+        // If invert=0, check-in is in the future (now < check_in), so keep it positive
+        $reservation['days_until_checkin'] = $diff->days * ($diff->invert ? -1 : 1);
+        $reservation['is_past_checkin'] = $reservation['days_until_checkin'] < 0;
+        
+        // Can request rebooking? (7+ days before check-in and status=confirmed)
         $reservation['can_rebook'] = (
             $reservation['status'] === 'confirmed' && 
-            $reservation['days_until_checkin'] >= 3 &&
-            !$reservation['is_past_checkin'] &&
+            $reservation['days_until_checkin'] >= 7 &&
             !$reservation['rebooking_requested']
         );
         
