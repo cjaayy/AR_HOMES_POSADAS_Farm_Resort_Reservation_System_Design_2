@@ -1362,8 +1362,15 @@ async function payWithGCash(reservationId) {
   return payWithPayMongo(reservationId);
 }
 
+// Store current payment details globally
+let currentPaymentDetails = {
+  reservationId: null,
+  amount: 0,
+  btnElement: null,
+};
+
 /**
- * Pay full remaining balance with PayMongo
+ * Pay full remaining balance with PayMongo - Opens modal first
  */
 async function payFullBalanceWithPayMongo(reservationId, amount, btnElement) {
   console.log(
@@ -1373,33 +1380,45 @@ async function payFullBalanceWithPayMongo(reservationId, amount, btnElement) {
     btnElement
   );
 
-  if (
-    !confirm(
-      `You will be redirected to pay the remaining balance of ₱${parseFloat(
-        amount
-      ).toLocaleString()}. Continue?`
-    )
-  ) {
+  // Store payment details
+  currentPaymentDetails = {
+    reservationId: reservationId,
+    amount: amount,
+    btnElement: btnElement,
+  };
+
+  // Show payment options modal
+  document.getElementById(
+    "remainingBalanceAmount"
+  ).textContent = `₱${parseFloat(amount).toLocaleString()}`;
+  document.getElementById("payRemainingBalanceModal").style.display = "flex";
+}
+
+/**
+ * Close remaining balance payment modal
+ */
+function closePayRemainingBalanceModal() {
+  document.getElementById("payRemainingBalanceModal").style.display = "none";
+  currentPaymentDetails = { reservationId: null, amount: 0, btnElement: null };
+}
+
+/**
+ * Proceed with online payment (PayMongo)
+ */
+async function proceedWithOnlinePayment() {
+  const { reservationId, amount, btnElement } = currentPaymentDetails;
+
+  if (!reservationId) {
+    alert("Payment details not found. Please try again.");
     return;
   }
 
-  // Determine button element
-  let btn = btnElement;
-  if (!btn && typeof event !== "undefined" && event && event.target) {
-    btn = event.target;
-  }
-
-  let originalText = "";
-  if (btn) {
-    originalText = btn.innerHTML;
-  }
+  // Close modal
+  closePayRemainingBalanceModal();
 
   try {
-    // Show loading state
-    if (btn) {
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-      btn.disabled = true;
-    }
+    // Show loading indicator
+    showLoadingOverlay("Processing payment...");
 
     console.log("Creating payment intent for full balance:", reservationId);
 
@@ -1432,6 +1451,7 @@ async function payFullBalanceWithPayMongo(reservationId, amount, btnElement) {
     }
   } catch (error) {
     console.error("Payment error:", error);
+    hideLoadingOverlay();
 
     // Show user-friendly error message
     let errorMsg = error.message;
@@ -1441,12 +1461,37 @@ async function payFullBalanceWithPayMongo(reservationId, amount, btnElement) {
     }
 
     alert("Payment Error: " + errorMsg);
+  }
+}
 
-    // Restore button
-    if (btn && originalText) {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-    }
+/**
+ * Show loading overlay
+ */
+function showLoadingOverlay(message = "Loading...") {
+  let overlay = document.getElementById("loadingOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "loadingOverlay";
+    overlay.style.cssText =
+      "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 99999;";
+    overlay.innerHTML = `
+      <div style="background: white; padding: 30px 40px; border-radius: 12px; text-align: center;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2.5em; color: #11224e; margin-bottom: 15px;"></i>
+        <div style="color: #11224e; font-weight: 600; font-size: 1.1em;">${message}</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = "flex";
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoadingOverlay() {
+  const overlay = document.getElementById("loadingOverlay");
+  if (overlay) {
+    overlay.style.display = "none";
   }
 }
 
@@ -1454,16 +1499,14 @@ async function payFullBalanceWithPayMongo(reservationId, amount, btnElement) {
  * Show information about paying at resort
  */
 function showPayAtResortInfo() {
-  alert(
-    "💰 Pay at Resort\n\n" +
-      "You can pay the remaining balance at the resort upon check-in or during your stay.\n\n" +
-      "Payment methods accepted at resort:\n" +
-      "• Cash\n" +
-      "• GCash\n" +
-      "• Bank Transfer\n" +
-      "• Credit/Debit Card\n\n" +
-      "Please ensure to settle your balance before check-out."
-  );
+  document.getElementById("payAtResortModal").style.display = "flex";
+}
+
+/**
+ * Close "Pay at Resort" information modal
+ */
+function closePayAtResortModal() {
+  document.getElementById("payAtResortModal").style.display = "none";
 }
 
 // ===========================
