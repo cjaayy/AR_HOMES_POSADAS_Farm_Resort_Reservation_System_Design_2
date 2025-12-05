@@ -66,113 +66,46 @@ function renderBookings(bookings) {
   if (!grid) return;
 
   grid.innerHTML = bookings
-    .map((booking) => {
+    .map((booking, index) => {
       const statusClass = getStatusClass(booking.status);
       const statusLabel = booking.status_label || booking.status;
 
       return `
-        <div class="booking-card" data-status="${booking.status}">
-          ${
-            booking.status === "confirmed" &&
-            booking.downpayment_verified == 1 &&
-            booking.full_payment_verified == 1
-              ? `
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-radius: 12px 12px 0 0; font-weight: 600;">
-            <i class="fas fa-check-double" style="font-size: 1.2em;"></i>
-            <span>Fully Paid & Verified ${
-              booking.payment_method
-                ? "via " + formatPaymentMethod(booking.payment_method)
-                : ""
-            }</span>
-          </div>
-          `
-              : booking.status === "confirmed" &&
-                booking.downpayment_verified == 1
-              ? `
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-radius: 12px 12px 0 0; font-weight: 600;">
-            <i class="fas fa-check-circle" style="font-size: 1.2em;"></i>
-            <span>Downpayment Paid & Verified ${
-              booking.payment_method
-                ? "via " + formatPaymentMethod(booking.payment_method)
-                : ""
-            }</span>
-          </div>
-          `
-              : booking.downpayment_paid == 1 &&
-                booking.status === "pending_confirmation"
-              ? `
-          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-radius: 12px 12px 0 0; font-weight: 600; margin-bottom: 15px;">
-            <i class="fas fa-clock" style="font-size: 1.2em;"></i>
-            <span>Payment Received ${
-              booking.payment_method
-                ? "via " + formatPaymentMethod(booking.payment_method)
-                : ""
-            } - Awaiting Admin Approval</span>
-          </div>
-          `
-              : ""
-          }
-          <div class="booking-card-header" style="${
-            booking.downpayment_paid == 1 || booking.downpayment_verified == 1
-              ? "margin-top: 0;"
-              : ""
-          }">
-            <span class="status-badge ${statusClass}">${statusLabel}</span>
-            <span class="booking-id">#${booking.reservation_id}</span>
-          </div>
-          
-          <div class="booking-card-body">
-            <h3>${booking.package_name || "Package"}</h3>
-            <div class="booking-type-badge ${booking.booking_type}">
-              <i class="fas ${getBookingTypeIcon(booking.booking_type)}"></i>
-              ${booking.booking_type.toUpperCase()}
-            </div>
-            
-            <div class="booking-details-grid">
-              <div class="detail-item">
-                <i class="fas fa-calendar"></i>
-                <span>${formatDate(booking.check_in_date)}</span>
+        <div class="booking-list-item" onclick="openBookingModal(${index})" style="cursor: pointer; padding: 12px 15px; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 10px; transition: all 0.3s ease; border: 2px solid #11224e;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+                <span class="status-badge ${statusClass}" style="font-size: 0.75em; padding: 4px 8px;">${statusLabel}</span>
+                <span style="font-weight: 700; color: #1e293b; font-size: 0.9em;">#${
+                  booking.reservation_id
+                }</span>
+                <span style="color: #94a3b8; font-size: 0.85em;">${formatDate(
+                  booking.check_in_date
+                )}</span>
               </div>
-              <div class="detail-item">
-                <i class="fas fa-clock"></i>
-                <span>${booking.check_in_time}</span>
-              </div>
-              <div class="detail-item">
-                <i class="fas fa-user"></i>
-                <span>${booking.guest_name}</span>
-              </div>
-              <div class="detail-item">
-                <i class="fas fa-calendar-day"></i>
-                <span>${
-                  booking.booking_type === "daytime"
-                    ? booking.number_of_days
-                    : booking.number_of_nights
-                } ${
-        booking.booking_type === "daytime" ? "Day(s)" : "Night(s)"
-      }</span>
-              </div>
-              <div class="detail-item">
-                <i class="fas fa-tag"></i>
-                <span>₱${parseFloat(
+              <div style="font-weight: 600; color: #334155; margin-bottom: 4px; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
+                booking.package_name || "Package"
+              } - ${booking.booking_type.toUpperCase()}</div>
+              <div style="color: #64748b; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <i class="fas fa-user" style="font-size: 0.9em;"></i> ${
+                  booking.guest_name
+                } • 
+                <i class="fas fa-tag" style="font-size: 0.9em;"></i> ₱${parseFloat(
                   booking.total_amount
-                ).toLocaleString()}</span>
-              </div>
-              <div class="detail-item" style="grid-column: 1/-1; font-size: 0.85em; color: #64748b;">
-                <i class="fas fa-info-circle"></i>
-                <span>₱${parseFloat(booking.base_price).toLocaleString()} × ${
-        booking.booking_type === "daytime"
-          ? booking.number_of_days
-          : booking.number_of_nights
-      } ${
-        booking.booking_type === "daytime" ? "day(s)" : "night(s)"
-      } = ₱${parseFloat(booking.total_amount).toLocaleString()}</span>
+                ).toLocaleString()}
               </div>
             </div>
-
-            ${renderPaymentStatus(booking)}
-            ${renderBookingActions(booking)}
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;">
+              <i class="fas fa-eye" style="color: #11224e; font-size: 1.3em;"></i>
+              <span style="color: #11224e; font-size: 0.7em; font-weight: 600; white-space: nowrap;">View Details</span>
+            </div>
           </div>
         </div>
+        
+        <!-- Hidden data for modal (stored in data attributes) -->
+        <div id="booking-data-${index}" style="display: none;" data-booking='${JSON.stringify(
+        booking
+      ).replace(/'/g, "&apos;")}'></div>
       `;
     })
     .join("");
@@ -212,6 +145,308 @@ function renderBookings(bookings) {
         e.preventDefault();
         e.stopPropagation();
         console.log("Full payment button clicked!", reservationId);
+        payFullBalanceWithPayMongo(reservationId, amount, this);
+      });
+    });
+  }, 100);
+}
+
+/**
+ * Open booking details modal
+ */
+function openBookingModal(index) {
+  const bookingDataDiv = document.getElementById(`booking-data-${index}`);
+  if (!bookingDataDiv) return;
+
+  const booking = JSON.parse(bookingDataDiv.getAttribute("data-booking"));
+
+  const modalHTML = createBookingModalHTML(booking);
+
+  // Remove existing modal if any
+  const existingModal = document.getElementById("bookingDetailsModal");
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  // Add modal to body
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+  // Show modal with animation
+  setTimeout(() => {
+    const modal = document.getElementById("bookingDetailsModal");
+    if (modal) {
+      modal.style.display = "flex";
+
+      // Attach payment button listeners
+      attachModalPaymentListeners(booking);
+    }
+  }, 10);
+}
+
+/**
+ * Close booking details modal
+ */
+function closeBookingModal() {
+  const modal = document.getElementById("bookingDetailsModal");
+  if (modal) {
+    modal.style.opacity = "0";
+    setTimeout(() => {
+      modal.remove();
+    }, 300);
+  }
+}
+
+/**
+ * Create booking modal HTML
+ */
+function createBookingModalHTML(booking) {
+  const statusClass = getStatusClass(booking.status);
+  const statusLabel = booking.status_label || booking.status;
+
+  return `
+    <div id="bookingDetailsModal" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      padding: 20px;
+    " onclick="if(event.target === this) closeBookingModal()">
+      <div style="
+        background: white;
+        border-radius: 16px;
+        max-width: 700px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideUp 0.3s ease;
+      " onclick="event.stopPropagation()">
+        
+        <!-- Modal Header -->
+        <div style="
+          position: sticky;
+          top: 0;
+          background: #11224e;
+          color: white;
+          padding: 20px;
+          border-radius: 16px 16px 0 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          z-index: 10;
+        ">
+          <div>
+            <h2 style="margin: 0; font-size: 1.5em;">
+              <i class="fas fa-receipt"></i> Booking Details
+            </h2>
+            <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.95em;">#${
+              booking.reservation_id
+            }</p>
+          </div>
+          <button onclick="closeBookingModal()" style="
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+          " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div style="padding: 25px;">
+          
+          ${
+            booking.status === "confirmed" &&
+            booking.downpayment_verified == 1 &&
+            booking.full_payment_verified == 1
+              ? `
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-radius: 10px; font-weight: 600; margin-bottom: 20px;">
+            <i class="fas fa-check-double" style="font-size: 1.5em;"></i>
+            <span>Fully Paid & Verified ${
+              booking.payment_method
+                ? "via " + formatPaymentMethod(booking.payment_method)
+                : ""
+            }</span>
+          </div>
+          `
+              : booking.status === "confirmed" &&
+                booking.downpayment_verified == 1
+              ? `
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-radius: 10px; font-weight: 600; margin-bottom: 20px;">
+            <i class="fas fa-check-circle" style="font-size: 1.5em;"></i>
+            <span>Downpayment Paid & Verified ${
+              booking.payment_method
+                ? "via " + formatPaymentMethod(booking.payment_method)
+                : ""
+            }</span>
+          </div>
+          `
+              : booking.downpayment_paid == 1 &&
+                booking.status === "pending_confirmation"
+              ? `
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-radius: 10px; font-weight: 600; margin-bottom: 20px;">
+            <i class="fas fa-clock" style="font-size: 1.5em;"></i>
+            <span>Payment Received ${
+              booking.payment_method
+                ? "via " + formatPaymentMethod(booking.payment_method)
+                : ""
+            } - Awaiting Admin Approval</span>
+          </div>
+          `
+              : ""
+          }
+          
+          <!-- Status Badge -->
+          <div style="margin-bottom: 20px;">
+            <span class="status-badge ${statusClass}" style="font-size: 1em; padding: 8px 16px;">${statusLabel}</span>
+            <span class="booking-type-badge ${
+              booking.booking_type
+            }" style="margin-left: 10px; font-size: 0.9em;">
+              <i class="fas ${getBookingTypeIcon(booking.booking_type)}"></i>
+              ${booking.booking_type.toUpperCase()}
+            </span>
+          </div>
+          
+          <!-- Package Name -->
+          <h3 style="color: #000; margin-bottom: 20px; font-size: 1.3em;">
+            <i class="fas fa-box-open" style="color: #11224e;"></i> ${
+              booking.package_name || "Package"
+            }
+          </h3>
+          
+          <!-- Booking Details Grid -->
+          <div style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+          ">
+            <div>
+              <div style="color: #000; font-size: 0.85em; margin-bottom: 4px;">
+                <i class="fas fa-calendar"></i> Check-in Date
+              </div>
+              <div style="color: #000; font-weight: 600;">${formatDate(
+                booking.check_in_date
+              )}</div>
+            </div>
+            <div>
+              <div style="color: #000; font-size: 0.85em; margin-bottom: 4px;">
+                <i class="fas fa-clock"></i> Check-in Time
+              </div>
+              <div style="color: #000; font-weight: 600;">${
+                booking.check_in_time
+              }</div>
+            </div>
+            <div>
+              <div style="color: #000; font-size: 0.85em; margin-bottom: 4px;">
+                <i class="fas fa-user"></i> Guest Name
+              </div>
+              <div style="color: #000; font-weight: 600;">${
+                booking.guest_name
+              }</div>
+            </div>
+            <div>
+              <div style="color: #000; font-size: 0.85em; margin-bottom: 4px;">
+                <i class="fas fa-calendar-day"></i> Duration
+              </div>
+              <div style="color: #000; font-weight: 600;">${
+                booking.booking_type === "daytime"
+                  ? booking.number_of_days
+                  : booking.number_of_nights
+              } ${
+    booking.booking_type === "daytime" ? "Day(s)" : "Night(s)"
+  }</div>
+            </div>
+            <div style="grid-column: 1/-1;">
+              <div style="color: #000; font-size: 0.85em; margin-bottom: 4px;">
+                <i class="fas fa-tag"></i> Total Amount
+              </div>
+              <div style="color: #000; font-weight: 700; font-size: 1.3em;">
+                ₱${parseFloat(booking.total_amount).toLocaleString()}
+              </div>
+              <div style="color: #000; font-size: 0.85em; margin-top: 4px;">
+                ₱${parseFloat(booking.base_price).toLocaleString()} × ${
+    booking.booking_type === "daytime"
+      ? booking.number_of_days
+      : booking.number_of_nights
+  } ${booking.booking_type === "daytime" ? "day(s)" : "night(s)"}
+              </div>
+            </div>
+          </div>
+          
+          ${renderPaymentStatus(booking)}
+          ${renderBookingActions(booking)}
+          
+        </div>
+      </div>
+    </div>
+    
+    <style>
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      #bookingDetailsModal {
+        opacity: 1 !important;
+      }
+    </style>
+  `;
+}
+
+/**
+ * Attach payment listeners in modal
+ */
+function attachModalPaymentListeners(booking) {
+  setTimeout(() => {
+    // Downpayment buttons
+    const paymentButtons = document.querySelectorAll(
+      "#bookingDetailsModal .payment-button"
+    );
+    paymentButtons.forEach((btn) => {
+      const reservationId = btn.getAttribute("data-reservation-id");
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        payWithPayMongo(reservationId, this);
+      });
+    });
+
+    // Full payment buttons
+    const fullPaymentButtons = document.querySelectorAll(
+      "#bookingDetailsModal .payment-button-full"
+    );
+    fullPaymentButtons.forEach((btn) => {
+      const reservationId = btn.getAttribute("data-reservation-id");
+      const amount = btn.getAttribute("data-amount");
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         payFullBalanceWithPayMongo(reservationId, amount, this);
       });
     });
@@ -389,19 +624,19 @@ function renderBookingActions(booking) {
   if (booking.can_upload_full_payment) {
     const remainingBalance = booking.total_amount - booking.downpayment_amount;
     html += `
-      <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #0284c7; margin: 10px 0;">
+      <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #11224e; margin: 10px 0;">
         <div style="display: flex; align-items: start; gap: 12px;">
-          <i class="fas fa-wallet" style="color: #0284c7; font-size: 1.3em; margin-top: 2px;"></i>
+          <i class="fas fa-wallet" style="color: #11224e; font-size: 1.3em; margin-top: 2px;"></i>
           <div style="flex: 1;">
-            <strong style="color: #0c4a6e; display: block; margin-bottom: 8px; font-size: 1.05em;">Remaining Balance: ₱${remainingBalance.toLocaleString()}</strong>
-            <p style="margin: 0 0 12px 0; color: #075985; font-size: 0.9em;">Choose your payment option:</p>
+            <strong style="color: #000; display: block; margin-bottom: 8px; font-size: 1.05em;">Remaining Balance: ₱${remainingBalance.toLocaleString()}</strong>
+            <p style="margin: 0 0 12px 0; color: #000; font-size: 0.9em;">Choose your payment option:</p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
               <button 
                 class="btn-primary payment-button-full" 
                 type="button" 
                 data-reservation-id="${booking.reservation_id}"
                 data-amount="${remainingBalance}"
-                style="padding: 10px 16px; font-size: 0.95em; width: 100%;">
+                style="padding: 10px 16px; font-size: 0.95em; width: 100%; background: #11224e; border-color: #11224e;">
                 <i class="fas fa-credit-card"></i> Pay Remaining Balance Online
               </button>
               <button 
@@ -420,7 +655,7 @@ function renderBookingActions(booking) {
       <div style="background: #fef9e7; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #f59e0b; margin: 10px 0; font-size: 0.85em;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <i class="fas fa-shield-alt" style="color: #d97706; font-size: 1em;"></i>
-          <div style="flex: 1; color: #78350f;">
+          <div style="flex: 1; color: #000;">
             <strong>₱2,000 Security Bond</strong> upon check-in (refundable) — Covers damages/extra charges. Can be paid at check-in.
           </div>
         </div>
@@ -433,13 +668,13 @@ function renderBookingActions(booking) {
   // When approved, original date becomes available for other users
   if (booking.can_rebook) {
     html += `
-      <button class="btn-primary" onclick="openRebookingModal('${booking.reservation_id}', '${booking.check_in_date}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <button class="btn-primary" onclick="openRebookingModal('${booking.reservation_id}', '${booking.check_in_date}')" style="background: #11224e;">
         <i class="fas fa-calendar-alt"></i> Request Rebooking (Within 3 Months)
       </button>
       <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 10px; border-radius: 6px; margin-top: 8px; font-size: 0.85em;">
         <i class="fas fa-info-circle" style="color: #2e7d32;"></i>
-        <strong style="color: #2e7d32;">Downpayment is Non-Refundable:</strong>
-        <span style="color: #1b5e20;"> Since downpayment cannot be refunded, you can rebook to another date within 3 months. Original date will be released when approved.</span>
+        <strong style="color: #000;">Downpayment is Non-Refundable:</strong>
+        <span style="color: #000;"> Since downpayment cannot be refunded, you can rebook to another date within 3 months. Original date will be released when approved.</span>
       </div>
     `;
   }
@@ -1235,3 +1470,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+// Make modal functions globally accessible
+window.openBookingModal = openBookingModal;
+window.closeBookingModal = closeBookingModal;

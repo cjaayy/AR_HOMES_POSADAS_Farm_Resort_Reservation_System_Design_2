@@ -2019,9 +2019,32 @@
           <!-- My Bookings Section (Active Reservations) -->
           <div class="content-section" id="my-bookings-section">
             <div class="section-header-inline">
-              <h2><i class="fas fa-clipboard-list"></i> My Bookings</h2>
-              <button class="btn-primary" onclick="loadMyBookings()">
-                <i class="fas fa-sync"></i> Refresh
+              <h2>
+                <i class="fas fa-clipboard-list" style="color: #11224e"></i> My
+                Bookings
+              </h2>
+              <button
+                class="btn-refresh"
+                onclick="loadMyBookings()"
+                style="
+                  background: #11224e;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: 600;
+                  font-size: 0.9em;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  transition: all 0.3s ease;
+                  box-shadow: 0 2px 8px rgba(17, 34, 78, 0.3);
+                "
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(17, 34, 78, 0.5)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(17, 34, 78, 0.3)'"
+              >
+                <i class="fas fa-sync-alt"></i> Refresh
               </button>
             </div>
 

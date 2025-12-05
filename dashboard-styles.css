@@ -5653,10 +5653,24 @@ body::before {
 
 /* ===== MY BOOKINGS SECTION ===== */
 .bookings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+  display: block;
   margin-top: 20px;
+  max-width: 800px;
+}
+
+.booking-list-item {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.booking-list-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateX(5px);
 }
 
 .booking-card {
