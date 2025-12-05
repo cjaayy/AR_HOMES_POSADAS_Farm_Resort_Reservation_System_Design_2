@@ -64,19 +64,29 @@ try {
             throw new Exception('New date is no longer available');
         }
         
-        // Approve rebooking: Update date, keep payment, lock new date
+        // Calculate check_out_date based on booking type
+        $check_out_date = $reservation['rebooking_new_date'];
+        if ($reservation['booking_type'] === 'nighttime' || $reservation['booking_type'] === '22hours') {
+            $check_out_date = date('Y-m-d', strtotime($reservation['rebooking_new_date'] . ' +1 day'));
+        }
+        
+        // Approve rebooking: Update dates, keep payment status, lock new date
+        // Old date automatically becomes available for other users
         $stmt = $conn->prepare("
             UPDATE reservations 
             SET check_in_date = rebooking_new_date,
+                check_out_date = :check_out_date,
                 rebooking_approved = 1,
                 rebooking_approved_by = :admin_id,
                 rebooking_approved_at = NOW(),
                 date_locked = 1,
                 locked_until = DATE_ADD(rebooking_new_date, INTERVAL 1 DAY),
-                status = 'rebooked',
+                status = 'confirmed',
                 updated_at = NOW()
             WHERE reservation_id = :id
         ");
+        
+        $stmt->bindParam(':check_out_date', $check_out_date);
         
         $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
         $stmt->bindParam(':id', $reservation_id);

@@ -51,9 +51,15 @@ try {
         throw new Exception('Reservation not found');
     }
     
-    // Check if reservation can be cancelled (only before admin confirmation)
-    if (!in_array($reservation['status'], ['pending_payment', 'pending_confirmation'])) {
-        throw new Exception('Cannot cancel a confirmed reservation. Once confirmed by admin/staff, cancellation is not allowed.');
+    // Cancellation is NOT allowed - downpayment is non-refundable
+    // Users must request rebooking instead (within 3 months)
+    if ($reservation['downpayment_verified'] == 1 || $reservation['full_payment_verified'] == 1 || $reservation['status'] === 'confirmed') {
+        throw new Exception('Cancellation is not allowed. Downpayment is non-refundable/non-transferable. Please request REBOOKING (within 3 months) instead.');
+    }
+    
+    // Only allow cancellation for unpaid/unconfirmed reservations
+    if (!in_array($reservation['status'], ['pending_payment']) || $reservation['downpayment_verified'] == 1) {
+        throw new Exception('Cannot cancel this reservation. Please contact us for rebooking options.');
     }
     
     if ($reservation['checked_in'] == 1) {

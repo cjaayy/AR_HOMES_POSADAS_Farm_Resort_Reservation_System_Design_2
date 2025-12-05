@@ -80,37 +80,76 @@ try {
         throw new Exception('Rebooking is only allowed 7 days or more before check-in date. You have ' . $days_until_checkin . ' days remaining.');
     }
     
-    // Check if already confirmed
-    if ($reservation['status'] !== 'confirmed') {
-        throw new Exception('Only confirmed reservations can be rebooked');
+    // Check if downpayment paid (downpayment is non-refundable, so rebooking is allowed)
+    if ($reservation['downpayment_verified'] != 1) {
+        throw new Exception('Rebooking is only available once downpayment is paid and verified');
     }
     
-    // Check if new date is available
+    // Check if status allows rebooking (pending_confirmation, confirmed, or rebooked)
+    if (!in_array($reservation['status'], ['pending_confirmation', 'confirmed', 'rebooked'])) {
+        throw new Exception('Rebooking is not available for this reservation status');
+    }
+    
+    // Check if already requested rebooking
+    if ($reservation['rebooking_requested'] == 1) {
+        throw new Exception('Rebooking has already been requested for this reservation');
+    }
+    
+    // Validate new date is within 3 months from original date
+    $original_date = new DateTime($reservation['check_in_date']);
+    $new_date_obj = DateTime::createFromFormat('Y-m-d', $new_date);
+    
+    if (!$new_date_obj) {
+        throw new Exception('Invalid date format');
+    }
+    
+    $three_months_later = clone $original_date;
+    $three_months_later->modify('+3 months');
+    
+    if ($new_date_obj > $three_months_later) {
+        throw new Exception('New date must be within 3 months of original check-in date (' . $original_date->format('M d, Y') . ' - ' . $three_months_later->format('M d, Y') . ')');
+    }
+    
+    // Validate new date is in the future
+    if ($new_date_obj < $today) {
+        throw new Exception('New date must be in the future');
+    }
+    
+    // Check if new date is available (cross-package blocking)
+    // Calculate check_out_date for new booking
+    $new_check_out = $new_date;
+    if ($reservation['booking_type'] === 'nighttime' || $reservation['booking_type'] === '22hours') {
+        $new_check_out = date('Y-m-d', strtotime($new_date . ' +1 day'));
+    }
+    
     $stmt = $pdo->prepare("
         SELECT COUNT(*) as count FROM reservations 
-        WHERE check_in_date = :date 
-        AND booking_type = :type
-        AND status IN ('confirmed', 'checked_in', 'pending_confirmation')
-        AND (downpayment_verified = 1 OR date_locked = 1)
+        WHERE status IN ('confirmed', 'checked_in', 'rebooked')
         AND reservation_id != :id
+        AND (
+            (check_in_date <= :new_date AND check_out_date >= :new_date)
+            OR (check_in_date <= :new_check_out AND check_out_date >= :new_check_out)
+            OR (check_in_date >= :new_date AND check_out_date <= :new_check_out)
+        )
     ");
     $stmt->execute([
-        ':date' => $new_date,
-        ':type' => $reservation['booking_type'],
+        ':new_date' => $new_date,
+        ':new_check_out' => $new_check_out,
         ':id' => $reservation_id
     ]);
     
     $result = $stmt->fetch();
     if ($result['count'] > 0) {
-        throw new Exception('New date is already booked. Please choose another date.');
+        throw new Exception('The selected date is not available. Please choose another date.');
     }
     
-    // Submit rebooking request
+    // Submit rebooking request (original date remains occupied until admin approval)
     $stmt = $pdo->prepare("
         UPDATE reservations 
         SET rebooking_requested = 1,
             rebooking_new_date = :new_date,
             rebooking_reason = :reason,
+            rebooking_requested_at = NOW(),
             updated_at = NOW()
         WHERE reservation_id = :id
     ");
@@ -123,9 +162,10 @@ try {
     
     echo json_encode([
         'success' => true,
-        'message' => 'Rebooking request submitted! Waiting for admin approval.',
+        'message' => 'Rebooking request submitted successfully! Your original date will be released once admin approves your request.',
         'original_date' => $reservation['check_in_date'],
-        'new_date' => $new_date
+        'new_date' => $new_date,
+        'note' => 'The new date will be confirmed by admin within 24-48 hours.'
     ]);
     
 } catch (Exception $e) {

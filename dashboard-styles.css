@@ -5035,6 +5035,20 @@ body::before {
   color: #11224e;
   font-size: 1.2rem;
   margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.policy-item div {
+  flex: 1;
+}
+
+.policy-item strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.policy-item p {
+  line-height: 1.4;
 }
 
 .booking-step {

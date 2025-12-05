@@ -418,32 +418,36 @@ function renderBookingActions(booking) {
     `;
   }
 
-  // Request rebooking
+  // Request rebooking - available once DOWNPAYMENT is paid (within 3 months)
+  // Downpayment is non-refundable, so guest can rebook to another date
+  // When approved, original date becomes available for other users
   if (booking.can_rebook) {
     html += `
-      <button class="btn-secondary" onclick="openRebookingModal('${booking.reservation_id}', '${booking.check_in_date}')">
-        <i class="fas fa-calendar-alt"></i> Request Rebooking
+      <button class="btn-primary" onclick="openRebookingModal('${booking.reservation_id}', '${booking.check_in_date}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <i class="fas fa-calendar-alt"></i> Request Rebooking (Within 3 Months)
       </button>
+      <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 10px; border-radius: 6px; margin-top: 8px; font-size: 0.85em;">
+        <i class="fas fa-info-circle" style="color: #2e7d32;"></i>
+        <strong style="color: #2e7d32;">Downpayment is Non-Refundable:</strong>
+        <span style="color: #1b5e20;"> Since downpayment cannot be refunded, you can rebook to another date within 3 months. Original date will be released when approved.</span>
+      </div>
     `;
   }
 
-  // Cancel reservation - only allowed before admin/staff confirmation
-  if (
-    booking.can_cancel === true ||
-    booking.can_cancel === 1 ||
-    booking.can_cancel === "1"
-  ) {
+  // Rebooking Policy Notice for paid reservations (no cancellation allowed)
+  if (booking.downpayment_verified == 1 && !booking.can_rebook) {
+    // Show policy notice when rebooking not yet available (less than 7 days or outside 3-month window)
     html += `
-      <button class="btn-danger" onclick="openCancelModal('${booking.reservation_id}')">
-        <i class="fas fa-times"></i> Cancel Booking
-      </button>
-    `;
-  } else if (booking.status === "confirmed") {
-    // Show disabled button when confirmed by admin
-    html += `
-      <button class="btn-danger" disabled style="opacity: 0.5; cursor: not-allowed;" title="Cannot cancel - booking has been confirmed by admin/staff">
-        <i class="fas fa-times"></i> Cancel Booking
-      </button>
+      <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 6px; margin-top: 10px;">
+        <strong style="color: #856404; display: block; margin-bottom: 5px;">
+          <i class="fas fa-info-circle"></i> No Cancellation Policy
+        </strong>
+        <p style="margin: 0; color: #856404; font-size: 0.9em;">
+          • Downpayment is <strong>non-refundable/non-transferable</strong><br>
+          • <strong>Rebooking available</strong> 7 days before check-in (within 3 months)<br>
+          • Cancellation is <strong>not allowed</strong> once confirmed
+        </p>
+      </div>
     `;
   }
 
@@ -581,9 +585,31 @@ function openRebookingModal(reservationId, currentCheckInDate) {
     reservationIdInput.value = reservationId;
     currentCheckInElement.textContent = formatDate(currentCheckInDate);
 
-    // Set minimum date to today
+    // Set date constraints: min = today, max = 3 months from original date
     const todayStr = new Date().toISOString().split("T")[0];
+    const originalDate = new Date(currentCheckInDate);
+    const threeMonthsLater = new Date(originalDate);
+    threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+    const maxDateStr = threeMonthsLater.toISOString().split("T")[0];
+
     newCheckInElement.setAttribute("min", todayStr);
+    newCheckInElement.setAttribute("max", maxDateStr);
+
+    // Show date range info
+    const dateRangeInfo = document.createElement("div");
+    dateRangeInfo.id = "dateRangeInfo";
+    dateRangeInfo.style.cssText =
+      "background: #e3f2fd; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 0.9em; color: #1976d2;";
+    dateRangeInfo.innerHTML = `<i class="fas fa-calendar-check"></i> <strong>Valid Date Range:</strong> ${formatDate(
+      todayStr
+    )} to ${formatDate(maxDateStr)} (within 3 months)`;
+
+    // Remove old date range info if exists
+    const oldInfo = document.getElementById("dateRangeInfo");
+    if (oldInfo) oldInfo.remove();
+
+    // Insert after new date input
+    newCheckInElement.parentElement.appendChild(dateRangeInfo);
 
     rebookingModal.style.display = "flex";
   } catch (error) {

@@ -134,11 +134,15 @@ try {
         $reservation['days_until_checkin'] = $diff->days * ($diff->invert ? -1 : 1);
         $reservation['is_past_checkin'] = $reservation['days_until_checkin'] < 0;
         
-        // Can request rebooking? (7+ days before check-in and status=confirmed)
+        // Can request rebooking? (7+ days before check-in, downpayment paid, within 3 months)
+        // Downpayment is non-refundable, so rebooking is allowed once downpayment is verified
+        $three_months_from_now = date('Y-m-d', strtotime('+3 months'));
         $reservation['can_rebook'] = (
-            $reservation['status'] === 'confirmed' && 
+            in_array($reservation['status'], ['confirmed', 'rebooked', 'pending_confirmation']) &&
+            $reservation['downpayment_verified'] == 1 &&
             $reservation['days_until_checkin'] >= 7 &&
-            !$reservation['rebooking_requested']
+            !$reservation['rebooking_requested'] &&
+            $reservation['check_in_date'] <= $three_months_from_now
         );
         
         // Can cancel? (only before admin/staff confirmation - once confirmed cannot cancel)

@@ -57,9 +57,15 @@ try {
                 total_amount,
                 downpayment_amount,
                 downpayment_paid,
+                downpayment_verified,
                 full_payment_paid,
+                full_payment_verified,
                 payment_method,
                 security_bond_paid,
+                rebooking_requested,
+                rebooking_new_date,
+                rebooking_reason,
+                rebooking_approved,
                 status, 
                 created_at 
             FROM reservations";

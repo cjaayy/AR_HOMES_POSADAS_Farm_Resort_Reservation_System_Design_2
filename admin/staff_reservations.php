@@ -733,10 +733,10 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
             <div class="stat-card-res-value" id="pendingCount">0</div>
             <div class="stat-card-res-label">Pending</div>
           </div>
-          <div class="stat-card-res red">
-            <div class="stat-card-res-icon"><i class="fas fa-times-circle"></i></div>
-            <div class="stat-card-res-value" id="canceledCount">0</div>
-            <div class="stat-card-res-label">Canceled</div>
+          <div class="stat-card-res" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); box-shadow: 0 8px 24px rgba(139, 92, 246, 0.25);">
+            <div class="stat-card-res-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="stat-card-res-value" id="rebookingCount">0</div>
+            <div class="stat-card-res-label">Rebooking Requests</div>
           </div>
         </div>
 
@@ -947,15 +947,16 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     function updateStatsCards() {
       const total = allReservations.length;
       const confirmed = allReservations.filter(r => r.status === 'confirmed').length;
-      const pending = allReservations.filter(r => r.status === 'pending').length;
+      const pending = allReservations.filter(r => r.status === 'pending' || r.status === 'pending_confirmation').length;
       const canceled = allReservations.filter(r => r.status === 'canceled').length;
       const completed = allReservations.filter(r => r.status === 'completed').length;
+      const rebooking = allReservations.filter(r => r.rebooking_requested == 1 && !r.rebooking_approved).length;
       
       // Update main stats cards
       document.getElementById('totalReservations').textContent = total;
       document.getElementById('confirmedCount').textContent = confirmed;
       document.getElementById('pendingCount').textContent = pending;
-      document.getElementById('canceledCount').textContent = canceled;
+      document.getElementById('rebookingCount').textContent = rebooking;
       
       // Update filter chip counts
       document.getElementById('count-all').textContent = total;
@@ -1086,11 +1087,23 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
               ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
             </div>
           </td>
-          <td><span class="status-badge ${r.status||''}">${escapeHtml(r.status||'').replace('_', ' ')}</span></td>
+          <td>
+            <span class="status-badge ${r.status||''}">${escapeHtml(r.status||'').replace('_', ' ')}</span>
+            ${r.rebooking_requested == 1 && !r.rebooking_approved ? '<div style="margin-top:4px;"><span style="background:#fef3c7;color:#92400e;padding:4px 8px;border-radius:8px;font-size:10px;font-weight:600;"><i class="fas fa-calendar-alt"></i> Rebooking Request</span></div>' : ''}
+          </td>
           <td style="text-align:center">
             <div class="action-buttons">
-              <button onclick="updateStatus('${r.reservation_id}', 'confirmed')" class="btn-action btn-approve" title="Approve" aria-label="Approve reservation"><i class="fas fa-check"></i></button>
-              <button onclick="updateStatus('${r.reservation_id}', 'canceled')" class="btn-action btn-cancel" title="Cancel" aria-label="Cancel reservation"><i class="fas fa-times"></i></button>
+              ${r.rebooking_requested == 1 && !r.rebooking_approved ? `
+                <button onclick="approveRebooking('${r.reservation_id}')" class="btn-action" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;" title="Approve Rebooking" aria-label="Approve rebooking">
+                  <i class="fas fa-calendar-check"></i>
+                </button>
+                <button onclick="rejectRebooking('${r.reservation_id}')" class="btn-action" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;" title="Reject Rebooking" aria-label="Reject rebooking">
+                  <i class="fas fa-calendar-times"></i>
+                </button>
+              ` : `
+                <button onclick="updateStatus('${r.reservation_id}', 'confirmed')" class="btn-action btn-approve" title="Approve" aria-label="Approve reservation"><i class="fas fa-check"></i></button>
+                <button onclick="updateStatus('${r.reservation_id}', 'canceled')" class="btn-action btn-cancel" title="Cancel" aria-label="Cancel reservation"><i class="fas fa-times"></i></button>
+              `}
               <button onclick="viewReservation('${r.reservation_id}')" class="btn-action btn-view" title="View" aria-label="View reservation"><i class="fas fa-eye"></i></button>
             </div>
           </td>
@@ -1259,6 +1272,37 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
               <div style="color:#475569; font-size:12px; font-weight:600;">${r.created_at||'N/A'}</div>
             </div>
           </div>
+          
+          ${r.rebooking_requested == 1 && !r.rebooking_approved ? `
+            <div style="margin-top:16px; padding:16px; background:#fef3c7; border-left:4px solid #f59e0b; border-radius:12px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                <i class="fas fa-calendar-alt" style="color:#f59e0b; font-size:20px;"></i>
+                <div style="font-weight:700; color:#92400e; font-size:15px;">Rebooking Request</div>
+              </div>
+              <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:8px;">
+                  <div>
+                    <div style="font-size:11px; color:#78716c; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Original Date</div>
+                    <div style="font-weight:700; color:#1e293b;">${r.check_in_date||'N/A'}</div>
+                  </div>
+                  <div>
+                    <div style="font-size:11px; color:#78716c; font-weight:600; text-transform:uppercase; margin-bottom:4px;">New Date</div>
+                    <div style="font-weight:700; color:#10b981;">${r.rebooking_new_date||'N/A'}</div>
+                  </div>
+                </div>
+                <div style="font-size:11px; color:#78716c; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Reason</div>
+                <div style="color:#475569; font-size:13px;">${escapeHtml(r.rebooking_reason||'No reason provided')}</div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button onclick="approveRebooking('${r.reservation_id}')" style="flex:1; padding:10px; background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <i class="fas fa-check"></i> Approve
+                </button>
+                <button onclick="rejectRebooking('${r.reservation_id}')" style="flex:1; padding:10px; background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <i class="fas fa-times"></i> Reject
+                </button>
+              </div>
+            </div>
+          ` : ''}
         </div>
       `;
       showModal('Reservation Details', html);
@@ -1291,6 +1335,64 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
       });
+    }
+
+    async function approveRebooking(reservationId) {
+      if (!confirm('Approve this rebooking request? The original date will be released and the new date will be locked.')) return;
+      
+      const form = new FormData();
+      form.append('reservation_id', reservationId);
+      form.append('action', 'approve');
+      
+      try {
+        const res = await fetch('approve_rebooking.php', {
+          method: 'POST',
+          body: form,
+          credentials: 'include'
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          await fetchAllReservations();
+          showNotification('✅ Rebooking approved successfully!', 'success');
+        } else {
+          showNotification('❌ ' + (data.message || 'Failed to approve rebooking'), 'error');
+        }
+      } catch (error) {
+        console.error('Rebooking approval error:', error);
+        showNotification('❌ Failed to approve rebooking', 'error');
+      }
+    }
+    
+    async function rejectRebooking(reservationId) {
+      const reason = prompt('Reason for rejection (optional):');
+      if (reason === null) return; // User cancelled
+      
+      const form = new FormData();
+      form.append('reservation_id', reservationId);
+      form.append('action', 'reject');
+      if (reason) form.append('rejection_reason', reason);
+      
+      try {
+        const res = await fetch('approve_rebooking.php', {
+          method: 'POST',
+          body: form,
+          credentials: 'include'
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          await fetchAllReservations();
+          showNotification('✅ Rebooking request rejected', 'success');
+        } else {
+          showNotification('❌ ' + (data.message || 'Failed to reject rebooking'), 'error');
+        }
+      } catch (error) {
+        console.error('Rebooking rejection error:', error);
+        showNotification('❌ Failed to reject rebooking', 'error');
+      }
     }
 
     function exportCSV(){
