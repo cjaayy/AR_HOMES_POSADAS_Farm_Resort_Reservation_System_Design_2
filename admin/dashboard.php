@@ -194,22 +194,22 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="../logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      href="../logo/ar-homes-logo.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="../logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      href="../logo/ar-homes-logo.png"
     />
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="../logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      href="../logo/ar-homes-logo.png"
     />
     <link
       rel="shortcut icon"
-      href="../logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      href="../logo/ar-homes-logo.png"
     />
 
     <!-- Meta tags -->
@@ -231,7 +231,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
     />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
@@ -264,7 +264,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         <div class="header-left">
           <div class="logo">
             <img
-              src="../logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+              src="../logo/ar-homes-logo.png"
               alt="AR Homes Resort Logo"
             />
           </div>

@@ -10,22 +10,22 @@
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      href="logo/ar-homes-logo.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      href="logo/ar-homes-logo.png"
     />
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      href="logo/ar-homes-logo.png"
     />
     <link
       rel="shortcut icon"
-      href="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      href="logo/ar-homes-logo.png"
     />
 
     <!-- Meta tags -->
@@ -51,7 +51,7 @@
     />
     <meta
       property="og:image"
-      content="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      content="logo/ar-homes-logo.png"
     />
     <meta property="og:url" content="#" />
     <meta property="og:type" content="website" />
@@ -68,7 +68,7 @@
     />
     <meta
       name="twitter:image"
-      content="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+      content="logo/ar-homes-logo.png"
     />
 
     <!-- CSS -->
@@ -85,7 +85,7 @@
     <!-- Font Awesome for icons -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
     />
 
     <!-- Flatpickr for date picker with disabled dates -->
@@ -143,7 +143,7 @@
         <div class="header-left">
           <div class="logo">
             <img
-              src="logo/ChatGPT Image Sep 15, 2025, 10_25_25 PM.png"
+              src="logo/ar-homes-logo.png"
               alt="AR Homes Resort Logo"
             />
           </div>
@@ -2222,21 +2222,131 @@
 
           <!-- Notifications Section -->
           <div class="content-section" id="notifications-section">
-            <div class="section-header-inline">
-              <h2><i class="fas fa-bell"></i> Notifications</h2>
-              <button class="btn-text" onclick="markAllAsRead()">
-                <i class="fas fa-check-double"></i> Mark all as read
-              </button>
-            </div>
-            <div class="notifications-list" id="notificationsList">
-              <!-- Notifications will be loaded dynamically from database -->
-              <div style="text-align: center; padding: 40px; color: #999">
-                <i
-                  class="fas fa-spinner fa-spin"
-                  style="font-size: 32px; margin-bottom: 10px"
-                ></i>
-                <p>Loading notifications...</p>
+            <div class="section-header-inline" style="margin-bottom: 25px">
+              <h2
+                style="
+                  color: #11224e;
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  margin: 0;
+                "
+              >
+                <i class="fas fa-bell" style="color: #11224e"></i> Notifications
+                <span
+                  id="unreadCount"
+                  style="
+                    background: #ef4444;
+                    color: white;
+                    font-size: 0.7em;
+                    padding: 3px 8px;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    display: none;
+                  "
+                  >0</span
+                >
+              </h2>
+              <div style="display: flex; gap: 10px; align-items: center">
+                <button
+                  class="btn-text"
+                  onclick="filterNotifications('all')"
+                  id="filterAll"
+                  style="
+                    color: #11224e;
+                    font-weight: 600;
+                    border-bottom: 2px solid #11224e;
+                  "
+                >
+                  All
+                </button>
+                <button
+                  class="btn-text"
+                  onclick="filterNotifications('unread')"
+                  id="filterUnread"
+                  style="color: #64748b"
+                >
+                  Unread
+                </button>
+                <button
+                  class="btn-text"
+                  onclick="markAllAsRead()"
+                  style="
+                    color: #10b981;
+                    padding: 8px 16px;
+                    background: #f0fdf4;
+                    border-radius: 8px;
+                    border: 1px solid #10b981;
+                  "
+                >
+                  <i class="fas fa-check-double"></i> Mark all as read
+                </button>
               </div>
+            </div>
+
+            <!-- Notifications Container -->
+            <div style="max-width: 900px; margin: 0 auto">
+              <div class="notifications-list" id="notificationsList">
+                <!-- Notifications will be loaded dynamically from database -->
+                <div
+                  style="text-align: center; padding: 60px 20px; color: #64748b"
+                >
+                  <div
+                    style="
+                      width: 80px;
+                      height: 80px;
+                      background: linear-gradient(
+                        135deg,
+                        #f0f9ff 0%,
+                        #e0f2fe 100%
+                      );
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      margin: 0 auto 20px;
+                    "
+                  >
+                    <i
+                      class="fas fa-spinner fa-spin"
+                      style="font-size: 2em; color: #11224e"
+                    ></i>
+                  </div>
+                  <p style="font-size: 1.1em; font-weight: 500; color: #11224e">
+                    Loading notifications...
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State (hidden by default) -->
+            <div
+              id="emptyNotifications"
+              style="display: none; text-align: center; padding: 80px 20px"
+            >
+              <div
+                style="
+                  width: 120px;
+                  height: 120px;
+                  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin: 0 auto 25px;
+                "
+              >
+                <i
+                  class="fas fa-bell-slash"
+                  style="font-size: 3em; color: #94a3b8"
+                ></i>
+              </div>
+              <h3 style="color: #11224e; margin: 0 0 10px 0; font-size: 1.5em">
+                No Notifications
+              </h3>
+              <p style="color: #64748b; margin: 0; font-size: 1em">
+                You're all caught up! Check back later for updates.
+              </p>
             </div>
           </div>
 

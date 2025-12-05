@@ -2519,6 +2519,68 @@ function updateNotificationBadge(unreadCount) {
       badge.style.display = "none";
     }
   }
+
+  // Update unread count in notifications section
+  const unreadCountEl = document.getElementById("unreadCount");
+  if (unreadCountEl) {
+    if (unreadCount > 0) {
+      unreadCountEl.textContent = unreadCount;
+      unreadCountEl.style.display = "inline-block";
+    } else {
+      unreadCountEl.style.display = "none";
+    }
+  }
+}
+
+// Filter notifications
+function filterNotifications(filter) {
+  const allBtn = document.getElementById("filterAll");
+  const unreadBtn = document.getElementById("filterUnread");
+  const notificationItems = document.querySelectorAll(".notification-item");
+
+  // Update button styles
+  if (filter === "all") {
+    allBtn.style.fontWeight = "600";
+    allBtn.style.color = "#11224e";
+    allBtn.style.borderBottom = "2px solid #11224e";
+    unreadBtn.style.fontWeight = "500";
+    unreadBtn.style.color = "#64748b";
+    unreadBtn.style.borderBottom = "none";
+
+    // Show all notifications
+    notificationItems.forEach((item) => {
+      item.style.display = "flex";
+    });
+  } else if (filter === "unread") {
+    unreadBtn.style.fontWeight = "600";
+    unreadBtn.style.color = "#11224e";
+    unreadBtn.style.borderBottom = "2px solid #11224e";
+    allBtn.style.fontWeight = "500";
+    allBtn.style.color = "#64748b";
+    allBtn.style.borderBottom = "none";
+
+    // Show only unread notifications
+    let hasUnread = false;
+    notificationItems.forEach((item) => {
+      if (item.classList.contains("unread")) {
+        item.style.display = "flex";
+        hasUnread = true;
+      } else {
+        item.style.display = "none";
+      }
+    });
+
+    // Show empty state if no unread
+    const emptyState = document.getElementById("emptyNotifications");
+    const notificationsList = document.getElementById("notificationsList");
+    if (!hasUnread && emptyState) {
+      notificationsList.style.display = "none";
+      emptyState.style.display = "block";
+    } else if (emptyState) {
+      notificationsList.style.display = "flex";
+      emptyState.style.display = "none";
+    }
+  }
 }
 
 // Mark all notifications as read
@@ -3455,6 +3517,7 @@ window.modifyBooking = modifyBooking;
 window.cancelBooking = cancelBooking;
 window.completePayment = completePayment;
 window.markAllAsRead = markAllAsRead;
+window.filterNotifications = filterNotifications;
 window.dismissNotification = dismissNotification;
 window.redeemReward = redeemReward;
 window.writeNewReview = writeNewReview;

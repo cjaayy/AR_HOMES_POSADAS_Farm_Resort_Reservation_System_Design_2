@@ -16,7 +16,7 @@ $reservation_id = $_GET['reservation_id'] ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Failed - AR Homes Resort</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
