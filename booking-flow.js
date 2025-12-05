@@ -285,6 +285,15 @@ function createBookingModalHTML(booking) {
                 : ""
             }</span>
           </div>
+          <!-- Security Bond Information for Fully Paid -->
+          <div style="background: #fef9e7; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #f59e0b; margin: 10px 0; font-size: 0.85em;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-shield-alt" style="color: #d97706; font-size: 1em;"></i>
+              <div style="flex: 1; color: #000;">
+                <strong>₱2,000 Security Bond</strong> upon check-in (refundable) — Covers damages/extra charges. Can be paid at check-in.
+              </div>
+            </div>
+          </div>
           `
               : booking.status === "confirmed" &&
                 booking.downpayment_verified == 1
