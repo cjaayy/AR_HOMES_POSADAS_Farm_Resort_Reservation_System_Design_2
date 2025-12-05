@@ -59,7 +59,7 @@ async function loadMyBookings() {
 }
 
 /**
- * Render bookings grid
+ * Render bookings grid - Compact list view
  */
 function renderBookings(bookings) {
   const grid = document.getElementById("myBookingsGrid");
@@ -412,6 +412,16 @@ function renderBookingActions(booking) {
                 <i class="fas fa-building"></i> Pay at Resort
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Security Bond Information -->
+      <div style="background: #fef9e7; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #f59e0b; margin: 10px 0; font-size: 0.85em;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-shield-alt" style="color: #d97706; font-size: 1em;"></i>
+          <div style="flex: 1; color: #78350f;">
+            <strong>₱2,000 Security Bond</strong> upon check-in (refundable) — Covers damages/extra charges. Can be paid at check-in.
           </div>
         </div>
       </div>

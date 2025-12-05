@@ -2023,8 +2023,51 @@ function getPaymentStatusHTML(r) {
     html +=
       '<div style="color: #28a745;"><i class="fas fa-check-circle"></i> <strong>Confirmed</strong></div>';
     if (!r.full_payment_paid) {
+      const remainingBalance =
+        parseFloat(r.total_amount) - parseFloat(r.downpayment_amount);
       html +=
         '<div style="margin-top: 5px; color: #6c757d;">Full payment due before check-in</div>';
+
+      // Payment Breakdown Section
+      html += `<div style="margin-top: 12px; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;">
+          <div style="font-weight: 600; color: #333; margin-bottom: 10px; font-size: 13px;">
+            <i class="fas fa-file-invoice-dollar"></i> Payment Summary
+          </div>
+          
+          <!-- Remaining Balance -->
+          <div style="display: flex; justify-content: space-between; padding: 8px; background: #fff3cd; border-radius: 6px; margin-bottom: 8px;">
+            <div>
+              <div style="color: #856404; font-weight: 600; font-size: 13px;">
+                <i class="fas fa-wallet"></i> Remaining Balance
+              </div>
+              <div style="color: #6c757d; font-size: 11px; margin-top: 2px;">
+                Must be paid before check-in
+              </div>
+            </div>
+            <div style="color: #856404; font-weight: 700; font-size: 15px;">
+              ₱${remainingBalance.toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}
+            </div>
+          </div>
+          
+          <!-- Security Bond -->
+          <div style="display: flex; justify-content: space-between; padding: 8px; background: #d1ecf1; border-radius: 6px;">
+            <div>
+              <div style="color: #0c5460; font-weight: 600; font-size: 13px;">
+                <i class="fas fa-shield-alt"></i> Security Bond
+              </div>
+              <div style="color: #6c757d; font-size: 11px; margin-top: 2px; line-height: 1.3;">
+                Collected at check-in to cover any damages or extra charges.<br>
+                <strong>Fully refundable</strong> upon check-out if no issues are found.<br>
+                Can be paid at check-in since it's refundable.
+              </div>
+            </div>
+            <div style="color: #0c5460; font-weight: 700; font-size: 15px; white-space: nowrap;">
+              ₱2,000.00
+            </div>
+          </div>
+        </div>`;
     }
   }
 
