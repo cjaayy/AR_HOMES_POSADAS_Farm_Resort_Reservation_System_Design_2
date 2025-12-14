@@ -23,7 +23,10 @@
       sizes="180x180"
       href="logo/ar-homes-logo.png"
     />
-    <link rel="shortcut icon" href="logo/ar-homes-logo.png" />
+    <link
+      rel="shortcut icon"
+      href="logo/ar-homes-logo.png"
+    />
 
     <!-- Meta tags -->
     <meta name="theme-color" content="#667eea" />
@@ -46,7 +49,10 @@
       property="og:description"
       content="Manage your reservations and profile at AR Homes Posadas Farm Resort."
     />
-    <meta property="og:image" content="logo/ar-homes-logo.png" />
+    <meta
+      property="og:image"
+      content="logo/ar-homes-logo.png"
+    />
     <meta property="og:url" content="#" />
     <meta property="og:type" content="website" />
 
@@ -60,7 +66,10 @@
       name="twitter:description"
       content="Manage your reservations and profile at AR Homes Posadas Farm Resort."
     />
-    <meta name="twitter:image" content="logo/ar-homes-logo.png" />
+    <meta
+      name="twitter:image"
+      content="logo/ar-homes-logo.png"
+    />
 
     <!-- CSS -->
     <link rel="stylesheet" href="dashboard-styles.css?v=20251203002" />
@@ -133,16 +142,16 @@
       <header class="dashboard-header">
         <div class="header-left">
           <div class="logo">
-            <img src="logo/ar-homes-logo.png" alt="AR Homes Resort Logo" />
+            <img
+              src="logo/ar-homes-logo.png"
+              alt="AR Homes Resort Logo"
+            />
           </div>
           <div class="resort-info">
             <h1>AR Homes Posadas Farm Resort</h1>
           </div>
         </div>
         <div class="header-right">
-          <div class="mobile-toggle" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-          </div>
           <div class="user-profile">
             <div class="profile-info">
               <span class="user-name" id="userName" style="opacity: 0"
@@ -158,6 +167,9 @@
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
           </button>
+        </div>
+        <div class="mobile-toggle" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
         </div>
       </header>
 
@@ -229,67 +241,57 @@
           </div>
         </div>
 
-    <!-- Main Body Wrapper -->
-    <div class="dashboard-body">
-      <!-- Sidebar Navigation -->
-      <aside class="sidebar" id="sidebar">
-        <nav class="sidebar-nav">
-          <ul class="nav-menu">
-            <li class="nav-item active">
-              <a href="#dashboard" class="nav-link" data-section="dashboard">
+        <!-- Navigation Section -->
+        <div class="navigation-section">
+          <div class="horizontal-nav">
+            <nav class="nav-menu-horizontal">
+              <button class="nav-btn active" data-section="dashboard">
                 <i class="fas fa-chart-line"></i>
                 <span>Dashboard</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#my-reservations" class="nav-link" data-section="my-reservations">
+              </button>
+              <button class="nav-btn" data-section="my-reservations">
                 <i class="fas fa-calendar-plus"></i>
                 <span>Make Reservation</span>
-              </a>
-            </li>
-            <li class="nav-item booking-nav" id="booking-details-nav" style="display: none">
-              <a href="#booking-details" class="nav-link" data-section="booking-details">
+              </button>
+              <button
+                class="nav-btn booking-nav"
+                id="booking-details-tab"
+                data-section="booking-details"
+                style="display: none"
+              >
                 <i class="fas fa-credit-card"></i>
                 <span>Booking & Payment</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#profile" class="nav-link" data-section="profile">
+              </button>
+              <button class="nav-btn" data-section="profile">
                 <i class="fas fa-user-cog"></i>
                 <span>Profile</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#my-bookings" class="nav-link" data-section="my-bookings">
+              </button>
+              <button class="nav-btn" data-section="my-bookings">
                 <i class="fas fa-clipboard-list"></i>
                 <span>My Bookings</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#bookings-history" class="nav-link" data-section="bookings-history">
+              </button>
+              <button class="nav-btn" data-section="bookings-history">
                 <i class="fas fa-history"></i>
                 <span>Booking History</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#notifications" class="nav-link" data-section="notifications">
+              </button>
+              <button class="nav-btn" data-section="notifications">
                 <i class="fas fa-bell"></i>
                 <span>Notifications</span>
-                <span class="notification-badge" id="notificationCount" style="display: none">0</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#reviews" class="nav-link" data-section="reviews">
+                <span
+                  class="notification-badge"
+                  id="notificationCount"
+                  style="display: none"
+                  >0</span
+                >
+              </button>
+              <button class="nav-btn" data-section="reviews">
                 <i class="fas fa-star"></i>
                 <span>My Reviews</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+              </button>
+            </nav>
+          </div>
+        </div>
 
-      <!-- Main Content -->
-      <main class="main-content">
         <!-- Content Area (Half View) -->
         <div class="content-area" id="contentArea">
           <!-- Dashboard Content -->
@@ -3306,8 +3308,6 @@
         </div>
       </div>
     </div>
-      </main>
-    </div>
 
     <!-- JavaScript - Session Check -->
     <script>
@@ -4024,34 +4024,6 @@
       document.addEventListener("keydown", function (e) {
         if (e.key === "Escape") {
           window.closeImageLightbox();
-        }
-      });
-    </script>
-
-    <!-- Mobile Toggle Debug & Backup Script -->
-    <script>
-      console.log(
-        "%c🔍 MOBILE TOGGLE DEBUG",
-        "color: #4CAF50; font-weight: bold; font-size: 16px;"
-      );
-
-      // Wait for DOM to be fully loaded
-      window.addEventListener("load", function () {
-        const toggle = document.querySelector(".mobile-toggle");
-        const navMenu = document.querySelector(".nav-menu-horizontal");
-
-        console.log("Mobile Toggle Element:", toggle);
-        console.log("Nav Menu Element:", navMenu);
-        console.log("toggleSidebar function:", typeof window.toggleSidebar);
-
-        if (toggle && !toggle.onclick) {
-          console.warn("⚠️ onclick not set, adding backup listener");
-          toggle.addEventListener("click", function (e) {
-            console.log("🔴 BACKUP LISTENER FIRED");
-            if (typeof window.toggleSidebar === "function") {
-              window.toggleSidebar();
-            }
-          });
         }
       });
     </script>
