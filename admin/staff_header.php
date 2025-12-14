@@ -20,6 +20,9 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
     <div class="resort-info"><h1>AR Homes Posadas Farm Resort</h1></div>
   </div>
   <div class="header-right">
+    <div class="mobile-toggle" onclick="toggleStaffSidebar()">
+      <i class="fas fa-bars"></i>
+    </div>
     <div class="admin-profile">
       <div class="profile-info"><span class="admin-name"><?php echo htmlspecialchars($staffName); ?></span><span class="admin-role">Staff</span></div>
     </div>
@@ -104,6 +107,43 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       closeLogoutModal();
+    }
+  });
+  
+  // Mobile sidebar toggle functionality
+  function toggleStaffSidebar() {
+    const sidebar = document.getElementById('staff-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    if (sidebar) {
+      sidebar.classList.toggle('open');
+    }
+    
+    // Create overlay if it doesn't exist
+    if (!overlay && sidebar && sidebar.classList.contains('open')) {
+      const newOverlay = document.createElement('div');
+      newOverlay.id = 'sidebar-overlay';
+      newOverlay.className = 'sidebar-overlay';
+      newOverlay.onclick = toggleStaffSidebar;
+      document.body.appendChild(newOverlay);
+      setTimeout(() => newOverlay.classList.add('active'), 10);
+    } else if (overlay) {
+      if (sidebar && !sidebar.classList.contains('open')) {
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.remove(), 300);
+      }
+    }
+  }
+  
+  // Close sidebar when clicking on nav links (mobile)
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.innerWidth <= 768) {
+      const navLinks = document.querySelectorAll('.staff-sidebar .nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          setTimeout(toggleStaffSidebar, 100);
+        });
+      });
     }
   });
 </script>
