@@ -4030,7 +4030,7 @@ body::before {
 }
 
 .section-header-inline h2 i {
-  color: #667eea;
+  color: #11224e;
 }
 
 .filter-buttons {
@@ -4041,10 +4041,10 @@ body::before {
 
 .filter-btn {
   padding: 0.5rem 1rem;
-  border-radius: 20px;
-  border: 2px solid rgba(102, 126, 234, 0.2);
-  background: rgba(102, 126, 234, 0.05);
-  color: #667eea;
+  border-radius: 8px;
+  border: 2px solid rgba(17, 34, 78, 0.2);
+  background: rgba(17, 34, 78, 0.05);
+  color: #11224e;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
@@ -4053,9 +4053,9 @@ body::before {
 
 .filter-btn:hover,
 .filter-btn.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #11224e;
   color: white;
-  border-color: transparent;
+  border-color: #11224e;
 }
 
 .search-filter-section {
@@ -4063,11 +4063,15 @@ body::before {
   gap: 1rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .search-box {
   flex: 1;
-  min-width: 250px;
+  min-width: 200px;
+  max-width: 400px;
   position: relative;
 }
 
@@ -4076,32 +4080,33 @@ body::before {
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
+  color: #11224e;
 }
 
 .search-box input {
   width: 100%;
   padding: 0.8rem 1rem 0.8rem 2.5rem;
-  border: 2px solid rgba(102, 126, 234, 0.2);
-  border-radius: 10px;
+  border: 2px solid rgba(17, 34, 78, 0.2);
+  border-radius: 8px;
   font-size: 0.9rem;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.8);
+  color: #11224e;
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #11224e;
+  box-shadow: 0 0 0 3px rgba(17, 34, 78, 0.1);
 }
 
 .sort-select {
   padding: 0.8rem 1rem;
-  border: 2px solid rgba(102, 126, 234, 0.2);
-  border-radius: 10px;
+  border: 2px solid rgba(17, 34, 78, 0.2);
+  border-radius: 8px;
   font-size: 0.9rem;
   background: rgba(255, 255, 255, 0.8);
-  color: #667eea;
+  color: #11224e;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -4109,45 +4114,46 @@ body::before {
 
 .sort-select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #11224e;
+  box-shadow: 0 0 0 3px rgba(17, 34, 78, 0.1);
 }
 
 .bookings-history-grid {
-  display: grid;
-  gap: 1.5rem;
+  display: block;
+  margin: 20px auto;
+  max-width: 800px;
 }
 
 .booking-history-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: white;
+  border-radius: 8px;
+  padding: 12px 15px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid #11224e;
   transition: all 0.3s ease;
-  border-left: 4px solid;
+  cursor: pointer;
+  margin-bottom: 10px;
 }
 
 .booking-history-card[data-status="completed"] {
-  border-left-color: #66bb6a;
+  border-color: #11224e;
 }
 
 .booking-history-card[data-status="confirmed"] {
-  border-left-color: #42a5f5;
+  border-color: #11224e;
 }
 
 .booking-history-card[data-status="pending"] {
-  border-left-color: #ffa726;
+  border-color: #11224e;
 }
 
 .booking-history-card[data-status="cancelled"] {
-  border-left-color: #ef5350;
+  border-color: #11224e;
 }
 
 .booking-history-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateX(5px);
 }
 
 .booking-card-header {
@@ -5696,7 +5702,7 @@ body::before {
 /* ===== MY BOOKINGS SECTION ===== */
 .bookings-grid {
   display: block;
-  margin-top: 20px;
+  margin: 20px auto;
   max-width: 800px;
 }
 

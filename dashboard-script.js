@@ -889,7 +889,10 @@ window.addEventListener("error", function (e) {
     (e.message.includes("payWithPayMongo") ||
       e.message.includes("openCancelModal") ||
       e.message.includes("openRebookingModal") ||
-      e.message.includes("openPaymentUploadModal"))
+      e.message.includes("openPaymentUploadModal") ||
+      e.message.includes("viewReservationDetails") ||
+      e.message.includes("showReservationDetailsModal") ||
+      e.message.includes("closeReservationDetailsModal"))
   ) {
     // Let the function handle its own errors
     return;
@@ -897,6 +900,13 @@ window.addEventListener("error", function (e) {
   console.error("Global error caught:", e);
   console.error("Error details:", e.message, e.filename, e.lineno, e.colno);
   showNotification("An error occurred. Please refresh the page.", "error");
+});
+
+// Handle unhandled promise rejections
+window.addEventListener("unhandledrejection", function (e) {
+  console.error("Unhandled promise rejection:", e.reason);
+  // Don't show generic error for these - let functions handle their own errors
+  e.preventDefault();
 });
 
 // ===== KEYBOARD SHORTCUTS =====
@@ -2275,12 +2285,12 @@ let currentSearchTerm = "";
 
 // View Reservation Details - Full Modal Implementation
 async function viewReservationDetails(reservationId) {
-  showNotification(
-    `Loading details for reservation #${reservationId}...`,
-    "info"
-  );
-
   try {
+    showNotification(
+      `Loading details for reservation #${reservationId}...`,
+      "info"
+    );
+
     // Find reservation from loaded data or fetch fresh
     let reservation = loadedReservations.find(
       (r) => r.reservation_id == reservationId
@@ -2306,29 +2316,33 @@ async function viewReservationDetails(reservationId) {
     showReservationDetailsModal(reservation);
   } catch (error) {
     console.error("Error loading reservation details:", error);
-    showNotification("Failed to load reservation details", "error");
+    showNotification(
+      "Failed to load reservation details: " + error.message,
+      "error"
+    );
   }
 }
 
 function showReservationDetailsModal(r) {
-  const statusColors = {
-    pending_payment: "#ffa726",
-    pending_confirmation: "#ffb74d",
-    confirmed: "#42a5f5",
-    checked_in: "#66bb6a",
-    checked_out: "#81c784",
-    completed: "#4caf50",
-    cancelled: "#ef5350",
-    no_show: "#ff7043",
-    forfeited: "#e57373",
-    rebooked: "#7986cb",
-  };
+  try {
+    const statusColors = {
+      pending_payment: "#ffa726",
+      pending_confirmation: "#ffb74d",
+      confirmed: "#42a5f5",
+      checked_in: "#66bb6a",
+      checked_out: "#81c784",
+      completed: "#4caf50",
+      cancelled: "#ef5350",
+      no_show: "#ff7043",
+      forfeited: "#e57373",
+      rebooked: "#7986cb",
+    };
 
-  const statusColor = statusColors[r.status] || "#999";
-  const remainingBalance =
-    parseFloat(r.total_amount) - parseFloat(r.downpayment_amount);
+    const statusColor = statusColors[r.status] || "#999";
+    const remainingBalance =
+      parseFloat(r.total_amount) - parseFloat(r.downpayment_amount);
 
-  const modalHTML = `
+    const modalHTML = `
     <div id="reservationDetailsModal" class="reservation-modal-overlay" onclick="closeReservationDetailsModal(event)">
       <div class="reservation-modal-content" onclick="event.stopPropagation()">
         <div class="reservation-modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -2364,8 +2378,8 @@ function showReservationDetailsModal(r) {
               box-shadow: 0 4px 15px ${statusColor}40;
             ">
               <i class="fas fa-${getStatusIcon(r.status)}"></i> ${
-    r.status_label
-  }
+      r.status_label
+    }
             </span>
           </div>
           
@@ -2419,8 +2433,8 @@ function showReservationDetailsModal(r) {
               <div class="detail-item">
                 <label>Duration</label>
                 <span>${r.number_of_days || 0} day(s) / ${
-    r.number_of_nights || 0
-  } night(s)</span>
+      r.number_of_nights || 0
+    } night(s)</span>
               </div>
               <div class="detail-item">
                 <label>Days Until Check-in</label>
@@ -2607,8 +2621,15 @@ function showReservationDetailsModal(r) {
     </div>
   `;
 
-  document.body.insertAdjacentHTML("beforeend", modalHTML);
-  document.body.style.overflow = "hidden";
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+    document.body.style.overflow = "hidden";
+  } catch (error) {
+    console.error("Error showing reservation details modal:", error);
+    showNotification(
+      "Failed to display reservation details: " + error.message,
+      "error"
+    );
+  }
 }
 
 function getModalActionButtons(r) {
@@ -3398,52 +3419,42 @@ function createEnhancedReservationCard(r) {
   };
 
   const statusClass = statusColors[r.status] || "pending";
-  const remainingBalance =
-    parseFloat(r.total_amount) - parseFloat(r.downpayment_amount);
 
   return `
     <div class="booking-history-card" data-status="${statusClass}" data-reservation-id="${
     r.reservation_id
-  }">
-      <div class="booking-card-header">
-        <span class="status-badge ${statusClass}">${r.status_label}</span>
-        <span class="booking-date">${formatDate(r.check_in_date)}</span>
-      </div>
-      <div class="booking-card-body">
-        <h4>Reservation #${r.reservation_id}</h4>
-        <div class="booking-details">
-          <span><i class="fas fa-calendar"></i> ${formatBookingType(
-            r.booking_type
-          )}</span>
+  }" onclick="viewReservationDetails('${
+    r.reservation_id
+  }')" style="cursor: pointer; padding: 12px 15px; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 10px; transition: all 0.3s ease; border: 2px solid #11224e; border-left: 2px solid #11224e;">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+            <span class="status-badge ${statusClass}" style="font-size: 0.75em; padding: 4px 8px;">${
+    r.status_label
+  }</span>
+            <span style="font-weight: 700; color: #1e293b; font-size: 0.9em;">#${
+              r.reservation_id
+            }</span>
+            <span style="color: #94a3b8; font-size: 0.85em;">${formatDate(
+              r.check_in_date
+            )}</span>
+          </div>
+          <div style="font-weight: 600; color: #334155; margin-bottom: 4px; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
+            r.package_type || "Package"
+          } - ${(r.booking_type || "").toUpperCase()}</div>
+          <div style="color: #64748b; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <i class="fas fa-user" style="font-size: 0.9em; color: #64748b;"></i> ${
+              r.number_of_guests || 1
+            } Guest(s) • 
+            <i class="fas fa-tag" style="font-size: 0.9em; color: #64748b;"></i> ₱${parseFloat(
+              r.total_amount
+            ).toLocaleString()}
+          </div>
         </div>
-        <div class="booking-details" style="margin-top: 8px;">
-          <span><i class="fas fa-box"></i> ${r.package_type || "Package"}</span>
-          <span><i class="fas fa-users"></i> ${
-            r.number_of_guests || 1
-          } Guest(s)</span>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;">
+          <i class="fas fa-eye" style="color: #11224e; font-size: 1.3em;"></i>
+          <span style="color: #11224e; font-size: 0.7em; font-weight: 600; white-space: nowrap;">View Details</span>
         </div>
-        <div class="booking-details" style="margin-top: 10px;">
-          <span><i class="fas fa-money-bill-wave"></i> Total: ₱${parseFloat(
-            r.total_amount
-          ).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
-        </div>
-        <div class="booking-details" style="margin-top: 5px;">
-          <span style="color: ${
-            r.downpayment_verified == 1 ? "#4caf50" : "#ff9800"
-          };">
-            <i class="fas fa-${
-              r.downpayment_verified == 1 ? "check-circle" : "clock"
-            }"></i> 
-            Down: ₱${parseFloat(r.downpayment_amount).toLocaleString("en-PH", {
-              minimumFractionDigits: 2,
-            })}
-            (${r.downpayment_status})
-          </span>
-        </div>
-        ${getPaymentStatusHTML(r)}
-      </div>
-      <div class="booking-card-actions">
-        ${getEnhancedActionButtons(r)}
       </div>
     </div>
   `;
