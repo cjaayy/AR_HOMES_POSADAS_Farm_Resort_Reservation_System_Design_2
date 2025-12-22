@@ -3825,31 +3825,6 @@ document.addEventListener("DOMContentLoaded", function () {
   initNotificationBadge();
 });
 
-// ===== REWARDS FUNCTIONS =====
-function redeemReward(points, rewardType) {
-  const currentPoints = 2500; // This would come from user data
-
-  if (currentPoints < points) {
-    showNotification("Insufficient points for this reward.", "error");
-    return;
-  }
-
-  if (confirm(`Redeem this reward for ${points} points?`)) {
-    showNotification(
-      `Redeeming reward... ${points} points will be deducted.`,
-      "info"
-    );
-
-    setTimeout(() => {
-      showNotification(
-        "Reward redeemed successfully! Check your email for details.",
-        "success"
-      );
-      // In production, this would update the points balance
-    }, 1500);
-  }
-}
-
 // ===== REVIEWS FUNCTIONS =====
 function writeNewReview() {
   showNotification("Opening review form...", "info");
@@ -4679,7 +4654,6 @@ window.completePayment = completePayment;
 window.markAllAsRead = markAllAsRead;
 window.filterNotifications = filterNotifications;
 window.dismissNotification = dismissNotification;
-window.redeemReward = redeemReward;
 window.writeNewReview = writeNewReview;
 window.editReview = editReview;
 window.deleteReview = deleteReview;
