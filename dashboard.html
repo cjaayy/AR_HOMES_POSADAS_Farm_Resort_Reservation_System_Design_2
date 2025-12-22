@@ -1865,146 +1865,290 @@
                 <i class="fas fa-user" style="color: #11224e"></i> Profile
               </h2>
             </div>
-            <!-- Profile Stats Grid -->
-            <div class="profile-stats-grid">
-              <div class="profile-stats-card">
-                <div class="stats-icon">
-                  <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="stats-content">
-                  <h3 class="stats-number" id="profileTotalBookings">0</h3>
-                  <p class="stats-label">Total Bookings</p>
-                </div>
-              </div>
-              <div class="profile-stats-card">
-                <div class="stats-icon pending">
-                  <i class="fas fa-star"></i>
-                </div>
-                <div class="stats-content">
-                  <h3 class="stats-number" id="profileReviewsGiven">0</h3>
-                  <p class="stats-label">Reviews Given</p>
-                </div>
-              </div>
-              <div class="profile-stats-card">
-                <div class="stats-icon approved">
-                  <i class="fas fa-award"></i>
-                </div>
-                <div class="stats-content">
-                  <h3 class="stats-number" id="profileMemberSince">2024</h3>
-                  <p class="stats-label">Member Since</p>
-                </div>
-              </div>
-            </div>
 
-            <!-- Profile Information Cards -->
-            <div class="profile-cards-container">
-              <!-- Personal Information Card -->
-              <div class="profile-info-card">
-                <div class="profile-card-header">
-                  <h3>
-                    <i class="fas fa-user-circle"></i> Personal Information
-                  </h3>
+            <!-- Single Profile Card -->
+            <div
+              class="profile-single-card"
+              style="
+                background: white;
+                border-radius: 12px;
+                padding: 25px;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+                border: 2px solid #11224e;
+                max-width: 800px;
+                margin: 0 auto;
+              "
+            >
+              <!-- Profile Stats -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-around;
+                  flex-wrap: wrap;
+                  gap: 20px;
+                  padding-bottom: 20px;
+                  border-bottom: 1px solid #e5e7eb;
+                  margin-bottom: 25px;
+                "
+              >
+                <div style="text-align: center">
+                  <div
+                    style="font-size: 2em; font-weight: 700; color: #11224e"
+                    id="profileTotalBookings"
+                  >
+                    0
+                  </div>
+                  <div style="font-size: 0.85em; color: #64748b">
+                    Total Bookings
+                  </div>
                 </div>
-                <div class="profile-card-body">
-                  <div class="profile-info-grid">
-                    <div class="profile-info-item">
-                      <div class="profile-info-icon">
-                        <i class="fas fa-user"></i>
+                <div style="text-align: center">
+                  <div
+                    style="font-size: 2em; font-weight: 700; color: #11224e"
+                    id="profileReviewsGiven"
+                  >
+                    0
+                  </div>
+                  <div style="font-size: 0.85em; color: #64748b">
+                    Reviews Given
+                  </div>
+                </div>
+                <div style="text-align: center">
+                  <div
+                    style="font-size: 2em; font-weight: 700; color: #11224e"
+                    id="profileMemberSince"
+                  >
+                    2024
+                  </div>
+                  <div style="font-size: 0.85em; color: #64748b">
+                    Member Since
+                  </div>
+                </div>
+              </div>
+
+              <!-- Personal Information -->
+              <div style="margin-bottom: 25px">
+                <h3
+                  style="
+                    color: #11224e;
+                    font-size: 1.1em;
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  <i class="fas fa-user-circle"></i> Personal Information
+                </h3>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <i
+                      class="fas fa-user"
+                      style="color: #11224e; width: 20px"
+                    ></i>
+                    <div>
+                      <div style="font-size: 0.75em; color: #64748b">
+                        Given Name
                       </div>
-                      <div class="profile-info-content">
-                        <label>Given Name</label>
-                        <p id="displayGivenName">-</p>
+                      <div
+                        style="font-weight: 600; color: #1e293b"
+                        id="displayGivenName"
+                      >
+                        -
                       </div>
                     </div>
-                    <div class="profile-info-item">
-                      <div class="profile-info-icon">
-                        <i class="fas fa-user"></i>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <i
+                      class="fas fa-user"
+                      style="color: #11224e; width: 20px"
+                    ></i>
+                    <div>
+                      <div style="font-size: 0.75em; color: #64748b">
+                        Middle Name
                       </div>
-                      <div class="profile-info-content">
-                        <label>Middle Name</label>
-                        <p id="displayMiddleName">-</p>
+                      <div
+                        style="font-weight: 600; color: #1e293b"
+                        id="displayMiddleName"
+                      >
+                        -
                       </div>
                     </div>
-                    <div class="profile-info-item">
-                      <div class="profile-info-icon">
-                        <i class="fas fa-user"></i>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <i
+                      class="fas fa-user"
+                      style="color: #11224e; width: 20px"
+                    ></i>
+                    <div>
+                      <div style="font-size: 0.75em; color: #64748b">
+                        Last Name
                       </div>
-                      <div class="profile-info-content">
-                        <label>Last Name</label>
-                        <p id="displayLastName">-</p>
+                      <div
+                        style="font-weight: 600; color: #1e293b"
+                        id="displayLastName"
+                      >
+                        -
                       </div>
                     </div>
-                    <div class="profile-info-item">
-                      <div class="profile-info-icon">
-                        <i class="fas fa-user-tag"></i>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <i
+                      class="fas fa-user-tag"
+                      style="color: #11224e; width: 20px"
+                    ></i>
+                    <div>
+                      <div style="font-size: 0.75em; color: #64748b">
+                        Username
                       </div>
-                      <div class="profile-info-content">
-                        <label>Username</label>
-                        <p id="displayUsername">-</p>
+                      <div
+                        style="font-weight: 600; color: #1e293b"
+                        id="displayUsername"
+                      >
+                        -
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Contact Information Card -->
-              <div class="profile-info-card">
-                <div class="profile-card-header">
-                  <h3>
-                    <i class="fas fa-address-book"></i> Contact Information
-                  </h3>
-                </div>
-                <div class="profile-card-body">
-                  <div class="profile-info-grid">
-                    <div class="profile-info-item">
-                      <div class="profile-info-icon">
-                        <i class="fas fa-envelope"></i>
+              <!-- Contact Information -->
+              <div
+                style="
+                  margin-bottom: 25px;
+                  padding-top: 20px;
+                  border-top: 1px solid #e5e7eb;
+                "
+              >
+                <h3
+                  style="
+                    color: #11224e;
+                    font-size: 1.1em;
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  <i class="fas fa-address-book"></i> Contact Information
+                </h3>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <i
+                      class="fas fa-envelope"
+                      style="color: #11224e; width: 20px"
+                    ></i>
+                    <div>
+                      <div style="font-size: 0.75em; color: #64748b">
+                        Email Address
                       </div>
-                      <div class="profile-info-content">
-                        <label>Email Address</label>
-                        <p id="displayEmail">-</p>
+                      <div
+                        style="font-weight: 600; color: #1e293b"
+                        id="displayEmail"
+                      >
+                        -
                       </div>
                     </div>
-                    <div class="profile-info-item">
-                      <div class="profile-info-icon">
-                        <i class="fas fa-phone"></i>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <i
+                      class="fas fa-phone"
+                      style="color: #11224e; width: 20px"
+                    ></i>
+                    <div>
+                      <div style="font-size: 0.75em; color: #64748b">
+                        Phone Number
                       </div>
-                      <div class="profile-info-content">
-                        <label>Phone Number</label>
-                        <p id="displayPhone">-</p>
+                      <div
+                        style="font-weight: 600; color: #1e293b"
+                        id="displayPhone"
+                      >
+                        -
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Account Status Card -->
-              <div class="profile-info-card">
-                <div class="profile-card-header">
-                  <h3><i class="fas fa-shield-alt"></i> Account Status</h3>
-                </div>
-                <div class="profile-card-body">
-                  <div class="account-status-grid">
-                    <div class="status-badge-item verified">
-                      <i class="fas fa-check-circle"></i>
-                      <span>Email Verified</span>
-                    </div>
-                    <div class="status-badge-item verified">
-                      <i class="fas fa-check-circle"></i>
-                      <span>Account Active</span>
-                    </div>
+              <!-- Account Status -->
+              <div style="padding-top: 20px; border-top: 1px solid #e5e7eb">
+                <h3
+                  style="
+                    color: #11224e;
+                    font-size: 1.1em;
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  <i class="fas fa-shield-alt"></i> Account Status
+                </h3>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      background: #d1fae5;
+                      padding: 8px 15px;
+                      border-radius: 20px;
+                      color: #065f46;
+                    "
+                  >
+                    <i class="fas fa-check-circle"></i>
+                    <span>Email Verified</span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      background: #d1fae5;
+                      padding: 8px 15px;
+                      border-radius: 20px;
+                      color: #065f46;
+                    "
+                  >
+                    <i class="fas fa-check-circle"></i>
+                    <span>Account Active</span>
                   </div>
                 </div>
               </div>
 
               <!-- Information Note -->
-              <div class="profile-info-notice">
-                <i class="fas fa-info-circle"></i>
-                <div>
+              <div
+                style="
+                  margin-top: 20px;
+                  padding: 15px;
+                  background: #f0f9ff;
+                  border-radius: 8px;
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 12px;
+                  color: #0369a1;
+                "
+              >
+                <i class="fas fa-info-circle" style="margin-top: 2px"></i>
+                <div style="font-size: 0.9em">
                   <strong>Note:</strong> Profile information is currently
                   read-only. To update your details, please contact our support
                   team at
-                  <a href="mailto:support@arhomes.com">support@arhomes.com</a>
+                  <a href="mailto:support@arhomes.com" style="color: #0369a1"
+                    >support@arhomes.com</a
+                  >
                   or call us at <strong>(123) 456-7890</strong>.
                 </div>
               </div>
