@@ -6307,3 +6307,492 @@ button:disabled {
   color: #667eea;
   font-weight: 600;
 }
+/* ===== RESERVATION DETAILS MODAL STYLES ===== */
+.reservation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.reservation-modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  animation: slideUpFade 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reservation-modal-header {
+  padding: 20px 25px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.modal-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.reservation-modal-body {
+  padding: 25px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.reservation-modal-footer {
+  padding: 20px 25px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.details-section {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.details-section h3 {
+  color: #333;
+  font-size: 1.1rem;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #667eea;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.details-section h3 i {
+  color: #667eea;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-item label {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.detail-item span {
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.payment-breakdown {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.payment-row span:first-child {
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.payment-row span:last-child {
+  font-weight: 500;
+  color: #333;
+}
+
+.payment-status-badge {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.payment-status-badge.verified {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.payment-status-badge.pending {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.payment-status-badge.unpaid {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Modal Action Buttons */
+.modal-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-btn.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.modal-btn.secondary {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.modal-btn.success {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  color: white;
+}
+
+.modal-btn.warning {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+}
+
+.modal-btn.danger {
+  background: linear-gradient(135deg, #ef5350, #c62828);
+  color: white;
+}
+
+/* Star Rating Styles */
+#starRating i {
+  transition: all 0.2s ease;
+  color: #ddd;
+}
+
+#starRating i:hover {
+  transform: scale(1.2);
+}
+
+#starRating i.fas {
+  color: #ffc107;
+}
+
+/* Enhanced Booking Card Action Buttons */
+.booking-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  margin-top: 15px;
+}
+
+.booking-card-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.booking-card-actions .btn-secondary {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.booking-card-actions .btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.booking-card-actions .btn-warning {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+}
+
+.booking-card-actions .btn-danger {
+  background: linear-gradient(135deg, #ef5350, #c62828);
+  color: white;
+}
+
+.booking-card-actions .btn-success {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  color: white;
+}
+
+.booking-card-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Modal Styles */
+@media (max-width: 768px) {
+  .reservation-modal-content {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 15px;
+  }
+
+  .reservation-modal-header {
+    padding: 15px 20px;
+  }
+
+  .reservation-modal-header h2 {
+    font-size: 1.2rem !important;
+  }
+
+  .reservation-modal-body {
+    padding: 15px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-modal-footer {
+    padding: 15px;
+  }
+
+  .modal-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 120px;
+  }
+
+  .booking-card-actions {
+    flex-direction: column;
+  }
+
+  .booking-card-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ===== ADDITIONAL BOOKING HISTORY ENHANCEMENTS ===== */
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.refresh-btn:active {
+  transform: translateY(0);
+}
+
+.refresh-btn i.fa-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reservation count badge */
+.reservation-count {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Empty state styling */
+.empty-state {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.empty-state .make-reservation-btn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.empty-state .make-reservation-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Rebooked status style */
+.status-badge.rebooked {
+  background: rgba(121, 134, 203, 0.2);
+  color: #3f51b5;
+}
+
+.booking-history-card[data-status="rebooked"] {
+  border-left-color: #7986cb;
+}
+
+/* Animation for filter buttons */
+.filter-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 100%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+}
+
+.filter-btn:active::after {
+  animation: ripple 0.4s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(20);
+    opacity: 0;
+  }
+}
+
+/* Skeleton loading animation */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Fade animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

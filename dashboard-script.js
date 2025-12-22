@@ -230,20 +230,49 @@ document.addEventListener("DOMContentLoaded", function () {
   setupEventListeners();
   setupFormValidation();
 
-  // Show dashboard section by default
-  const dashboardSection = document.getElementById("dashboard-section");
-  if (dashboardSection) {
-    dashboardSection.style.display = "block";
-    dashboardSection.classList.add("active");
-  }
+  // Pre-load reservations for booking history
+  loadMyReservations();
 
-  // Hide all other sections
+  // Initialize booking history filters
+  initBookingHistoryFilters();
+
+  // Restore last viewed section from localStorage, or show dashboard by default
+  const savedSection = localStorage.getItem("currentDashboardSection");
+  const defaultSection = savedSection || "dashboard";
+
+  // Hide all sections first
   document.querySelectorAll(".content-section").forEach((section) => {
-    if (section.id !== "dashboard-section") {
-      section.style.display = "none";
-      section.classList.remove("active");
-    }
+    section.style.display = "none";
+    section.classList.remove("active");
   });
+
+  // Show the saved/default section
+  const targetSectionId = defaultSection + "-section";
+  const targetSection = document.getElementById(targetSectionId);
+
+  if (targetSection) {
+    targetSection.style.display = "block";
+    targetSection.classList.add("active");
+
+    // Update navigation to highlight the correct button
+    updateActiveNavigation(defaultSection);
+
+    // Load data for specific sections
+    if (defaultSection === "bookings-history") {
+      loadMyReservations();
+    }
+    if (defaultSection === "notifications") {
+      loadUserNotifications();
+    }
+  } else {
+    // Fallback to dashboard if saved section not found
+    const dashboardSection = document.getElementById("dashboard-section");
+    if (dashboardSection) {
+      dashboardSection.style.display = "block";
+      dashboardSection.classList.add("active");
+      updateActiveNavigation("dashboard");
+    }
+  }
 });
 
 // ===== DASHBOARD INITIALIZATION =====
@@ -446,6 +475,9 @@ function setupEventListeners() {
 }
 
 function showSection(sectionId) {
+  // Save current section to localStorage for persistence on refresh
+  localStorage.setItem("currentDashboardSection", sectionId);
+
   // Use the new popup system instead of the old section switching
   if (window.popupManager) {
     window.popupManager.showSection(sectionId);
@@ -469,6 +501,9 @@ function showSection(sectionId) {
 }
 
 function updateActiveNavigation(activeSection) {
+  // Save current section to localStorage for persistence on refresh
+  localStorage.setItem("currentDashboardSection", activeSection);
+
   // Updated for new navigation system
   // Remove active class from all nav buttons
   document.querySelectorAll(".nav-btn").forEach((btn) => {
@@ -759,30 +794,8 @@ function logout() {
   }
 }
 
-// ===== RESERVATION MANAGEMENT =====
-function viewReservationDetails(reservationId) {
-  const reservation = reservationsData.find((r) => r.id === reservationId);
-  if (reservation) {
-    alert(
-      `Reservation Details:\n\nDates: ${reservation.dates}\nRoom: ${
-        reservation.roomType
-      }\nGuests: ${
-        reservation.guests
-      }\nStatus: ${reservation.status.toUpperCase()}`
-    );
-  }
-}
-
-function cancelReservation(reservationId) {
-  if (confirm("Are you sure you want to cancel this reservation?")) {
-    showNotification("Reservation cancelled successfully.", "success");
-    // In a real app, you would make an API call here
-    userData.totalReservations--;
-    userData.pendingReservations--;
-    updateStatistic("totalReservations", userData.totalReservations);
-    updateStatistic("pendingReservations", userData.pendingReservations);
-  }
-}
+// ===== RESERVATION MANAGEMENT (Legacy - now replaced by enhanced functions in BOOKING HISTORY section) =====
+// Note: viewReservationDetails, cancelReservation are now defined in the Enhanced Booking History section
 
 function modifyReservation(reservationId) {
   showNotification("Redirecting to modification form...", "info");
@@ -791,15 +804,18 @@ function modifyReservation(reservationId) {
 }
 
 function reviewStay(reservationId) {
-  showNotification("Review form will be available soon!", "info");
+  // Now redirects to the enhanced write review function
+  if (typeof writeReviewForReservation === "function") {
+    writeReviewForReservation(reservationId);
+  } else {
+    showNotification("Review form will be available soon!", "info");
+  }
 }
 
 // ===== GLOBAL FUNCTIONS FOR ONCLICK HANDLERS =====
 window.logout = logout;
 window.showSection = showSection;
 window.toggleSidebar = toggleSidebar;
-window.viewReservationDetails = viewReservationDetails;
-window.cancelReservation = cancelReservation;
 window.modifyReservation = modifyReservation;
 window.reviewStay = reviewStay;
 
@@ -1577,7 +1593,20 @@ class PopupContentManager {
     }
 
     this.setupEventListeners();
-    this.loadSectionContent("dashboard"); // Load default content
+
+    // Load saved section from localStorage or default to dashboard
+    const savedSection =
+      localStorage.getItem("currentDashboardSection") || "dashboard";
+    this.loadSectionContent(savedSection);
+    this.setActiveNavButtonBySection(savedSection);
+  }
+
+  setActiveNavButtonBySection(sectionName) {
+    this.navButtons.forEach((btn) => {
+      if (btn.dataset.section === sectionName) {
+        this.setActiveNavButton(btn);
+      }
+    });
   }
 
   setupEventListeners() {
@@ -1614,6 +1643,9 @@ class PopupContentManager {
   }
 
   showSection(sectionName) {
+    // Save current section to localStorage for persistence on refresh
+    localStorage.setItem("currentDashboardSection", sectionName);
+
     this.loadSectionContent(sectionName);
     this.showPopup();
     this.currentSection = sectionName;
@@ -1891,6 +1923,8 @@ async function loadMyReservations() {
     const result = await response.json();
 
     if (result.success) {
+      // Store in global variable for filtering/sorting
+      loadedReservations = result.reservations;
       displayReservations(result.reservations);
       updateDashboardCounts(result.reservations);
     } else {
@@ -1900,6 +1934,7 @@ async function loadMyReservations() {
       );
     }
   } catch (error) {
+    console.error("Error loading reservations:", error);
     showNotification("Failed to load reservations", "error");
   }
 }
@@ -1923,78 +1958,8 @@ function updateDashboardCounts(reservations) {
   if (completedEl) completedEl.textContent = completed;
 }
 
-function displayReservations(reservations) {
-  const container = document.querySelector(".bookings-history-grid");
-  if (!container) return;
-
-  if (reservations.length === 0) {
-    container.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #94a3b8;">
-        <i class="fas fa-calendar-times" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
-        <p style="font-size: 18px; font-weight: 600;">No reservations yet</p>
-        <p style="margin-top: 10px;">Make your first reservation to see it here!</p>
-        <button onclick="showSection('my-reservations'); updateActiveNavigation('my-reservations');" 
-                style="margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer;">
-          <i class="fas fa-calendar-plus"></i> Make Reservation
-        </button>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = reservations
-    .map((r) => createReservationCard(r))
-    .join("");
-}
-
-function createReservationCard(r) {
-  const statusColors = {
-    pending_payment: "pending",
-    pending_confirmation: "pending",
-    confirmed: "confirmed",
-    checked_in: "confirmed",
-    checked_out: "completed",
-    completed: "completed",
-    cancelled: "cancelled",
-    no_show: "cancelled",
-    forfeited: "cancelled",
-  };
-
-  const statusClass = statusColors[r.status] || "pending";
-
-  return `
-    <div class="booking-history-card" data-status="${statusClass}" data-reservation-id="${
-    r.reservation_id
-  }">
-      <div class="booking-card-header">
-        <span class="status-badge ${statusClass}">${r.status_label}</span>
-        <span class="booking-date">${formatDate(r.check_in_date)}</span>
-      </div>
-      <div class="booking-card-body">
-        <h4>Reservation #${r.reservation_id}</h4>
-        <div class="booking-details">
-          <span><i class="fas fa-calendar"></i> ${r.booking_type}</span>
-          <span><i class="fas fa-box"></i> ${r.package_type || "Package"}</span>
-          <span><i class="fas fa-users"></i> ${
-            r.number_of_guests || 1
-          } Guests</span>
-        </div>
-        <div class="booking-details" style="margin-top: 10px;">
-          <span><i class="fas fa-money-bill-wave"></i> Total: ₱${parseFloat(
-            r.total_amount
-          ).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
-          <span><i class="fas fa-wallet"></i> Down: ₱${parseFloat(
-            r.downpayment_amount
-          ).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
-        </div>
-        ${getPaymentStatusHTML(r)}
-      </div>
-      <div class="booking-card-actions">
-        ${getActionButtons(r)}
-      </div>
-    </div>
-  `;
-}
+// Note: displayReservations is defined in the ENHANCED BOOKING HISTORY FUNCTIONS section below
+// Note: createReservationCard is replaced by createEnhancedReservationCard in the ENHANCED section
 
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -2069,36 +2034,18 @@ function getPaymentStatusHTML(r) {
           </div>
         </div>`;
     }
+  } else if (r.status === "completed" || r.status === "checked_out") {
+    html +=
+      '<div style="color: #4caf50;"><i class="fas fa-check-double"></i> <strong>Stay Completed</strong></div>';
+    html +=
+      '<div style="margin-top: 5px; color: #6c757d;">Thank you for staying with us!</div>';
+  } else if (r.status === "cancelled") {
+    html +=
+      '<div style="color: #ef5350;"><i class="fas fa-ban"></i> <strong>Cancelled</strong></div>';
   }
 
   html += "</div>";
   return html;
-}
-
-function getActionButtons(r) {
-  let buttons = `<button class="btn-secondary" onclick="viewReservationDetails(${r.reservation_id})">
-    <i class="fas fa-eye"></i> View Details
-  </button>`;
-
-  if (r.can_upload_downpayment) {
-    buttons += `<button class="btn-primary" onclick="completePayment(${r.reservation_id}, 'downpayment')">
-      <i class="fas fa-upload"></i> Upload Payment
-    </button>`;
-  }
-
-  if (r.can_upload_full_payment) {
-    buttons += `<button class="btn-primary" onclick="completePayment(${r.reservation_id}, 'full_payment')">
-      <i class="fas fa-upload"></i> Pay Balance
-    </button>`;
-  }
-
-  if (r.can_cancel) {
-    buttons += `<button class="btn-danger" onclick="cancelReservation(${r.reservation_id})">
-      <i class="fas fa-times"></i> Cancel
-    </button>`;
-  }
-
-  return buttons;
 }
 
 // ===== PAYMENT UPLOAD MODAL =====
@@ -2318,51 +2265,1253 @@ async function cancelReservation(reservationId) {
   }
 }
 
-function viewReservationDetails(reservationId) {
+// ===== ENHANCED BOOKING HISTORY FUNCTIONS =====
+
+// Store loaded reservations globally for filtering/sorting
+let loadedReservations = [];
+let currentFilter = "all";
+let currentSort = "date-desc";
+let currentSearchTerm = "";
+
+// View Reservation Details - Full Modal Implementation
+async function viewReservationDetails(reservationId) {
   showNotification(
     `Loading details for reservation #${reservationId}...`,
     "info"
   );
-  // TODO: Implement detailed view modal
+
+  try {
+    // Find reservation from loaded data or fetch fresh
+    let reservation = loadedReservations.find(
+      (r) => r.reservation_id == reservationId
+    );
+
+    if (!reservation) {
+      // Fetch from server if not in cache
+      const response = await fetch(`user/get_my_reservations.php`);
+      const result = await response.json();
+      if (result.success) {
+        loadedReservations = result.reservations;
+        reservation = loadedReservations.find(
+          (r) => r.reservation_id == reservationId
+        );
+      }
+    }
+
+    if (!reservation) {
+      showNotification("Reservation not found", "error");
+      return;
+    }
+
+    showReservationDetailsModal(reservation);
+  } catch (error) {
+    console.error("Error loading reservation details:", error);
+    showNotification("Failed to load reservation details", "error");
+  }
 }
 
-// Filter booking history
-document.addEventListener("DOMContentLoaded", function () {
-  const filterButtons = document.querySelectorAll(".filter-btn");
-  const bookingCards = document.querySelectorAll(".booking-history-card");
+function showReservationDetailsModal(r) {
+  const statusColors = {
+    pending_payment: "#ffa726",
+    pending_confirmation: "#ffb74d",
+    confirmed: "#42a5f5",
+    checked_in: "#66bb6a",
+    checked_out: "#81c784",
+    completed: "#4caf50",
+    cancelled: "#ef5350",
+    no_show: "#ff7043",
+    forfeited: "#e57373",
+    rebooked: "#7986cb",
+  };
 
+  const statusColor = statusColors[r.status] || "#999";
+  const remainingBalance =
+    parseFloat(r.total_amount) - parseFloat(r.downpayment_amount);
+
+  const modalHTML = `
+    <div id="reservationDetailsModal" class="reservation-modal-overlay" onclick="closeReservationDetailsModal(event)">
+      <div class="reservation-modal-content" onclick="event.stopPropagation()">
+        <div class="reservation-modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <h2 style="color: white; margin: 0; font-size: 1.5rem;">
+                <i class="fas fa-ticket-alt"></i> Reservation #${
+                  r.reservation_id
+                }
+              </h2>
+              <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem;">
+                Created: ${formatDateTime(r.created_at)}
+              </p>
+            </div>
+            <button onclick="closeReservationDetailsModal()" class="modal-close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="reservation-modal-body">
+          <!-- Status Badge -->
+          <div style="text-align: center; margin-bottom: 25px;">
+            <span style="
+              display: inline-block;
+              padding: 10px 25px;
+              background: ${statusColor};
+              color: white;
+              border-radius: 25px;
+              font-weight: 600;
+              font-size: 1rem;
+              text-transform: uppercase;
+              box-shadow: 0 4px 15px ${statusColor}40;
+            ">
+              <i class="fas fa-${getStatusIcon(r.status)}"></i> ${
+    r.status_label
+  }
+            </span>
+          </div>
+          
+          <!-- Booking Information -->
+          <div class="details-section">
+            <h3><i class="fas fa-calendar-alt"></i> Booking Information</h3>
+            <div class="details-grid">
+              <div class="detail-item">
+                <label>Booking Type</label>
+                <span>${formatBookingType(r.booking_type)}</span>
+              </div>
+              <div class="detail-item">
+                <label>Package</label>
+                <span>${r.package_type || "Standard"}</span>
+              </div>
+              <div class="detail-item">
+                <label>Room/Accommodation</label>
+                <span>${r.room || "All Rooms"}</span>
+              </div>
+              <div class="detail-item">
+                <label>Number of Guests</label>
+                <span>${r.number_of_guests || 1} guest(s)</span>
+              </div>
+              <div class="detail-item">
+                <label>Group Type</label>
+                <span>${r.group_type || "Not specified"}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Date & Time Information -->
+          <div class="details-section">
+            <h3><i class="fas fa-clock"></i> Schedule</h3>
+            <div class="details-grid">
+              <div class="detail-item">
+                <label>Check-in Date</label>
+                <span>${formatDate(r.check_in_date)}</span>
+              </div>
+              <div class="detail-item">
+                <label>Check-out Date</label>
+                <span>${formatDate(r.check_out_date)}</span>
+              </div>
+              <div class="detail-item">
+                <label>Check-in Time</label>
+                <span>${r.check_in_time || "As per package"}</span>
+              </div>
+              <div class="detail-item">
+                <label>Check-out Time</label>
+                <span>${r.check_out_time || "As per package"}</span>
+              </div>
+              <div class="detail-item">
+                <label>Duration</label>
+                <span>${r.number_of_days || 0} day(s) / ${
+    r.number_of_nights || 0
+  } night(s)</span>
+              </div>
+              <div class="detail-item">
+                <label>Days Until Check-in</label>
+                <span style="color: ${
+                  r.days_until_checkin < 0
+                    ? "#ef5350"
+                    : r.days_until_checkin <= 3
+                    ? "#ffa726"
+                    : "#4caf50"
+                }">
+                  ${
+                    r.days_until_checkin < 0
+                      ? Math.abs(r.days_until_checkin) + " days ago"
+                      : r.days_until_checkin + " days"
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Guest Information -->
+          <div class="details-section">
+            <h3><i class="fas fa-user"></i> Guest Information</h3>
+            <div class="details-grid">
+              <div class="detail-item">
+                <label>Guest Name</label>
+                <span>${r.guest_name || "Not provided"}</span>
+              </div>
+              <div class="detail-item">
+                <label>Email</label>
+                <span>${r.guest_email || "Not provided"}</span>
+              </div>
+              <div class="detail-item">
+                <label>Phone</label>
+                <span>${r.guest_phone || "Not provided"}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Payment Information -->
+          <div class="details-section">
+            <h3><i class="fas fa-money-bill-wave"></i> Payment Details</h3>
+            <div class="payment-breakdown">
+              <div class="payment-row">
+                <span>Base Price</span>
+                <span>₱${parseFloat(r.base_price || 0).toLocaleString("en-PH", {
+                  minimumFractionDigits: 2,
+                })}</span>
+              </div>
+              <div class="payment-row">
+                <span>Total Amount</span>
+                <span style="font-weight: 600;">₱${parseFloat(
+                  r.total_amount
+                ).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div class="payment-row" style="border-top: 1px dashed #ddd; padding-top: 10px; margin-top: 10px;">
+                <span>
+                  Downpayment (50%)
+                  <span class="payment-status-badge ${
+                    r.downpayment_verified == 1
+                      ? "verified"
+                      : r.downpayment_paid == 1
+                      ? "pending"
+                      : "unpaid"
+                  }">
+                    ${r.downpayment_status}
+                  </span>
+                </span>
+                <span>₱${parseFloat(r.downpayment_amount).toLocaleString(
+                  "en-PH",
+                  { minimumFractionDigits: 2 }
+                )}</span>
+              </div>
+              <div class="payment-row">
+                <span>
+                  Remaining Balance
+                  <span class="payment-status-badge ${
+                    r.full_payment_verified == 1
+                      ? "verified"
+                      : r.full_payment_paid == 1
+                      ? "pending"
+                      : "unpaid"
+                  }">
+                    ${r.full_payment_status}
+                  </span>
+                </span>
+                <span>₱${remainingBalance.toLocaleString("en-PH", {
+                  minimumFractionDigits: 2,
+                })}</span>
+              </div>
+              <div class="payment-row" style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                <span><i class="fas fa-shield-alt"></i> Security Bond (Refundable)</span>
+                <span>₱2,000.00</span>
+              </div>
+              ${
+                r.payment_method
+                  ? `
+              <div class="payment-row" style="margin-top: 10px;">
+                <span>Payment Method</span>
+                <span style="text-transform: capitalize;">${r.payment_method}</span>
+              </div>`
+                  : ""
+              }
+              ${
+                r.downpayment_reference
+                  ? `
+              <div class="payment-row">
+                <span>Downpayment Reference</span>
+                <span>${r.downpayment_reference}</span>
+              </div>`
+                  : ""
+              }
+            </div>
+          </div>
+          
+          ${
+            r.special_requests
+              ? `
+          <!-- Special Requests -->
+          <div class="details-section">
+            <h3><i class="fas fa-sticky-note"></i> Special Requests</h3>
+            <p style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 0; color: #555;">
+              ${r.special_requests}
+            </p>
+          </div>`
+              : ""
+          }
+          
+          ${
+            r.rebooking_requested == 1
+              ? `
+          <!-- Rebooking Request -->
+          <div class="details-section" style="background: #fff3e0; border-left: 4px solid #ff9800;">
+            <h3 style="color: #e65100;"><i class="fas fa-calendar-check"></i> Rebooking Request</h3>
+            <div class="details-grid">
+              <div class="detail-item">
+                <label>New Requested Date</label>
+                <span>${formatDate(r.rebooking_new_date)}</span>
+              </div>
+              <div class="detail-item">
+                <label>Reason</label>
+                <span>${r.rebooking_reason || "Not specified"}</span>
+              </div>
+              <div class="detail-item">
+                <label>Status</label>
+                <span style="color: ${
+                  r.rebooking_approved == 1 ? "#4caf50" : "#ff9800"
+                }">
+                  ${r.rebooking_approved == 1 ? "Approved" : "Pending Approval"}
+                </span>
+              </div>
+            </div>
+          </div>`
+              : ""
+          }
+          
+          ${
+            r.status === "cancelled"
+              ? `
+          <!-- Cancellation Info -->
+          <div class="details-section" style="background: #ffebee; border-left: 4px solid #ef5350;">
+            <h3 style="color: #c62828;"><i class="fas fa-ban"></i> Cancellation Details</h3>
+            <div class="details-grid">
+              <div class="detail-item">
+                <label>Cancelled At</label>
+                <span>${
+                  r.cancelled_at ? formatDateTime(r.cancelled_at) : "N/A"
+                }</span>
+              </div>
+              <div class="detail-item">
+                <label>Reason</label>
+                <span>${r.cancellation_reason || "Not specified"}</span>
+              </div>
+            </div>
+          </div>`
+              : ""
+          }
+        </div>
+        
+        <div class="reservation-modal-footer">
+          ${getModalActionButtons(r)}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+  document.body.style.overflow = "hidden";
+}
+
+function getModalActionButtons(r) {
+  let buttons = "";
+
+  // Print/Download Receipt button for all confirmed or completed reservations
+  if (
+    ["confirmed", "checked_in", "checked_out", "completed"].includes(r.status)
+  ) {
+    buttons += `<button class="modal-btn secondary" onclick="printReservationReceipt(${r.reservation_id});">
+      <i class="fas fa-print"></i> Print Receipt
+    </button>`;
+  }
+
+  if (r.can_upload_downpayment) {
+    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); completePayment(${r.reservation_id}, 'downpayment');">
+      <i class="fas fa-upload"></i> Upload Downpayment
+    </button>`;
+  }
+
+  if (r.can_upload_full_payment) {
+    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); completePayment(${r.reservation_id}, 'full_payment');">
+      <i class="fas fa-credit-card"></i> Pay Remaining Balance
+    </button>`;
+  }
+
+  if (r.can_rebook) {
+    buttons += `<button class="modal-btn warning" onclick="closeReservationDetailsModal(); showRebookingModal(${r.reservation_id});">
+      <i class="fas fa-calendar-alt"></i> Request Rebooking
+    </button>`;
+  }
+
+  if (r.can_cancel) {
+    buttons += `<button class="modal-btn danger" onclick="closeReservationDetailsModal(); cancelReservation(${r.reservation_id});">
+      <i class="fas fa-times"></i> Cancel Reservation
+    </button>`;
+  }
+
+  if (r.status === "completed" || r.status === "checked_out") {
+    buttons += `<button class="modal-btn success" onclick="closeReservationDetailsModal(); writeReviewForReservation(${r.reservation_id});">
+      <i class="fas fa-star"></i> Write Review
+    </button>`;
+    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); bookAgainFromReservation(${r.reservation_id});">
+      <i class="fas fa-redo"></i> Book Again
+    </button>`;
+  }
+
+  buttons += `<button class="modal-btn secondary" onclick="closeReservationDetailsModal();">
+    <i class="fas fa-times"></i> Close
+  </button>`;
+
+  return buttons;
+}
+
+function closeReservationDetailsModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  const modal = document.getElementById("reservationDetailsModal");
+  if (modal) {
+    modal.style.animation = "fadeOut 0.3s ease";
+    setTimeout(() => {
+      modal.remove();
+      document.body.style.overflow = "";
+    }, 300);
+  }
+}
+
+// Helper functions
+function getStatusIcon(status) {
+  const icons = {
+    pending_payment: "clock",
+    pending_confirmation: "hourglass-half",
+    confirmed: "check-circle",
+    checked_in: "sign-in-alt",
+    checked_out: "sign-out-alt",
+    completed: "check-double",
+    cancelled: "ban",
+    no_show: "user-slash",
+    forfeited: "exclamation-triangle",
+    rebooked: "calendar-check",
+  };
+  return icons[status] || "info-circle";
+}
+
+function formatBookingType(type) {
+  const types = {
+    daytime: "Daytime Package (9AM - 5PM)",
+    nighttime: "Nighttime Package (7PM - 7AM)",
+    "22hours": "22 Hours Package (2PM - 12NN)",
+    "venue-daytime": "Venue - Daytime",
+    "venue-nighttime": "Venue - Nighttime",
+    "venue-22hours": "Venue - 22 Hours",
+  };
+  return types[type] || type || "Standard";
+}
+
+function formatDateTime(dateString) {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+// ===== REBOOKING MODAL =====
+function showRebookingModal(reservationId) {
+  const reservation = loadedReservations.find(
+    (r) => r.reservation_id == reservationId
+  );
+  if (!reservation) {
+    showNotification("Reservation not found", "error");
+    return;
+  }
+
+  // Calculate date constraints
+  const originalDate = new Date(reservation.check_in_date);
+  const minDate = new Date();
+  minDate.setDate(minDate.getDate() + 7); // Minimum 7 days from now
+  const maxDate = new Date(originalDate);
+  maxDate.setMonth(maxDate.getMonth() + 3); // Maximum 3 months from original date
+
+  const modalHTML = `
+    <div id="rebookingModal" class="reservation-modal-overlay" onclick="closeRebookingModal(event)">
+      <div class="reservation-modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
+        <div class="reservation-modal-header" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h2 style="color: white; margin: 0;">
+              <i class="fas fa-calendar-alt"></i> Request Rebooking
+            </h2>
+            <button onclick="closeRebookingModal()" class="modal-close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="reservation-modal-body">
+          <div style="background: #fff3e0; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <p style="margin: 0; color: #e65100;">
+              <i class="fas fa-info-circle"></i> <strong>Rebooking Policy:</strong>
+            </p>
+            <ul style="margin: 10px 0 0 20px; font-size: 14px; color: #555;">
+              <li>Rebooking must be requested at least 7 days before check-in</li>
+              <li>New date must be within 3 months of original date</li>
+              <li>Downpayment is non-refundable but will be applied to new booking</li>
+              <li>Subject to date availability and admin approval</li>
+            </ul>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <p><strong>Current Check-in Date:</strong> ${formatDate(
+              reservation.check_in_date
+            )}</p>
+            <p><strong>Reservation #:</strong> ${reservation.reservation_id}</p>
+          </div>
+          
+          <form id="rebookingForm" onsubmit="submitRebooking(event, ${reservationId})">
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-calendar"></i> New Check-in Date *
+              </label>
+              <input type="date" name="new_date" required 
+                min="${minDate.toISOString().split("T")[0]}"
+                max="${maxDate.toISOString().split("T")[0]}"
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+              <small style="color: #666; display: block; margin-top: 5px;">
+                Available dates: ${formatDate(
+                  minDate.toISOString()
+                )} - ${formatDate(maxDate.toISOString())}
+              </small>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-comment"></i> Reason for Rebooking
+              </label>
+              <textarea name="reason" rows="3" placeholder="Please explain why you need to rebook..."
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" class="modal-btn primary" style="width: 100%;">
+              <i class="fas fa-paper-plane"></i> Submit Rebooking Request
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+  document.body.style.overflow = "hidden";
+}
+
+function closeRebookingModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  const modal = document.getElementById("rebookingModal");
+  if (modal) {
+    modal.remove();
+    document.body.style.overflow = "";
+  }
+}
+
+async function submitRebooking(event, reservationId) {
+  event.preventDefault();
+
+  const form = event.target;
+  const newDate = form.new_date.value;
+  const reason = form.reason.value;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  submitBtn.disabled = true;
+
+  try {
+    const response = await fetch("user/request_rebooking.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        reservation_id: reservationId,
+        new_date: newDate,
+        reason: reason,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showNotification(
+        result.message || "Rebooking request submitted successfully!",
+        "success"
+      );
+      closeRebookingModal();
+      loadMyReservations(); // Refresh the list
+    } else {
+      showNotification(
+        result.message || "Failed to submit rebooking request",
+        "error"
+      );
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }
+  } catch (error) {
+    console.error("Rebooking error:", error);
+    showNotification("Failed to submit rebooking request", "error");
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+// ===== WRITE REVIEW FOR RESERVATION =====
+function writeReviewForReservation(reservationId) {
+  const reservation = loadedReservations.find(
+    (r) => r.reservation_id == reservationId
+  );
+
+  const modalHTML = `
+    <div id="reviewModal" class="reservation-modal-overlay" onclick="closeReviewModal(event)">
+      <div class="reservation-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()">
+        <div class="reservation-modal-header" style="background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h2 style="color: white; margin: 0;">
+              <i class="fas fa-star"></i> Write a Review
+            </h2>
+            <button onclick="closeReviewModal()" class="modal-close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="reservation-modal-body">
+          <div style="text-align: center; margin-bottom: 25px;">
+            <p style="color: #666; margin-bottom: 15px;">How was your stay?</p>
+            <div id="starRating" style="font-size: 2.5rem; cursor: pointer;">
+              <i class="far fa-star" data-rating="1" onclick="setRating(1)"></i>
+              <i class="far fa-star" data-rating="2" onclick="setRating(2)"></i>
+              <i class="far fa-star" data-rating="3" onclick="setRating(3)"></i>
+              <i class="far fa-star" data-rating="4" onclick="setRating(4)"></i>
+              <i class="far fa-star" data-rating="5" onclick="setRating(5)"></i>
+            </div>
+            <p id="ratingText" style="color: #ffc107; font-weight: 600; margin-top: 10px;">Select a rating</p>
+          </div>
+          
+          <form id="reviewForm" onsubmit="submitReview(event, ${reservationId})">
+            <input type="hidden" name="rating" id="ratingInput" value="0">
+            <input type="hidden" name="reservation_id" value="${reservationId}">
+            
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-heading"></i> Review Title
+              </label>
+              <input type="text" name="title" placeholder="Give your review a title..." required
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-comment-alt"></i> Your Review
+              </label>
+              <textarea name="content" rows="4" placeholder="Share your experience with other guests..." required
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" class="modal-btn success" style="width: 100%;">
+              <i class="fas fa-paper-plane"></i> Submit Review
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+  document.body.style.overflow = "hidden";
+}
+
+let selectedRating = 0;
+function setRating(rating) {
+  selectedRating = rating;
+  document.getElementById("ratingInput").value = rating;
+
+  const stars = document.querySelectorAll("#starRating i");
+  const ratingTexts = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
+
+  stars.forEach((star, index) => {
+    if (index < rating) {
+      star.classList.remove("far");
+      star.classList.add("fas");
+      star.style.color = "#ffc107";
+    } else {
+      star.classList.remove("fas");
+      star.classList.add("far");
+      star.style.color = "#ddd";
+    }
+  });
+
+  document.getElementById("ratingText").textContent = ratingTexts[rating];
+}
+
+function closeReviewModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  const modal = document.getElementById("reviewModal");
+  if (modal) {
+    modal.remove();
+    document.body.style.overflow = "";
+  }
+}
+
+async function submitReview(event, reservationId) {
+  event.preventDefault();
+
+  if (selectedRating === 0) {
+    showNotification("Please select a rating", "warning");
+    return;
+  }
+
+  const form = event.target;
+  const formData = new FormData(form);
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  submitBtn.disabled = true;
+
+  try {
+    // For now, show success and store locally
+    // In production, this would be an API call
+    showNotification(
+      "Thank you for your review! It has been submitted successfully.",
+      "success"
+    );
+    closeReviewModal();
+
+    // Navigate to reviews section
+    showSection("reviews");
+    updateActiveNavigation("reviews");
+  } catch (error) {
+    showNotification("Failed to submit review", "error");
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+// ===== PRINT RESERVATION RECEIPT =====
+function printReservationReceipt(reservationId) {
+  const reservation = loadedReservations.find(
+    (r) => r.reservation_id == reservationId
+  );
+  if (!reservation) {
+    showNotification("Reservation not found", "error");
+    return;
+  }
+
+  const r = reservation;
+  const remainingBalance =
+    parseFloat(r.total_amount) - parseFloat(r.downpayment_amount);
+
+  const receiptHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Reservation Receipt - #${r.reservation_id}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #333; background: #f5f5f5; }
+        .receipt { max-width: 700px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #667eea; padding-bottom: 20px; }
+        .logo { font-size: 28px; font-weight: 700; color: #667eea; margin-bottom: 5px; }
+        .subtitle { color: #666; font-size: 14px; }
+        .receipt-title { font-size: 22px; color: #333; margin-top: 15px; }
+        .section { margin: 25px 0; }
+        .section-title { font-size: 14px; color: #667eea; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .info-item { padding: 8px 0; }
+        .info-label { font-size: 12px; color: #888; margin-bottom: 3px; }
+        .info-value { font-size: 14px; font-weight: 500; color: #333; }
+        .payment-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .payment-table td { padding: 12px 0; border-bottom: 1px solid #eee; }
+        .payment-table td:last-child { text-align: right; font-weight: 600; }
+        .total-row { background: #f8f9fa; }
+        .total-row td { font-size: 16px; font-weight: 700; padding: 15px 10px; }
+        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .status-confirmed { background: #e3f2fd; color: #1565c0; }
+        .status-completed { background: #e8f5e9; color: #2e7d32; }
+        .status-pending { background: #fff3e0; color: #e65100; }
+        .footer { margin-top: 40px; text-align: center; padding-top: 20px; border-top: 1px solid #eee; }
+        .footer p { font-size: 12px; color: #888; margin: 5px 0; }
+        .qr-placeholder { text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        @media print {
+          body { padding: 0; background: white; }
+          .receipt { box-shadow: none; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="receipt">
+        <div class="header">
+          <div class="logo">🏡 AR Homes Posadas Farm Resort</div>
+          <div class="subtitle">Your Home Away From Home</div>
+          <div class="receipt-title">Reservation Receipt</div>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+          <span class="status-badge status-${
+            r.status === "confirmed"
+              ? "confirmed"
+              : r.status === "completed" || r.status === "checked_out"
+              ? "completed"
+              : "pending"
+          }">
+            ${r.status_label}
+          </span>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Reservation Details</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Reservation ID</div>
+              <div class="info-value">#${r.reservation_id}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Booking Date</div>
+              <div class="info-value">${formatDateTime(r.created_at)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Booking Type</div>
+              <div class="info-value">${formatBookingType(r.booking_type)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Package</div>
+              <div class="info-value">${r.package_type || "Standard"}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Guest Information</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Guest Name</div>
+              <div class="info-value">${r.guest_name || "N/A"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Number of Guests</div>
+              <div class="info-value">${r.number_of_guests || 1} guest(s)</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value">${r.guest_email || "N/A"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Phone</div>
+              <div class="info-value">${r.guest_phone || "N/A"}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Schedule</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Check-in Date</div>
+              <div class="info-value">${formatDate(r.check_in_date)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Check-out Date</div>
+              <div class="info-value">${formatDate(r.check_out_date)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Check-in Time</div>
+              <div class="info-value">${
+                r.check_in_time || "As per package"
+              }</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Check-out Time</div>
+              <div class="info-value">${
+                r.check_out_time || "As per package"
+              }</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Payment Summary</div>
+          <table class="payment-table">
+            <tr>
+              <td>Base Price</td>
+              <td>₱${parseFloat(r.base_price || 0).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}</td>
+            </tr>
+            <tr>
+              <td>Downpayment (50%) - ${r.downpayment_status}</td>
+              <td>₱${parseFloat(r.downpayment_amount).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}</td>
+            </tr>
+            <tr>
+              <td>Remaining Balance - ${r.full_payment_status}</td>
+              <td>₱${remainingBalance.toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}</td>
+            </tr>
+            <tr>
+              <td>Security Bond (Refundable)</td>
+              <td>₱2,000.00</td>
+            </tr>
+            <tr class="total-row">
+              <td>Total Amount</td>
+              <td>₱${parseFloat(r.total_amount).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}</td>
+            </tr>
+          </table>
+        </div>
+        
+        ${
+          r.special_requests
+            ? `
+        <div class="section">
+          <div class="section-title">Special Requests</div>
+          <p style="font-size: 14px; color: #555; line-height: 1.6;">${r.special_requests}</p>
+        </div>
+        `
+            : ""
+        }
+        
+        <div class="footer">
+          <p><strong>AR Homes Posadas Farm Resort</strong></p>
+          <p>Thank you for choosing us for your stay!</p>
+          <p style="margin-top: 10px;">For inquiries, contact us at: arhomesresort@gmail.com</p>
+          <p style="margin-top: 15px; font-size: 10px; color: #aaa;">
+            Receipt generated on ${new Date().toLocaleString()}
+          </p>
+        </div>
+        
+        <div class="no-print" style="text-align: center; margin-top: 30px;">
+          <button onclick="window.print()" style="
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+          ">
+            🖨️ Print Receipt
+          </button>
+          <button onclick="window.close()" style="
+            padding: 12px 30px;
+            background: #e9ecef;
+            color: #495057;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+          ">
+            Close
+          </button>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Open in new window for printing
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(receiptHTML);
+  printWindow.document.close();
+}
+
+// ===== BOOK AGAIN FUNCTIONALITY =====
+function bookAgainFromReservation(reservationId) {
+  const reservation = loadedReservations.find(
+    (r) => r.reservation_id == reservationId
+  );
+
+  if (reservation) {
+    // Store the previous booking details for pre-filling
+    sessionStorage.setItem(
+      "bookAgainData",
+      JSON.stringify({
+        booking_type: reservation.booking_type,
+        package_type: reservation.package_type,
+        number_of_guests: reservation.number_of_guests,
+        group_type: reservation.group_type,
+        special_requests: reservation.special_requests,
+      })
+    );
+
+    showNotification(
+      "Pre-filling your previous booking preferences...",
+      "info"
+    );
+
+    // Navigate to reservation section
+    showSection("my-reservations");
+    updateActiveNavigation("my-reservations");
+
+    // Try to pre-select the booking type if the function exists
+    setTimeout(() => {
+      if (typeof selectBookingType === "function" && reservation.booking_type) {
+        selectBookingType(reservation.booking_type);
+      }
+    }, 500);
+  } else {
+    showSection("my-reservations");
+    updateActiveNavigation("my-reservations");
+  }
+}
+
+// ===== ENHANCED FILTER & SORT FUNCTIONS =====
+function initBookingHistoryFilters() {
+  // Filter buttons
+  const filterButtons = document.querySelectorAll(".filter-btn");
   filterButtons.forEach((button) => {
     button.addEventListener("click", function () {
-      // Remove active from all buttons
       filterButtons.forEach((btn) => btn.classList.remove("active"));
-      // Add active to clicked button
       this.classList.add("active");
-
-      const filter = this.getAttribute("data-filter");
-
-      bookingCards.forEach((card) => {
-        if (filter === "all") {
-          card.style.display = "block";
-        } else {
-          const status = card.getAttribute("data-status");
-          card.style.display = status === filter ? "block" : "none";
-        }
-      });
+      currentFilter = this.getAttribute("data-filter");
+      applyFiltersAndSort();
     });
   });
 
-  // Search functionality
+  // Search input
   const searchInput = document.getElementById("bookingSearch");
   if (searchInput) {
     searchInput.addEventListener("input", function () {
-      const searchTerm = this.value.toLowerCase();
-      bookingCards.forEach((card) => {
-        const text = card.textContent.toLowerCase();
-        card.style.display = text.includes(searchTerm) ? "block" : "none";
-      });
+      currentSearchTerm = this.value.toLowerCase();
+      applyFiltersAndSort();
     });
   }
-});
+
+  // Sort select
+  const sortSelect = document.getElementById("sortBookings");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", function () {
+      currentSort = this.value;
+      applyFiltersAndSort();
+    });
+  }
+}
+
+function applyFiltersAndSort() {
+  let filtered = [...loadedReservations];
+
+  // Apply status filter
+  if (currentFilter !== "all") {
+    const statusMap = {
+      pending: ["pending_payment", "pending_confirmation"],
+      confirmed: ["confirmed", "checked_in"],
+      completed: ["completed", "checked_out"],
+      cancelled: ["cancelled", "no_show", "forfeited"],
+    };
+    const allowedStatuses = statusMap[currentFilter] || [];
+    filtered = filtered.filter((r) => allowedStatuses.includes(r.status));
+  }
+
+  // Apply search filter
+  if (currentSearchTerm) {
+    filtered = filtered.filter((r) => {
+      const searchText = `
+        ${r.reservation_id}
+        ${r.booking_type || ""}
+        ${r.package_type || ""}
+        ${r.guest_name || ""}
+        ${r.status_label || ""}
+        ${r.check_in_date || ""}
+      `.toLowerCase();
+      return searchText.includes(currentSearchTerm);
+    });
+  }
+
+  // Apply sorting
+  filtered.sort((a, b) => {
+    switch (currentSort) {
+      case "date-desc":
+        return new Date(b.check_in_date) - new Date(a.check_in_date);
+      case "date-asc":
+        return new Date(a.check_in_date) - new Date(b.check_in_date);
+      case "price-desc":
+        return parseFloat(b.total_amount) - parseFloat(a.total_amount);
+      case "price-asc":
+        return parseFloat(a.total_amount) - parseFloat(b.total_amount);
+      default:
+        return new Date(b.created_at) - new Date(a.created_at);
+    }
+  });
+
+  // Re-render the cards
+  displayReservations(filtered);
+}
+
+// Override displayReservations to also store data
+const originalDisplayReservations = displayReservations;
+function displayReservations(reservations) {
+  // Store all loaded reservations if this is a full load
+  if (
+    reservations.length > 0 &&
+    (!loadedReservations.length || reservations[0].reservation_id)
+  ) {
+    loadedReservations = reservations;
+  }
+
+  const container = document.querySelector(".bookings-history-grid");
+  if (!container) return;
+
+  if (reservations.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #94a3b8;">
+        <i class="fas fa-search" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
+        <p style="font-size: 18px; font-weight: 600;">No reservations found</p>
+        <p style="margin-top: 10px;">Try adjusting your filters or search term</p>
+        <button onclick="resetBookingFilters()" 
+                style="margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer;">
+          <i class="fas fa-undo"></i> Reset Filters
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = reservations
+    .map((r) => createEnhancedReservationCard(r))
+    .join("");
+}
+
+function createEnhancedReservationCard(r) {
+  const statusColors = {
+    pending_payment: "pending",
+    pending_confirmation: "pending",
+    confirmed: "confirmed",
+    checked_in: "confirmed",
+    checked_out: "completed",
+    completed: "completed",
+    cancelled: "cancelled",
+    no_show: "cancelled",
+    forfeited: "cancelled",
+    rebooked: "confirmed",
+  };
+
+  const statusClass = statusColors[r.status] || "pending";
+  const remainingBalance =
+    parseFloat(r.total_amount) - parseFloat(r.downpayment_amount);
+
+  return `
+    <div class="booking-history-card" data-status="${statusClass}" data-reservation-id="${
+    r.reservation_id
+  }">
+      <div class="booking-card-header">
+        <span class="status-badge ${statusClass}">${r.status_label}</span>
+        <span class="booking-date">${formatDate(r.check_in_date)}</span>
+      </div>
+      <div class="booking-card-body">
+        <h4>Reservation #${r.reservation_id}</h4>
+        <div class="booking-details">
+          <span><i class="fas fa-calendar"></i> ${formatBookingType(
+            r.booking_type
+          )}</span>
+        </div>
+        <div class="booking-details" style="margin-top: 8px;">
+          <span><i class="fas fa-box"></i> ${r.package_type || "Package"}</span>
+          <span><i class="fas fa-users"></i> ${
+            r.number_of_guests || 1
+          } Guest(s)</span>
+        </div>
+        <div class="booking-details" style="margin-top: 10px;">
+          <span><i class="fas fa-money-bill-wave"></i> Total: ₱${parseFloat(
+            r.total_amount
+          ).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
+        </div>
+        <div class="booking-details" style="margin-top: 5px;">
+          <span style="color: ${
+            r.downpayment_verified == 1 ? "#4caf50" : "#ff9800"
+          };">
+            <i class="fas fa-${
+              r.downpayment_verified == 1 ? "check-circle" : "clock"
+            }"></i> 
+            Down: ₱${parseFloat(r.downpayment_amount).toLocaleString("en-PH", {
+              minimumFractionDigits: 2,
+            })}
+            (${r.downpayment_status})
+          </span>
+        </div>
+        ${getPaymentStatusHTML(r)}
+      </div>
+      <div class="booking-card-actions">
+        ${getEnhancedActionButtons(r)}
+      </div>
+    </div>
+  `;
+}
+
+function getEnhancedActionButtons(r) {
+  let buttons = `<button class="btn-secondary" onclick="viewReservationDetails(${r.reservation_id})">
+    <i class="fas fa-eye"></i> View Details
+  </button>`;
+
+  if (r.can_upload_downpayment) {
+    buttons += `<button class="btn-primary" onclick="completePayment(${r.reservation_id}, 'downpayment')">
+      <i class="fas fa-upload"></i> Upload Payment
+    </button>`;
+  }
+
+  if (r.can_upload_full_payment) {
+    buttons += `<button class="btn-primary" onclick="completePayment(${r.reservation_id}, 'full_payment')">
+      <i class="fas fa-credit-card"></i> Pay Balance
+    </button>`;
+  }
+
+  if (r.can_rebook) {
+    buttons += `<button class="btn-warning" onclick="showRebookingModal(${r.reservation_id})">
+      <i class="fas fa-calendar-alt"></i> Rebook
+    </button>`;
+  }
+
+  if (r.can_cancel) {
+    buttons += `<button class="btn-danger" onclick="cancelReservation(${r.reservation_id})">
+      <i class="fas fa-times"></i> Cancel
+    </button>`;
+  }
+
+  if (r.status === "completed" || r.status === "checked_out") {
+    buttons += `<button class="btn-success" onclick="writeReviewForReservation(${r.reservation_id})">
+      <i class="fas fa-star"></i> Review
+    </button>`;
+    buttons += `<button class="btn-primary" onclick="bookAgainFromReservation(${r.reservation_id})">
+      <i class="fas fa-redo"></i> Book Again
+    </button>`;
+  }
+
+  return buttons;
+}
+
+function resetBookingFilters() {
+  currentFilter = "all";
+  currentSort = "date-desc";
+  currentSearchTerm = "";
+
+  // Reset UI
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.classList.remove("active");
+    if (btn.getAttribute("data-filter") === "all") {
+      btn.classList.add("active");
+    }
+  });
+
+  const searchInput = document.getElementById("bookingSearch");
+  if (searchInput) searchInput.value = "";
+
+  const sortSelect = document.getElementById("sortBookings");
+  if (sortSelect) sortSelect.value = "date-desc";
+
+  // Re-display all reservations
+  displayReservations(loadedReservations);
+}
 
 // ===== NOTIFICATIONS FUNCTIONS =====
 
@@ -3528,6 +4677,23 @@ window.selectRoomPackage = selectRoomPackage;
 window.goBackToStep = goBackToStep;
 window.showBookingPolicy = showBookingPolicy;
 window.refreshUserData = refreshUserData;
+
+// ===== BOOKING HISTORY FUNCTION EXPORTS =====
+window.viewReservationDetails = viewReservationDetails;
+window.closeReservationDetailsModal = closeReservationDetailsModal;
+window.showRebookingModal = showRebookingModal;
+window.closeRebookingModal = closeRebookingModal;
+window.submitRebooking = submitRebooking;
+window.writeReviewForReservation = writeReviewForReservation;
+window.setRating = setRating;
+window.closeReviewModal = closeReviewModal;
+window.submitReview = submitReview;
+window.bookAgainFromReservation = bookAgainFromReservation;
+window.resetBookingFilters = resetBookingFilters;
+window.cancelReservation = cancelReservation;
+window.printReservationReceipt = printReservationReceipt;
+window.loadMyReservations = loadMyReservations;
+window.applyFiltersAndSort = applyFiltersAndSort;
 
 // Debug: Verify functions are accessible
 // Test button onclick attributes
