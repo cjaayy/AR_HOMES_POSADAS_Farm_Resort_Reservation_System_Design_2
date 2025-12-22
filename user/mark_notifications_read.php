@@ -77,10 +77,32 @@ try {
                 'message' => 'Failed to mark notification as read.'
             ]);
         }
+    } elseif (isset($input['mark_all_unread']) && $input['mark_all_unread'] === true) {
+        // Mark all notifications as unread for this user
+        $query = "UPDATE notifications 
+                  SET is_read = 0, read_at = NULL 
+                  WHERE user_id = :user_id";
+        
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        
+        if ($stmt->execute()) {
+            $affected_rows = $stmt->rowCount();
+            echo json_encode([
+                'success' => true,
+                'message' => 'All notifications marked as unread.',
+                'affected_rows' => $affected_rows
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to mark notifications as unread.'
+            ]);
+        }
     } else {
         echo json_encode([
             'success' => false,
-            'message' => 'Invalid request. Specify mark_all or notification_id.'
+            'message' => 'Invalid request. Specify mark_all, mark_all_unread, or notification_id.'
         ]);
     }
     

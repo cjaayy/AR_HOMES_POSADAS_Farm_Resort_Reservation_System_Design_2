@@ -4392,6 +4392,58 @@ body::before {
   transform: scale(1.1);
 }
 
+/* Dismiss button for notifications */
+.dismiss-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 8px;
+  transition: all 0.3s ease;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.dismiss-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+/* Notification link */
+.notification-link {
+  color: #11224e;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.notification-link:hover {
+  text-decoration: underline;
+}
+
+/* Notifications container card */
+.notifications-container {
+  background: white;
+  border: 2px solid #11224e;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 /* Filter buttons */
 .btn-text {
   background: none;
@@ -4402,22 +4454,18 @@ body::before {
   font-weight: 500;
   padding: 6px 12px;
   border-radius: 6px;
+  color: #64748b;
 }
 
 .btn-text:hover {
   background: #f1f5f9;
+  color: #11224e;
 }
 
-.btn-text {
-  background: none;
-  border: none;
-  color: #667eea;
-  cursor: pointer;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.5rem 1rem;
+.btn-text.active {
+  color: #11224e;
+  font-weight: 600;
+  border-bottom: 2px solid #11224e;
   border-radius: 6px;
   transition: all 0.3s ease;
 }

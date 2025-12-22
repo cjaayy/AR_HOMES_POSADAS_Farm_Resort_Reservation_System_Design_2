@@ -2361,7 +2361,31 @@
                   >0</span
                 >
               </h2>
-              <div style="display: flex; gap: 10px; align-items: center">
+            </div>
+
+            <!-- Notifications Container Card -->
+            <div
+              style="
+                background: white;
+                border: 2px solid #11224e;
+                border-radius: 8px;
+                padding: 20px;
+                max-width: 900px;
+                margin: 0 auto;
+              "
+            >
+              <!-- Filter Controls -->
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                  margin-bottom: 20px;
+                  padding-bottom: 15px;
+                  border-bottom: 1px solid #e2e8f0;
+                  flex-wrap: wrap;
+                "
+              >
                 <button
                   class="btn-text"
                   onclick="filterNotifications('all')"
@@ -2370,36 +2394,84 @@
                     color: #11224e;
                     font-weight: 600;
                     border-bottom: 2px solid #11224e;
+                    padding: 8px 16px;
+                    border-radius: 6px;
                   "
                 >
-                  All
+                  <i class="fas fa-list"></i> All
                 </button>
                 <button
                   class="btn-text"
                   onclick="filterNotifications('unread')"
                   id="filterUnread"
-                  style="color: #64748b"
+                  style="color: #64748b; padding: 8px 16px; border-radius: 6px"
                 >
-                  Unread
+                  <i class="fas fa-envelope"></i> Unread
                 </button>
                 <button
-                  class="btn-text"
                   onclick="markAllAsRead()"
                   style="
-                    color: #10b981;
+                    color: white;
                     padding: 8px 16px;
-                    background: #f0fdf4;
+                    background: #11224e;
                     border-radius: 8px;
-                    border: 1px solid #10b981;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 500;
+                    margin-left: auto;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.3s ease;
                   "
+                  onmouseover="this.style.background='#1e3a5f'"
+                  onmouseout="this.style.background='#11224e'"
                 >
                   <i class="fas fa-check-double"></i> Mark all as read
                 </button>
+                <button
+                  onclick="markAllAsUnread()"
+                  style="
+                    color: #11224e;
+                    padding: 8px 16px;
+                    background: white;
+                    border-radius: 8px;
+                    border: 2px solid #11224e;
+                    cursor: pointer;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.3s ease;
+                  "
+                  onmouseover="this.style.background='#f0f9ff'"
+                  onmouseout="this.style.background='white'"
+                >
+                  <i class="fas fa-envelope"></i> Mark all as unread
+                </button>
+                <button
+                  onclick="clearAllNotifications()"
+                  style="
+                    color: white;
+                    padding: 8px 16px;
+                    background: #ef4444;
+                    border-radius: 8px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.3s ease;
+                  "
+                  onmouseover="this.style.background='#dc2626'"
+                  onmouseout="this.style.background='#ef4444'"
+                >
+                  <i class="fas fa-trash"></i> Clear all
+                </button>
               </div>
-            </div>
 
-            <!-- Notifications Container -->
-            <div style="max-width: 900px; margin: 0 auto">
+              <!-- Notifications List -->
               <div class="notifications-list" id="notificationsList">
                 <!-- Notifications will be loaded dynamically from database -->
                 <div
@@ -2431,36 +2503,42 @@
                   </p>
                 </div>
               </div>
-            </div>
 
-            <!-- Empty State (hidden by default) -->
-            <div
-              id="emptyNotifications"
-              style="display: none; text-align: center; padding: 80px 20px"
-            >
+              <!-- Empty State (hidden by default) -->
               <div
-                style="
-                  width: 120px;
-                  height: 120px;
-                  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-                  border-radius: 50%;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  margin: 0 auto 25px;
-                "
+                id="emptyNotifications"
+                style="display: none; text-align: center; padding: 60px 20px"
               >
-                <i
-                  class="fas fa-bell-slash"
-                  style="font-size: 3em; color: #94a3b8"
-                ></i>
+                <div
+                  style="
+                    width: 100px;
+                    height: 100px;
+                    background: linear-gradient(
+                      135deg,
+                      #f0f9ff 0%,
+                      #e0f2fe 100%
+                    );
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 20px;
+                  "
+                >
+                  <i
+                    class="fas fa-bell-slash"
+                    style="font-size: 2.5em; color: #11224e"
+                  ></i>
+                </div>
+                <h3
+                  style="color: #11224e; margin: 0 0 10px 0; font-size: 1.3em"
+                >
+                  No Notifications
+                </h3>
+                <p style="color: #64748b; margin: 0; font-size: 0.95em">
+                  You're all caught up! Check back later for updates.
+                </p>
               </div>
-              <h3 style="color: #11224e; margin: 0 0 10px 0; font-size: 1.5em">
-                No Notifications
-              </h3>
-              <p style="color: #64748b; margin: 0; font-size: 1em">
-                You're all caught up! Check back later for updates.
-              </p>
             </div>
           </div>
 

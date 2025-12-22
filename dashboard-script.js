@@ -3560,10 +3560,10 @@ async function loadUserNotifications() {
       const notificationsList = document.getElementById("notificationsList");
       if (notificationsList) {
         notificationsList.innerHTML = `
-          <div style="text-align: center; padding: 40px; color: #f44336;">
-            <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
-            <p>Error loading notifications</p>
-            <p style="font-size: 14px; color: #999;">${result.message}</p>
+          <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 16px; color: #ef4444;"></i>
+            <p style="color: #11224e; font-weight: 500;">Error loading notifications</p>
+            <p style="font-size: 14px; color: #64748b;">${result.message}</p>
           </div>
         `;
       }
@@ -3572,10 +3572,10 @@ async function loadUserNotifications() {
     const notificationsList = document.getElementById("notificationsList");
     if (notificationsList) {
       notificationsList.innerHTML = `
-        <div style="text-align: center; padding: 40px; color: #f44336;">
+        <div style="text-align: center; padding: 40px; color: #ef4444;">
           <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
-          <p>Failed to load notifications</p>
-          <p style="font-size: 14px; color: #999;">${error.message}</p>
+          <p style="color: #11224e; font-weight: 500;">Failed to load notifications</p>
+          <p style="font-size: 14px; color: #64748b;">${error.message}</p>
         </div>
       `;
     }
@@ -3589,14 +3589,21 @@ function displayNotifications(notifications) {
     return;
   }
 
+  // Also show/hide the empty state element
+  const emptyState = document.getElementById("emptyNotifications");
+
   if (!notifications || notifications.length === 0) {
-    notificationsList.innerHTML = `
-      <div style="text-align: center; padding: 40px; color: #999;">
-        <i class="fas fa-bell-slash" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
-        <p>No notifications yet</p>
-      </div>
-    `;
+    notificationsList.style.display = "none";
+    if (emptyState) {
+      emptyState.style.display = "block";
+    }
     return;
+  }
+
+  // Show notifications list, hide empty state
+  notificationsList.style.display = "flex";
+  if (emptyState) {
+    emptyState.style.display = "none";
   }
 
   // Build notifications HTML
@@ -3605,21 +3612,30 @@ function displayNotifications(notifications) {
     const isUnread = notification.is_read == 0;
     const unreadClass = isUnread ? "unread" : "";
 
-    // Icon based on notification type
+    // Icon based on notification type - using navy blue primary theme
     let icon = "bell";
-    let iconColor = "#4CAF50";
+    let iconColor = "#11224e";
     if (notification.type === "booking_confirmed") {
       icon = "check-circle";
-      iconColor = "#4CAF50";
+      iconColor = "#10b981"; // Green for success
     } else if (notification.type === "booking_cancelled") {
       icon = "times-circle";
-      iconColor = "#f44336";
+      iconColor = "#ef4444"; // Red for cancelled
     } else if (notification.type === "payment_reminder") {
       icon = "credit-card";
-      iconColor = "#FF9800";
+      iconColor = "#f59e0b"; // Amber for payment
     } else if (notification.type === "promo") {
       icon = "tag";
-      iconColor = "#2196F3";
+      iconColor = "#11224e"; // Navy blue for promos
+    } else if (notification.type === "booking_pending") {
+      icon = "clock";
+      iconColor = "#f59e0b"; // Amber for pending
+    } else if (notification.type === "check_in") {
+      icon = "sign-in-alt";
+      iconColor = "#10b981"; // Green for check-in
+    } else if (notification.type === "check_out") {
+      icon = "sign-out-alt";
+      iconColor = "#11224e"; // Navy for check-out
     }
 
     // Format date
@@ -3641,6 +3657,21 @@ function displayNotifications(notifications) {
       timeAgo = "Just now";
     }
 
+    // Determine if this notification should have a link
+    // For booking-related notifications, create a link to my-bookings section
+    let notificationLink = notification.link || "";
+    if (
+      !notificationLink &&
+      (notification.type === "booking_confirmed" ||
+        notification.type === "booking_cancelled" ||
+        notification.type === "booking_pending" ||
+        notification.type === "payment_reminder" ||
+        notification.type === "check_in" ||
+        notification.type === "check_out")
+    ) {
+      notificationLink = "#my-bookings";
+    }
+
     notificationsHTML += `
       <div class="notification-item ${unreadClass}" data-notification-id="${
       notification.notification_id
@@ -3651,14 +3682,14 @@ function displayNotifications(notifications) {
         <div class="notification-content">
           <h4>${notification.title}</h4>
           <p>${notification.message}</p>
-          <span class="notification-time">${timeAgo}</span>
+          <span class="notification-time"><i class="fas fa-clock"></i> ${timeAgo}</span>
           ${
-            notification.link
-              ? `<a href="${notification.link}" class="notification-link">View Details</a>`
+            notificationLink
+              ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); handleNotificationLink('${notificationLink}', '${notification.notification_id}')" class="notification-link"><i class="fas fa-arrow-right"></i> View Details</a>`
               : ""
           }
         </div>
-        <button class="dismiss-btn" onclick="dismissNotification(this)" title="Dismiss">
+        <button class="dismiss-btn" onclick="event.stopPropagation(); dismissNotification(this)" title="Dismiss">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -3697,6 +3728,8 @@ function filterNotifications(filter) {
   const allBtn = document.getElementById("filterAll");
   const unreadBtn = document.getElementById("filterUnread");
   const notificationItems = document.querySelectorAll(".notification-item");
+  const emptyState = document.getElementById("emptyNotifications");
+  const notificationsList = document.getElementById("notificationsList");
 
   // Update button styles
   if (filter === "all") {
@@ -3711,6 +3744,15 @@ function filterNotifications(filter) {
     notificationItems.forEach((item) => {
       item.style.display = "flex";
     });
+
+    // Show notifications list if there are any, otherwise show empty state
+    if (notificationItems.length > 0) {
+      notificationsList.style.display = "flex";
+      if (emptyState) emptyState.style.display = "none";
+    } else {
+      notificationsList.style.display = "none";
+      if (emptyState) emptyState.style.display = "block";
+    }
   } else if (filter === "unread") {
     unreadBtn.style.fontWeight = "600";
     unreadBtn.style.color = "#11224e";
@@ -3731,8 +3773,6 @@ function filterNotifications(filter) {
     });
 
     // Show empty state if no unread
-    const emptyState = document.getElementById("emptyNotifications");
-    const notificationsList = document.getElementById("notificationsList");
     if (!hasUnread && emptyState) {
       notificationsList.style.display = "none";
       emptyState.style.display = "block";
@@ -3776,6 +3816,83 @@ async function markAllAsRead() {
   }
 }
 
+// Mark all notifications as unread
+async function markAllAsUnread() {
+  try {
+    const response = await fetch("user/mark_notifications_read.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ mark_all_unread: true }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // Update UI
+      const allNotifications = document.querySelectorAll(".notification-item");
+      allNotifications.forEach((notif) => {
+        notif.classList.add("unread");
+      });
+
+      // Update badge
+      updateNotificationBadge(allNotifications.length);
+      showNotification("All notifications marked as unread.", "success");
+    } else {
+      showNotification("Failed to mark notifications as unread.", "error");
+    }
+  } catch (error) {
+    showNotification("Failed to mark notifications as unread.", "error");
+  }
+}
+
+// Clear all notifications
+async function clearAllNotifications() {
+  // Confirm before clearing
+  if (
+    !confirm(
+      "Are you sure you want to clear all notifications? This action cannot be undone."
+    )
+  ) {
+    return;
+  }
+
+  try {
+    const response = await fetch("user/clear_notifications.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ clear_all: true }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // Update UI - show empty state
+      const notificationsList = document.getElementById("notificationsList");
+      const emptyState = document.getElementById("emptyNotifications");
+
+      if (notificationsList) {
+        notificationsList.innerHTML = "";
+        notificationsList.style.display = "none";
+      }
+      if (emptyState) {
+        emptyState.style.display = "block";
+      }
+
+      // Update badge
+      updateNotificationBadge(0);
+      showNotification("All notifications cleared.", "success");
+    } else {
+      showNotification("Failed to clear notifications.", "error");
+    }
+  } catch (error) {
+    showNotification("Failed to clear notifications.", "error");
+  }
+}
+
 // Dismiss a notification
 async function dismissNotification(button) {
   const notificationItem = button.closest(".notification-item");
@@ -3816,6 +3933,153 @@ async function dismissNotification(button) {
     }
   } catch (error) {
     showNotification("Failed to dismiss notification.", "error");
+  }
+}
+
+// Handle notification link click
+async function handleNotificationLink(link, notificationId) {
+  console.log("handleNotificationLink called with:", link, notificationId);
+
+  try {
+    // Mark notification as read
+    fetch("user/mark_notifications_read.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ notification_id: notificationId }),
+    }).catch((err) => console.log("Error marking notification as read:", err));
+
+    // Update UI - remove unread class
+    const notificationItem = document.querySelector(
+      `.notification-item[data-notification-id="${notificationId}"]`
+    );
+    if (notificationItem) {
+      notificationItem.classList.remove("unread");
+    }
+
+    // Update badge count
+    const remainingUnread = document.querySelectorAll(
+      ".notification-item.unread"
+    ).length;
+    updateNotificationBadge(remainingUnread);
+
+    // Parse URL parameters if link contains query string
+    let sectionId = null;
+    let reservationId = null;
+
+    if (link.includes("?")) {
+      const urlParams = new URLSearchParams(link.split("?")[1]);
+      sectionId = urlParams.get("section");
+      reservationId = urlParams.get("reservation");
+      console.log(
+        "Parsed URL params - section:",
+        sectionId,
+        "reservation:",
+        reservationId
+      );
+    }
+
+    // Handle different link types
+    if (reservationId) {
+      // If there's a reservation ID, show the reservation details
+      console.log("Opening reservation details for:", reservationId);
+
+      // First navigate to the section if specified
+      if (sectionId) {
+        if (typeof showSection === "function") {
+          showSection(sectionId);
+        } else if (
+          window.popupManager &&
+          typeof window.popupManager.showSection === "function"
+        ) {
+          window.popupManager.showSection(sectionId);
+        } else {
+          const navBtn = document.querySelector(
+            `.nav-btn[data-section="${sectionId}"]`
+          );
+          if (navBtn) navBtn.click();
+        }
+      }
+
+      // Then open the reservation details modal
+      setTimeout(() => {
+        if (typeof viewReservationDetails === "function") {
+          viewReservationDetails(reservationId);
+        } else if (typeof window.viewReservationDetails === "function") {
+          window.viewReservationDetails(reservationId);
+        } else {
+          showNotification("Opening reservation: " + reservationId, "info");
+        }
+      }, 300);
+    } else if (sectionId) {
+      // Navigate to section only
+      console.log("Navigating to section:", sectionId);
+
+      if (typeof showSection === "function") {
+        showSection(sectionId);
+      } else if (
+        window.popupManager &&
+        typeof window.popupManager.showSection === "function"
+      ) {
+        window.popupManager.showSection(sectionId);
+      } else {
+        const navBtn = document.querySelector(
+          `.nav-btn[data-section="${sectionId}"]`
+        );
+        if (navBtn) {
+          navBtn.click();
+        } else {
+          showNotification("Navigating to " + sectionId, "info");
+        }
+      }
+    } else if (link.startsWith("#")) {
+      // Internal section link (e.g., #bookings, #my-bookings)
+      const hashSection = link.substring(1);
+      console.log("Navigating to hash section:", hashSection);
+
+      if (typeof showSection === "function") {
+        showSection(hashSection);
+      } else if (
+        window.popupManager &&
+        typeof window.popupManager.showSection === "function"
+      ) {
+        window.popupManager.showSection(hashSection);
+      } else {
+        // Fallback: try to find and click the nav button
+        const navBtn = document.querySelector(
+          `.nav-btn[data-section="${hashSection}"]`
+        );
+        if (navBtn) {
+          navBtn.click();
+        } else {
+          showNotification("Navigating to " + hashSection, "info");
+        }
+      }
+    } else if (link.includes("RES-") || link.includes("RES")) {
+      // Reservation details link (old format)
+      const resMatch = link.match(/RES-[\w-]+|RES\d+/);
+      if (resMatch) {
+        console.log("Opening reservation details for:", resMatch[0]);
+        if (typeof viewReservationDetails === "function") {
+          viewReservationDetails(resMatch[0]);
+        }
+      }
+    } else if (link.startsWith("http")) {
+      // External link
+      window.open(link, "_blank");
+    } else {
+      // Default: try to navigate to link
+      window.location.href = link;
+    }
+  } catch (error) {
+    console.error("Error handling notification link:", error);
+    // Still try to navigate even if marking as read fails
+    if (link.startsWith("http")) {
+      window.open(link, "_blank");
+    } else if (!link.startsWith("#")) {
+      window.location.href = link;
+    }
   }
 }
 
@@ -4652,8 +4916,11 @@ window.modifyBooking = modifyBooking;
 window.cancelBooking = cancelBooking;
 window.completePayment = completePayment;
 window.markAllAsRead = markAllAsRead;
+window.markAllAsUnread = markAllAsUnread;
+window.clearAllNotifications = clearAllNotifications;
 window.filterNotifications = filterNotifications;
 window.dismissNotification = dismissNotification;
+window.handleNotificationLink = handleNotificationLink;
 window.writeNewReview = writeNewReview;
 window.editReview = editReview;
 window.deleteReview = deleteReview;
