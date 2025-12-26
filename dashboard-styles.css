@@ -885,9 +885,11 @@ body::before {
   position: relative;
 }
 
-.gallery-slide.active {
-  /* Active state managed by JavaScript transform */
+/*
+gallery-slide.active {
+  /* Active state managed by JavaScript transform 
 }
+*/
 
 .gallery-slide img {
   width: 100%;
