@@ -338,6 +338,13 @@ body::before {
   font-weight: 500;
   transform: translateY(-3px) scale(1.02);
   box-shadow: 0 12px 30px rgba(255, 238, 145, 0.4);
+  outline: none !important;
+}
+/* Remove blue border/outline for staff nav links as well */
+.staff-sidebar .nav-item.active .nav-link,
+#staff-sidebar .nav-item.active .nav-link {
+  outline: none !important;
+  border-color: #b8860b !important;
 }
 
 .nav-link i {
