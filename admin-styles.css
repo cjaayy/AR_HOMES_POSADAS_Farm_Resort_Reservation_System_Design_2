@@ -347,6 +347,16 @@ body::before {
   border-color: #b8860b !important;
 }
 
+/* Force remove blue border for staff nav links */
+.staff-sidebar .nav-link:focus,
+#staff-sidebar .nav-link:focus,
+.staff-sidebar .nav-link:focus-visible,
+#staff-sidebar .nav-link:focus-visible {
+  outline: none !important;
+  border-color: #b8860b !important;
+  box-shadow: none !important;
+}
+
 .nav-link i {
   width: 20px;
   text-align: center;
@@ -2139,7 +2149,7 @@ body::before {
   font-size: 1.5rem;
   font-weight: 700;
   color: #333;
-  line-height: 1;
+  margin-bottom: 0.2rem;
 }
 
 .dashboard-stats-grid .stat-label {
