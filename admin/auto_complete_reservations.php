@@ -3,11 +3,21 @@
  * Auto-Complete Past Reservations
  * AR Homes Posadas Farm Resort Reservation System
  * 
- * This script automatically completes reservations where:
- * - Status is 'confirmed' (fully paid)
- * - Check-in date has passed
+ * PAYMENT REQUIREMENT:
+ * - Reservations can ONLY be auto-completed if FULL PAYMENT is verified
+ * - Partially paid reservations (only downpayment) require admin action
  * 
- * Can be run as a cron job or triggered manually by admin.
+ * Flow:
+ * 1. FULLY PAID (full_payment_verified = 1):
+ *    - Auto-complete when check-in date passes → status = 'completed'
+ * 
+ * 2. ONLY DOWNPAYMENT PAID:
+ *    - Keep as 'confirmed' - CANNOT auto-complete
+ *    - Log for admin to handle (collect balance or mark no-show)
+ * 
+ * 3. CHECKED-IN guests:
+ *    - Auto checkout ONLY if fully paid
+ * 
  * Recommended cron schedule: Daily at midnight
  * 0 0 * * * php /path/to/auto_complete_reservations.php
  */
@@ -15,9 +25,7 @@
 // Can be run from CLI or web
 if (php_sapi_name() !== 'cli') {
     session_start();
-    // Allow admin access OR run without auth for cron
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        // Check for API key for cron access
         $apiKey = $_SERVER['HTTP_X_API_KEY'] ?? $_GET['api_key'] ?? '';
         if ($apiKey !== 'ar_homes_cron_key_2026') {
             http_response_code(401);
@@ -44,16 +52,17 @@ try {
     
     $results = [
         'completed' => [],
-        'no_show' => [],
+        'awaiting_balance' => [],
+        'checked_out' => [],
         'errors' => []
     ];
     
     // ============================================================
-    // PART 1: Auto-complete confirmed reservations where check-in date has passed
+    // PART 1: Auto-complete FULLY PAID reservations only
     // ============================================================
+    // Condition: status='confirmed' AND check_in_date < TODAY 
+    //            AND downpayment_verified=1 AND full_payment_verified=1
     
-    // Find confirmed reservations where check-in date was yesterday or earlier
-    // (giving a buffer of 1 day after check-in to mark as complete)
     $stmt = $pdo->prepare("
         SELECT 
             reservation_id,
@@ -63,65 +72,50 @@ try {
             check_in_date,
             booking_type,
             total_amount,
+            downpayment_amount,
             downpayment_verified,
             full_payment_verified
         FROM reservations
         WHERE status = 'confirmed'
         AND check_in_date < CURDATE()
         AND downpayment_verified = 1
+        AND full_payment_verified = 1
     ");
     
     $stmt->execute();
-    $pastReservations = $stmt->fetchAll();
+    $fullyPaidReservations = $stmt->fetchAll();
     
-    if (count($pastReservations) > 0) {
+    if (count($fullyPaidReservations) > 0) {
         $pdo->beginTransaction();
         
         try {
-            foreach ($pastReservations as $reservation) {
-                // Determine final status based on payment
-                // If full payment is verified, mark as completed
-                // If only downpayment, could be no_show or completed (assume completed for now)
-                $newStatus = 'completed';
-                $note = 'Auto-completed: Check-in date has passed.';
-                
-                if ($reservation['full_payment_verified'] == 1) {
-                    $note = 'Auto-completed: Fully paid reservation, check-in date passed.';
-                } else {
-                    // Only downpayment verified, still mark as completed 
-                    // (remaining balance can be paid at resort)
-                    $note = 'Auto-completed: Downpayment verified, check-in date passed.';
-                }
-                
+            foreach ($fullyPaidReservations as $reservation) {
                 $updateStmt = $pdo->prepare("
                     UPDATE reservations
                     SET 
-                        status = :status,
+                        status = 'completed',
                         date_locked = 0,
                         admin_notes = CONCAT(
                             COALESCE(admin_notes, ''),
-                            '\n[', NOW(), '] ', :note
+                            '\n[', NOW(), '] Auto-completed: Fully paid, check-in date passed.'
                         ),
                         updated_at = NOW()
                     WHERE reservation_id = :id
                     AND status = 'confirmed'
                 ");
                 
-                $updateStmt->execute([
-                    ':status' => $newStatus,
-                    ':note' => $note,
-                    ':id' => $reservation['reservation_id']
-                ]);
+                $updateStmt->execute([':id' => $reservation['reservation_id']]);
                 
                 if ($updateStmt->rowCount() > 0) {
                     $results['completed'][] = [
                         'reservation_id' => $reservation['reservation_id'],
                         'guest_name' => $reservation['guest_name'],
-                        'check_in_date' => $reservation['check_in_date']
+                        'check_in_date' => $reservation['check_in_date'],
+                        'reason' => 'Fully paid'
                     ];
                     
                     error_log(sprintf(
-                        "[RESERVATION_AUTO_COMPLETED] ID: %s, Guest: %s, Check-in: %s",
+                        "[RESERVATION_AUTO_COMPLETED] ID: %s, Guest: %s, Check-in: %s (Fully Paid)",
                         $reservation['reservation_id'],
                         $reservation['guest_name'],
                         $reservation['check_in_date']
@@ -137,7 +131,8 @@ try {
     }
     
     // ============================================================
-    // PART 2: Mark checked_in reservations as checked_out if check-in date passed
+    // PART 2: Flag PARTIALLY PAID reservations - CANNOT auto-complete
+    // These require admin to either collect balance or mark as no-show
     // ============================================================
     
     $stmt2 = $pdo->prepare("
@@ -145,14 +140,62 @@ try {
             reservation_id,
             user_id,
             guest_name,
-            check_in_date
+            guest_email,
+            check_in_date,
+            total_amount,
+            downpayment_amount,
+            (total_amount - downpayment_amount) as remaining_balance
         FROM reservations
-        WHERE status = 'checked_in'
+        WHERE status = 'confirmed'
         AND check_in_date < CURDATE()
+        AND downpayment_verified = 1
+        AND (full_payment_verified = 0 OR full_payment_verified IS NULL)
     ");
     
     $stmt2->execute();
-    $checkedInReservations = $stmt2->fetchAll();
+    $partiallyPaidReservations = $stmt2->fetchAll();
+    
+    if (count($partiallyPaidReservations) > 0) {
+        foreach ($partiallyPaidReservations as $reservation) {
+            // DO NOT change status - keep as 'confirmed'
+            // This requires manual admin action
+            $results['awaiting_balance'][] = [
+                'reservation_id' => $reservation['reservation_id'],
+                'guest_name' => $reservation['guest_name'],
+                'guest_email' => $reservation['guest_email'],
+                'check_in_date' => $reservation['check_in_date'],
+                'remaining_balance' => $reservation['remaining_balance'],
+                'action_required' => 'Admin must collect balance or mark as no-show'
+            ];
+            
+            error_log(sprintf(
+                "[AWAITING_BALANCE] ID: %s, Guest: %s, Balance: PHP %s - Cannot auto-complete, requires admin action",
+                $reservation['reservation_id'],
+                $reservation['guest_name'],
+                number_format($reservation['remaining_balance'], 2)
+            ));
+        }
+    }
+    
+    // ============================================================
+    // PART 3: Auto-checkout CHECKED_IN guests ONLY if fully paid
+    // ============================================================
+    
+    $stmt3 = $pdo->prepare("
+        SELECT 
+            reservation_id,
+            user_id,
+            guest_name,
+            check_in_date,
+            full_payment_verified
+        FROM reservations
+        WHERE status = 'checked_in'
+        AND check_in_date < CURDATE()
+        AND full_payment_verified = 1
+    ");
+    
+    $stmt3->execute();
+    $checkedInReservations = $stmt3->fetchAll();
     
     if (count($checkedInReservations) > 0) {
         $pdo->beginTransaction();
@@ -166,7 +209,7 @@ try {
                         check_out_time = NOW(),
                         admin_notes = CONCAT(
                             COALESCE(admin_notes, ''),
-                            '\n[', NOW(), '] Auto checked-out: Booking period ended.'
+                            '\n[', NOW(), '] Auto checked-out: Booking period ended, fully paid.'
                         ),
                         updated_at = NOW()
                     WHERE reservation_id = :id
@@ -176,10 +219,9 @@ try {
                 $updateStmt->execute([':id' => $reservation['reservation_id']]);
                 
                 if ($updateStmt->rowCount() > 0) {
-                    $results['completed'][] = [
+                    $results['checked_out'][] = [
                         'reservation_id' => $reservation['reservation_id'],
-                        'guest_name' => $reservation['guest_name'],
-                        'action' => 'auto_checked_out'
+                        'guest_name' => $reservation['guest_name']
                     ];
                     
                     error_log(sprintf(
@@ -197,29 +239,94 @@ try {
         }
     }
     
+    // ============================================================
+    // PART 4: Flag CHECKED_IN guests with unpaid balance
+    // ============================================================
+    
+    $stmt4 = $pdo->prepare("
+        SELECT 
+            reservation_id,
+            guest_name,
+            check_in_date,
+            (total_amount - downpayment_amount) as remaining_balance
+        FROM reservations
+        WHERE status = 'checked_in'
+        AND check_in_date < CURDATE()
+        AND (full_payment_verified = 0 OR full_payment_verified IS NULL)
+    ");
+    
+    $stmt4->execute();
+    $unpaidCheckedIn = $stmt4->fetchAll();
+    
+    foreach ($unpaidCheckedIn as $reservation) {
+        $results['awaiting_balance'][] = [
+            'reservation_id' => $reservation['reservation_id'],
+            'guest_name' => $reservation['guest_name'],
+            'remaining_balance' => $reservation['remaining_balance'],
+            'action_required' => 'Guest checked-in but balance unpaid - collect before checkout'
+        ];
+        
+        error_log(sprintf(
+            "[CHECKED_IN_UNPAID] ID: %s, Guest: %s, Balance: PHP %s - Cannot auto checkout",
+            $reservation['reservation_id'],
+            $reservation['guest_name'],
+            number_format($reservation['remaining_balance'], 2)
+        ));
+    }
+    
+    // ============================================================
     // Summary
+    // ============================================================
+    
     $summary = sprintf(
-        "Auto-completion completed: %d reservations completed, %d checked out",
+        "Results: %d auto-completed (fully paid), %d auto-checked-out, %d awaiting balance (manual action needed)",
         count($results['completed']),
-        count(array_filter($results['completed'], fn($r) => ($r['action'] ?? '') === 'auto_checked_out'))
+        count($results['checked_out']),
+        count($results['awaiting_balance'])
     );
     
     error_log("[AUTO_COMPLETE_RESERVATIONS] " . $summary);
     
     if (php_sapi_name() === 'cli') {
+        echo "=== Auto-Complete Reservations ===\n";
         echo $summary . "\n";
+        
         if (count($results['completed']) > 0) {
-            echo "Completed reservations:\n";
+            echo "\n✅ COMPLETED (Fully Paid):\n";
             foreach ($results['completed'] as $r) {
-                echo "  - {$r['reservation_id']}: {$r['guest_name']}\n";
+                echo "   • {$r['reservation_id']}: {$r['guest_name']} (Check-in: {$r['check_in_date']})\n";
             }
+        }
+        
+        if (count($results['checked_out']) > 0) {
+            echo "\n✅ AUTO CHECKED-OUT:\n";
+            foreach ($results['checked_out'] as $r) {
+                echo "   • {$r['reservation_id']}: {$r['guest_name']}\n";
+            }
+        }
+        
+        if (count($results['awaiting_balance']) > 0) {
+            echo "\n⚠️  AWAITING BALANCE (Requires Admin Action):\n";
+            foreach ($results['awaiting_balance'] as $r) {
+                $balance = isset($r['remaining_balance']) ? 'PHP ' . number_format($r['remaining_balance'], 2) : 'N/A';
+                echo "   • {$r['reservation_id']}: {$r['guest_name']}\n";
+                echo "     Balance: {$balance}\n";
+                echo "     Action: {$r['action_required']}\n";
+            }
+            echo "\n💡 Tip: These reservations need admin to either:\n";
+            echo "   1. Verify the remaining balance payment, OR\n";
+            echo "   2. Mark as 'no_show' if guest didn't arrive\n";
+        }
+        
+        if (empty($results['completed']) && empty($results['checked_out']) && empty($results['awaiting_balance'])) {
+            echo "\n✓ No reservations needed processing.\n";
         }
     } else {
         echo json_encode([
             'success' => true,
             'message' => $summary,
             'results' => $results
-        ]);
+        ], JSON_PRETTY_PRINT);
     }
     
 } catch (PDOException $e) {
