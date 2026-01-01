@@ -1874,7 +1874,7 @@ function quickAction(action) {
     case "view":
       showSection("bookings-history");
       updateActiveNavigation("bookings-history");
-      showNotification("Loading your bookings...", "info");
+      showNotification("Loading your reservations...", "info");
       break;
     case "promo":
       showNotification("Promotions section is currently unavailable.", "info");
@@ -3436,7 +3436,7 @@ function displayReservations(reservations) {
     container.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #94a3b8;">
         <i class="fas fa-history" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
-        <p style="font-size: 18px; font-weight: 600;">No booking history found</p>
+        <p style="font-size: 18px; font-weight: 600;">No reservation history found</p>
         <p style="margin-top: 10px;">Completed and cancelled reservations will appear here</p>
       </div>
     `;
@@ -5462,7 +5462,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
               } catch (paymentError) {
                 showNotification(
-                  "Payment setup failed. Please try again from My Bookings.",
+                  "Payment setup failed. Please try again from My Reservations.",
                   "error"
                 );
                 console.error("Payment error:", paymentError);
@@ -5471,7 +5471,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Still show reservation success but redirect to bookings
                 setTimeout(() => {
                   alert(
-                    `Reservation Created!\n\nReservation ID: ${result.reservation_id}\n\nPayment setup encountered an issue. Please complete payment from My Bookings section.`
+                    `Reservation Created!\n\nReservation ID: ${result.reservation_id}\n\nPayment setup encountered an issue. Please complete payment from My Reservations section.`
                   );
 
                   // Reset form and go to bookings
