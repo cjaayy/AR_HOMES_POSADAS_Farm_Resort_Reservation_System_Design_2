@@ -1889,10 +1889,14 @@ function viewBookingDetails(bookingId) {
 }
 
 function leaveReview(bookingId) {
-  showSection("reviews");
-  updateActiveNavigation("reviews");
-  showNotification("Write a review for your stay!", "success");
-  // In production, this would open a review form for that specific booking
+  // Open the write review modal for this specific booking
+  if (typeof writeReviewForReservation === "function") {
+    writeReviewForReservation(bookingId);
+  } else {
+    showSection("reviews");
+    updateActiveNavigation("reviews");
+    showNotification("Write a review for your stay!", "success");
+  }
 }
 
 function bookAgain(packageType) {
@@ -2998,19 +3002,44 @@ async function submitReview(event, reservationId) {
   submitBtn.disabled = true;
 
   try {
-    // For now, show success and store locally
-    // In production, this would be an API call
-    showNotification(
-      "Thank you for your review! It has been submitted successfully.",
-      "success"
-    );
-    closeReviewModal();
+    const response = await fetch("user/submit_review.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        reservation_id: reservationId,
+        rating: selectedRating,
+        title: formData.get("title"),
+        content: formData.get("content"),
+      }),
+    });
 
-    // Navigate to reviews section
-    showSection("reviews");
-    updateActiveNavigation("reviews");
+    const data = await response.json();
+
+    if (data.success) {
+      showNotification(
+        "Thank you for your review! It has been submitted successfully.",
+        "success"
+      );
+      closeReviewModal();
+
+      // Reload reviews to update the list
+      if (typeof loadUserReviews === "function") {
+        loadUserReviews();
+      }
+
+      // Navigate to reviews section
+      showSection("reviews");
+      updateActiveNavigation("reviews");
+    } else {
+      showNotification(data.message || "Failed to submit review", "error");
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }
   } catch (error) {
-    showNotification("Failed to submit review", "error");
+    console.error("Error submitting review:", error);
+    showNotification("Failed to submit review. Please try again.", "error");
     submitBtn.innerHTML = originalText;
     submitBtn.disabled = false;
   }
@@ -4087,39 +4116,607 @@ async function handleNotificationLink(link, notificationId) {
 // Initialize notifications badge on page load
 document.addEventListener("DOMContentLoaded", function () {
   initNotificationBadge();
+  loadUserReviews(); // Load reviews on page load
 });
 
 // ===== REVIEWS FUNCTIONS =====
+// Global reviews data storage
+let loadedReviewsData = [];
+let reviewableReservations = [];
+
+// Load user reviews from the server
+async function loadUserReviews() {
+  try {
+    const response = await fetch("user/get_reviews.php");
+    const data = await response.json();
+
+    if (data.success) {
+      loadedReviewsData = data.reviews || [];
+      reviewableReservations = data.reviewable_reservations || [];
+
+      // Update stats
+      updateReviewStats(data.stats);
+
+      // Render reviews list
+      renderReviewsList(loadedReviewsData);
+
+      // Update profile reviews given count
+      const reviewsGivenElement = document.getElementById(
+        "profileReviewsGiven"
+      );
+      if (reviewsGivenElement) {
+        reviewsGivenElement.textContent = data.stats.total_reviews || 0;
+      }
+    } else {
+      console.error("Failed to load reviews:", data.message);
+      showReviewsError();
+    }
+  } catch (error) {
+    console.error("Error loading reviews:", error);
+    showReviewsError();
+  }
+}
+
+// Update review statistics in the UI
+function updateReviewStats(stats) {
+  const avgRatingEl = document.getElementById("avgRatingValue");
+  const totalReviewsEl = document.getElementById("totalReviewsValue");
+  const totalHelpfulEl = document.getElementById("totalHelpfulValue");
+
+  if (avgRatingEl) avgRatingEl.textContent = stats.average_rating || "0.0";
+  if (totalReviewsEl) totalReviewsEl.textContent = stats.total_reviews || 0;
+  if (totalHelpfulEl) totalHelpfulEl.textContent = stats.total_helpful || 0;
+}
+
+// Render reviews list
+function renderReviewsList(reviews) {
+  const container = document.getElementById("reviewsList");
+  if (!container) return;
+
+  if (reviews.length === 0) {
+    container.innerHTML = `
+      <div class="no-reviews" style="text-align: center; padding: 60px 20px;">
+        <i class="fas fa-star" style="font-size: 4rem; color: #ddd; margin-bottom: 20px;"></i>
+        <h3 style="color: #666; margin-bottom: 10px;">No Reviews Yet</h3>
+        <p style="color: #999; margin-bottom: 20px;">You haven't written any reviews yet. Complete a stay to share your experience!</p>
+        ${
+          reviewableReservations.length > 0
+            ? `
+          <button class="btn-primary" onclick="writeNewReview()">
+            <i class="fas fa-pen"></i> Write Your First Review
+          </button>
+        `
+            : ""
+        }
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = reviews
+    .map((review) => createReviewCard(review))
+    .join("");
+}
+
+// Create a review card HTML
+function createReviewCard(review) {
+  const stars = generateStarsHTML(review.rating);
+  const formattedDate = formatReviewDate(review.created_at);
+  const packageLabel = getPackageLabel(
+    review.booking_type,
+    review.package_type
+  );
+
+  return `
+    <div class="review-card" data-review-id="${review.review_id}">
+      <div class="review-header">
+        <div class="review-info">
+          <h4>${escapeHtml(review.title)}</h4>
+          <div class="review-rating">
+            ${stars}
+            <span>${review.rating}.0</span>
+          </div>
+        </div>
+        <span class="review-date">${formattedDate}</span>
+      </div>
+      <p class="review-package" style="color: #667eea; font-size: 0.85rem; margin-bottom: 10px;">
+        <i class="fas fa-bed"></i> ${packageLabel}
+      </p>
+      <p class="review-text">${escapeHtml(review.content)}</p>
+      <div class="review-footer">
+        <span class="helpful-count">
+          <i class="fas fa-thumbs-up"></i> ${
+            review.helpful_count
+          } found this helpful
+        </span>
+        <div class="review-actions">
+          <button class="btn-text" onclick="editReview(${review.review_id})">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn-text text-danger" onclick="deleteReview(${
+            review.review_id
+          })">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Generate star icons HTML based on rating
+function generateStarsHTML(rating) {
+  let stars = "";
+  for (let i = 1; i <= 5; i++) {
+    if (i <= rating) {
+      stars += '<i class="fas fa-star"></i>';
+    } else {
+      stars += '<i class="far fa-star"></i>';
+    }
+  }
+  return stars;
+}
+
+// Format review date
+function formatReviewDate(dateString) {
+  const date = new Date(dateString);
+  const options = { year: "numeric", month: "short", day: "numeric" };
+  return date.toLocaleDateString("en-US", options);
+}
+
+// Get package label from booking type
+function getPackageLabel(bookingType, packageType) {
+  const types = {
+    daytime: "Daytime Package",
+    nighttime: "Nighttime Package",
+    "22hours": "22 Hours Package",
+    "venue-daytime": "Venue (Daytime)",
+    "venue-nighttime": "Venue (Nighttime)",
+    "venue-22hours": "Venue (22 Hours)",
+  };
+  return types[bookingType] || packageType || bookingType || "Resort Stay";
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+  if (!text) return "";
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Show reviews error state
+function showReviewsError() {
+  const container = document.getElementById("reviewsList");
+  if (container) {
+    container.innerHTML = `
+      <div class="reviews-error" style="text-align: center; padding: 40px;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px;"></i>
+        <p style="color: #666;">Unable to load reviews. Please try again later.</p>
+        <button class="btn-primary" onclick="loadUserReviews()" style="margin-top: 15px;">
+          <i class="fas fa-refresh"></i> Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
+// Write new review - shows modal with available reservations
 function writeNewReview() {
-  showNotification("Opening review form...", "info");
-  // In production, this would show a modal with review form
-  setTimeout(() => {
-    alert(
-      "Review form would appear here!\n\nFeatures:\n- Rating stars\n- Text area for review\n- Photo upload\n- Submit button"
-    );
-  }, 500);
+  if (reviewableReservations.length === 0) {
+    showNotification("You don't have any completed stays to review.", "info");
+    return;
+  }
+
+  const reservationOptions = reviewableReservations
+    .map((res) => {
+      const packageLabel = getPackageLabel(res.booking_type, res.package_type);
+      const checkIn = formatReviewDate(res.check_in_date);
+      const checkOut = formatReviewDate(res.check_out_date);
+      return `<option value="${res.reservation_id}">${packageLabel} (${checkIn} - ${checkOut})</option>`;
+    })
+    .join("");
+
+  const modalHTML = `
+    <div id="newReviewModal" class="reservation-modal-overlay" onclick="closeNewReviewModal(event)">
+      <div class="reservation-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()">
+        <div class="reservation-modal-header" style="background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h2 style="color: white; margin: 0;">
+              <i class="fas fa-star"></i> Write a Review
+            </h2>
+            <button onclick="closeNewReviewModal()" class="modal-close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="reservation-modal-body">
+          <form id="newReviewForm" onsubmit="submitNewReview(event)">
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-calendar-check"></i> Select Reservation
+              </label>
+              <select name="reservation_id" required style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                <option value="">Choose a reservation to review...</option>
+                ${reservationOptions}
+              </select>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 25px;">
+              <p style="color: #666; margin-bottom: 15px;">How was your stay?</p>
+              <div id="newReviewStarRating" style="font-size: 2.5rem; cursor: pointer;">
+                <i class="far fa-star" data-rating="1" onclick="setNewReviewRating(1)"></i>
+                <i class="far fa-star" data-rating="2" onclick="setNewReviewRating(2)"></i>
+                <i class="far fa-star" data-rating="3" onclick="setNewReviewRating(3)"></i>
+                <i class="far fa-star" data-rating="4" onclick="setNewReviewRating(4)"></i>
+                <i class="far fa-star" data-rating="5" onclick="setNewReviewRating(5)"></i>
+              </div>
+              <p id="newReviewRatingText" style="color: #ffc107; font-weight: 600; margin-top: 10px;">Select a rating</p>
+            </div>
+            
+            <input type="hidden" name="rating" id="newReviewRatingInput" value="0">
+            
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-heading"></i> Review Title
+              </label>
+              <input type="text" name="title" placeholder="Give your review a title..." required
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-comment-alt"></i> Your Review
+              </label>
+              <textarea name="content" rows="4" placeholder="Share your experience with other guests..." required
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" id="newReviewSubmitBtn" class="modal-btn success" style="width: 100%;">
+              <i class="fas fa-paper-plane"></i> Submit Review
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+  document.body.style.overflow = "hidden";
 }
 
+let newReviewSelectedRating = 0;
+function setNewReviewRating(rating) {
+  newReviewSelectedRating = rating;
+  document.getElementById("newReviewRatingInput").value = rating;
+
+  const stars = document.querySelectorAll("#newReviewStarRating i");
+  const ratingTexts = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
+
+  stars.forEach((star, index) => {
+    if (index < rating) {
+      star.classList.remove("far");
+      star.classList.add("fas");
+      star.style.color = "#ffc107";
+    } else {
+      star.classList.remove("fas");
+      star.classList.add("far");
+      star.style.color = "#ddd";
+    }
+  });
+
+  document.getElementById("newReviewRatingText").textContent =
+    ratingTexts[rating];
+}
+
+function closeNewReviewModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  const modal = document.getElementById("newReviewModal");
+  if (modal) {
+    modal.remove();
+    document.body.style.overflow = "";
+    newReviewSelectedRating = 0;
+  }
+}
+
+async function submitNewReview(event) {
+  event.preventDefault();
+
+  if (newReviewSelectedRating === 0) {
+    showNotification("Please select a rating", "warning");
+    return;
+  }
+
+  const form = event.target;
+  const formData = new FormData(form);
+  const submitBtn = document.getElementById("newReviewSubmitBtn");
+  const originalText = submitBtn.innerHTML;
+
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  submitBtn.disabled = true;
+
+  try {
+    const response = await fetch("user/submit_review.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        reservation_id: formData.get("reservation_id"),
+        rating: parseInt(formData.get("rating")),
+        title: formData.get("title"),
+        content: formData.get("content"),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showNotification(
+        "Thank you for your review! It has been submitted successfully.",
+        "success"
+      );
+      closeNewReviewModal();
+      loadUserReviews(); // Reload reviews
+    } else {
+      showNotification(data.message || "Failed to submit review", "error");
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }
+  } catch (error) {
+    console.error("Error submitting review:", error);
+    showNotification("Failed to submit review. Please try again.", "error");
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+// Edit review
 function editReview(reviewId) {
-  showNotification(`Loading review ${reviewId} for editing...`, "info");
-  // In production, this would open the review in edit mode
+  const review = loadedReviewsData.find((r) => r.review_id == reviewId);
+  if (!review) {
+    showNotification("Review not found", "error");
+    return;
+  }
+
+  const modalHTML = `
+    <div id="editReviewModal" class="reservation-modal-overlay" onclick="closeEditReviewModal(event)">
+      <div class="reservation-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()">
+        <div class="reservation-modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h2 style="color: white; margin: 0;">
+              <i class="fas fa-edit"></i> Edit Review
+            </h2>
+            <button onclick="closeEditReviewModal()" class="modal-close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="reservation-modal-body">
+          <form id="editReviewForm" onsubmit="submitEditReview(event, ${reviewId})">
+            <div style="text-align: center; margin-bottom: 25px;">
+              <p style="color: #666; margin-bottom: 15px;">Update your rating</p>
+              <div id="editReviewStarRating" style="font-size: 2.5rem; cursor: pointer;">
+                ${[1, 2, 3, 4, 5]
+                  .map(
+                    (i) =>
+                      `<i class="${
+                        i <= review.rating ? "fas" : "far"
+                      } fa-star" data-rating="${i}" onclick="setEditReviewRating(${i})" style="color: ${
+                        i <= review.rating ? "#ffc107" : "#ddd"
+                      };"></i>`
+                  )
+                  .join("")}
+              </div>
+              <p id="editReviewRatingText" style="color: #ffc107; font-weight: 600; margin-top: 10px;">${
+                ["", "Poor", "Fair", "Good", "Very Good", "Excellent"][
+                  review.rating
+                ]
+              }</p>
+            </div>
+            
+            <input type="hidden" name="rating" id="editReviewRatingInput" value="${
+              review.rating
+            }">
+            
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-heading"></i> Review Title
+              </label>
+              <input type="text" name="title" value="${escapeHtml(
+                review.title
+              )}" required
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <i class="fas fa-comment-alt"></i> Your Review
+              </label>
+              <textarea name="content" rows="4" required
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;">${escapeHtml(
+                  review.content
+                )}</textarea>
+            </div>
+            
+            <button type="submit" id="editReviewSubmitBtn" class="modal-btn success" style="width: 100%;">
+              <i class="fas fa-save"></i> Update Review
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+  document.body.style.overflow = "hidden";
+  editReviewSelectedRating = review.rating;
 }
 
-function deleteReview(reviewId) {
+let editReviewSelectedRating = 0;
+function setEditReviewRating(rating) {
+  editReviewSelectedRating = rating;
+  document.getElementById("editReviewRatingInput").value = rating;
+
+  const stars = document.querySelectorAll("#editReviewStarRating i");
+  const ratingTexts = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
+
+  stars.forEach((star, index) => {
+    if (index < rating) {
+      star.classList.remove("far");
+      star.classList.add("fas");
+      star.style.color = "#ffc107";
+    } else {
+      star.classList.remove("fas");
+      star.classList.add("far");
+      star.style.color = "#ddd";
+    }
+  });
+
+  document.getElementById("editReviewRatingText").textContent =
+    ratingTexts[rating];
+}
+
+function closeEditReviewModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  const modal = document.getElementById("editReviewModal");
+  if (modal) {
+    modal.remove();
+    document.body.style.overflow = "";
+  }
+}
+
+async function submitEditReview(event, reviewId) {
+  event.preventDefault();
+
+  if (editReviewSelectedRating === 0) {
+    showNotification("Please select a rating", "warning");
+    return;
+  }
+
+  const form = event.target;
+  const formData = new FormData(form);
+  const submitBtn = document.getElementById("editReviewSubmitBtn");
+  const originalText = submitBtn.innerHTML;
+
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+  submitBtn.disabled = true;
+
+  try {
+    const response = await fetch("user/update_review.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        review_id: reviewId,
+        rating: parseInt(formData.get("rating")),
+        title: formData.get("title"),
+        content: formData.get("content"),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showNotification("Review updated successfully!", "success");
+      closeEditReviewModal();
+      loadUserReviews(); // Reload reviews
+    } else {
+      showNotification(data.message || "Failed to update review", "error");
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }
+  } catch (error) {
+    console.error("Error updating review:", error);
+    showNotification("Failed to update review. Please try again.", "error");
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+// Delete review
+async function deleteReview(reviewId) {
   if (
-    confirm(
+    !confirm(
       "Are you sure you want to delete this review? This action cannot be undone."
     )
   ) {
-    showNotification("Deleting review...", "warning");
+    return;
+  }
 
-    setTimeout(() => {
+  showNotification("Deleting review...", "info");
+
+  try {
+    const response = await fetch("user/delete_review.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ review_id: reviewId }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
       showNotification("Review deleted successfully.", "success");
-      // In production, this would remove the review from the list
-      document.querySelector(`[data-review-id="${reviewId}"]`)?.remove();
-    }, 1000);
+      // Remove from UI immediately
+      const reviewCard = document.querySelector(
+        `[data-review-id="${reviewId}"]`
+      );
+      if (reviewCard) {
+        reviewCard.style.transition = "opacity 0.3s, transform 0.3s";
+        reviewCard.style.opacity = "0";
+        reviewCard.style.transform = "translateX(-20px)";
+        setTimeout(() => {
+          reviewCard.remove();
+          // Check if we need to show empty state
+          if (loadedReviewsData.length <= 1) {
+            loadUserReviews();
+          }
+        }, 300);
+      }
+      // Remove from data array
+      loadedReviewsData = loadedReviewsData.filter(
+        (r) => r.review_id != reviewId
+      );
+      // Update stats
+      updateReviewStats({
+        total_reviews: loadedReviewsData.length,
+        average_rating:
+          loadedReviewsData.length > 0
+            ? (
+                loadedReviewsData.reduce((sum, r) => sum + r.rating, 0) /
+                loadedReviewsData.length
+              ).toFixed(1)
+            : 0,
+        total_helpful: loadedReviewsData.reduce(
+          (sum, r) => sum + r.helpful_count,
+          0
+        ),
+      });
+    } else {
+      showNotification(data.message || "Failed to delete review", "error");
+    }
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    showNotification("Failed to delete review. Please try again.", "error");
   }
 }
+
+// Make functions globally available
+window.loadUserReviews = loadUserReviews;
+window.writeNewReview = writeNewReview;
+window.setNewReviewRating = setNewReviewRating;
+window.closeNewReviewModal = closeNewReviewModal;
+window.submitNewReview = submitNewReview;
+window.editReview = editReview;
+window.setEditReviewRating = setEditReviewRating;
+window.closeEditReviewModal = closeEditReviewModal;
+window.submitEditReview = submitEditReview;
+window.deleteReview = deleteReview;
 
 // ===== RESERVATION SYSTEM =====
 // Global reservation state

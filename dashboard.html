@@ -2553,103 +2553,32 @@
             </div>
             <div class="reviews-stats">
               <div class="review-stat">
-                <div class="stat-value">4.8</div>
+                <div class="stat-value" id="avgRatingValue">0.0</div>
                 <div class="stat-label">Average Rating Given</div>
               </div>
               <div class="review-stat">
-                <div class="stat-value">8</div>
+                <div class="stat-value" id="totalReviewsValue">0</div>
                 <div class="stat-label">Total Reviews</div>
               </div>
               <div class="review-stat">
-                <div class="stat-value">12</div>
+                <div class="stat-value" id="totalHelpfulValue">0</div>
                 <div class="stat-label">Helpful Votes</div>
               </div>
             </div>
-            <div class="reviews-list">
-              <div class="review-card">
-                <div class="review-header">
-                  <div class="review-info">
-                    <h4>Family Suite Package</h4>
-                    <div class="review-rating">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <span>5.0</span>
-                    </div>
-                  </div>
-                  <span class="review-date">Nov 13, 2025</span>
-                </div>
-                <p class="review-text">
-                  Amazing experience! The resort exceeded our expectations. The
-                  staff was incredibly friendly and accommodating. The rooms
-                  were spacious and clean. We especially loved the pool area and
-                  the beautiful gardens. Will definitely come back!
+            <div class="reviews-list" id="reviewsList">
+              <!-- Reviews will be loaded dynamically -->
+              <div
+                class="loading-reviews"
+                id="reviewsLoading"
+                style="text-align: center; padding: 40px"
+              >
+                <i
+                  class="fas fa-spinner fa-spin"
+                  style="font-size: 2rem; color: #667eea"
+                ></i>
+                <p style="margin-top: 15px; color: #666">
+                  Loading your reviews...
                 </p>
-                <div class="review-photos">
-                  <img
-                    src="images/545601129_1082516497373944_2891607710179489901_n.jpg"
-                    alt="Review photo"
-                  />
-                  <img
-                    src="images/546182776_2167385133738763_7006991891791172725_n.jpg"
-                    alt="Review photo"
-                  />
-                </div>
-                <div class="review-footer">
-                  <span class="helpful-count"
-                    ><i class="fas fa-thumbs-up"></i> 5 found this helpful</span
-                  >
-                  <div class="review-actions">
-                    <button class="btn-text" onclick="editReview('REV001')">
-                      <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button
-                      class="btn-text text-danger"
-                      onclick="deleteReview('REV001')"
-                    >
-                      <i class="fas fa-trash"></i> Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="review-card">
-                <div class="review-header">
-                  <div class="review-info">
-                    <h4>VIP Suite Weekend</h4>
-                    <div class="review-rating">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="far fa-star"></i>
-                      <span>4.0</span>
-                    </div>
-                  </div>
-                  <span class="review-date">Oct 15, 2025</span>
-                </div>
-                <p class="review-text">
-                  Great location and facilities. The VIP suite was luxurious and
-                  comfortable. Only minor issue was the WiFi speed could be
-                  better. Overall, a wonderful getaway spot for couples.
-                </p>
-                <div class="review-footer">
-                  <span class="helpful-count"
-                    ><i class="fas fa-thumbs-up"></i> 3 found this helpful</span
-                  >
-                  <div class="review-actions">
-                    <button class="btn-text" onclick="editReview('REV002')">
-                      <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button
-                      class="btn-text text-danger"
-                      onclick="deleteReview('REV002')"
-                    >
-                      <i class="fas fa-trash"></i> Delete
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
