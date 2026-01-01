@@ -622,7 +622,7 @@ function renderBookingActions(booking) {
     } else {
       // Show upload button for bank transfer or other methods
       html += `
-        <button class="btn-primary" type="button" onclick="openPaymentUploadModal(${booking.reservation_id}, 'downpayment', ${booking.downpayment_amount})">
+        <button class="btn-primary" type="button" onclick="openPaymentUploadModal('${booking.reservation_id}', 'downpayment', ${booking.downpayment_amount})">
           <i class="fas fa-upload"></i> Upload Downpayment
         </button>
       `;
@@ -1391,32 +1391,50 @@ let currentPaymentDetails = {
  * Pay full remaining balance with PayMongo - Opens modal first
  */
 async function payFullBalanceWithPayMongo(reservationId, amount, btnElement) {
-  console.log(
-    "payFullBalanceWithPayMongo called with:",
-    reservationId,
-    amount,
-    btnElement
-  );
+  try {
+    console.log(
+      "payFullBalanceWithPayMongo called with:",
+      reservationId,
+      amount,
+      btnElement
+    );
 
-  // Store payment details
-  currentPaymentDetails = {
-    reservationId: reservationId,
-    amount: amount,
-    btnElement: btnElement,
-  };
+    // Store payment details
+    currentPaymentDetails = {
+      reservationId: reservationId,
+      amount: amount,
+      btnElement: btnElement,
+    };
 
-  // Show payment options modal
-  document.getElementById(
-    "remainingBalanceAmount"
-  ).textContent = `₱${parseFloat(amount).toLocaleString()}`;
-  document.getElementById("payRemainingBalanceModal").style.display = "flex";
+    // Show payment options modal with null checks
+    const balanceElement = document.getElementById("remainingBalanceAmount");
+    const modalElement = document.getElementById("payRemainingBalanceModal");
+
+    if (!balanceElement || !modalElement) {
+      console.error("Pay remaining balance modal elements not found:", {
+        balanceElement: !!balanceElement,
+        modalElement: !!modalElement,
+      });
+      alert("Payment modal not found. Please refresh the page and try again.");
+      return;
+    }
+
+    balanceElement.textContent = `₱${parseFloat(amount).toLocaleString()}`;
+    modalElement.style.display = "flex";
+  } catch (error) {
+    console.error("Error in payFullBalanceWithPayMongo:", error);
+    alert("Error opening payment modal: " + error.message);
+  }
 }
 
 /**
  * Close remaining balance payment modal
  */
 function closePayRemainingBalanceModal() {
-  document.getElementById("payRemainingBalanceModal").style.display = "none";
+  const modal = document.getElementById("payRemainingBalanceModal");
+  if (modal) {
+    modal.style.display = "none";
+  }
   currentPaymentDetails = { reservationId: null, amount: 0, btnElement: null };
 }
 
@@ -1517,14 +1535,22 @@ function hideLoadingOverlay() {
  * Show information about paying at resort
  */
 function showPayAtResortInfo() {
-  document.getElementById("payAtResortModal").style.display = "flex";
+  const modal = document.getElementById("payAtResortModal");
+  if (modal) {
+    modal.style.display = "flex";
+  } else {
+    console.error("payAtResortModal element not found");
+  }
 }
 
 /**
  * Close "Pay at Resort" information modal
  */
 function closePayAtResortModal() {
-  document.getElementById("payAtResortModal").style.display = "none";
+  const modal = document.getElementById("payAtResortModal");
+  if (modal) {
+    modal.style.display = "none";
+  }
 }
 
 // ===========================
@@ -1544,3 +1570,8 @@ document.addEventListener("DOMContentLoaded", function () {
 // Make modal functions globally accessible
 window.openBookingModal = openBookingModal;
 window.closeBookingModal = closeBookingModal;
+window.payFullBalanceWithPayMongo = payFullBalanceWithPayMongo;
+window.proceedWithOnlinePayment = proceedWithOnlinePayment;
+window.closePayRemainingBalanceModal = closePayRemainingBalanceModal;
+window.showPayAtResortInfo = showPayAtResortInfo;
+window.closePayAtResortModal = closePayAtResortModal;

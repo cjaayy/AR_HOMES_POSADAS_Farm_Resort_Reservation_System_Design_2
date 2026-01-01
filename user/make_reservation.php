@@ -2,6 +2,8 @@
 /**
  * AR Homes Posadas Farm Resort Reservation System
  * Make Reservation API
+ * 
+ * Enhanced with validation, security, and state management
  */
 
 session_start();
@@ -9,6 +11,11 @@ header('Content-Type: application/json');
 
 require_once '../config/database.php';
 require_once '../config/IDGenerator.php';
+require_once '../config/security.php';
+require_once '../config/ReservationValidator.php';
+
+// Set security headers
+Security::setSecurityHeaders();
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {

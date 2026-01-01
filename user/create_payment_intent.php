@@ -81,18 +81,31 @@ try {
         throw new Exception('Reservation not found');
     }
     
+    error_log('Reservation found: ' . json_encode([
+        'reservation_id' => $reservation_id,
+        'status' => $reservation['status'],
+        'downpayment_verified' => $reservation['downpayment_verified'],
+        'full_payment_paid' => $reservation['full_payment_paid'],
+        'total_amount' => $reservation['total_amount'],
+        'downpayment_amount' => $reservation['downpayment_amount'],
+        'payment_type_requested' => $payment_type
+    ]));
+    
     // Determine amount and validate based on payment type
     if ($payment_type === 'full_payment') {
         // For full payment, check if downpayment is verified
         if ($reservation['status'] !== 'confirmed' || $reservation['downpayment_verified'] != 1) {
+            error_log('Full payment rejected: status=' . $reservation['status'] . ', downpayment_verified=' . $reservation['downpayment_verified']);
             throw new Exception('Downpayment must be verified before paying remaining balance');
         }
         if ($reservation['full_payment_paid'] == 1) {
+            error_log('Full payment rejected: already paid');
             throw new Exception('Full payment has already been made');
         }
         
         // Calculate remaining balance
         $amount = $reservation['total_amount'] - $reservation['downpayment_amount'];
+        error_log('Full payment amount calculated: ' . $amount);
         $payment_description = 'AR Homes Resort - Reservation #' . $reservation_id . ' - Remaining Balance';
     } else {
         // For downpayment

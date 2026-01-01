@@ -1,0 +1,470 @@
+/**
+ * Checkout Validation Styles
+ * AR Homes Posadas Farm Resort Reservation System
+ */
+
+/* ===========================
+   Validation Error Display
+   =========================== */
+
+.validation-errors {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fca5a5;
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  display: none;
+}
+
+.validation-errors.visible {
+  display: block;
+  animation: shake 0.5s ease-in-out;
+}
+
+.error-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  color: #991b1b;
+  font-size: 0.95rem;
+}
+
+.error-item:not(:last-child) {
+  border-bottom: 1px solid #fecaca;
+}
+
+.error-item i {
+  color: #ef4444;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* ===========================
+   Success Message Display
+   =========================== */
+
+.success-alert {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+  border-left: 4px solid #22c55e;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #166534;
+  animation: slideIn 0.3s ease-out;
+}
+
+.success-alert i {
+  color: #22c55e;
+  font-size: 1.5rem;
+}
+
+/* ===========================
+   Warning Message Display
+   =========================== */
+
+.warning-alert {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fcd34d;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #92400e;
+}
+
+.warning-alert i {
+  color: #f59e0b;
+  font-size: 1.3rem;
+  margin-top: 2px;
+}
+
+/* ===========================
+   Info Message Display
+   =========================== */
+
+.info-alert {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #93c5fd;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #1e40af;
+}
+
+.info-alert i {
+  color: #3b82f6;
+  font-size: 1.3rem;
+}
+
+/* ===========================
+   Form Field Validation States
+   =========================== */
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field.error input,
+.form-field.error select,
+.form-field.error textarea {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-field.success input,
+.form-field.success select,
+.form-field.success textarea {
+  border-color: #22c55e;
+  background-color: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-error i {
+  font-size: 0.9rem;
+}
+
+.field-success {
+  color: #16a34a;
+  font-size: 0.85rem;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===========================
+   Loading Button State
+   =========================== */
+
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ===========================
+   Availability Status
+   =========================== */
+
+.availability-status {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.availability-status.available {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.availability-status.available i {
+  color: #22c55e;
+}
+
+.availability-status.unavailable {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.availability-status.unavailable i {
+  color: #ef4444;
+}
+
+.availability-status.checking {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #93c5fd;
+  color: #1e40af;
+}
+
+.availability-status.checking i {
+  animation: spin 1s linear infinite;
+}
+
+/* ===========================
+   Pricing Display
+   =========================== */
+
+.pricing-summary {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.pricing-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.pricing-row:last-child {
+  border-bottom: none;
+}
+
+.pricing-row.total {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #11224e;
+  padding-top: 16px;
+  margin-top: 8px;
+  border-top: 2px solid #11224e;
+}
+
+.pricing-label {
+  color: #64748b;
+}
+
+.pricing-value {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.pricing-value.highlight {
+  color: #22c55e;
+}
+
+.pricing-value.warning {
+  color: #f59e0b;
+}
+
+/* ===========================
+   Status Badges
+   =========================== */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.pending-payment {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.pending-confirmation {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.status-badge.confirmed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.checked-in {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.expired {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-badge.no-show {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* ===========================
+   Expiry Timer
+   =========================== */
+
+.expiry-timer {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #92400e;
+}
+
+.expiry-timer i {
+  color: #f59e0b;
+  font-size: 1.2rem;
+}
+
+.expiry-timer.urgent {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-color: #ef4444;
+  color: #991b1b;
+  animation: pulse 2s infinite;
+}
+
+.expiry-timer.urgent i {
+  color: #ef4444;
+}
+
+.expiry-countdown {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* ===========================
+   Animations
+   =========================== */
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===========================
+   Responsive Adjustments
+   =========================== */
+
+@media (max-width: 768px) {
+  .validation-errors {
+    padding: 12px;
+  }
+
+  .error-item {
+    font-size: 0.9rem;
+  }
+
+  .pricing-summary {
+    padding: 16px;
+  }
+
+  .pricing-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .pricing-row.total {
+    flex-direction: row;
+  }
+}
+
+/* ===========================
+   Dark Mode Support (Optional)
+   =========================== */
+
+@media (prefers-color-scheme: dark) {
+  .validation-errors {
+    background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+    border-color: #991b1b;
+  }
+
+  .error-item {
+    color: #fca5a5;
+  }
+
+  .success-alert {
+    background: linear-gradient(135deg, #052e16 0%, #166534 100%);
+    border-color: #22c55e;
+    color: #86efac;
+  }
+}

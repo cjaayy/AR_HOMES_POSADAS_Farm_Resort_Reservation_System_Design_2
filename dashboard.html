@@ -64,6 +64,7 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="dashboard-styles.css?v=20251203002" />
+    <link rel="stylesheet" href="checkout-styles.css?v=1.0" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -2281,13 +2282,7 @@
                 </button>
                 <div class="filter-buttons">
                   <button class="filter-btn active" data-filter="all">
-                    All
-                  </button>
-                  <button class="filter-btn" data-filter="pending">
-                    Pending
-                  </button>
-                  <button class="filter-btn" data-filter="confirmed">
-                    Confirmed
+                    All History
                   </button>
                   <button class="filter-btn" data-filter="completed">
                     Completed
@@ -2304,7 +2299,7 @@
                 <input
                   type="text"
                   id="bookingSearch"
-                  placeholder="Search bookings..."
+                  placeholder="Search history..."
                 />
               </div>
               <select id="sortBookings" class="sort-select">
@@ -3835,11 +3830,14 @@
     <!-- Flatpickr JavaScript - Must load BEFORE dashboard-script.js -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <!-- Checkout Validator - Client-side validation and security -->
+    <script src="checkout-validator.js?v=1.0"></script>
+
     <!-- Load Dashboard Script (for additional functionality) -->
-    <script src="dashboard-script.js?v=20251203008"></script>
+    <script src="dashboard-script.js?v=20260101003"></script>
 
     <!-- Load Booking Flow Script -->
-    <script src="booking-flow.js?v=2.2"></script>
+    <script src="booking-flow.js?v=2.5"></script>
 
     <!-- DEBUG: Test booking buttons -->
     <script>

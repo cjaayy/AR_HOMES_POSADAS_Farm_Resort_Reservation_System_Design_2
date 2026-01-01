@@ -887,12 +887,15 @@ window.addEventListener("error", function (e) {
   if (
     e.message &&
     (e.message.includes("payWithPayMongo") ||
+      e.message.includes("payFullBalanceWithPayMongo") ||
+      e.message.includes("proceedWithOnlinePayment") ||
       e.message.includes("openCancelModal") ||
       e.message.includes("openRebookingModal") ||
       e.message.includes("openPaymentUploadModal") ||
       e.message.includes("viewReservationDetails") ||
       e.message.includes("showReservationDetailsModal") ||
-      e.message.includes("closeReservationDetailsModal"))
+      e.message.includes("closeReservationDetailsModal") ||
+      e.message.includes("closePayRemainingBalanceModal"))
   ) {
     // Let the function handle its own errors
     return;
@@ -2643,40 +2646,40 @@ function getModalActionButtons(r) {
   if (
     ["confirmed", "checked_in", "checked_out", "completed"].includes(r.status)
   ) {
-    buttons += `<button class="modal-btn secondary" onclick="printReservationReceipt(${r.reservation_id});">
+    buttons += `<button class="modal-btn secondary" onclick="printReservationReceipt('${r.reservation_id}');">
       <i class="fas fa-print"></i> Print Receipt
     </button>`;
   }
 
   if (r.can_upload_downpayment) {
-    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); completePayment(${r.reservation_id}, 'downpayment');">
+    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); completePayment('${r.reservation_id}', 'downpayment');">
       <i class="fas fa-upload"></i> Upload Downpayment
     </button>`;
   }
 
   if (r.can_upload_full_payment) {
-    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); completePayment(${r.reservation_id}, 'full_payment');">
+    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); completePayment('${r.reservation_id}', 'full_payment');">
       <i class="fas fa-credit-card"></i> Pay Remaining Balance
     </button>`;
   }
 
   if (r.can_rebook) {
-    buttons += `<button class="modal-btn warning" onclick="closeReservationDetailsModal(); showRebookingModal(${r.reservation_id});">
+    buttons += `<button class="modal-btn warning" onclick="closeReservationDetailsModal(); showRebookingModal('${r.reservation_id}');">
       <i class="fas fa-calendar-alt"></i> Request Rebooking
     </button>`;
   }
 
   if (r.can_cancel) {
-    buttons += `<button class="modal-btn danger" onclick="closeReservationDetailsModal(); cancelReservation(${r.reservation_id});">
+    buttons += `<button class="modal-btn danger" onclick="closeReservationDetailsModal(); cancelReservation('${r.reservation_id}');">
       <i class="fas fa-times"></i> Cancel Reservation
     </button>`;
   }
 
   if (r.status === "completed" || r.status === "checked_out") {
-    buttons += `<button class="modal-btn success" onclick="closeReservationDetailsModal(); writeReviewForReservation(${r.reservation_id});">
+    buttons += `<button class="modal-btn success" onclick="closeReservationDetailsModal(); writeReviewForReservation('${r.reservation_id}');">
       <i class="fas fa-star"></i> Write Review
     </button>`;
-    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); bookAgainFromReservation(${r.reservation_id});">
+    buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); bookAgainFromReservation('${r.reservation_id}');">
       <i class="fas fa-redo"></i> Book Again
     </button>`;
   }
@@ -3350,15 +3353,16 @@ function initBookingHistoryFilters() {
 }
 
 function applyFiltersAndSort() {
-  let filtered = [...loadedReservations];
+  // First filter to only history statuses
+  let filtered = loadedReservations.filter((r) =>
+    HISTORY_STATUSES.includes(r.status)
+  );
 
-  // Apply status filter
+  // Apply status filter (for Booking History, only completed/cancelled options)
   if (currentFilter !== "all") {
     const statusMap = {
-      pending: ["pending_payment", "pending_confirmation"],
-      confirmed: ["confirmed", "checked_in"],
       completed: ["completed", "checked_out"],
-      cancelled: ["cancelled", "no_show", "forfeited"],
+      cancelled: ["cancelled", "no_show", "forfeited", "expired"],
     };
     const allowedStatuses = statusMap[currentFilter] || [];
     filtered = filtered.filter((r) => allowedStatuses.includes(r.status));
@@ -3399,7 +3403,17 @@ function applyFiltersAndSort() {
   displayReservations(filtered);
 }
 
-// Override displayReservations to also store data
+// History-only statuses (past reservations)
+const HISTORY_STATUSES = [
+  "completed",
+  "checked_out",
+  "cancelled",
+  "no_show",
+  "forfeited",
+  "expired",
+];
+
+// Override displayReservations to also store data - BOOKING HISTORY ONLY (past reservations)
 const originalDisplayReservations = displayReservations;
 function displayReservations(reservations) {
   // Store all loaded reservations if this is a full load
@@ -3413,24 +3427,92 @@ function displayReservations(reservations) {
   const container = document.querySelector(".bookings-history-grid");
   if (!container) return;
 
-  if (reservations.length === 0) {
+  // Filter to only show HISTORY statuses (completed, cancelled, etc.) - not active reservations
+  const historyReservations = reservations.filter((r) =>
+    HISTORY_STATUSES.includes(r.status)
+  );
+
+  if (historyReservations.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #94a3b8;">
-        <i class="fas fa-search" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
-        <p style="font-size: 18px; font-weight: 600;">No reservations found</p>
-        <p style="margin-top: 10px;">Try adjusting your filters or search term</p>
-        <button onclick="resetBookingFilters()" 
-                style="margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer;">
-          <i class="fas fa-undo"></i> Reset Filters
-        </button>
+        <i class="fas fa-history" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
+        <p style="font-size: 18px; font-weight: 600;">No booking history found</p>
+        <p style="margin-top: 10px;">Completed and cancelled reservations will appear here</p>
       </div>
     `;
     return;
   }
 
-  container.innerHTML = reservations
-    .map((r) => createEnhancedReservationCard(r))
+  container.innerHTML = historyReservations
+    .map((r) => createHistoryReservationCard(r))
     .join("");
+}
+
+// Create a history-specific card (no payment actions)
+function createHistoryReservationCard(r) {
+  const statusColors = {
+    completed: "completed",
+    checked_out: "completed",
+    cancelled: "cancelled",
+    no_show: "cancelled",
+    forfeited: "cancelled",
+    expired: "cancelled",
+  };
+  const statusClass = statusColors[r.status] || "pending";
+  const checkInDate = new Date(r.check_in_date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  return `
+    <div class="reservation-card ${statusClass}" data-reservation-id="${
+    r.reservation_id
+  }">
+      <div class="card-header">
+        <span class="reservation-id">#${r.reservation_id}</span>
+        <span class="status-badge ${statusClass}">${
+    r.status_label || r.status
+  }</span>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <i class="fas fa-calendar"></i>
+          <span>${checkInDate}</span>
+        </div>
+        <div class="info-row">
+          <i class="fas fa-clock"></i>
+          <span>${r.booking_type_label || r.booking_type || "N/A"}</span>
+        </div>
+        <div class="info-row">
+          <i class="fas fa-peso-sign"></i>
+          <span>₱${parseFloat(r.total_amount || 0).toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        ${getHistoryActionButtons(r)}
+      </div>
+    </div>
+  `;
+}
+
+// History-specific action buttons (no payment actions)
+function getHistoryActionButtons(r) {
+  let buttons = `<button class="btn-secondary" onclick="viewReservationDetails('${r.reservation_id}')">
+    <i class="fas fa-eye"></i> View Details
+  </button>`;
+
+  // Only show Review and Book Again for completed reservations
+  if (r.status === "completed" || r.status === "checked_out") {
+    buttons += `<button class="btn-success" onclick="writeReviewForReservation('${r.reservation_id}')">
+      <i class="fas fa-star"></i> Review
+    </button>`;
+    buttons += `<button class="btn-primary" onclick="bookAgainFromReservation('${r.reservation_id}')">
+      <i class="fas fa-redo"></i> Book Again
+    </button>`;
+  }
+
+  return buttons;
 }
 
 function createEnhancedReservationCard(r) {
@@ -3490,39 +3572,39 @@ function createEnhancedReservationCard(r) {
 }
 
 function getEnhancedActionButtons(r) {
-  let buttons = `<button class="btn-secondary" onclick="viewReservationDetails(${r.reservation_id})">
+  let buttons = `<button class="btn-secondary" onclick="viewReservationDetails('${r.reservation_id}')">
     <i class="fas fa-eye"></i> View Details
   </button>`;
 
   if (r.can_upload_downpayment) {
-    buttons += `<button class="btn-primary" onclick="completePayment(${r.reservation_id}, 'downpayment')">
+    buttons += `<button class="btn-primary" onclick="completePayment('${r.reservation_id}', 'downpayment')">
       <i class="fas fa-upload"></i> Upload Payment
     </button>`;
   }
 
   if (r.can_upload_full_payment) {
-    buttons += `<button class="btn-primary" onclick="completePayment(${r.reservation_id}, 'full_payment')">
+    buttons += `<button class="btn-primary" onclick="completePayment('${r.reservation_id}', 'full_payment')">
       <i class="fas fa-credit-card"></i> Pay Balance
     </button>`;
   }
 
   if (r.can_rebook) {
-    buttons += `<button class="btn-warning" onclick="showRebookingModal(${r.reservation_id})">
+    buttons += `<button class="btn-warning" onclick="showRebookingModal('${r.reservation_id}')">
       <i class="fas fa-calendar-alt"></i> Rebook
     </button>`;
   }
 
   if (r.can_cancel) {
-    buttons += `<button class="btn-danger" onclick="cancelReservation(${r.reservation_id})">
+    buttons += `<button class="btn-danger" onclick="cancelReservation('${r.reservation_id}')">
       <i class="fas fa-times"></i> Cancel
     </button>`;
   }
 
   if (r.status === "completed" || r.status === "checked_out") {
-    buttons += `<button class="btn-success" onclick="writeReviewForReservation(${r.reservation_id})">
+    buttons += `<button class="btn-success" onclick="writeReviewForReservation('${r.reservation_id}')">
       <i class="fas fa-star"></i> Review
     </button>`;
-    buttons += `<button class="btn-primary" onclick="bookAgainFromReservation(${r.reservation_id})">
+    buttons += `<button class="btn-primary" onclick="bookAgainFromReservation('${r.reservation_id}')">
       <i class="fas fa-redo"></i> Book Again
     </button>`;
   }
