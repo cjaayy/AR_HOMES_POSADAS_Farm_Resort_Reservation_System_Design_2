@@ -7,7 +7,7 @@
  * reservations that haven't been paid within 24 hours.
  * 
  * Recommended cron schedule: Every 15 minutes
- * */15 * * * * php /path/to/expire_reservations.php
+ * Example: 0,15,30,45 * * * * php /path/to/expire_reservations.php
  */
 
 // Can be run from CLI or web
@@ -36,42 +36,43 @@ try {
         ]
     );
     
-    // Find expired reservations
-    // Reservations that are:
-    // - status = 'pending_payment'
-    // - downpayment_paid = 0 OR downpayment_paid IS NULL
-    // - created more than 24 hours ago OR locked_until has passed
-    $stmt = $pdo->prepare("
-        SELECT 
-            reservation_id,
-            user_id,
-            guest_name,
-            guest_email,
-            check_in_date,
-            booking_type,
-            total_amount,
-            created_at,
-            locked_until
-        FROM reservations
-        WHERE status = 'pending_payment'
-        AND (downpayment_paid = 0 OR downpayment_paid IS NULL)
-        AND (
-            created_at <= DATE_SUB(NOW(), INTERVAL 24 HOUR)
-            OR (locked_until IS NOT NULL AND locked_until <= NOW())
-        )
-        FOR UPDATE
-    ");
-    
-    $stmt->execute();
-    $expiredReservations = $stmt->fetchAll();
-    
     $expiredCount = 0;
     $expiredIds = [];
     
-    if (count($expiredReservations) > 0) {
-        $pdo->beginTransaction();
+    // Start transaction before SELECT FOR UPDATE
+    $pdo->beginTransaction();
+    
+    try {
+        // Find expired reservations
+        // Reservations that are:
+        // - status = 'pending_payment'
+        // - downpayment_paid = 0 OR downpayment_paid IS NULL
+        // - created more than 24 hours ago OR locked_until has passed
+        $stmt = $pdo->prepare("
+            SELECT 
+                reservation_id,
+                user_id,
+                guest_name,
+                guest_email,
+                check_in_date,
+                booking_type,
+                total_amount,
+                created_at,
+                locked_until
+            FROM reservations
+            WHERE status = 'pending_payment'
+            AND (downpayment_paid = 0 OR downpayment_paid IS NULL)
+            AND (
+                created_at <= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+                OR (locked_until IS NOT NULL AND locked_until <= NOW())
+            )
+            FOR UPDATE
+        ");
         
-        try {
+        $stmt->execute();
+        $expiredReservations = $stmt->fetchAll();
+        
+        if (count($expiredReservations) > 0) {
             foreach ($expiredReservations as $reservation) {
                 // Update status to expired
                 $updateStmt = $pdo->prepare("
@@ -108,13 +109,13 @@ try {
                     // Mailer::sendReservationExpiredEmail($reservation);
                 }
             }
-            
-            $pdo->commit();
-            
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            throw $e;
         }
+        
+        $pdo->commit();
+        
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        throw $e;
     }
     
     $result = [
