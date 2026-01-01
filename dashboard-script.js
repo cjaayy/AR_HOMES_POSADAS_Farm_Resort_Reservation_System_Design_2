@@ -4672,8 +4672,20 @@ document.addEventListener("DOMContentLoaded", function () {
       // Format package type with booking suffix (e.g., 'all-rooms-night' or 'all-rooms-day')
       const bookingType = window.reservationData.bookingType;
       const packageBase = window.reservationData.packageType;
-      const packageSuffix = bookingType === "daytime" ? "-day" : "-night";
-      const packageType = packageBase + packageSuffix;
+
+      // For venue packages, the booking type already contains the time slot (venue-daytime, venue-nighttime, venue-22hours)
+      // so we use the booking type as is and add the appropriate suffix for package_type
+      let packageType;
+      if (bookingType.startsWith("venue-")) {
+        // For venue packages, format: venue-daytime-day, venue-nighttime-night, venue-22hours-night
+        const packageSuffix =
+          bookingType === "venue-daytime" ? "-day" : "-night";
+        packageType = packageBase + packageSuffix;
+      } else {
+        // For regular packages
+        const packageSuffix = bookingType === "daytime" ? "-day" : "-night";
+        packageType = packageBase + packageSuffix;
+      }
 
       // Prepare reservation data
       const reservationPayload = {
@@ -4681,8 +4693,14 @@ document.addEventListener("DOMContentLoaded", function () {
         package_type: packageType,
         check_in_date: checkInDate,
         check_out_date: checkOutDate,
-        number_of_days: bookingType === "daytime" ? duration : null,
-        number_of_nights: bookingType !== "daytime" ? duration : null,
+        number_of_days:
+          bookingType === "daytime" || bookingType === "venue-daytime"
+            ? duration
+            : null,
+        number_of_nights:
+          bookingType !== "daytime" && bookingType !== "venue-daytime"
+            ? duration
+            : null,
         group_size: groupSize,
         group_type: groupType,
         special_requests: specialRequests,

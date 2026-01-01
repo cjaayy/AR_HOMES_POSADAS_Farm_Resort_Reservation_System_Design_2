@@ -85,7 +85,7 @@ function renderBookings(bookings) {
               </div>
               <div style="font-weight: 600; color: #334155; margin-bottom: 4px; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
                 booking.package_name || "Package"
-              } - ${booking.booking_type.toUpperCase()}</div>
+              } - ${getBookingTypeLabel(booking.booking_type)}</div>
               <div style="color: #64748b; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 <i class="fas fa-user" style="font-size: 0.9em;"></i> ${
                   booking.guest_name
@@ -329,7 +329,7 @@ function createBookingModalHTML(booking) {
               booking.booking_type
             }" style="margin-left: 10px; font-size: 0.9em;">
               <i class="fas ${getBookingTypeIcon(booking.booking_type)}"></i>
-              ${booking.booking_type.toUpperCase()}
+              ${getBookingTypeLabel(booking.booking_type)}
             </span>
           </div>
           
@@ -1243,8 +1243,26 @@ function getBookingTypeIcon(bookingType) {
     daytime: "fa-sun",
     nighttime: "fa-moon",
     "22hours": "fa-clock",
+    "venue-daytime": "fa-sun",
+    "venue-nighttime": "fa-moon",
+    "venue-22hours": "fa-clock",
   };
   return iconMap[bookingType] || "fa-calendar";
+}
+
+/**
+ * Get formatted booking type label
+ */
+function getBookingTypeLabel(bookingType) {
+  const labelMap = {
+    daytime: "DAYTIME",
+    nighttime: "NIGHTTIME",
+    "22hours": "22 HOURS",
+    "venue-daytime": "VENUE - DAYTIME",
+    "venue-nighttime": "VENUE - NIGHTTIME",
+    "venue-22hours": "VENUE - 22 HOURS",
+  };
+  return labelMap[bookingType] || bookingType.toUpperCase();
 }
 
 /**

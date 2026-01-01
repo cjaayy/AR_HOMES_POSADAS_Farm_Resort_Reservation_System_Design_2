@@ -137,6 +137,29 @@ try {
             'base_price' => 2000.00,
             'security_bond' => 2000.00,
             'overtime_charge' => 500.00
+        ],
+        // Venue for All Occasions packages
+        'venue-daytime' => [
+            'check_in_time' => '09:00:00',
+            'check_out_time' => '17:00:00',
+            'base_price' => 6000.00,
+            'security_bond' => 2000.00,
+            'overtime_charge' => 500.00
+        ],
+        'venue-nighttime' => [
+            'check_in_time' => '19:00:00',
+            'check_out_time' => '07:00:00',
+            'base_price' => 10000.00,
+            'security_bond' => 2000.00,
+            'overtime_charge' => 1000.00,
+            'early_checkin_charge' => 500.00
+        ],
+        'venue-22hours' => [
+            'check_in_time' => '14:00:00',
+            'check_out_time' => '12:00:00',
+            'base_price' => 18000.00,
+            'security_bond' => 2000.00,
+            'overtime_charge' => 500.00
         ]
     ];
     
@@ -153,10 +176,11 @@ try {
     $number_of_nights = null;
     $check_out_date = null;
     
-    if ($booking_type === 'daytime') {
+    if ($booking_type === 'daytime' || $booking_type === 'venue-daytime') {
         $number_of_days = isset($data['number_of_days']) ? (int)$data['number_of_days'] : 1;
         $check_out_date = date('Y-m-d', strtotime($check_in_date . ' + ' . ($number_of_days - 1) . ' days'));
-    } elseif ($booking_type === 'nighttime' || $booking_type === '22hours') {
+    } elseif ($booking_type === 'nighttime' || $booking_type === '22hours' || 
+              $booking_type === 'venue-nighttime' || $booking_type === 'venue-22hours') {
         $number_of_nights = isset($data['number_of_nights']) ? (int)$data['number_of_nights'] : 1;
         $check_out_date = date('Y-m-d', strtotime($check_in_date . ' + ' . $number_of_nights . ' days'));
     }
@@ -220,7 +244,7 @@ try {
     $base_price = $package_prices[$package_type];
     
     // Calculate total based on duration
-    $duration = ($booking_type === 'daytime') ? $number_of_days : $number_of_nights;
+    $duration = ($booking_type === 'daytime' || $booking_type === 'venue-daytime') ? $number_of_days : $number_of_nights;
     $total_amount = $base_price * $duration;
     
     // Fixed downpayment amount

@@ -121,6 +121,30 @@ try {
     
     // Format data for frontend
     foreach ($reservations as &$reservation) {
+        // Map package type to display name
+        $package_names = [
+            'daytime-day' => 'Daytime Package',
+            'daytime-night' => 'Daytime Package',
+            'nighttime-day' => 'Nighttime Package',
+            'nighttime-night' => 'Nighttime Package',
+            '22hours-day' => '22 Hours Package',
+            '22hours-night' => '22 Hours Package',
+            'venue-daytime-day' => 'Venue for All Occasions - Daytime',
+            'venue-daytime-night' => 'Venue for All Occasions - Daytime',
+            'venue-nighttime-day' => 'Venue for All Occasions - Nighttime',
+            'venue-nighttime-night' => 'Venue for All Occasions - Nighttime',
+            'venue-22hours-day' => 'Venue for All Occasions - 22 Hours',
+            'venue-22hours-night' => 'Venue for All Occasions - 22 Hours',
+            // Legacy support
+            'all-rooms-day' => 'All Rooms Package',
+            'all-rooms-night' => 'All Rooms Package',
+            'aircon-rooms-day' => 'Aircon Rooms Package',
+            'aircon-rooms-night' => 'Aircon Rooms Package',
+            'basic-rooms-day' => 'Basic Rooms Package',
+            'basic-rooms-night' => 'Basic Rooms Package'
+        ];
+        $reservation['package_name'] = $package_names[$reservation['package_type']] ?? ucwords(str_replace(['-', '_'], ' ', $reservation['package_type'] ?? 'Package'));
+        
         // Calculate days until check-in
         $check_in = new DateTime($reservation['check_in_date']);
         $check_in->setTime(0, 0, 0);

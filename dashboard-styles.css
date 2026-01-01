@@ -5555,6 +5555,22 @@ gallery-slide.active {
   color: #721c24;
 }
 
+/* Venue booking type badges */
+.booking-type-badge.venue-daytime {
+  background: linear-gradient(135deg, #fff3cd, #ffe066);
+  color: #856404;
+}
+
+.booking-type-badge.venue-nighttime {
+  background: linear-gradient(135deg, #d1ecf1, #a6d5e8);
+  color: #0c5460;
+}
+
+.booking-type-badge.venue-22hours {
+  background: linear-gradient(135deg, #f8d7da, #f5c2c7);
+  color: #721c24;
+}
+
 .booking-details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
