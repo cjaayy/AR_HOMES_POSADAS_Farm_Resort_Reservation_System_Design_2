@@ -2943,8 +2943,8 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               datasets: [{
                 label: 'Reservations',
                 data: [0, 0, 0, 0, 0, 0, 0],
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderColor: '#11224e',
+                backgroundColor: 'rgba(17, 34, 78, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -2972,7 +2972,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               datasets: [{
                 label: 'Revenue',
                 data: [0, 0, 0, 0, 0, 0, 0],
-                backgroundColor: ['rgba(102, 126, 234, 0.8)', 'rgba(102, 126, 234, 0.8)', 'rgba(102, 126, 234, 0.8)', 'rgba(102, 126, 234, 0.8)', 'rgba(102, 126, 234, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(16, 185, 129, 0.8)'],
+                backgroundColor: 'rgba(17, 34, 78, 0.8)',
                 borderRadius: 8
               }]
             },

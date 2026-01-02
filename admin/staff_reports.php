@@ -346,8 +346,8 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
           datasets: [{
             label: 'Reservations',
             data: [12, 19, 15, 25, 22, 30, 28],
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            borderColor: '#11224e',
+            backgroundColor: 'rgba(17, 34, 78, 0.1)',
             borderWidth: 3,
             fill: true,
             tension: 0.4
@@ -386,15 +386,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
           datasets: [{
             label: 'Revenue',
             data: [4200, 5800, 4500, 7200, 6800, 9500, 8600],
-            backgroundColor: [
-              'rgba(102, 126, 234, 0.8)',
-              'rgba(102, 126, 234, 0.8)',
-              'rgba(102, 126, 234, 0.8)',
-              'rgba(102, 126, 234, 0.8)',
-              'rgba(102, 126, 234, 0.8)',
-              'rgba(16, 185, 129, 0.8)',
-              'rgba(16, 185, 129, 0.8)'
-            ],
+            backgroundColor: 'rgba(17, 34, 78, 0.8)',
             borderRadius: 8
           }]
         },
