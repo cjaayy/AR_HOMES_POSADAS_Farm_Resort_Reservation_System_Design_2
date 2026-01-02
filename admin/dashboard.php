@@ -3153,12 +3153,20 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           }
 
           // Update performance metrics
-          if (data.performance) {
-            const perf = data.performance;
-            document.getElementById('adminCheckInTime').textContent = perf.check_in_time || '—';
-            document.getElementById('adminResponseTime').textContent = perf.response_time || '—';
-            document.getElementById('adminCheckInBar').style.width = (perf.check_in_efficiency || 0) + '%';
-            document.getElementById('adminResponseBar').style.width = (perf.response_efficiency || 0) + '%';
+          if (data.performance_metrics) {
+            const perf = data.performance_metrics;
+            const avgCheckin = perf.avg_checkin_time || 0;
+            const avgResponse = perf.avg_response_time || 0;
+            
+            document.getElementById('adminCheckInTime').textContent = avgCheckin > 0 ? avgCheckin + ' min' : '—';
+            document.getElementById('adminResponseTime').textContent = avgResponse > 0 ? avgResponse + ' min' : '—';
+            
+            // Calculate efficiency (lower is better, so invert for progress bar)
+            const checkinEfficiency = avgCheckin > 0 ? Math.max(0, 100 - (avgCheckin / 60 * 100)) : 0;
+            const responseEfficiency = avgResponse > 0 ? Math.max(0, 100 - (avgResponse / 120 * 100)) : 0;
+            
+            document.getElementById('adminCheckInBar').style.width = checkinEfficiency + '%';
+            document.getElementById('adminResponseBar').style.width = responseEfficiency + '%';
           }
           
           showAdminToast('Reports updated successfully!', 'success');

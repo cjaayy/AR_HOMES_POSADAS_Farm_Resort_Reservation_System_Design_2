@@ -149,16 +149,16 @@ try {
     
     $occupancyRate = $totalDays > 0 ? round(($bookedDays / $totalDays) * 100) : 0;
     
-    // Get daily trend data (only verified paid bookings)
+    // Get daily trend data (only verified paid bookings) - by created_at (booking date)
     $trendSql = "SELECT 
-                    DATE(check_in_date) as date,
+                    DATE(created_at) as date,
                     COUNT(*) as count,
                     SUM($priceColumn) as revenue
                  FROM reservations
-                 WHERE DATE(check_in_date) BETWEEN :start AND :end
+                 WHERE DATE(created_at) BETWEEN :start AND :end
                  AND status IN ('confirmed', 'checked_in', 'completed')
                  AND full_payment_verified = 1
-                 GROUP BY DATE(check_in_date)
+                 GROUP BY DATE(created_at)
                  ORDER BY date ASC";
     
     $trendStmt = $conn->prepare($trendSql);
@@ -262,7 +262,7 @@ try {
                       WHERE checked_in = 1 
                         AND checked_in_at IS NOT NULL
                         AND downpayment_verified_at IS NOT NULL
-                        AND DATE(check_in_date) BETWEEN :start AND :end";
+                        AND DATE(created_at) BETWEEN :start AND :end";
         $checkinStmt = $conn->prepare($checkinSql);
         $checkinStmt->execute([':start' => $start, ':end' => $end]);
         $checkinData = $checkinStmt->fetch(PDO::FETCH_ASSOC);
