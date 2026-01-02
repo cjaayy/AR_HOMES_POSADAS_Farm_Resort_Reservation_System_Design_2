@@ -1079,23 +1079,52 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                       <div>
                         <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Total Amount</div>
                         <div style="font-size:18px; font-weight:700; color:#1e293b;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                        <div style="font-size:11px; font-weight:600; color:${(() => {
+                          const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
+                          const isCompleted = r.status === 'completed';
+                          const isConfirmedAndPaid = r.status === 'confirmed' && r.downpayment_paid;
+                          return actualRemaining <= 0 || isCompleted || isConfirmedAndPaid ? '#10b981' : (r.full_payment_paid ? '#10b981' : '#ef4444');
+                        })()}; margin-top:4px;">
+                          ${(() => {
+                            const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
+                            const isCompleted = r.status === 'completed';
+                            const isConfirmedAndPaid = r.status === 'confirmed' && r.downpayment_paid;
+                            return actualRemaining <= 0 || isCompleted || isConfirmedAndPaid ? '✓ Fully Paid' : (r.full_payment_paid ? '✓ Paid' : '✗ Unpaid');
+                          })()}
+                        </div>
                       </div>
                       <div>
                         <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Downpayment</div>
                         <div style="font-size:18px; font-weight:700; color:#f59e0b;">₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
-                        <div style="font-size:11px; font-weight:600; color:${r.downpayment_paid ? '#10b981' : '#ef4444'}; margin-top:4px;">
-                          ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
+                        <div style="font-size:11px; font-weight:600; color:${r.downpayment_paid || r.status === 'completed' || r.status === 'confirmed' ? '#10b981' : '#ef4444'}; margin-top:4px;">
+                          ${r.downpayment_paid || r.status === 'completed' || r.status === 'confirmed' ? '✓ Paid' : '✗ Unpaid'}
                         </div>
                       </div>
                       <div>
                         <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Remaining Balance</div>
-                        <div style="font-size:16px; font-weight:700; color:#667eea;">₱${parseFloat(r.remaining_balance||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+                        <div style="font-size:16px; font-weight:700; color:#667eea;">₱${(() => {
+                          const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
+                          return actualRemaining.toLocaleString('en-US', {minimumFractionDigits:2});
+                        })()}</div>
+                        <div style="font-size:11px; font-weight:600; color:${(() => {
+                          const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
+                          const isCompleted = r.status === 'completed';
+                          const isConfirmedAndPaid = r.status === 'confirmed' && r.downpayment_paid;
+                          return actualRemaining <= 0 || isCompleted || isConfirmedAndPaid ? '#10b981' : (r.remaining_balance_paid ? '#10b981' : '#ef4444');
+                        })()}; margin-top:4px;">
+                          ${(() => {
+                            const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
+                            const isCompleted = r.status === 'completed';
+                            const isConfirmedAndPaid = r.status === 'confirmed' && r.downpayment_paid;
+                            return actualRemaining <= 0 || isCompleted || isConfirmedAndPaid ? '✓ Fully Paid' : (r.remaining_balance_paid ? '✓ Paid' : '✗ Unpaid');
+                          })()}
+                        </div>
                       </div>
                       <div>
-                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Security Bond</div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Security Bond (Refundable)</div>
                         <div style="font-size:16px; font-weight:700; color:#8b5cf6;">₱${parseFloat(r.security_bond||2000).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
-                        <div style="font-size:11px; font-weight:600; color:${r.security_bond_paid ? '#10b981' : '#ef4444'}; margin-top:4px;">
-                          ${r.security_bond_paid ? '✓ Paid' : '✗ Unpaid'}
+                        <div style="font-size:10px; font-weight:600; color:${r.security_bond_paid ? '#10b981' : '#f59e0b'}; margin-top:4px; line-height:1.4;">
+                          ${r.security_bond_paid ? '✓ Paid - Refundable after checkout' : '⏱ Pay at Check-in (Refundable)'}
                         </div>
                       </div>
                     </div>
