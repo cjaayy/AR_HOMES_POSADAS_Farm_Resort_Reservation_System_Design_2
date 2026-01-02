@@ -1536,58 +1536,75 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         </section>
 
         <!-- Reports Section -->
-        <section id="reports" class="content-section" style="background:#ffffff; border-radius:12px; padding:24px;">
-          <div class="section-header" style="margin-bottom:24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <h2 style="font-size:28px; font-weight:700; color:#1e293b; margin-bottom:8px;">Reports & Analytics</h2>
-                <p style="color:#64748b;">View detailed reports and insights</p>
-              </div>
-              <div style="display:flex; gap:12px;">
-                <button onclick="exportReportsPDF()" class="btn-secondary" style="display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#ef4444,#dc2626); border:none; color:white;">
-                  <i class="fas fa-file-pdf"></i> Export PDF
-                </button>
-                <button onclick="exportReportsExcel()" class="btn-primary" style="display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#10b981,#059669); border:none; color:white;">
-                  <i class="fas fa-file-excel"></i> Export Excel
-                </button>
-              </div>
+        <section id="reports" class="content-section">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Reports & Analytics</h2>
+            <p style="color:#666; margin:0; font-size:16px;">View detailed reports and insights</p>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:16px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button onclick="loadAdminReportData('week')" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+              <span style="color:#64748b; font-size:14px;" id="reportsLastUpdate">Last updated: Just now</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button onclick="exportReportsPDF()" style="padding:12px 20px; background:linear-gradient(135deg, #ef4444, #dc2626); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-file-pdf"></i> Export PDF
+              </button>
+              <button onclick="exportReportsExcel()" style="padding:12px 20px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-file-excel"></i> Export Excel
+              </button>
             </div>
           </div>
 
           <!-- Period Selector -->
-          <div class="report-card">
-            <div style="display:flex; gap:12px; align-items:center;">
-              <label style="font-weight:600; color:#1e293b;">Report Period:</label>
-              <select id="adminPeriodSelector" onchange="updateAdminReports()" style="padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px;">
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+              <label style="font-weight:600; color:#1e293b; display:flex; align-items:center; gap:8px;"><i class="fas fa-calendar-alt" style="color:#11224e;"></i> Report Period:</label>
+              <select id="adminPeriodSelector" onchange="updateAdminReports()" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; cursor:pointer; transition:all 0.3s;">
                 <option value="today">Today</option>
                 <option value="week" selected>This Week</option>
                 <option value="month">This Month</option>
                 <option value="year">This Year</option>
                 <option value="custom">Custom Range</option>
               </select>
-              <input type="date" id="adminStartDate" style="padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px; display:none;">
-              <input type="date" id="adminEndDate" style="padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px; display:none;">
-              <button onclick="applyAdminCustomDate()" id="adminApplyDateBtn" class="btn-primary" style="display:none;">Apply</button>
+              <input type="date" id="adminStartDate" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; display:none;">
+              <input type="date" id="adminEndDate" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; display:none;">
+              <button onclick="applyAdminCustomDate()" id="adminApplyDateBtn" style="padding:12px 20px; background:linear-gradient(135deg, #11224e, #1e3a8a); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:none;">Apply</button>
             </div>
           </div>
 
           <!-- Key Metrics -->
-          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; margin-top:24px;">
-            <div class="stat-box" style="background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; padding:24px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(102,126,234,0.3);">
-              <div style="font-size:14px; opacity:0.9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Total Reservations</div>
-              <div style="font-size:36px; font-weight:700; line-height:1;" id="adminTotalReservations">—</div>
+          <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-calendar-check"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminTotalReservations">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Reservations</div>
+              </div>
             </div>
-            <div class="stat-box" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; padding:24px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
-              <div style="font-size:14px; opacity:0.9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Revenue</div>
-              <div style="font-size:36px; font-weight:700; line-height:1;" id="adminTotalRevenue">—</div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-money-bill-wave"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminTotalRevenue">₱0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Revenue</div>
+              </div>
             </div>
-            <div class="stat-box" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; padding:24px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(245,158,11,0.3);">
-              <div style="font-size:14px; opacity:0.9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Occupancy Rate</div>
-              <div style="font-size:36px; font-weight:700; line-height:1;" id="adminOccupancyRate">—</div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-percentage"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminOccupancyRate">0%</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Occupancy Rate</div>
+              </div>
             </div>
-            <div class="stat-box" style="background:linear-gradient(135deg, #ef4444, #dc2626); color:#fff; padding:24px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(239,68,68,0.3);">
-              <div style="font-size:14px; opacity:0.9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Cancellations</div>
-              <div style="font-size:36px; font-weight:700; line-height:1;" id="adminTotalCancellations">—</div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-ban"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminTotalCancellations">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Cancellations</div>
+              </div>
             </div>
           </div>
 
