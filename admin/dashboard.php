@@ -586,11 +586,11 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             <div style="display:flex; gap:12px; padding-top:16px; border-top:2px solid #f1f5f9;">
               <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
                 <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#11224e;"></i> From Date</label>
-                <input type="date" id="adminFilterFrom" onchange="adminApplyFilters()" style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
+                <input type="date" id="adminFilterFrom" onchange="adminApplyFilters()" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
               </div>
               <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
                 <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#11224e;"></i> To Date</label>
-                <input type="date" id="adminFilterTo" onchange="adminApplyFilters()" style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
+                <input type="date" id="adminFilterTo" onchange="adminApplyFilters()" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
               </div>
             </div>
           </div>
