@@ -352,8 +352,10 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             </p>
           </div>
 
-          <!-- Dashboard Statistics Cards -->
-          <div class="dashboard-stats-grid">
+          <!-- Dashboard Container - Same width as User Dashboard -->
+          <div style="max-width: 800px; margin: 0 auto;">
+            <!-- Dashboard Statistics Cards -->
+            <div class="dashboard-stats-grid">
             <!-- Total Users Card -->
             <div class="stat-card primary">
               <div class="stat-icon">
@@ -475,7 +477,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           </div>
 
           <!-- Recent Activities Section -->
-          <div class="recent-activities-section">
+          <div class="recent-activities-section" style="max-width: 800px; margin: 0 auto;">
             <div class="section-header-inline">
               <h3><i class="fas fa-history"></i> Recent Activities</h3>
               <button class="refresh-btn" onclick="loadDashboardStats()" title="Refresh data">

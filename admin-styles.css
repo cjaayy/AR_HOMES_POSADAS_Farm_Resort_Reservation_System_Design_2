@@ -2073,8 +2073,8 @@ body::before {
 /* ===== DASHBOARD STATISTICS STYLES - User Dashboard Design ===== */
 .dashboard-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 
@@ -2137,34 +2137,39 @@ body::before {
   font-size: 1.25rem;
   color: white;
   background: #11224e;
+  flex-shrink: 0;
 }
 
 .dashboard-stats-grid .stat-content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .dashboard-stats-grid .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
   color: #333;
-  margin-bottom: 0.2rem;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
 }
 
 .dashboard-stats-grid .stat-label {
   font-size: 0.85rem;
   color: #666;
   font-weight: 500;
+  margin: 0.1rem 0 0 0;
+  padding: 0;
+  line-height: 1.2;
 }
 
 .dashboard-stats-grid .stat-change {
-  font-size: 0.8rem;
-  color: #999;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 2px;
+  display: none !important;
+  margin: 0;
+  padding: 0;
 }
 .dashboard-stats-grid .stat-change.positive {
   color: #047857;
