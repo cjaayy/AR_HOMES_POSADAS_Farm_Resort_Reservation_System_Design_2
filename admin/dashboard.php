@@ -239,6 +239,10 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PDF and Excel Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
       #adminFilterFrom:focus,
       #adminFilterTo:focus {
@@ -2931,6 +2935,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
       // ===== REPORTS SECTION FUNCTIONS =====
       let adminTrendChart, adminRevenueChart, adminRoomTypeChart;
+      let currentReportData = null; // Store current report data for export
 
       function initAdminReportsCharts() {
         // Trend Chart
@@ -3068,6 +3073,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             return;
           }
           
+          // Store the data globally for export
+          currentReportData = data;
+          
           // Update metrics
           const m = data.metrics;
           document.getElementById('reportTotalReservations').textContent = m.total_reservations || 0;
@@ -3177,17 +3185,360 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       }
 
       function exportReportsPDF() {
+        if (!currentReportData) {
+          showAdminToast('Please wait for report data to load first', 'warning');
+          return;
+        }
+        
         showAdminToast('Generating PDF report...', 'info');
-        setTimeout(() => {
-          showAdminToast('PDF report generated successfully!', 'success');
-        }, 1500);
+        
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          const data = currentReportData;
+          
+          // Header
+          doc.setFontSize(20);
+          doc.setTextColor(17, 34, 78);
+          doc.text('AR Homes Posadas Farm Resort', 105, 20, { align: 'center' });
+          doc.setFontSize(14);
+          doc.text('Reservation Reports', 105, 30, { align: 'center' });
+          
+          // Period info
+          const period = document.getElementById('adminPeriodSelector').value;
+          doc.setFontSize(10);
+          doc.setTextColor(100);
+          doc.text(`Report Period: ${period.charAt(0).toUpperCase() + period.slice(1)} (${data.start_date} to ${data.end_date})`, 105, 38, { align: 'center' });
+          doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 44, { align: 'center' });
+          
+          // Key Metrics
+          doc.setFontSize(14);
+          doc.setTextColor(17, 34, 78);
+          doc.text('Key Metrics', 14, 55);
+          
+          const m = data.metrics || {};
+          const metricsData = [
+            ['Total Reservations', String(m.total_reservations || 0)],
+            ['Total Revenue', 'P' + (m.total_revenue || 0).toLocaleString()],
+            ['Occupancy Rate', (m.occupancy_rate || 0) + '%'],
+            ['Cancellations', String(m.cancellations || 0)],
+            ['Confirmed Reservations', String(m.confirmed_reservations || 0)]
+          ];
+          
+          doc.autoTable({
+            startY: 60,
+            head: [['Metric', 'Value']],
+            body: metricsData,
+            theme: 'striped',
+            headStyles: { fillColor: [17, 34, 78] },
+            styles: { fontSize: 11 }
+          });
+          
+          // Reservations Trend
+          if (data.trend_data && data.trend_data.labels && data.trend_data.labels.length > 0) {
+            const trendY = doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(14);
+            doc.setTextColor(17, 34, 78);
+            doc.text('Reservations Trend', 14, trendY);
+            
+            const trendTableData = data.trend_data.labels.map((label, i) => [
+              label,
+              String(data.trend_data.values[i] || 0)
+            ]);
+            
+            doc.autoTable({
+              startY: trendY + 5,
+              head: [['Date', 'Reservations']],
+              body: trendTableData,
+              theme: 'striped',
+              headStyles: { fillColor: [17, 34, 78] },
+              styles: { fontSize: 10 }
+            });
+          }
+          
+          // Revenue Analysis
+          if (data.revenue_data && data.revenue_data.labels && data.revenue_data.labels.length > 0) {
+            const revenueY = doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(14);
+            doc.setTextColor(17, 34, 78);
+            doc.text('Revenue Analysis', 14, revenueY);
+            
+            const revenueTableData = data.revenue_data.labels.map((label, i) => [
+              label,
+              'P' + (data.revenue_data.values[i] || 0).toLocaleString()
+            ]);
+            
+            doc.autoTable({
+              startY: revenueY + 5,
+              head: [['Date', 'Revenue']],
+              body: revenueTableData,
+              theme: 'striped',
+              headStyles: { fillColor: [17, 34, 78] },
+              styles: { fontSize: 10 }
+            });
+          }
+          
+          // Package Distribution - New page if needed
+          if (data.room_type_data && data.room_type_data.length > 0) {
+            if (doc.lastAutoTable.finalY > 200) {
+              doc.addPage();
+            }
+            const packageY = doc.lastAutoTable.finalY > 200 ? 20 : doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(14);
+            doc.setTextColor(17, 34, 78);
+            doc.text('Package Distribution', 14, packageY);
+            
+            const packageTableData = data.room_type_data.map(r => [
+              r.room_type || 'N/A',
+              String(r.bookings || 0),
+              'P' + (r.revenue || 0).toLocaleString()
+            ]);
+            
+            doc.autoTable({
+              startY: packageY + 5,
+              head: [['Package Type', 'Bookings', 'Revenue']],
+              body: packageTableData,
+              theme: 'striped',
+              headStyles: { fillColor: [17, 34, 78] },
+              styles: { fontSize: 10 }
+            });
+          }
+          
+          // Guest Statistics
+          if (data.guest_stats) {
+            const gs = data.guest_stats;
+            if (doc.lastAutoTable.finalY > 220) {
+              doc.addPage();
+            }
+            const guestY = doc.lastAutoTable.finalY > 220 ? 20 : doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(14);
+            doc.setTextColor(17, 34, 78);
+            doc.text('Guest Statistics', 14, guestY);
+            
+            const guestTableData = [];
+            if (gs.unique_guests) {
+              const change = gs.unique_guests.previous > 0 
+                ? (((gs.unique_guests.current - gs.unique_guests.previous) / gs.unique_guests.previous) * 100).toFixed(1) + '%'
+                : (gs.unique_guests.current > 0 ? 'New' : '0%');
+              guestTableData.push(['Unique Guests', String(gs.unique_guests.current), String(gs.unique_guests.previous), change]);
+            }
+            if (gs.total_bookings) {
+              const change = gs.total_bookings.previous > 0 
+                ? (((gs.total_bookings.current - gs.total_bookings.previous) / gs.total_bookings.previous) * 100).toFixed(1) + '%'
+                : (gs.total_bookings.current > 0 ? 'New' : '0%');
+              guestTableData.push(['Total Bookings', String(gs.total_bookings.current), String(gs.total_bookings.previous), change]);
+            }
+            if (gs.avg_booking_value) {
+              const change = gs.avg_booking_value.previous > 0 
+                ? (((gs.avg_booking_value.current - gs.avg_booking_value.previous) / gs.avg_booking_value.previous) * 100).toFixed(1) + '%'
+                : (gs.avg_booking_value.current > 0 ? 'New' : '0%');
+              guestTableData.push(['Avg. Booking Value', 'P' + gs.avg_booking_value.current.toLocaleString(undefined, {minimumFractionDigits: 2}), 'P' + gs.avg_booking_value.previous.toLocaleString(undefined, {minimumFractionDigits: 2}), change]);
+            }
+            
+            if (guestTableData.length > 0) {
+              doc.autoTable({
+                startY: guestY + 5,
+                head: [['Metric', 'Current Period', 'Previous Period', 'Change']],
+                body: guestTableData,
+                theme: 'striped',
+                headStyles: { fillColor: [17, 34, 78] },
+                styles: { fontSize: 10 }
+              });
+            }
+          }
+          
+          // Performance Metrics
+          if (data.performance_metrics) {
+            const pm = data.performance_metrics;
+            if (doc.lastAutoTable.finalY > 240) {
+              doc.addPage();
+            }
+            const perfY = doc.lastAutoTable.finalY > 240 ? 20 : doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(14);
+            doc.setTextColor(17, 34, 78);
+            doc.text('Performance Metrics', 14, perfY);
+            
+            const perfTableData = [
+              ['Average Check-in Time', pm.avg_checkin_time > 0 ? pm.avg_checkin_time + ' minutes' : 'N/A'],
+              ['Average Response Time', pm.avg_response_time > 0 ? pm.avg_response_time + ' minutes' : 'N/A']
+            ];
+            
+            doc.autoTable({
+              startY: perfY + 5,
+              head: [['Metric', 'Value']],
+              body: perfTableData,
+              theme: 'striped',
+              headStyles: { fillColor: [17, 34, 78] },
+              styles: { fontSize: 10 }
+            });
+          }
+          
+          // Footer
+          const pageCount = doc.internal.getNumberOfPages();
+          for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text(`Page ${i} of ${pageCount} | AR Homes Posadas Farm Resort`, 105, 290, { align: 'center' });
+          }
+          
+          // Save the PDF
+          doc.save(`AR_Homes_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+          showAdminToast('PDF report downloaded successfully!', 'success');
+        } catch (err) {
+          console.error('PDF Export Error:', err);
+          showAdminToast('Failed to generate PDF: ' + err.message, 'error');
+        }
       }
 
       function exportReportsExcel() {
+        if (!currentReportData) {
+          showAdminToast('Please wait for report data to load first', 'warning');
+          return;
+        }
+        
         showAdminToast('Generating Excel report...', 'info');
-        setTimeout(() => {
-          showAdminToast('Excel report generated successfully!', 'success');
-        }, 1500);
+        
+        try {
+          const wb = XLSX.utils.book_new();
+          const data = currentReportData;
+          const period = document.getElementById('adminPeriodSelector').value;
+          const m = data.metrics || {};
+          
+          // Summary Sheet
+          const summaryData = [
+            ['AR Homes Posadas Farm Resort - Reservation Report'],
+            [''],
+            ['Report Period:', period.charAt(0).toUpperCase() + period.slice(1)],
+            ['Date Range:', `${data.start_date} to ${data.end_date}`],
+            ['Generated:', new Date().toLocaleString()],
+            [''],
+            ['KEY METRICS'],
+            ['Metric', 'Value'],
+            ['Total Reservations', m.total_reservations || 0],
+            ['Total Revenue', m.total_revenue || 0],
+            ['Occupancy Rate', (m.occupancy_rate || 0) + '%'],
+            ['Cancellations', m.cancellations || 0],
+            ['Confirmed Reservations', m.confirmed_reservations || 0]
+          ];
+          
+          const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+          summaryWs['!cols'] = [{ wch: 25 }, { wch: 25 }];
+          XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+          
+          // Trend Data Sheet
+          if (data.trend_data && data.trend_data.labels && data.trend_data.labels.length > 0) {
+            const trendData = [
+              ['RESERVATIONS TREND'],
+              ['Date', 'Reservations']
+            ];
+            data.trend_data.labels.forEach((label, i) => {
+              trendData.push([label, data.trend_data.values[i] || 0]);
+            });
+            // Add total
+            const totalReservations = data.trend_data.values.reduce((a, b) => a + b, 0);
+            trendData.push(['', '']);
+            trendData.push(['TOTAL', totalReservations]);
+            
+            const trendWs = XLSX.utils.aoa_to_sheet(trendData);
+            trendWs['!cols'] = [{ wch: 15 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, trendWs, 'Trend');
+          }
+          
+          // Revenue Data Sheet
+          if (data.revenue_data && data.revenue_data.labels && data.revenue_data.labels.length > 0) {
+            const revenueData = [
+              ['REVENUE ANALYSIS'],
+              ['Date', 'Revenue']
+            ];
+            data.revenue_data.labels.forEach((label, i) => {
+              revenueData.push([label, data.revenue_data.values[i] || 0]);
+            });
+            // Add total
+            const totalRevenue = data.revenue_data.values.reduce((a, b) => a + b, 0);
+            revenueData.push(['', '']);
+            revenueData.push(['TOTAL', totalRevenue]);
+            
+            const revenueWs = XLSX.utils.aoa_to_sheet(revenueData);
+            revenueWs['!cols'] = [{ wch: 15 }, { wch: 18 }];
+            XLSX.utils.book_append_sheet(wb, revenueWs, 'Revenue');
+          }
+          
+          // Package Distribution Sheet
+          if (data.room_type_data && data.room_type_data.length > 0) {
+            const packageData = [
+              ['PACKAGE DISTRIBUTION'],
+              ['Package Type', 'Bookings', 'Revenue']
+            ];
+            let totalBookings = 0;
+            let totalRevenue = 0;
+            data.room_type_data.forEach(r => {
+              packageData.push([r.room_type || 'N/A', r.bookings || 0, r.revenue || 0]);
+              totalBookings += r.bookings || 0;
+              totalRevenue += r.revenue || 0;
+            });
+            packageData.push(['', '', '']);
+            packageData.push(['TOTAL', totalBookings, totalRevenue]);
+            
+            const packageWs = XLSX.utils.aoa_to_sheet(packageData);
+            packageWs['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 18 }];
+            XLSX.utils.book_append_sheet(wb, packageWs, 'Packages');
+          }
+          
+          // Guest Statistics Sheet
+          if (data.guest_stats) {
+            const gs = data.guest_stats;
+            const guestData = [
+              ['GUEST STATISTICS'],
+              ['Metric', 'Current Period', 'Previous Period', 'Change %']
+            ];
+            
+            if (gs.unique_guests) {
+              const change = gs.unique_guests.previous > 0 
+                ? (((gs.unique_guests.current - gs.unique_guests.previous) / gs.unique_guests.previous) * 100).toFixed(1)
+                : (gs.unique_guests.current > 0 ? 'New' : '0');
+              guestData.push(['Unique Guests', gs.unique_guests.current, gs.unique_guests.previous, change]);
+            }
+            if (gs.total_bookings) {
+              const change = gs.total_bookings.previous > 0 
+                ? (((gs.total_bookings.current - gs.total_bookings.previous) / gs.total_bookings.previous) * 100).toFixed(1)
+                : (gs.total_bookings.current > 0 ? 'New' : '0');
+              guestData.push(['Total Bookings', gs.total_bookings.current, gs.total_bookings.previous, change]);
+            }
+            if (gs.avg_booking_value) {
+              const change = gs.avg_booking_value.previous > 0 
+                ? (((gs.avg_booking_value.current - gs.avg_booking_value.previous) / gs.avg_booking_value.previous) * 100).toFixed(1)
+                : (gs.avg_booking_value.current > 0 ? 'New' : '0');
+              guestData.push(['Avg. Booking Value', gs.avg_booking_value.current, gs.avg_booking_value.previous, change]);
+            }
+            
+            const guestWs = XLSX.utils.aoa_to_sheet(guestData);
+            guestWs['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 12 }];
+            XLSX.utils.book_append_sheet(wb, guestWs, 'Guest Stats');
+          }
+          
+          // Performance Metrics Sheet
+          if (data.performance_metrics) {
+            const pm = data.performance_metrics;
+            const perfData = [
+              ['PERFORMANCE METRICS'],
+              ['Metric', 'Value', 'Unit'],
+              ['Average Check-in Time', pm.avg_checkin_time || 0, 'minutes'],
+              ['Average Response Time', pm.avg_response_time || 0, 'minutes']
+            ];
+            
+            const perfWs = XLSX.utils.aoa_to_sheet(perfData);
+            perfWs['!cols'] = [{ wch: 25 }, { wch: 12 }, { wch: 10 }];
+            XLSX.utils.book_append_sheet(wb, perfWs, 'Performance');
+          }
+          
+          // Download the Excel file
+          XLSX.writeFile(wb, `AR_Homes_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+          showAdminToast('Excel report downloaded successfully!', 'success');
+        } catch (err) {
+          console.error('Excel Export Error:', err);
+          showAdminToast('Failed to generate Excel: ' + err.message, 'error');
+        }
       }
 
       async function fixReservationPrices() {
