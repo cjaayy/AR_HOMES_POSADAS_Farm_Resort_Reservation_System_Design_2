@@ -495,11 +495,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
         <!-- Reservations Section -->
         <section id="reservations" class="content-section">
-          <div class="section-header" style="background:linear-gradient(135deg,#10b981,#059669); padding:24px; border-radius:12px; margin-bottom:30px; box-shadow:0 4px 12px rgba(16,185,129,0.25);">
-            <div>
-              <h2 style="font-size:32px; font-weight:700; color:white; margin-bottom:8px;">Reservations Management</h2>
-              <p style="color:rgba(255,255,255,0.95); font-size:16px; margin:0;">View and manage all resort reservations efficiently</p>
-            </div>
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Reservations Management</h2>
+            <p style="color:#666; margin:0; font-size:16px;">View and manage all resort reservations efficiently</p>
           </div>
 
           <!-- Stats Overview -->
@@ -1210,11 +1208,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
         <!-- Users Section -->
         <section id="users" class="content-section">
-          <div class="section-header" style="background:linear-gradient(135deg,#3b82f6,#2563eb); padding:24px; border-radius:12px; margin-bottom:30px; box-shadow:0 4px 12px rgba(59,130,246,0.25);">
-            <div>
-              <h2 style="font-size:32px; font-weight:700; color:white; margin-bottom:8px;">User Management</h2>
-              <p style="color:rgba(255,255,255,0.95); font-size:16px; margin:0;">Manage guest accounts, loyalty levels, and permissions</p>
-            </div>
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">User Management</h2>
+            <p style="color:#666; margin:0; font-size:16px;">Manage guest accounts, loyalty levels, and permissions</p>
           </div>
 
           <!-- Enhanced Stats Cards -->
