@@ -234,6 +234,14 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      #adminFilterFrom:focus,
+      #adminFilterTo:focus {
+        outline: none;
+        border-color: #11224e !important;
+        box-shadow: 0 0 0 3px rgba(17, 34, 78, 0.1);
+      }
+    </style>
   </head>
   <body>
     <!-- PHP Session Debug Info (Hidden) -->
