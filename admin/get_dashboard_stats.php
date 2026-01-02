@@ -85,31 +85,115 @@ try {
     $stmt->execute();
     $loyaltyStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Get recent activities (last 10 users registered)
+    // Get recent activities from various sources
+    $recentActivities = [];
+
+    // 1. Get recent reservations
+    if ($tableCheck->rowCount() > 0) {
+        $recentReservationsQuery = "SELECT 
+                                        r.reservation_id,
+                                        r.guest_name,
+                                        r.status,
+                                        r.check_in_date,
+                                        r.check_out_date,
+                                        r.created_at,
+                                        r.updated_at
+                                     FROM reservations r
+                                     ORDER BY r.updated_at DESC 
+                                     LIMIT 5";
+        $stmt = $conn->prepare($recentReservationsQuery);
+        $stmt->execute();
+        $recentReservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($recentReservations as $reservation) {
+            $timeAgo = getTimeAgo(strtotime($reservation['updated_at']));
+            
+            // Determine activity based on status
+            switch ($reservation['status']) {
+                case 'confirmed':
+                    $icon = 'fa-check-circle';
+                    $title = 'Reservation Confirmed';
+                    $description = $reservation['guest_name'] . ' - Booking #' . $reservation['reservation_id'];
+                    break;
+                case 'pending':
+                    $icon = 'fa-clock';
+                    $title = 'New Reservation';
+                    $description = $reservation['guest_name'] . ' - Pending confirmation';
+                    break;
+                case 'checked_in':
+                    $icon = 'fa-door-open';
+                    $title = 'Guest Checked In';
+                    $description = $reservation['guest_name'] . ' - Booking #' . $reservation['reservation_id'];
+                    break;
+                case 'checked_out':
+                    $icon = 'fa-door-closed';
+                    $title = 'Guest Checked Out';
+                    $description = $reservation['guest_name'] . ' - Booking #' . $reservation['reservation_id'];
+                    break;
+                case 'completed':
+                    $icon = 'fa-flag-checkered';
+                    $title = 'Reservation Completed';
+                    $description = $reservation['guest_name'] . ' - Booking #' . $reservation['reservation_id'];
+                    break;
+                case 'canceled':
+                    $icon = 'fa-times-circle';
+                    $title = 'Reservation Canceled';
+                    $description = $reservation['guest_name'] . ' - Booking #' . $reservation['reservation_id'];
+                    break;
+                default:
+                    $icon = 'fa-calendar';
+                    $title = 'Reservation Updated';
+                    $description = $reservation['guest_name'] . ' - Booking #' . $reservation['reservation_id'];
+            }
+            
+            $recentActivities[] = [
+                'type' => 'reservation_' . $reservation['status'],
+                'icon' => $icon,
+                'title' => $title,
+                'description' => $description,
+                'time' => $timeAgo,
+                'date' => date('M d, Y', strtotime($reservation['updated_at'])),
+                'timestamp' => strtotime($reservation['updated_at'])
+            ];
+        }
+    }
+
+    // 2. Get recent user registrations
     $recentUsersQuery = "SELECT 
                             full_name,
                             email,
-                            created_at,
-                            loyalty_level
+                            created_at
                          FROM users 
                          ORDER BY created_at DESC 
-                         LIMIT 10";
+                         LIMIT 5";
     $stmt = $conn->prepare($recentUsersQuery);
     $stmt->execute();
     $recentUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Format recent users for display
-    $recentActivities = [];
     foreach ($recentUsers as $user) {
         $timeAgo = getTimeAgo(strtotime($user['created_at']));
         $recentActivities[] = [
             'type' => 'user_registration',
             'icon' => 'fa-user-plus',
             'title' => 'New User Registration',
-            'description' => $user['full_name'] . ' joined as ' . $user['loyalty_level'] . ' member',
+            'description' => $user['full_name'] . ' registered an account',
             'time' => $timeAgo,
-            'date' => date('M d, Y', strtotime($user['created_at']))
+            'date' => date('M d, Y', strtotime($user['created_at'])),
+            'timestamp' => strtotime($user['created_at'])
         ];
+    }
+
+    // Sort all activities by timestamp (most recent first)
+    usort($recentActivities, function($a, $b) {
+        return $b['timestamp'] - $a['timestamp'];
+    });
+
+    // Keep only the 10 most recent activities
+    $recentActivities = array_slice($recentActivities, 0, 10);
+
+    // Remove timestamp field as it was only used for sorting
+    foreach ($recentActivities as &$activity) {
+        unset($activity['timestamp']);
     }
 
     // Get users registered today
