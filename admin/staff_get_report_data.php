@@ -182,7 +182,7 @@ try {
         $revenueValues = [0, 0, 0, 0, 0, 0, 0];
     }
     
-    // Get package type distribution (not room-based)
+    // Get package type distribution (not room-based) - by created_at date
     $roomTypeData = [];
     try {
         if ($priceColumn) {
@@ -191,7 +191,7 @@ try {
                             COUNT(*) as bookings,
                             SUM($priceColumn) as revenue
                         FROM reservations
-                        WHERE DATE(check_in_date) BETWEEN :start AND :end
+                        WHERE DATE(created_at) BETWEEN :start AND :end
                         AND status IN ('confirmed', 'checked_in', 'completed')
                         AND full_payment_verified = 1
                         GROUP BY package_type

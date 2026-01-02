@@ -1654,10 +1654,10 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             </div>
           </div>
 
-          <!-- Room Type Distribution -->
+          <!-- Package Distribution -->
           <div class="report-card" style="margin-top:24px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-              <h3 style="font-size:20px; font-weight:700; color:#1e293b;">Room Type Distribution</h3>
+              <h3 style="font-size:20px; font-weight:700; color:#1e293b;">Package Distribution</h3>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
               <div style="position:relative; height:250px;">
@@ -1667,7 +1667,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <table class="report-table" style="width:100%; border-collapse:collapse;">
                   <thead>
                     <tr>
-                      <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Room Type</th>
+                      <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Package Type</th>
                       <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Bookings</th>
                       <th style="background:#f8fafc; padding:12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0;">Revenue</th>
                     </tr>

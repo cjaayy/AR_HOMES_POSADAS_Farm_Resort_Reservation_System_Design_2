@@ -2,6 +2,12 @@
 /**
  * Staff Reports & Analytics - View reports and statistics
  */
+
+// Prevent browser caching
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 session_start();
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
     header('Location: ../index.html');
@@ -238,10 +244,10 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
           </div>
         </div>
 
-        <!-- Room Type Distribution -->
+        <!-- Package Distribution -->
         <div class="report-card">
           <div class="report-header">
-            <h3 class="report-title">Room Type Distribution</h3>
+            <h3 class="report-title">Package Distribution</h3>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
             <div class="chart-container" style="height:250px;">
