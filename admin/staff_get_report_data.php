@@ -92,14 +92,14 @@ try {
         }
     }
     
-    // Get reservations metrics (only paid/verified reservations)
+    // Get reservations metrics (only FULLY PAID reservations - full_payment_verified = 1)
     $sql = "SELECT 
                 COUNT(*) as total_reservations,
                 SUM(CASE WHEN status = 'canceled' THEN 1 ELSE 0 END) as cancellations,
                 SUM(CASE WHEN status = 'confirmed' OR status = 'completed' THEN 1 ELSE 0 END) as confirmed_reservations
             FROM reservations
             WHERE DATE(created_at) BETWEEN :start AND :end
-            AND downpayment_verified = 1";
+            AND full_payment_verified = 1";
     
     $stmt = $conn->prepare($sql);
     $stmt->execute([':start' => $start, ':end' => $end]);
@@ -112,7 +112,7 @@ try {
             $revSql = "SELECT SUM($priceColumn) as revenue FROM reservations 
                        WHERE DATE(created_at) BETWEEN :start AND :end 
                        AND status NOT IN ('canceled', 'rejected')
-                       AND downpayment_verified = 1
+                       AND full_payment_verified = 1
                        AND $priceColumn IS NOT NULL AND $priceColumn > 0";
             $revStmt = $conn->prepare($revSql);
             $revStmt->execute([':start' => $start, ':end' => $end]);
@@ -135,7 +135,7 @@ try {
     $bookedDaysSql = "SELECT COUNT(DISTINCT check_in_date) as booked_days 
                       FROM reservations 
                       WHERE status IN ('confirmed', 'checked_in', 'completed')
-                        AND downpayment_verified = 1
+                        AND full_payment_verified = 1
                         AND check_in_date BETWEEN :start AND :end";
     $bookedStmt = $conn->prepare($bookedDaysSql);
     $bookedStmt->execute([':start' => $start, ':end' => $end]);
@@ -157,7 +157,7 @@ try {
                  FROM reservations
                  WHERE DATE(check_in_date) BETWEEN :start AND :end
                  AND status IN ('confirmed', 'checked_in', 'completed')
-                 AND downpayment_verified = 1
+                 AND full_payment_verified = 1
                  GROUP BY DATE(check_in_date)
                  ORDER BY date ASC";
     
@@ -193,7 +193,7 @@ try {
                         FROM reservations
                         WHERE DATE(check_in_date) BETWEEN :start AND :end
                         AND status IN ('confirmed', 'checked_in', 'completed')
-                        AND downpayment_verified = 1
+                        AND full_payment_verified = 1
                         GROUP BY package_type
                         ORDER BY bookings DESC";
             $roomStmt = $conn->prepare($roomSql);
@@ -210,7 +210,7 @@ try {
         $prevStart = date('Y-m-d', strtotime($start . ' -7 days'));
         $prevEnd = date('Y-m-d', strtotime($end . ' -7 days'));
         
-        // Current period stats (only verified paid bookings)
+        // Current period stats (only FULLY PAID bookings)
         $currentSql = "SELECT 
                         COUNT(DISTINCT user_id) as unique_guests,
                         COUNT(*) as total_bookings,
@@ -219,7 +219,7 @@ try {
                       FROM reservations
                       WHERE DATE(check_in_date) BETWEEN :start AND :end
                       AND status IN ('confirmed', 'checked_in', 'completed')
-                      AND downpayment_verified = 1";
+                      AND full_payment_verified = 1";
         $currentStmt = $conn->prepare($currentSql);
         $currentStmt->execute([':start' => $start, ':end' => $end]);
         $currentStats = $currentStmt->fetch(PDO::FETCH_ASSOC);
