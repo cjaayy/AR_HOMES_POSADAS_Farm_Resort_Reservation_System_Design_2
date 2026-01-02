@@ -879,7 +879,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
         return;
       }
       
-      showToast('Generating Excel report...', 'info');
+      showToast('Generating comprehensive Excel report...', 'info');
       
       try {
         const wb = XLSX.utils.book_new();
@@ -887,136 +887,220 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
         const period = document.getElementById('periodSelector').value;
         const m = data.metrics || {};
         
-        // Summary Sheet
+        // Calculate additional metrics for summary
+        const totalRes = m.total_reservations || 0;
+        const totalRev = m.total_revenue || 0;
+        const avgRevenuePerRes = totalRes > 0 ? (totalRev / totalRes).toFixed(2) : 0;
+        const numDays = data.trend_data && data.trend_data.labels ? data.trend_data.labels.length : 1;
+        const avgDailyRes = numDays > 0 ? (totalRes / numDays).toFixed(2) : 0;
+        const avgDailyRev = numDays > 0 ? (totalRev / numDays).toFixed(2) : 0;
+        
+        // Comprehensive Summary Sheet
         const summaryData = [
-          ['AR Homes Posadas Farm Resort - Staff Report'],
+          ['AR Homes Posadas Farm Resort - Comprehensive Staff Report'],
           [''],
+          ['REPORT INFORMATION'],
           ['Report Period:', period.charAt(0).toUpperCase() + period.slice(1)],
           ['Date Range:', `${data.start_date} to ${data.end_date}`],
+          ['Number of Days:', numDays],
           ['Generated:', new Date().toLocaleString()],
           [''],
           ['KEY METRICS'],
-          ['Metric', 'Value'],
-          ['Total Reservations', m.total_reservations || 0],
-          ['Total Revenue', m.total_revenue || 0],
-          ['Occupancy Rate', (m.occupancy_rate || 0) + '%'],
-          ['Cancellations', m.cancellations || 0],
-          ['Confirmed Reservations', m.confirmed_reservations || 0]
+          ['Metric', 'Value', 'Description'],
+          ['Total Reservations', totalRes, 'All confirmed reservations in period'],
+          ['Total Revenue', totalRev, 'Total revenue from fully paid reservations'],
+          ['Occupancy Rate', (m.occupancy_rate || 0) + '%', 'Percentage of capacity utilized'],
+          ['Cancellations', m.cancellations || 0, 'Number of cancelled reservations'],
+          ['Confirmed Reservations', m.confirmed_reservations || 0, 'Active confirmed reservations'],
+          [''],
+          ['CALCULATED STATISTICS'],
+          ['Metric', 'Value', 'Formula'],
+          ['Avg Revenue per Reservation', avgRevenuePerRes, 'Total Revenue / Total Reservations'],
+          ['Avg Daily Reservations', avgDailyRes, 'Total Reservations / Number of Days'],
+          ['Avg Daily Revenue', avgDailyRev, 'Total Revenue / Number of Days'],
+          ['Cancellation Rate', totalRes > 0 ? ((m.cancellations / totalRes) * 100).toFixed(1) + '%' : '0%', 'Cancellations / Total Reservations × 100']
         ];
         
         const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-        summaryWs['!cols'] = [{ wch: 25 }, { wch: 25 }];
+        summaryWs['!cols'] = [{ wch: 30 }, { wch: 20 }, { wch: 40 }];
         XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
         
-        // Trend Data Sheet
+        // Trend Data Sheet with Cumulative Totals and Statistics
         if (data.trend_data && data.trend_data.labels && data.trend_data.labels.length > 0) {
+          const values = data.trend_data.values || [];
+          const totalReservations = values.reduce((a, b) => a + (b || 0), 0);
+          const maxRes = Math.max(...values.map(v => v || 0));
+          const minRes = Math.min(...values.map(v => v || 0));
+          const avgRes = values.length > 0 ? (totalReservations / values.length).toFixed(2) : 0;
+          
           const trendData = [
-            ['RESERVATIONS TREND'],
-            ['Date', 'Reservations']
+            ['RESERVATIONS TREND ANALYSIS'],
+            [''],
+            ['Date', 'Reservations', 'Cumulative Total', '% of Total']
           ];
+          
+          let cumulative = 0;
           data.trend_data.labels.forEach((label, i) => {
-            trendData.push([label, data.trend_data.values[i] || 0]);
+            const val = values[i] || 0;
+            cumulative += val;
+            const pctOfTotal = totalReservations > 0 ? ((val / totalReservations) * 100).toFixed(1) + '%' : '0%';
+            trendData.push([label, val, cumulative, pctOfTotal]);
           });
-          // Add total
-          const totalReservations = data.trend_data.values.reduce((a, b) => a + b, 0);
-          trendData.push(['', '']);
-          trendData.push(['TOTAL', totalReservations]);
+          
+          trendData.push(['', '', '', '']);
+          trendData.push(['STATISTICS', '', '', '']);
+          trendData.push(['Total (Sum)', totalReservations, '', '100%']);
+          trendData.push(['Average', avgRes, '', '']);
+          trendData.push(['Maximum', maxRes, '', '']);
+          trendData.push(['Minimum', minRes, '', '']);
+          trendData.push(['Count (Days)', values.length, '', '']);
           
           const trendWs = XLSX.utils.aoa_to_sheet(trendData);
-          trendWs['!cols'] = [{ wch: 15 }, { wch: 15 }];
-          XLSX.utils.book_append_sheet(wb, trendWs, 'Trend');
+          trendWs['!cols'] = [{ wch: 18 }, { wch: 15 }, { wch: 18 }, { wch: 12 }];
+          XLSX.utils.book_append_sheet(wb, trendWs, 'Trend Analysis');
         }
         
-        // Revenue Data Sheet
+        // Revenue Data Sheet with Cumulative Totals and Statistics
         if (data.revenue_data && data.revenue_data.labels && data.revenue_data.labels.length > 0) {
+          const values = data.revenue_data.values || [];
+          const totalRevenue = values.reduce((a, b) => a + (b || 0), 0);
+          const maxRev = Math.max(...values.map(v => v || 0));
+          const minRev = Math.min(...values.map(v => v || 0));
+          const avgRev = values.length > 0 ? (totalRevenue / values.length).toFixed(2) : 0;
+          
           const revenueData = [
             ['REVENUE ANALYSIS'],
-            ['Date', 'Revenue']
+            [''],
+            ['Date', 'Revenue', 'Cumulative Total', '% of Total']
           ];
+          
+          let cumulative = 0;
           data.revenue_data.labels.forEach((label, i) => {
-            revenueData.push([label, data.revenue_data.values[i] || 0]);
+            const val = values[i] || 0;
+            cumulative += val;
+            const pctOfTotal = totalRevenue > 0 ? ((val / totalRevenue) * 100).toFixed(1) + '%' : '0%';
+            revenueData.push([label, val, cumulative, pctOfTotal]);
           });
-          // Add total
-          const totalRevenue = data.revenue_data.values.reduce((a, b) => a + b, 0);
-          revenueData.push(['', '']);
-          revenueData.push(['TOTAL', totalRevenue]);
+          
+          revenueData.push(['', '', '', '']);
+          revenueData.push(['STATISTICS', '', '', '']);
+          revenueData.push(['Total (Sum)', totalRevenue, '', '100%']);
+          revenueData.push(['Average', parseFloat(avgRev), '', '']);
+          revenueData.push(['Maximum', maxRev, '', '']);
+          revenueData.push(['Minimum', minRev, '', '']);
+          revenueData.push(['Count (Days)', values.length, '', '']);
           
           const revenueWs = XLSX.utils.aoa_to_sheet(revenueData);
-          revenueWs['!cols'] = [{ wch: 15 }, { wch: 18 }];
-          XLSX.utils.book_append_sheet(wb, revenueWs, 'Revenue');
+          revenueWs['!cols'] = [{ wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 12 }];
+          XLSX.utils.book_append_sheet(wb, revenueWs, 'Revenue Analysis');
         }
         
-        // Package Distribution Sheet
+        // Package Distribution Sheet with Percentages
         if (data.room_type_data && data.room_type_data.length > 0) {
-          const packageData = [
-            ['PACKAGE DISTRIBUTION'],
-            ['Package Type', 'Bookings', 'Revenue']
-          ];
           let totalBookings = 0;
           let totalRevenue = 0;
           data.room_type_data.forEach(r => {
-            packageData.push([r.room_type || 'N/A', r.bookings || 0, r.revenue || 0]);
             totalBookings += r.bookings || 0;
             totalRevenue += r.revenue || 0;
           });
-          packageData.push(['', '', '']);
-          packageData.push(['TOTAL', totalBookings, totalRevenue]);
+          
+          const packageData = [
+            ['PACKAGE DISTRIBUTION ANALYSIS'],
+            [''],
+            ['Package Type', 'Bookings', '% of Bookings', 'Revenue', '% of Revenue', 'Avg Revenue/Booking']
+          ];
+          
+          data.room_type_data.forEach(r => {
+            const bookings = r.bookings || 0;
+            const revenue = r.revenue || 0;
+            const pctBookings = totalBookings > 0 ? ((bookings / totalBookings) * 100).toFixed(1) + '%' : '0%';
+            const pctRevenue = totalRevenue > 0 ? ((revenue / totalRevenue) * 100).toFixed(1) + '%' : '0%';
+            const avgRevPerBooking = bookings > 0 ? (revenue / bookings).toFixed(2) : 0;
+            packageData.push([r.room_type || 'N/A', bookings, pctBookings, revenue, pctRevenue, avgRevPerBooking]);
+          });
+          
+          packageData.push(['', '', '', '', '', '']);
+          packageData.push(['TOTALS', totalBookings, '100%', totalRevenue, '100%', totalBookings > 0 ? (totalRevenue / totalBookings).toFixed(2) : 0]);
           
           const packageWs = XLSX.utils.aoa_to_sheet(packageData);
-          packageWs['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 18 }];
-          XLSX.utils.book_append_sheet(wb, packageWs, 'Packages');
+          packageWs['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 14 }, { wch: 15 }, { wch: 14 }, { wch: 18 }];
+          XLSX.utils.book_append_sheet(wb, packageWs, 'Package Distribution');
         }
         
-        // Guest Statistics Sheet
+        // Guest Statistics Sheet with Enhanced Data
         if (data.guest_stats) {
           const gs = data.guest_stats;
           const guestData = [
-            ['GUEST STATISTICS'],
-            ['Metric', 'Current Period', 'Previous Period', 'Change %']
+            ['GUEST STATISTICS COMPARISON'],
+            [''],
+            ['Metric', 'Current Period', 'Previous Period', 'Change Amount', 'Change %', 'Trend']
           ];
           
+          const addGuestRow = (name, current, previous) => {
+            const changeAmt = current - previous;
+            let changePct = '0%';
+            let trend = '→ Stable';
+            
+            if (previous > 0) {
+              const pct = ((changeAmt / previous) * 100).toFixed(1);
+              changePct = pct + '%';
+              if (parseFloat(pct) > 0) trend = '↑ Increase';
+              else if (parseFloat(pct) < 0) trend = '↓ Decrease';
+            } else if (current > 0) {
+              changePct = 'New';
+              trend = '↑ New';
+            }
+            
+            guestData.push([name, current, previous, changeAmt, changePct, trend]);
+          };
+          
           if (gs.unique_guests) {
-            const change = gs.unique_guests.previous > 0 
-              ? (((gs.unique_guests.current - gs.unique_guests.previous) / gs.unique_guests.previous) * 100).toFixed(1)
-              : (gs.unique_guests.current > 0 ? 'New' : '0');
-            guestData.push(['Unique Guests', gs.unique_guests.current, gs.unique_guests.previous, change]);
+            addGuestRow('Unique Guests', gs.unique_guests.current || 0, gs.unique_guests.previous || 0);
           }
           if (gs.total_bookings) {
-            const change = gs.total_bookings.previous > 0 
-              ? (((gs.total_bookings.current - gs.total_bookings.previous) / gs.total_bookings.previous) * 100).toFixed(1)
-              : (gs.total_bookings.current > 0 ? 'New' : '0');
-            guestData.push(['Total Bookings', gs.total_bookings.current, gs.total_bookings.previous, change]);
+            addGuestRow('Total Bookings', gs.total_bookings.current || 0, gs.total_bookings.previous || 0);
           }
           if (gs.avg_booking_value) {
-            const change = gs.avg_booking_value.previous > 0 
-              ? (((gs.avg_booking_value.current - gs.avg_booking_value.previous) / gs.avg_booking_value.previous) * 100).toFixed(1)
-              : (gs.avg_booking_value.current > 0 ? 'New' : '0');
-            guestData.push(['Avg. Booking Value', gs.avg_booking_value.current, gs.avg_booking_value.previous, change]);
+            addGuestRow('Avg. Booking Value', gs.avg_booking_value.current || 0, gs.avg_booking_value.previous || 0);
           }
           
           const guestWs = XLSX.utils.aoa_to_sheet(guestData);
-          guestWs['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 12 }];
-          XLSX.utils.book_append_sheet(wb, guestWs, 'Guest Stats');
+          guestWs['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 12 }];
+          XLSX.utils.book_append_sheet(wb, guestWs, 'Guest Statistics');
         }
         
-        // Performance Metrics Sheet
+        // Performance Metrics Sheet with Status Indicators
         if (data.performance_metrics) {
           const pm = data.performance_metrics;
+          const checkinTime = pm.avg_checkin_time || 0;
+          const responseTime = pm.avg_response_time || 0;
+          
+          // Determine performance status
+          const checkinStatus = checkinTime <= 5 ? 'Excellent' : (checkinTime <= 10 ? 'Good' : 'Needs Improvement');
+          const responseStatus = responseTime <= 30 ? 'Excellent' : (responseTime <= 60 ? 'Good' : 'Needs Improvement');
+          
           const perfData = [
-            ['PERFORMANCE METRICS'],
-            ['Metric', 'Value', 'Unit'],
-            ['Average Check-in Time', pm.avg_checkin_time || 0, 'minutes'],
-            ['Average Response Time', pm.avg_response_time || 0, 'minutes']
+            ['PERFORMANCE METRICS ANALYSIS'],
+            [''],
+            ['Metric', 'Value', 'Unit', 'Status', 'Benchmark'],
+            ['Average Check-in Time', checkinTime, 'minutes', checkinStatus, '≤5 min = Excellent, ≤10 min = Good'],
+            ['Average Response Time', responseTime, 'minutes', responseStatus, '≤30 min = Excellent, ≤60 min = Good'],
+            [''],
+            ['PERFORMANCE SUMMARY'],
+            ['Total Metrics Measured:', 2, '', '', ''],
+            ['Excellent Ratings:', (checkinStatus === 'Excellent' ? 1 : 0) + (responseStatus === 'Excellent' ? 1 : 0), '', '', ''],
+            ['Good Ratings:', (checkinStatus === 'Good' ? 1 : 0) + (responseStatus === 'Good' ? 1 : 0), '', '', ''],
+            ['Needs Improvement:', (checkinStatus === 'Needs Improvement' ? 1 : 0) + (responseStatus === 'Needs Improvement' ? 1 : 0), '', '', '']
           ];
           
           const perfWs = XLSX.utils.aoa_to_sheet(perfData);
-          perfWs['!cols'] = [{ wch: 25 }, { wch: 12 }, { wch: 10 }];
+          perfWs['!cols'] = [{ wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 18 }, { wch: 40 }];
           XLSX.utils.book_append_sheet(wb, perfWs, 'Performance');
         }
         
         // Download the Excel file
         XLSX.writeFile(wb, `AR_Homes_Staff_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-        showToast('Excel report downloaded successfully!', 'success');
+        showToast('Comprehensive Excel report downloaded successfully!', 'success');
       } catch (err) {
         console.error('Excel Export Error:', err);
         showToast('Failed to generate Excel: ' + err.message, 'error');
