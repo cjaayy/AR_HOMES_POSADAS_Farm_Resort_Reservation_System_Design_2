@@ -625,7 +625,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               </div>
             </div>
 
-            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow:hidden; margin-bottom:20px;">
+            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow-x:auto; margin-bottom:20px;">
               <table class="users-table" id="adminReservationsTable" style="width:100%; border-collapse:separate; border-spacing:0;">
                 <thead style="background:#11224e; color:white;">
                   <tr>
@@ -635,7 +635,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                     <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-check"></i> Check-in</th>
                     <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-times"></i> Check-out</th>
                     <th style="padding:18px 16px; text-align:left;"><i class="fas fa-money-bill-wave"></i> Payment</th>
-                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-tag"></i> Status</th>
+                    <th style="padding:18px 16px; text-align:left; min-width:180px;"><i class="fas fa-tag"></i> Status</th>
                     <th style="padding:18px 16px; text-align:center;"><i class="fas fa-cog"></i> Actions</th>
                   </tr>
                 </thead>
@@ -923,9 +923,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                       ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
                     </div>
                   </td>
-                  <td style="padding:16px;">
-                    <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; ${statusColor} color:white; border-radius:20px; font-size:13px; font-weight:600; text-transform:capitalize;">
-                      <i class="fas fa-circle" style="font-size:6px;"></i>${escapeHtml(r.status||'').replace('_', ' ')}
+                  <td style="padding:16px 12px; min-width:180px;">
+                    <span style="display:inline-flex; align-items:center; gap:3px; padding:4px 8px; ${statusColor} color:white; border-radius:16px; font-size:10px; font-weight:600; text-transform:capitalize; white-space:nowrap;">
+                      <i class="fas fa-circle" style="font-size:3px;"></i>${escapeHtml(r.status||'').replace('_', ' ')}
                     </span>
                   </td>
                   <td style="padding:16px; text-align:center;">
