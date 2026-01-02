@@ -536,7 +536,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
               <h3 style="margin:0; font-size:16px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:8px;">
-                <i class="fas fa-filter" style="color:#667eea;"></i> Filter Reservations
+                <i class="fas fa-filter" style="color:#11224e;"></i> Filter Reservations
               </h3>
               <button onclick="adminClearFilters()" style="padding:6px 14px; background:#f1f5f9; border:none; border-radius:6px; font-size:13px; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.2s;">
                 <i class="fas fa-redo"></i> Clear Filters
@@ -585,11 +585,11 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             <!-- Date Range Filter -->
             <div style="display:flex; gap:12px; padding-top:16px; border-top:2px solid #f1f5f9;">
               <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-                <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#667eea;"></i> From Date</label>
+                <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#11224e;"></i> From Date</label>
                 <input type="date" id="adminFilterFrom" onchange="adminApplyFilters()" style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
               </div>
               <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-                <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#667eea;"></i> To Date</label>
+                <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#11224e;"></i> To Date</label>
                 <input type="date" id="adminFilterTo" onchange="adminApplyFilters()" style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
               </div>
             </div>
@@ -605,7 +605,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:16px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
               <div style="display:flex; align-items:center; gap:12px;">
-                <button onclick="adminFetchAllReservations()" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                <button onclick="adminFetchAllReservations()" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
                   <i class="fas fa-sync-alt"></i> Refresh
                 </button>
                 <span style="color:#64748b; font-size:14px;" id="adminLastUpdate">Last updated: Just now</span>
@@ -767,10 +767,15 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 chip.style.background = 'white';
                 const span = chip.querySelector('span');
                 const count = chip.querySelector('div:last-child');
+                const iconContainer = chip.querySelector('div > div:first-child');
                 if(span) span.style.color = '#11224e';
                 if(count) {
-                  count.style.background = 'rgba(17, 34, 78, 0.1)';
+                  count.style.background = 'transparent';
                   count.style.color = '#11224e';
+                }
+                if(iconContainer) {
+                  iconContainer.style.background = 'rgba(17, 34, 78, 0.1)';
+                  iconContainer.style.color = '#11224e';
                 }
               });
               
@@ -782,10 +787,25 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 activeChip.style.background = '#11224e';
                 const span = activeChip.querySelector('span');
                 const count = activeChip.querySelector('div:last-child');
-                if(span) span.style.color = 'white';
+                const iconContainer = activeChip.querySelector('div > div:first-child');
+                const icon = iconContainer ? iconContainer.querySelector('i') : null;
+                if(span) {
+                  span.style.color = 'white';
+                }
                 if(count) {
-                  count.style.background = 'rgba(255,255,255,0.25)';
+                  count.style.removeProperty('background');
+                  count.style.backgroundColor = 'transparent';
+                  count.style.removeProperty('color');
                   count.style.color = 'white';
+                  count.style.fontWeight = '700';
+                  count.setAttribute('style', count.getAttribute('style').replace(/background:[^;]+;?/gi, '').replace(/color:[^;]+;?/gi, '') + 'background:transparent!important;color:white!important;font-weight:700;');
+                }
+                if(iconContainer) {
+                  iconContainer.style.background = 'transparent';
+                  iconContainer.style.color = 'white';
+                }
+                if(icon) {
+                  icon.style.color = 'white';
                 }
               }
               
