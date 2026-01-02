@@ -4,6 +4,11 @@
  * AR Homes Posadas Farm Resort Reservation System
  */
 
+// Prevent browser caching to ensure latest code is loaded
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 session_start();
 
 // Check if admin is logged in
@@ -919,8 +924,8 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                   <td style="padding:16px;">
                     <div style="font-weight:700; color:#1e293b; font-size:15px;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
                     <div style="font-size:11px; color:#64748b;">Down: ₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
-                    <div style="font-size:10px; color:${r.downpayment_paid ? '#10b981' : '#ef4444'}; font-weight:600;">
-                      ${r.downpayment_paid ? '✓ Paid' : '✗ Unpaid'}
+                    <div style="font-size:10px; color:${r.downpayment_verified == 1 ? '#10b981' : (r.downpayment_paid ? '#f59e0b' : '#ef4444')}; font-weight:600;">
+                      ${r.downpayment_verified == 1 ? '✓ Verified' : (r.downpayment_paid ? '⏱ Pending' : '✗ Unpaid')}
                     </div>
                   </td>
                   <td style="padding:16px 12px; min-width:180px;">
@@ -1081,23 +1086,21 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                         <div style="font-size:18px; font-weight:700; color:#1e293b;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
                         <div style="font-size:11px; font-weight:600; color:${(() => {
                           const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
-                          const isCompleted = r.status === 'completed';
-                          const isConfirmedAndPaid = r.status === 'confirmed' && r.downpayment_paid;
-                          return actualRemaining <= 0 || isCompleted || isConfirmedAndPaid ? '#10b981' : (r.full_payment_paid ? '#10b981' : '#ef4444');
+                          const isFullyPaid = r.full_payment_verified == 1;
+                          return actualRemaining <= 0 || isFullyPaid ? '#10b981' : (r.full_payment_paid ? '#f59e0b' : '#ef4444');
                         })()}; margin-top:4px;">
                           ${(() => {
                             const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
-                            const isCompleted = r.status === 'completed';
-                            const isConfirmedAndPaid = r.status === 'confirmed' && r.downpayment_paid;
-                            return actualRemaining <= 0 || isCompleted || isConfirmedAndPaid ? '✓ Fully Paid' : (r.full_payment_paid ? '✓ Paid' : '✗ Unpaid');
+                            const isFullyPaid = r.full_payment_verified == 1;
+                            return actualRemaining <= 0 || isFullyPaid ? '✓ Fully Paid' : (r.full_payment_paid ? '⏱ Pending Verification' : '✗ Unpaid');
                           })()}
                         </div>
                       </div>
                       <div>
                         <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Downpayment</div>
                         <div style="font-size:18px; font-weight:700; color:#f59e0b;">₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
-                        <div style="font-size:11px; font-weight:600; color:${r.downpayment_paid || r.status === 'completed' || r.status === 'confirmed' ? '#10b981' : '#ef4444'}; margin-top:4px;">
-                          ${r.downpayment_paid || r.status === 'completed' || r.status === 'confirmed' ? '✓ Paid' : '✗ Unpaid'}
+                        <div style="font-size:11px; font-weight:600; color:${r.downpayment_verified == 1 ? '#10b981' : (r.downpayment_paid ? '#f59e0b' : '#ef4444')}; margin-top:4px;">
+                          ${r.downpayment_verified == 1 ? '✓ Verified' : (r.downpayment_paid ? '⏱ Pending Verification' : '✗ Unpaid')}
                         </div>
                       </div>
                       <div>
@@ -1108,15 +1111,13 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                         })()}</div>
                         <div style="font-size:11px; font-weight:600; color:${(() => {
                           const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
-                          const isCompleted = r.status === 'completed';
-                          const isConfirmedAndPaid = r.status === 'confirmed' && r.downpayment_paid;
-                          return actualRemaining <= 0 || isCompleted || isConfirmedAndPaid ? '#10b981' : (r.remaining_balance_paid ? '#10b981' : '#ef4444');
+                          const isFullyPaid = r.full_payment_verified == 1;
+                          return actualRemaining <= 0 || isFullyPaid ? '#10b981' : (r.full_payment_paid ? '#f59e0b' : '#ef4444');
                         })()}; margin-top:4px;">
                           ${(() => {
                             const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
-                            const isCompleted = r.status === 'completed';
-                            const isConfirmedAndPaid = r.status === 'confirmed' && r.downpayment_paid;
-                            return actualRemaining <= 0 || isCompleted || isConfirmedAndPaid ? '✓ Fully Paid' : (r.remaining_balance_paid ? '✓ Paid' : '✗ Unpaid');
+                            const isFullyPaid = r.full_payment_verified == 1;
+                            return actualRemaining <= 0 || isFullyPaid ? '✓ Fully Paid' : (r.full_payment_paid ? '⏱ Pending Verification' : '✗ Unpaid');
                           })()}
                         </div>
                       </div>
@@ -1547,6 +1548,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               <button onclick="loadAdminReportData('week')" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
                 <i class="fas fa-sync-alt"></i> Refresh
               </button>
+              <button onclick="fixReservationPrices()" style="padding:12px 20px; background:#11224e; border:none; border-radius:10px; font-size:14px; font-weight:600; color:white; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-wrench"></i> Fix Prices
+              </button>
               <span style="color:#64748b; font-size:14px;" id="reportsLastUpdate">Last updated: Just now</span>
             </div>
             <div style="display:flex; gap:8px;">
@@ -1581,28 +1585,28 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
               <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-calendar-check"></i></div>
               <div>
-                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminTotalReservations">0</div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="reportTotalReservations"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>
                 <div style="font-size:14px; font-weight:500; color:#11224e;">Total Reservations</div>
               </div>
             </div>
             <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
               <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-money-bill-wave"></i></div>
               <div>
-                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminTotalRevenue">₱0</div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="reportTotalRevenue"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>
                 <div style="font-size:14px; font-weight:500; color:#11224e;">Revenue</div>
               </div>
             </div>
             <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
               <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-percentage"></i></div>
               <div>
-                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminOccupancyRate">0%</div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="reportOccupancyRate"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>
                 <div style="font-size:14px; font-weight:500; color:#11224e;">Occupancy Rate</div>
               </div>
             </div>
             <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
               <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-ban"></i></div>
               <div>
-                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminTotalCancellations">0</div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="reportTotalCancellations"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>
                 <div style="font-size:14px; font-weight:500; color:#11224e;">Cancellations</div>
               </div>
             </div>
@@ -3034,17 +3038,20 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           const res = await fetch(url);
           const data = await res.json();
           
+          console.log('Report data received:', data);
+          
           if (!data.success) {
             showAdminToast(data.message || 'Failed to load report data', 'error');
+            console.error('API Error:', data);
             return;
           }
           
           // Update metrics
           const m = data.metrics;
-          document.getElementById('adminTotalReservations').textContent = m.total_reservations || 0;
-          document.getElementById('adminTotalRevenue').textContent = '₱' + (m.total_revenue || 0).toLocaleString();
-          document.getElementById('adminOccupancyRate').textContent = (m.occupancy_rate || 0) + '%';
-          document.getElementById('adminTotalCancellations').textContent = m.cancellations || 0;
+          document.getElementById('reportTotalReservations').textContent = m.total_reservations || 0;
+          document.getElementById('reportTotalRevenue').textContent = '₱' + (m.total_revenue || 0).toLocaleString();
+          document.getElementById('reportOccupancyRate').textContent = (m.occupancy_rate || 0) + '%';
+          document.getElementById('reportTotalCancellations').textContent = m.cancellations || 0;
           
           // Update trend chart
           if (adminTrendChart && data.trend_data) {
@@ -3077,38 +3084,50 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <td style="padding:12px; color:#1e293b;">₱${(r.revenue || 0).toLocaleString()}</td>
               </tr>
             `).join('');
+          } else {
+            const tbody = document.getElementById('adminRoomTypeTable');
+            tbody.innerHTML = '<tr><td colspan="3" style="padding:20px; text-align:center; color:#64748b;">No room type data available</td></tr>';
           }
 
           // Update guest statistics
-          if (data.guest_stats) {
+          if (data.guest_stats && data.guest_stats.unique_guests) {
             const tbody = document.getElementById('adminGuestStatsTable');
             const gs = data.guest_stats;
+            
+            // Calculate percentage changes
+            const guestsChange = gs.unique_guests.previous > 0 
+              ? (((gs.unique_guests.current - gs.unique_guests.previous) / gs.unique_guests.previous) * 100).toFixed(1)
+              : 0;
+            const bookingsChange = gs.total_bookings.previous > 0
+              ? (((gs.total_bookings.current - gs.total_bookings.previous) / gs.total_bookings.previous) * 100).toFixed(1)
+              : 0;
+            const valueChange = gs.avg_booking_value.previous > 0
+              ? (((gs.avg_booking_value.current - gs.avg_booking_value.previous) / gs.avg_booking_value.previous) * 100).toFixed(1)
+              : 0;
+            
             tbody.innerHTML = `
               <tr style="border-bottom:1px solid #f1f5f9;">
-                <td style="padding:12px;"><strong>New Guests</strong></td>
-                <td style="padding:12px;">${gs.new_guests_this_week || 0}</td>
-                <td style="padding:12px;">${gs.new_guests_last_week || 0}</td>
-                <td style="padding:12px; color:${gs.new_guests_change >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${gs.new_guests_change >= 0 ? 'up' : 'down'}"></i> ${gs.new_guests_change || 0}%</td>
+                <td style="padding:12px;"><strong>Unique Guests</strong></td>
+                <td style="padding:12px;">${gs.unique_guests.current || 0}</td>
+                <td style="padding:12px;">${gs.unique_guests.previous || 0}</td>
+                <td style="padding:12px; color:${guestsChange >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${guestsChange >= 0 ? 'up' : 'down'}"></i> ${Math.abs(guestsChange)}%</td>
               </tr>
               <tr style="border-bottom:1px solid #f1f5f9;">
-                <td style="padding:12px;"><strong>Returning Guests</strong></td>
-                <td style="padding:12px;">${gs.returning_guests_this_week || 0}</td>
-                <td style="padding:12px;">${gs.returning_guests_last_week || 0}</td>
-                <td style="padding:12px; color:${gs.returning_guests_change >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${gs.returning_guests_change >= 0 ? 'up' : 'down'}"></i> ${gs.returning_guests_change || 0}%</td>
-              </tr>
-              <tr style="border-bottom:1px solid #f1f5f9;">
-                <td style="padding:12px;"><strong>Average Stay</strong></td>
-                <td style="padding:12px;">${gs.avg_stay_this_week || 0} days</td>
-                <td style="padding:12px;">${gs.avg_stay_last_week || 0} days</td>
-                <td style="padding:12px; color:${gs.avg_stay_change >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${gs.avg_stay_change >= 0 ? 'up' : 'down'}"></i> ${gs.avg_stay_change || 0}%</td>
+                <td style="padding:12px;"><strong>Total Bookings</strong></td>
+                <td style="padding:12px;">${gs.total_bookings.current || 0}</td>
+                <td style="padding:12px;">${gs.total_bookings.previous || 0}</td>
+                <td style="padding:12px; color:${bookingsChange >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${bookingsChange >= 0 ? 'up' : 'down'}"></i> ${Math.abs(bookingsChange)}%</td>
               </tr>
               <tr>
-                <td style="padding:12px;"><strong>Guest Satisfaction</strong></td>
-                <td style="padding:12px;">${gs.satisfaction_this_week || 0}/5.0</td>
-                <td style="padding:12px;">${gs.satisfaction_last_week || 0}/5.0</td>
-                <td style="padding:12px; color:${gs.satisfaction_change >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${gs.satisfaction_change >= 0 ? 'up' : 'down'}"></i> ${gs.satisfaction_change || 0}%</td>
+                <td style="padding:12px;"><strong>Avg. Booking Value</strong></td>
+                <td style="padding:12px;">₱${(gs.avg_booking_value.current || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="padding:12px;">₱${(gs.avg_booking_value.previous || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="padding:12px; color:${valueChange >= 0 ? '#10b981' : '#ef4444'};"><i class="fas fa-arrow-${valueChange >= 0 ? 'up' : 'down'}"></i> ${Math.abs(valueChange)}%</td>
               </tr>
             `;
+          } else {
+            const tbody = document.getElementById('adminGuestStatsTable');
+            tbody.innerHTML = '<tr><td colspan="4" style="padding:20px; text-align:center; color:#64748b;">No data available</td></tr>';
           }
 
           // Update performance metrics
@@ -3139,6 +3158,31 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         setTimeout(() => {
           showAdminToast('Excel report generated successfully!', 'success');
         }, 1500);
+      }
+
+      async function fixReservationPrices() {
+        if (!confirm('This will recalculate and update prices for all reservations with 0 or NULL total_price. Continue?')) {
+          return;
+        }
+        
+        showAdminToast('Fixing reservation prices...', 'info');
+        
+        try {
+          const res = await fetch('fix_reservation_prices.php');
+          const data = await res.json();
+          
+          if (data.success) {
+            showAdminToast(`Updated ${data.stats.updated} reservations. Skipped ${data.stats.skipped}.`, 'success');
+            // Reload report data to show updated revenue
+            setTimeout(() => {
+              loadAdminReportData('week');
+            }, 1000);
+          } else {
+            showAdminToast(data.message || 'Failed to fix prices', 'error');
+          }
+        } catch (error) {
+          showAdminToast('Error fixing prices: ' + error.message, 'error');
+        }
       }
 
       function showAdminToast(message, type = 'info') {
@@ -3175,11 +3219,22 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           setTimeout(() => {
             if (!adminTrendChart) {
               initAdminReportsCharts();
-              loadAdminReportData('week');
             }
+            loadAdminReportData('week');
           }, 100);
         });
       }
+
+      // Check if Reports section is visible on page load
+      setTimeout(() => {
+        const reportsSection = document.getElementById('reports');
+        if (reportsSection && reportsSection.style.display !== 'none' && !reportsSection.classList.contains('hidden')) {
+          if (!adminTrendChart) {
+            initAdminReportsCharts();
+          }
+          loadAdminReportData('week');
+        }
+      }, 500);
 
     </script>
   </body>

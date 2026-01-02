@@ -1,6 +1,7 @@
 <?php
 /**
- * Staff Room Stats API - Get room occupancy and availability stats
+ * Staff Venue Stats API - Get venue occupancy and booking stats
+ * Updated for package-based booking system (not room-based)
  */
 session_start();
 header('Content-Type: application/json');
@@ -21,61 +22,61 @@ try {
     $db = new Database();
     $conn = $db->getConnection();
     
-    // Check if table exists
-    $tableCheck = $conn->query("SHOW TABLES LIKE 'room_inventory'");
-    if ($tableCheck->rowCount() === 0) {
-        // Return default values if table doesn't exist
-        echo json_encode([
-            'success' => true,
-            'stats' => [
-                'total_rooms' => 20,
-                'occupied_rooms' => 12,
-                'available_rooms' => 8,
-                'maintenance_rooms' => 0,
-                'occupancy_rate' => 60
-            ]
-        ]);
-        exit;
-    }
+    // For package-based system: Calculate venue utilization
+    // Count bookings for today and upcoming days
     
-    // Get room statistics
-    $sql = "SELECT 
-                COUNT(*) as total_rooms,
-                SUM(CASE WHEN status = 'occupied' THEN 1 ELSE 0 END) as occupied_rooms,
-                SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available_rooms,
-                SUM(CASE WHEN status = 'maintenance' THEN 1 ELSE 0 END) as maintenance_rooms,
-                SUM(CASE WHEN status = 'reserved' THEN 1 ELSE 0 END) as reserved_rooms
-            FROM room_inventory";
+    // Today's bookings
+    $todayBookingsSql = "SELECT COUNT(*) as today_bookings 
+                         FROM reservations 
+                         WHERE status IN ('confirmed', 'checked_in')
+                           AND CURDATE() BETWEEN check_in_date AND check_out_date";
+    $todayStmt = $conn->query($todayBookingsSql);
+    $todayBookings = (int)($todayStmt->fetch(PDO::FETCH_ASSOC)['today_bookings'] ?? 0);
     
-    $stmt = $conn->query($sql);
-    $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+    // This month's occupancy rate
+    $monthStart = date('Y-m-01');
+    $monthEnd = date('Y-m-t');
     
-    $totalRooms = (int)$stats['total_rooms'];
-    $occupiedRooms = (int)$stats['occupied_rooms'];
-    $availableRooms = (int)$stats['available_rooms'];
-    $maintenanceRooms = (int)$stats['maintenance_rooms'];
-    $reservedRooms = (int)$stats['reserved_rooms'];
+    $bookedDaysSql = "SELECT COUNT(DISTINCT check_in_date) as booked_days 
+                      FROM reservations 
+                      WHERE status IN ('confirmed', 'checked_in', 'completed')
+                        AND check_in_date BETWEEN :start AND :end";
+    $bookedStmt = $conn->prepare($bookedDaysSql);
+    $bookedStmt->execute([':start' => $monthStart, ':end' => $monthEnd]);
+    $bookedDays = (int)($bookedStmt->fetch(PDO::FETCH_ASSOC)['booked_days'] ?? 0);
     
-    $occupancyRate = $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100) : 0;
+    // Calculate total days in current month
+    $totalDaysInMonth = (int)date('t');
+    $occupancyRate = $totalDaysInMonth > 0 ? round(($bookedDays / $totalDaysInMonth) * 100) : 0;
     
-    // Get active guests count (occupied + reserved rooms with capacity)
-    $guestSql = "SELECT SUM(capacity) as active_guests 
-                 FROM room_inventory 
-                 WHERE status IN ('occupied', 'reserved')";
-    $guestStmt = $conn->query($guestSql);
-    $guestData = $guestStmt->fetch(PDO::FETCH_ASSOC);
-    $activeGuests = (int)($guestData['active_guests'] ?? 0);
+    // Upcoming bookings (next 30 days)
+    $upcomingSql = "SELECT COUNT(*) as upcoming 
+                    FROM reservations 
+                    WHERE status IN ('confirmed', 'pending_confirmation')
+                      AND check_in_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)";
+    $upcomingStmt = $conn->query($upcomingSql);
+    $upcomingBookings = (int)($upcomingStmt->fetch(PDO::FETCH_ASSOC)['upcoming'] ?? 0);
+    
+    // Active guests today
+    $guestsSql = "SELECT SUM(number_of_guests) as active_guests 
+                  FROM reservations 
+                  WHERE status IN ('confirmed', 'checked_in')
+                    AND CURDATE() BETWEEN check_in_date AND check_out_date";
+    $guestsStmt = $conn->query($guestsSql);
+    $activeGuests = (int)($guestsStmt->fetch(PDO::FETCH_ASSOC)['active_guests'] ?? 0);
     
     echo json_encode([
         'success' => true,
         'stats' => [
-            'total_rooms' => $totalRooms,
-            'occupied_rooms' => $occupiedRooms,
-            'available_rooms' => $availableRooms,
-            'maintenance_rooms' => $maintenanceRooms,
-            'reserved_rooms' => $reservedRooms,
+            'total_rooms' => $totalDaysInMonth, // Total available days
+            'occupied_rooms' => $bookedDays, // Booked days
+            'available_rooms' => $totalDaysInMonth - $bookedDays, // Available days
+            'maintenance_rooms' => 0,
+            'reserved_rooms' => $todayBookings,
             'occupancy_rate' => $occupancyRate,
-            'active_guests' => $activeGuests
+            'active_guests' => $activeGuests,
+            'today_bookings' => $todayBookings,
+            'upcoming_bookings' => $upcomingBookings
         ]
     ]);
     

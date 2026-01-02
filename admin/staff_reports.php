@@ -142,6 +142,16 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
       background: #f8fafc;
     }
     
+    .positive {
+      color: #10b981;
+      font-weight: 600;
+    }
+    
+    .negative {
+      color: #ef4444;
+      font-weight: 600;
+    }
+    
     .export-buttons {
       display: flex;
       gap: 12px;
@@ -238,34 +248,17 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
               <canvas id="roomTypeChart"></canvas>
             </div>
             <div class="table-wrapper">
-              <table class="report-table">
+              <table class="report-table data-table">
                 <thead>
                   <tr>
-                    <th>Room Type</th>
+                    <th>Package Type</th>
                     <th>Bookings</th>
                     <th>Revenue</th>
                   </tr>
                 </thead>
                 <tbody id="roomTypeTable">
                   <tr>
-                    <td>Deluxe Room</td>
-                    <td>45</td>
-                    <td>$18,900</td>
-                  </tr>
-                  <tr>
-                    <td>Standard Room</td>
-                    <td>52</td>
-                    <td>$15,600</td>
-                  </tr>
-                  <tr>
-                    <td>Suite</td>
-                    <td>20</td>
-                    <td>$8,800</td>
-                  </tr>
-                  <tr>
-                    <td>Family Room</td>
-                    <td>10</td>
-                    <td>$1,930</td>
+                    <td colspan="3" style="text-align:center; color:#64748b;">Loading...</td>
                   </tr>
                 </tbody>
               </table>
@@ -279,7 +272,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
             <h3 class="report-title">Guest Statistics</h3>
           </div>
           <div class="table-wrapper">
-            <table class="report-table">
+            <table class="report-table guest-stats-table">
               <thead>
                 <tr>
                   <th>Metric</th>
@@ -290,28 +283,7 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>New Guests</strong></td>
-                  <td>34</td>
-                  <td>28</td>
-                  <td style="color:#10b981;"><i class="fas fa-arrow-up"></i> +21%</td>
-                </tr>
-                <tr>
-                  <td><strong>Returning Guests</strong></td>
-                  <td>18</td>
-                  <td>22</td>
-                  <td style="color:#ef4444;"><i class="fas fa-arrow-down"></i> -18%</td>
-                </tr>
-                <tr>
-                  <td><strong>Average Stay</strong></td>
-                  <td>3.2 days</td>
-                  <td>2.8 days</td>
-                  <td style="color:#10b981;"><i class="fas fa-arrow-up"></i> +14%</td>
-                </tr>
-                <tr>
-                  <td><strong>Guest Satisfaction</strong></td>
-                  <td>4.8/5.0</td>
-                  <td>4.6/5.0</td>
-                  <td style="color:#10b981;"><i class="fas fa-arrow-up"></i> +4%</td>
+                  <td colspan="4" style="text-align:center; color:#64748b;">Loading...</td>
                 </tr>
               </tbody>
             </table>
@@ -326,25 +298,25 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
             <div>
               <h4 style="color:#64748b; font-size:14px; margin-bottom:12px;">CHECK-IN EFFICIENCY</h4>
-              <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+              <div class="checkin-time" style="background:#f8fafc; padding:16px; border-radius:8px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                   <span>Average Time</span>
-                  <strong>8 minutes</strong>
+                  <strong>—</strong>
                 </div>
                 <div style="background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
-                  <div style="background:#10b981; width:85%; height:100%;"></div>
+                  <div style="background:#10b981; width:0%; height:100%;"></div>
                 </div>
               </div>
             </div>
             <div>
               <h4 style="color:#64748b; font-size:14px; margin-bottom:12px;">RESPONSE TIME</h4>
-              <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+              <div class="response-time" style="background:#f8fafc; padding:16px; border-radius:8px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                   <span>Average Response</span>
-                  <strong>15 minutes</strong>
+                  <strong>—</strong>
                 </div>
                 <div style="background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
-                  <div style="background:#667eea; width:70%; height:100%;"></div>
+                  <div style="background:#667eea; width:0%; height:100%;"></div>
                 </div>
               </div>
             </div>
@@ -539,6 +511,138 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
           revenueChart.data.labels = data.revenue_data.labels;
           revenueChart.data.datasets[0].data = data.revenue_data.values;
           revenueChart.update();
+        }
+        
+        // Update room type (package type) chart
+        if (roomTypeChart && data.room_type_data && data.room_type_data.length > 0) {
+          const labels = data.room_type_data.map(item => item.room_type);
+          const values = data.room_type_data.map(item => parseInt(item.bookings));
+          roomTypeChart.data.labels = labels;
+          roomTypeChart.data.datasets[0].data = values;
+          roomTypeChart.update();
+          
+          // Update room type table
+          const tbody = document.querySelector('.data-table tbody');
+          tbody.innerHTML = '';
+          data.room_type_data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${item.room_type || 'N/A'}</td>
+              <td>${item.bookings || 0}</td>
+              <td>₱${parseFloat(item.revenue || 0).toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+        
+        // Update guest statistics
+        if (data.guest_stats) {
+          const gs = data.guest_stats;
+          const statsTable = document.querySelector('.guest-stats-table tbody');
+          if (statsTable) {
+            statsTable.innerHTML = '';
+            
+            // Unique Guests
+            if (gs.unique_guests) {
+              const change = gs.unique_guests.current - gs.unique_guests.previous;
+              const changePercent = gs.unique_guests.previous > 0 ? 
+                ((change / gs.unique_guests.previous) * 100).toFixed(1) : 0;
+              const changeClass = change >= 0 ? 'positive' : 'negative';
+              const changeIcon = change >= 0 ? '▲' : '▼';
+              statsTable.innerHTML += `
+                <tr>
+                  <td>Unique Guests</td>
+                  <td>${gs.unique_guests.current}</td>
+                  <td>${gs.unique_guests.previous}</td>
+                  <td class="${changeClass}">${changeIcon} ${Math.abs(changePercent)}%</td>
+                </tr>
+              `;
+            }
+            
+            // Total Bookings
+            if (gs.total_bookings) {
+              const change = gs.total_bookings.current - gs.total_bookings.previous;
+              const changePercent = gs.total_bookings.previous > 0 ? 
+                ((change / gs.total_bookings.previous) * 100).toFixed(1) : 0;
+              const changeClass = change >= 0 ? 'positive' : 'negative';
+              const changeIcon = change >= 0 ? '▲' : '▼';
+              statsTable.innerHTML += `
+                <tr>
+                  <td>Total Bookings</td>
+                  <td>${gs.total_bookings.current}</td>
+                  <td>${gs.total_bookings.previous}</td>
+                  <td class="${changeClass}">${changeIcon} ${Math.abs(changePercent)}%</td>
+                </tr>
+              `;
+            }
+            
+            // Total Guests
+            if (gs.total_guests) {
+              const change = gs.total_guests.current - gs.total_guests.previous;
+              const changePercent = gs.total_guests.previous > 0 ? 
+                ((change / gs.total_guests.previous) * 100).toFixed(1) : 0;
+              const changeClass = change >= 0 ? 'positive' : 'negative';
+              const changeIcon = change >= 0 ? '▲' : '▼';
+              statsTable.innerHTML += `
+                <tr>
+                  <td>Total Guests</td>
+                  <td>${gs.total_guests.current}</td>
+                  <td>${gs.total_guests.previous}</td>
+                  <td class="${changeClass}">${changeIcon} ${Math.abs(changePercent)}%</td>
+                </tr>
+              `;
+            }
+            
+            // Average Booking Value
+            if (gs.avg_booking_value) {
+              const change = gs.avg_booking_value.current - gs.avg_booking_value.previous;
+              const changePercent = gs.avg_booking_value.previous > 0 ? 
+                ((change / gs.avg_booking_value.previous) * 100).toFixed(1) : 0;
+              const changeClass = change >= 0 ? 'positive' : 'negative';
+              const changeIcon = change >= 0 ? '▲' : '▼';
+              statsTable.innerHTML += `
+                <tr>
+                  <td>Avg. Booking Value</td>
+                  <td>₱${gs.avg_booking_value.current.toFixed(2)}</td>
+                  <td>₱${gs.avg_booking_value.previous.toFixed(2)}</td>
+                  <td class="${changeClass}">${changeIcon} ${Math.abs(changePercent)}%</td>
+                </tr>
+              `;
+            }
+          }
+        }
+        
+        // Update performance metrics
+        if (data.performance_metrics) {
+          const pm = data.performance_metrics;
+          const checkinTimeEl = document.querySelector('.checkin-time');
+          const responseTimeEl = document.querySelector('.response-time');
+          
+          if (checkinTimeEl && pm.avg_checkin_time !== undefined) {
+            const minutes = Math.floor(pm.avg_checkin_time);
+            checkinTimeEl.innerHTML = `
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span>Average Time</span>
+                <strong>${minutes > 0 ? minutes + ' minutes' : 'N/A'}</strong>
+              </div>
+              <div style="background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+                <div style="background:#10b981; width:${Math.min(100, Math.max(0, 100 - (minutes / 60 * 100)))}%; height:100%;"></div>
+              </div>
+            `;
+          }
+          
+          if (responseTimeEl && pm.avg_response_time !== undefined) {
+            const minutes = Math.floor(pm.avg_response_time);
+            responseTimeEl.innerHTML = `
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span>Average Response</span>
+                <strong>${minutes > 0 ? minutes + ' minutes' : 'N/A'}</strong>
+              </div>
+              <div style="background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+                <div style="background:#667eea; width:${Math.min(100, Math.max(0, 100 - (minutes / 120 * 100)))}%; height:100%;"></div>
+              </div>
+            `;
+          }
         }
         
         showToast('Reports updated successfully!', 'success');

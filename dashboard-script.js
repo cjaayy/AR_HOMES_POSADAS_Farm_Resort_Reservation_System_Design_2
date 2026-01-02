@@ -2439,9 +2439,13 @@ function showReservationDetailsModal(r) {
               </div>
               <div class="detail-item">
                 <label>Duration</label>
-                <span>${r.number_of_days || 0} day(s) / ${
-      r.number_of_nights || 0
-    } night(s)</span>
+                <span>${(() => {
+                  const days = r.number_of_days;
+                  const nights = r.number_of_nights;
+                  if (days && days > 0) return days + " day(s)";
+                  if (nights && nights > 0) return nights + " night(s)";
+                  return "1 session";
+                })()}</span>
               </div>
               <div class="detail-item">
                 <label>Days Until Check-in</label>
