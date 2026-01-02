@@ -1386,24 +1386,10 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         </section>
 
         <!-- Staff Section -->
-        <section id="staff" class="content-section" style="background:#ffffff; border-radius:12px; padding:24px;">
-          <div class="section-header" style="margin-bottom:24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <h2 style="font-size:28px; font-weight:700; color:#1e293b; margin-bottom:8px;">Staff Members Management</h2>
-                <p style="color:#64748b; font-size:14px;">Manage resort staff and employee information</p>
-              </div>
-              <div style="display:flex; gap:12px; align-items:center;">
-                <button onclick="loadStaffList()" style="display:flex; align-items:center; gap:8px; padding:10px 20px; background:#f1f5f9; color:#667eea; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='linear-gradient(135deg,#667eea,#764ba2)'; this.style.color='white';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#667eea';">
-                  <i class="fas fa-sync-alt"></i>
-                  <span>Refresh</span>
-                </button>
-                <button class="btn-primary" onclick="window.open('create_staff.php', '_blank')" title="Create new staff member" style="display:flex; align-items:center; gap:8px; padding:10px 20px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; box-shadow:0 4px 12px rgba(102,126,234,0.3); transition:all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102,126,234,0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102,126,234,0.3)';">
-                  <i class="fas fa-user-plus"></i>
-                  <span>Create Staff</span>
-                </button>
-              </div>
-            </div>
+        <section id="staff" class="content-section">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Staff Members Management</h2>
+            <p style="color:#666; margin:0; font-size:16px;">Manage resort staff and employee information</p>
           </div>
 
           <?php if (isset($_SESSION['flash_success'])): ?>
@@ -1420,102 +1406,131 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           <?php endif; ?>
 
           <!-- Stats Overview -->
-          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; margin-bottom:28px;">
-            <div style="background:linear-gradient(135deg,#667eea,#764ba2); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(102,126,234,0.25); position:relative; overflow:hidden;">
-              <div style="position:absolute; top:-10px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
-              <div style="position:relative; z-index:1;">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                  <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-user-tie" style="font-size:24px; color:white;"></i>
-                  </div>
-                  <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Total Staff</div>
-                </div>
-                <div style="font-size:32px; font-weight:700; color:white; line-height:1;" id="staffTotalCount">—</div>
+          <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-user-tie"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="staffTotalCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Staff</div>
               </div>
             </div>
-
-            <div style="background:linear-gradient(135deg,#10b981,#059669); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(16,185,129,0.25); position:relative; overflow:hidden;">
-              <div style="position:absolute; top:-10px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
-              <div style="position:relative; z-index:1;">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                  <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-check-circle" style="font-size:24px; color:white;"></i>
-                  </div>
-                  <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Active Staff</div>
-                </div>
-                <div style="font-size:32px; font-weight:700; color:white; line-height:1;" id="staffActiveCount">—</div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="staffActiveCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Active Staff</div>
               </div>
             </div>
-
-            <div style="background:linear-gradient(135deg,#f59e0b,#d97706); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(245,158,11,0.25); position:relative; overflow:hidden;">
-              <div style="position:absolute; top:-10px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
-              <div style="position:relative; z-index:1;">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                  <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-briefcase" style="font-size:24px; color:white;"></i>
-                  </div>
-                  <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Departments</div>
-                </div>
-                <div style="font-size:32px; font-weight:700; color:white; line-height:1;" id="staffDepartmentCount">—</div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-briefcase"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="staffDepartmentCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Departments</div>
               </div>
             </div>
-
-            <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(59,130,246,0.25); position:relative; overflow:hidden;">
-              <div style="position:absolute; top:-10px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
-              <div style="position:relative; z-index:1;">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                  <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-clock" style="font-size:24px; color:white;"></i>
-                  </div>
-                  <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Online Now</div>
-                </div>
-                <div style="font-size:32px; font-weight:700; color:white; line-height:1;" id="staffOnlineCount">—</div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-user-clock"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="staffOnlineCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Online Now</div>
               </div>
             </div>
           </div>
 
-          <!-- Search and Filter Bar -->
-          <div style="background:#f8fafc; padding:20px; border-radius:12px; margin-bottom:24px; display:flex; gap:16px; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="flex:1; position:relative;">
-              <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:14px;"></i>
-              <input type="text" id="searchStaff" placeholder="Search by name, email, username, or position..." oninput="filterStaff()" style="width:100%; padding:12px 16px 12px 44px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; transition:all 0.3s; background:white;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';" />
+          <!-- Enhanced Filters Section -->
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="margin:0; font-size:16px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-filter" style="color:#11224e;"></i> Filter Staff
+              </h3>
+              <button onclick="staffClearFilters()" style="padding:6px 14px; background:#f1f5f9; border:none; border-radius:6px; font-size:13px; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.2s;">
+                <i class="fas fa-redo"></i> Clear Filters
+              </button>
             </div>
-            <select id="statusFilterStaff" onchange="filterStaff()" style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; cursor:pointer; background:white; transition:all 0.3s; min-width:150px;" onfocus="this.style.borderColor='#667eea';" onblur="this.style.borderColor='#e2e8f0';">
-              <option value="all">All Status</option>
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
-            </select>
-            <button onclick="filterStaff()" style="padding:12px 24px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:all 0.3s; white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102,126,234,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-              <i class="fas fa-filter" style="margin-right:8px;"></i>Apply Filters
-            </button>
+
+            <!-- Quick Status Filters -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:16px;">
+              <div class="filter-chip-enhanced active" onclick="staffQuickFilter('all')" id="staff-chip-all" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease; box-shadow:0 4px 16px rgba(17,34,78,0.3); background:#11224e;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-list"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:white;">All</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:white; min-width:32px; text-align:center;" id="staff-count-all">0</div>
+                </div>
+              </div>
+              <div class="filter-chip-enhanced" onclick="staffQuickFilter('active')" id="staff-chip-active" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-user-check"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Active</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="staff-count-active">0</div>
+                </div>
+              </div>
+              <div class="filter-chip-enhanced" onclick="staffQuickFilter('inactive')" id="staff-chip-inactive" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-user-slash"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Inactive</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="staff-count-inactive">0</div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Staff Table -->
-          <div style="background:white; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
-            <div style="overflow-x:auto;">
-              <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
-                <thead>
-                  <tr style="background:linear-gradient(135deg,#667eea,#764ba2);">
-                    <th style="width:4%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-hashtag"></i></th>
-                    <th style="width:14%; padding:16px 12px; text-align:left; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-user" style="margin-right:6px;"></i>Full Name</th>
-                    <th style="width:11%; padding:16px 12px; text-align:left; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-id-card" style="margin-right:6px;"></i>Username</th>
-                    <th style="width:16%; padding:16px 12px; text-align:left; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-envelope" style="margin-right:6px;"></i>Email</th>
-                    <th style="width:13%; padding:16px 12px; text-align:left; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-briefcase" style="margin-right:6px;"></i>Position</th>
-                    <th style="width:8%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-toggle-on" style="margin-right:6px;"></i>Status</th>
-                    <th style="width:11%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-calendar-plus" style="margin-right:6px;"></i>Created</th>
-                    <th style="width:11%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-sign-in-alt" style="margin-right:6px;"></i>Last Login</th>
-                    <th style="width:12%; padding:16px 12px; text-align:center; color:white; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-cog" style="margin-right:6px;"></i>Actions</th>
+          <div class="staff-container">
+            <div class="staff-header" style="padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+              <div class="search-box" style="flex:1; max-width:400px; position:relative;">
+                <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;"></i>
+                <input type="text" id="searchStaff" placeholder="Search by name, email, username, or position..." oninput="filterStaff()" style="width:100%; padding:14px 16px 14px 48px; border:2px solid #11224e; border-radius:12px; font-size:14px; transition:all 0.3s ease;" />
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:16px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <button onclick="loadStaffList()" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <span style="color:#64748b; font-size:14px;" id="staffLastUpdate">Last updated: Just now</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button onclick="window.open('create_staff.php', '_blank')" style="padding:12px 20px; background:linear-gradient(135deg, #11224e, #1e3a8a); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-user-plus"></i> Create Staff
+                </button>
+                <button onclick="exportStaffCSV()" style="padding:12px 20px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-file-excel"></i> Export
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow-x:auto; margin-bottom:20px;">
+              <table class="staff-table" id="staffTable" style="width:100%; border-collapse:separate; border-spacing:0;">
+                <thead style="background:#11224e; color:white;">
+                  <tr>
+                    <th style="padding:12px 10px; text-align:center; width:50px; font-size:12px;">#</th>
+                    <th style="padding:12px 10px; text-align:left; font-size:12px;"><i class="fas fa-user"></i> Full Name</th>
+                    <th style="padding:12px 8px; text-align:left; font-size:11px; width:100px;"><i class="fas fa-id-card"></i> Username</th>
+                    <th style="padding:12px 10px; text-align:left; font-size:12px;"><i class="fas fa-envelope"></i> Email</th>
+                    <th style="padding:12px 10px; text-align:left; font-size:12px;"><i class="fas fa-briefcase"></i> Position</th>
+                    <th style="padding:12px 10px; text-align:center; font-size:12px;"><i class="fas fa-toggle-on"></i> Status</th>
+                    <th style="padding:12px 10px; text-align:left; font-size:12px;"><i class="fas fa-calendar-plus"></i> Created</th>
+                    <th style="padding:12px 8px; text-align:left; font-size:11px; width:95px;"><i class="fas fa-sign-in-alt"></i> Last Login</th>
+                    <th style="padding:12px 10px; text-align:center; font-size:12px;"><i class="fas fa-cog"></i> Actions</th>
                   </tr>
                 </thead>
                 <tbody id="staffTableBody">
                   <tr>
                     <td colspan="9" style="text-align:center; padding:3rem;">
-                      <i class="fas fa-spinner fa-spin" style="font-size:2.5rem; color:#667eea;"></i>
-                      <p style="margin-top:1rem; color:#64748b; font-weight:500; font-size:15px;">Loading staff members...</p>
+                      <i class="fas fa-spinner fa-spin" style="font-size:48px; color:#11224e;"></i>
+                      <p style="margin-top:1rem; color:#64748b; font-weight:600; font-size:16px;">Loading staff members...</p>
                     </td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+              <div id="staffPaginationInfo" style="font-size:14px; color:#64748b; font-weight:500;"></div>
+              <div style="display:flex; gap:8px;">
+                <button id="staffPrevPage" onclick="staffChangePage(-1)" disabled style="padding:10px 16px; border:2px solid #e2e8f0; background:white; border-radius:8px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s;">&larr; Prev</button>
+                <button id="staffNextPage" onclick="staffChangePage(1)" disabled style="padding:10px 16px; border:2px solid #e2e8f0; background:white; border-radius:8px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s;">Next &rarr;</button>
+              </div>
             </div>
           </div>
         </section>
@@ -2310,8 +2325,14 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <p style="color:#94a3b8; font-size:13px; margin-top:8px;">Try adjusting your search criteria</p>
               </td>
             </tr>`;
+          updateStaffPagination();
           return;
         }
+
+        // Calculate pagination
+        const startIndex = (currentStaffPage - 1) * staffPerPage;
+        const endIndex = startIndex + staffPerPage;
+        const staffToDisplay = filteredStaff.slice(startIndex, endIndex);
 
         const getPositionIcon = (position) => {
           const pos = (position || '').toLowerCase();
@@ -2322,7 +2343,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           return '<i class="fas fa-user" style="color:#64748b;"></i>';
         };
 
-        const rows = filteredStaff.map((s, idx) => {
+        const rows = staffToDisplay.map((s, idx) => {
           const statusDot = s.is_active == 1 ? '<i class="fas fa-circle" style="font-size:6px; color:#10b981;"></i>' : '';
           const statusBadge = s.is_active == 1 
             ? `<span style="display:inline-flex; align-items:center; gap:${statusDot ? '4px' : '0'}; padding:6px 12px; background:linear-gradient(135deg,#10b981,#059669); color:white; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap;">${statusDot}${statusDot ? ' ' : ''}Active</span>`
@@ -2375,6 +2396,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         }).join('');
 
         tbody.innerHTML = rows;
+        updateStaffPagination();
       }
 
       function updateStaffStats() {
@@ -2397,6 +2419,158 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         animateCountUp('staffActiveCount', active);
         animateCountUp('staffDepartmentCount', departments.size);
         animateCountUp('staffOnlineCount', online);
+        
+        // Update filter counts
+        updateStaffFilterCounts();
+      }
+
+      // Quick filter for staff status with chip UI
+      function staffQuickFilter(status) {
+        // Update active chip styling
+        const chips = ['all', 'active', 'inactive'];
+        chips.forEach(s => {
+          const chip = document.getElementById(`staff-chip-${s}`);
+          if (chip) {
+            if (s === status) {
+              chip.style.background = '#11224e';
+              chip.style.boxShadow = '0 4px 16px rgba(17,34,78,0.3)';
+              chip.querySelector('span').style.color = 'white';
+              chip.querySelector('div[style*="background"]').style.background = 'rgba(255,255,255,0.25)';
+              chip.querySelector('div[style*="background"]').style.color = 'white';
+              chip.querySelectorAll('div')[2].style.color = 'white';
+            } else {
+              chip.style.background = 'white';
+              chip.style.boxShadow = 'none';
+              chip.querySelector('span').style.color = '#11224e';
+              chip.querySelector('div[style*="background"]').style.background = 'rgba(17,34,78,0.1)';
+              chip.querySelector('div[style*="background"]').style.color = '#11224e';
+              chip.querySelectorAll('div')[2].style.color = '#11224e';
+            }
+          }
+        });
+
+        // Apply filter
+        if (status === 'all') {
+          filteredStaff = [...allStaff];
+        } else if (status === 'active') {
+          filteredStaff = allStaff.filter(s => s.is_active == 1);
+        } else if (status === 'inactive') {
+          filteredStaff = allStaff.filter(s => s.is_active == 0);
+        }
+
+        // Also apply search if present
+        const searchTerm = document.getElementById('searchStaff')?.value.toLowerCase();
+        if (searchTerm) {
+          filteredStaff = filteredStaff.filter(staff => {
+            const searchText = [
+              staff.full_name || '',
+              staff.username || '',
+              staff.email || '',
+              staff.position || ''
+            ].join(' ').toLowerCase();
+            return searchText.includes(searchTerm);
+          });
+        }
+
+        renderStaffTable();
+      }
+
+      // Clear all staff filters
+      function staffClearFilters() {
+        document.getElementById('searchStaff').value = '';
+        staffQuickFilter('all');
+      }
+
+      // Update filter count badges
+      function updateStaffFilterCounts() {
+        const totalCount = allStaff.length;
+        const activeCount = allStaff.filter(s => s.is_active == 1).length;
+        const inactiveCount = allStaff.filter(s => s.is_active == 0).length;
+
+        const allBadge = document.getElementById('staff-count-all');
+        const activeBadge = document.getElementById('staff-count-active');
+        const inactiveBadge = document.getElementById('staff-count-inactive');
+
+        if (allBadge) allBadge.textContent = totalCount;
+        if (activeBadge) activeBadge.textContent = activeCount;
+        if (inactiveBadge) inactiveBadge.textContent = inactiveCount;
+      }
+
+      // Export staff to CSV
+      function exportStaffCSV() {
+        if (!filteredStaff || filteredStaff.length === 0) {
+          alert('No staff to export');
+          return;
+        }
+
+        const headers = ['Staff ID', 'Full Name', 'Username', 'Email', 'Position', 'Status', 'Created', 'Last Login'];
+        const rows = filteredStaff.map(s => [
+          s.admin_id,
+          s.full_name || '',
+          s.username || '',
+          s.email || '',
+          s.position || '',
+          s.is_active == 1 ? 'Active' : 'Inactive',
+          s.created_at || '',
+          s.last_login || 'Never'
+        ]);
+
+        const csvContent = [
+          headers.join(','),
+          ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `staff_export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showToast('Staff data exported successfully!', 'success');
+      }
+
+      // Pagination functions
+      let currentStaffPage = 1;
+      const staffPerPage = 10;
+
+      function staffChangePage(direction) {
+        const totalPages = Math.ceil(filteredStaff.length / staffPerPage);
+        const newPage = currentStaffPage + direction;
+        
+        if (newPage < 1 || newPage > totalPages) return;
+        
+        currentStaffPage = newPage;
+        renderStaffTable();
+      }
+
+      function updateStaffPagination() {
+        const totalPages = Math.ceil(filteredStaff.length / staffPerPage);
+        const start = (currentStaffPage - 1) * staffPerPage + 1;
+        const end = Math.min(currentStaffPage * staffPerPage, filteredStaff.length);
+        
+        const infoDiv = document.getElementById('staffPaginationInfo');
+        const prevBtn = document.getElementById('staffPrevPage');
+        const nextBtn = document.getElementById('staffNextPage');
+        
+        if (infoDiv) {
+          infoDiv.textContent = `Showing ${start}-${end} of ${filteredStaff.length} staff`;
+        }
+        
+        if (prevBtn) {
+          prevBtn.disabled = currentStaffPage === 1;
+          prevBtn.style.opacity = currentStaffPage === 1 ? '0.5' : '1';
+          prevBtn.style.cursor = currentStaffPage === 1 ? 'not-allowed' : 'pointer';
+        }
+        
+        if (nextBtn) {
+          nextBtn.disabled = currentStaffPage === totalPages || totalPages === 0;
+          nextBtn.style.opacity = (currentStaffPage === totalPages || totalPages === 0) ? '0.5' : '1';
+          nextBtn.style.cursor = (currentStaffPage === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer';
+        }
       }
 
       // Action functions for staff management
@@ -2666,7 +2840,14 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
       function filterStaff() {
         const q = (document.getElementById('searchStaff').value || '').toLowerCase();
-        const status = document.getElementById('statusFilterStaff').value;
+
+        // Get the currently active status filter from chips
+        let status = 'all';
+        if (document.getElementById('staff-chip-active')?.style.background === 'rgb(17, 34, 78)') {
+          status = 'active';
+        } else if (document.getElementById('staff-chip-inactive')?.style.background === 'rgb(17, 34, 78)') {
+          status = 'inactive';
+        }
 
         filteredStaff = allStaff.filter(s => {
           // Search filter
@@ -2682,14 +2863,16 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           }
 
           // Status filter
-          if (status !== 'all') {
-            const isActive = s.is_active == 1 ? '1' : '0';
-            if (isActive !== status) return false;
+          if (status === 'active') {
+            if (s.is_active != 1) return false;
+          } else if (status === 'inactive') {
+            if (s.is_active == 1) return false;
           }
 
           return true;
         });
 
+        currentStaffPage = 1;
         renderStaffTable();
       }
 
