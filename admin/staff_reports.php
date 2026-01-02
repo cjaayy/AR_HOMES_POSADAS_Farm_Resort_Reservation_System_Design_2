@@ -542,70 +542,78 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
           if (statsTable) {
             statsTable.innerHTML = '';
             
+            // Helper function to calculate change display
+            function getChangeDisplay(current, previous) {
+              const change = current - previous;
+              let changeText, changeClass;
+              
+              if (previous === 0 && current > 0) {
+                changeText = '▲ New';
+                changeClass = 'positive';
+              } else if (previous === 0 && current === 0) {
+                changeText = '— 0%';
+                changeClass = '';
+              } else if (previous > 0) {
+                const percent = ((change / previous) * 100).toFixed(1);
+                const icon = change >= 0 ? '▲' : '▼';
+                changeText = `${icon} ${Math.abs(percent)}%`;
+                changeClass = change >= 0 ? 'positive' : 'negative';
+              } else {
+                changeText = '— 0%';
+                changeClass = '';
+              }
+              
+              return { text: changeText, class: changeClass };
+            }
+            
             // Unique Guests
             if (gs.unique_guests) {
-              const change = gs.unique_guests.current - gs.unique_guests.previous;
-              const changePercent = gs.unique_guests.previous > 0 ? 
-                ((change / gs.unique_guests.previous) * 100).toFixed(1) : 0;
-              const changeClass = change >= 0 ? 'positive' : 'negative';
-              const changeIcon = change >= 0 ? '▲' : '▼';
+              const changeInfo = getChangeDisplay(gs.unique_guests.current, gs.unique_guests.previous);
               statsTable.innerHTML += `
                 <tr>
                   <td>Unique Guests</td>
                   <td>${gs.unique_guests.current}</td>
                   <td>${gs.unique_guests.previous}</td>
-                  <td class="${changeClass}">${changeIcon} ${Math.abs(changePercent)}%</td>
+                  <td class="${changeInfo.class}">${changeInfo.text}</td>
                 </tr>
               `;
             }
             
             // Total Bookings
             if (gs.total_bookings) {
-              const change = gs.total_bookings.current - gs.total_bookings.previous;
-              const changePercent = gs.total_bookings.previous > 0 ? 
-                ((change / gs.total_bookings.previous) * 100).toFixed(1) : 0;
-              const changeClass = change >= 0 ? 'positive' : 'negative';
-              const changeIcon = change >= 0 ? '▲' : '▼';
+              const changeInfo = getChangeDisplay(gs.total_bookings.current, gs.total_bookings.previous);
               statsTable.innerHTML += `
                 <tr>
                   <td>Total Bookings</td>
                   <td>${gs.total_bookings.current}</td>
                   <td>${gs.total_bookings.previous}</td>
-                  <td class="${changeClass}">${changeIcon} ${Math.abs(changePercent)}%</td>
+                  <td class="${changeInfo.class}">${changeInfo.text}</td>
                 </tr>
               `;
             }
             
             // Total Guests
             if (gs.total_guests) {
-              const change = gs.total_guests.current - gs.total_guests.previous;
-              const changePercent = gs.total_guests.previous > 0 ? 
-                ((change / gs.total_guests.previous) * 100).toFixed(1) : 0;
-              const changeClass = change >= 0 ? 'positive' : 'negative';
-              const changeIcon = change >= 0 ? '▲' : '▼';
+              const changeInfo = getChangeDisplay(gs.total_guests.current, gs.total_guests.previous);
               statsTable.innerHTML += `
                 <tr>
                   <td>Total Guests</td>
                   <td>${gs.total_guests.current}</td>
                   <td>${gs.total_guests.previous}</td>
-                  <td class="${changeClass}">${changeIcon} ${Math.abs(changePercent)}%</td>
+                  <td class="${changeInfo.class}">${changeInfo.text}</td>
                 </tr>
               `;
             }
             
             // Average Booking Value
             if (gs.avg_booking_value) {
-              const change = gs.avg_booking_value.current - gs.avg_booking_value.previous;
-              const changePercent = gs.avg_booking_value.previous > 0 ? 
-                ((change / gs.avg_booking_value.previous) * 100).toFixed(1) : 0;
-              const changeClass = change >= 0 ? 'positive' : 'negative';
-              const changeIcon = change >= 0 ? '▲' : '▼';
+              const changeInfo = getChangeDisplay(gs.avg_booking_value.current, gs.avg_booking_value.previous);
               statsTable.innerHTML += `
                 <tr>
                   <td>Avg. Booking Value</td>
-                  <td>₱${gs.avg_booking_value.current.toFixed(2)}</td>
-                  <td>₱${gs.avg_booking_value.previous.toFixed(2)}</td>
-                  <td class="${changeClass}">${changeIcon} ${Math.abs(changePercent)}%</td>
+                  <td>₱${gs.avg_booking_value.current.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                  <td>₱${gs.avg_booking_value.previous.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                  <td class="${changeInfo.class}">${changeInfo.text}</td>
                 </tr>
               `;
             }

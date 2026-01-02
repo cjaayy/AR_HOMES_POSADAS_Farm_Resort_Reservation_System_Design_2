@@ -207,17 +207,18 @@ try {
     // Get guest statistics (compare current week vs previous week)
     $guestStats = [];
     try {
-        $prevStart = date('Y-m-d', strtotime($start . ' -7 days'));
-        $prevEnd = date('Y-m-d', strtotime($end . ' -7 days'));
+        // Previous period: same duration, ending 1 day before current period starts
+        $prevEnd = date('Y-m-d', strtotime($start . ' -1 day'));
+        $prevStart = date('Y-m-d', strtotime($prevEnd . ' -6 days'));
         
-        // Current period stats (only FULLY PAID bookings)
+        // Current period stats (only FULLY PAID bookings) - by created_at date
         $currentSql = "SELECT 
                         COUNT(DISTINCT user_id) as unique_guests,
                         COUNT(*) as total_bookings,
                         SUM(number_of_guests) as total_guests,
                         AVG($priceColumn) as avg_booking_value
                       FROM reservations
-                      WHERE DATE(check_in_date) BETWEEN :start AND :end
+                      WHERE DATE(created_at) BETWEEN :start AND :end
                       AND status IN ('confirmed', 'checked_in', 'completed')
                       AND full_payment_verified = 1";
         $currentStmt = $conn->prepare($currentSql);
