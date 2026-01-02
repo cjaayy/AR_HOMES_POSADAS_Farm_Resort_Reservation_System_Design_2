@@ -489,17 +489,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               </div>
             </div>
           </div>
-
-          <!-- Database Info -->
-          <div class="dashboard-info">
-            <div class="info-card">
-              <i class="fas fa-database"></i>
-              <p>Connected to database: <strong><?php echo DB_NAME; ?></strong></p>
-              <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
-                Last updated: <span id="lastUpdated">Loading...</span>
-              </p>
-            </div>
-          </div>
         </section>
 
         <!-- Reservations Section -->
@@ -1891,10 +1880,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             
             // Update recent activities
             updateRecentActivities(data.recent_activities);
-            
-            // Update timestamp
-            const lastUpdated = new Date(data.timestamp);
-            document.getElementById('lastUpdated').textContent = lastUpdated.toLocaleString();
             
             console.log('✅ Dashboard UI updated successfully');
         }

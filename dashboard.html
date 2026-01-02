@@ -1495,16 +1495,17 @@
 
               <!-- Booking Form -->
               <form id="reservationForm" class="reservation-form">
-                <div class="form-section">
-                  <h3>Select Dates</h3>
+                <div class="form-section" style="margin-bottom: 0.75rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08)); border-radius: 10px; padding: 0.75rem; border-left: 3px solid #667eea;">
+                  <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: #667eea; display: flex; align-items: center; gap: 0.4rem;"><i class="fas fa-calendar-alt"></i> Select Dates</h3>
                   <div class="form-row">
                     <div class="form-group">
-                      <label for="checkInDate">Check-in Date *</label>
+                      <label for="checkInDate" style="font-size: 0.75rem; color: #555; font-weight: 600;">Check-in Date *</label>
                       <input
                         type="date"
                         id="checkInDate"
                         name="checkInDate"
                         required
+                        style="padding: 0.45rem 0.6rem; font-size: 0.8rem; max-width: 180px; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s ease;"
                       />
                     </div>
                     <!-- Duration field hidden - single session booking only -->
@@ -1517,114 +1518,110 @@
                   </div>
                 </div>
 
-                <div class="form-section">
-                  <h3>Group Details</h3>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label for="groupSize">Group Size *</label>
-                      <select id="groupSize" name="groupSize" required>
-                        <option value="">Select group size</option>
-                        <option value="5-10">5-10 people</option>
-                        <option value="11-20">11-20 people</option>
-                        <option value="21-30">21-30 people</option>
-                        <option value="31-40">31-40 people</option>
-                        <option value="41-50">41-50 people</option>
-                        <option value="50+">50+ people</option>
+                <div class="form-section" style="margin-bottom: 0.75rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08)); border-radius: 10px; padding: 0.75rem; border-left: 3px solid #764ba2;">
+                  <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: #764ba2; display: flex; align-items: center; gap: 0.4rem;"><i class="fas fa-users"></i> Group Details</h3>
+                  <div class="form-row" style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                    <div class="form-group" style="flex: 0 1 auto;">
+                      <label for="groupSize" style="font-size: 0.75rem; color: #555; font-weight: 600;"><i class="fas fa-user-friends" style="color: #667eea; margin-right: 0.25rem;"></i>Group Size *</label>
+                      <select id="groupSize" name="groupSize" required style="padding: 0.45rem 0.6rem; font-size: 0.8rem; max-width: 140px; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;">
+                        <option value="">Select size</option>
+                        <option value="5-10">5-10</option>
+                        <option value="11-20">11-20</option>
+                        <option value="21-30">21-30</option>
+                        <option value="31-40">31-40</option>
+                        <option value="41-50">41-50</option>
+                        <option value="50+">50+</option>
                       </select>
                     </div>
-                    <div class="form-group">
-                      <label for="groupType">Group Type *</label>
-                      <select id="groupType" name="groupType" required>
+                    <div class="form-group" style="flex: 0 1 auto;">
+                      <label for="groupType" style="font-size: 0.75rem; color: #555; font-weight: 600;"><i class="fas fa-tag" style="color: #764ba2; margin-right: 0.25rem;"></i>Group Type *</label>
+                      <select id="groupType" name="groupType" required style="padding: 0.45rem 0.6rem; font-size: 0.8rem; max-width: 140px; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;">
                         <option value="">Select type</option>
-                        <option value="family">Family Reunion</option>
-                        <option value="friends">Friends Getaway</option>
-                        <option value="corporate">Corporate Event</option>
-                        <option value="celebration">Special Celebration</option>
+                        <option value="family">Family</option>
+                        <option value="friends">Friends</option>
+                        <option value="corporate">Corporate</option>
+                        <option value="celebration">Celebration</option>
                         <option value="other">Other</option>
                       </select>
                     </div>
                   </div>
                   <div class="form-group">
-                    <label for="specialRequests"
-                      >Special Requests (Optional)</label
+                    <label for="specialRequests" style="font-size: 0.75rem; color: #555; font-weight: 600;"
+                      ><i class="fas fa-comment-dots" style="color: #667eea; margin-right: 0.25rem;"></i>Special Requests (Optional)</label
                     >
                     <textarea
                       id="specialRequests"
                       name="specialRequests"
-                      rows="3"
-                      placeholder="Any special requests, dietary requirements, or additional services needed..."
+                      rows="2"
+                      placeholder="Any special requests..."
+                      style="padding: 0.45rem 0.6rem; font-size: 0.8rem; max-width: 300px; resize: vertical; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"
                     ></textarea>
                   </div>
                 </div>
 
                 <!-- Price Summary -->
-                <div class="price-summary">
-                  <h3>Price Breakdown</h3>
-                  <div class="price-row total">
-                    <span>Package Price:</span>
-                    <span id="priceTotal">₱0.00</span>
+                <div class="price-summary" style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.08), rgba(32, 201, 151, 0.08)); border-radius: 10px; padding: 0.75rem; border-left: 3px solid #28a745; margin-bottom: 0.75rem;">
+                  <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: #28a745; display: flex; align-items: center; gap: 0.4rem;"><i class="fas fa-receipt"></i> Price Breakdown</h3>
+                  <div class="price-row total" style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed rgba(0,0,0,0.1); font-weight: 600;">
+                    <span><i class="fas fa-peso-sign" style="color: #28a745; margin-right: 0.25rem;"></i>Package Price:</span>
+                    <span id="priceTotal" style="color: #28a745; font-weight: 700;">₱0.00</span>
                   </div>
-                  <div class="price-row downpayment">
-                    <span>₱1,000 Downpayment Required:</span>
-                    <span id="priceDownpayment">₱0.00</span>
+                  <div class="price-row downpayment" style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed rgba(0,0,0,0.1); color: #ff8c00;">
+                    <span><i class="fas fa-hand-holding-usd" style="margin-right: 0.25rem;"></i>₱1,000 Downpayment:</span>
+                    <span id="priceDownpayment" style="font-weight: 600;">₱0.00</span>
                   </div>
-                  <div class="price-row">
-                    <span>Remaining Balance:</span>
-                    <span id="priceBalance">₱0.00</span>
+                  <div class="price-row" style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed rgba(0,0,0,0.1);">
+                    <span><i class="fas fa-wallet" style="color: #667eea; margin-right: 0.25rem;"></i>Remaining Balance:</span>
+                    <span id="priceBalance" style="font-weight: 600;">₱0.00</span>
                   </div>
-                  <div class="price-row security">
-                    <span>Security Bond (at check-in):</span>
-                    <span>₱2,000.00</span>
+                  <div class="price-row security" style="display: flex; justify-content: space-between; padding: 0.4rem 0; color: #17a2b8;">
+                    <span><i class="fas fa-shield-alt" style="margin-right: 0.25rem;"></i>Security Bond:</span>
+                    <span style="font-weight: 600;">₱2,000.00</span>
                   </div>
                 </div>
 
                 <!-- Payment Method -->
-                <div class="form-section">
-                  <h3>✅ Payment Method (PayMongo)</h3>
-                  <p style="color: #666; font-size: 14px; margin-bottom: 15px">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>GCash / Card / Online Banking</strong>
-                    <br />
-                    All payments are processed through PayMongo's secure
-                    checkout page. After submitting your booking, you will be
-                    redirected to a safe, encrypted payment page where you can
-                    pay using GCash, debit/credit card, or supported online
-                    banking.
+                <div class="form-section" style="margin-bottom: 0.75rem; background: linear-gradient(135deg, rgba(0, 123, 255, 0.08), rgba(0, 86, 179, 0.08)); border-radius: 10px; padding: 0.75rem; border-left: 3px solid #007bff;">
+                  <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: #007bff; display: flex; align-items: center; gap: 0.4rem;"><i class="fas fa-credit-card"></i> Payment Method</h3>
+                  <p style="color: #555; font-size: 0.75rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.7); padding: 0.5rem; border-radius: 6px;">
+                    <i class="fas fa-lock" style="color: #28a745; margin-right: 0.25rem;"></i>
+                    <strong>Secure PayMongo Checkout</strong> - GCash, Card, or Online Banking
                   </p>
-                  <div class="payment-methods">
-                    <label class="payment-option">
+                  <div class="payment-methods" style="display: flex; justify-content: flex-start;">
+                    <label class="payment-option" style="cursor: pointer;">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="gcash"
                         required
                         checked
+                        style="display: none;"
                       />
-                      <div class="payment-card">
-                        <i class="fas fa-mobile-alt"></i>
-                        <span>GCash / Card / Online Banking</span>
-                        <small>Secure PayMongo checkout</small>
+                      <div class="payment-card" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.6rem 1rem; border-radius: 8px; text-align: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); max-width: 200px;">
+                        <i class="fas fa-mobile-alt" style="font-size: 1.2rem; margin-bottom: 0.25rem; display: block;"></i>
+                        <span style="font-size: 0.8rem; font-weight: 600; display: block;">GCash / Card / Bank</span>
+                        <small style="font-size: 0.65rem; opacity: 0.9;"><i class="fas fa-lock"></i> Secure checkout</small>
                       </div>
                     </label>
                   </div>
                 </div>
 
                 <!-- Terms and Conditions -->
-                <div class="form-section">
-                  <label class="checkbox-label">
+                <div class="form-section" style="margin-bottom: 0.75rem; background: rgba(255, 193, 7, 0.1); border-radius: 10px; padding: 0.6rem; border-left: 3px solid #ffc107;">
+                  <label class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.8rem;">
                     <input
                       type="checkbox"
                       id="agreeTerms"
                       name="agreeTerms"
                       required
+                      style="width: 18px; height: 18px; accent-color: #667eea; cursor: pointer;"
                     />
-                    <span
-                      >I agree to the
-                      <a href="#" onclick="showBookingPolicy(); return false;"
-                        >booking policies</a
-                      >
-                      and house rules</span
-                    >
+                    <span style="color: #555;">
+                      <i class="fas fa-file-contract" style="color: #ffc107; margin-right: 0.25rem;"></i>
+                      I agree to the
+                      <a href="#" onclick="showBookingPolicy(); return false;" style="color: #667eea; font-weight: 600; text-decoration: none;">booking policies</a>
+                      and house rules
+                    </span>
                   </label>
                 </div>
 
