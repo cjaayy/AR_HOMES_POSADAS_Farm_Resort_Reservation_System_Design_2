@@ -607,7 +607,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             <div class="users-header" style="padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
               <div class="search-box" style="flex:1; max-width:400px; position:relative;">
                 <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;"></i>
-                <input type="text" id="adminSearchBox" placeholder="Search guest, room, or contact..." oninput="adminApplyFilters()" style="width:100%; padding:14px 16px 14px 48px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; transition:all 0.3s ease;" />
+                <input type="text" id="adminSearchBox" placeholder="Search guest, room, or contact..." oninput="adminApplyFilters()" style="width:100%; padding:14px 16px 14px 48px; border:2px solid #11224e; border-radius:12px; font-size:14px; transition:all 0.3s ease;" />
               </div>
             </div>
 
