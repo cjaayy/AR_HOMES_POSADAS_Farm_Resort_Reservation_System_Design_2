@@ -549,35 +549,35 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <div style="display:flex; align-items:center; gap:12px;">
                   <div style="width:36px; height:36px; background:rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-list"></i></div>
                   <span style="flex:1; font-size:14px; font-weight:600; color:white;">All</span>
-                  <div style="padding:4px 10px; background:rgba(255,255,255,0.25); border-radius:12px; font-size:12px; font-weight:700; color:white; min-width:32px; text-align:center;" id="admin-count-all">0</div>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:white; min-width:32px; text-align:center;" id="admin-count-all">0</div>
                 </div>
               </div>
               <div class="filter-chip-enhanced" onclick="adminQuickFilter('pending')" id="admin-chip-pending" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
                 <div style="display:flex; align-items:center; gap:12px;">
                   <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-clock"></i></div>
                   <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Pending</span>
-                  <div style="padding:4px 10px; background:rgba(17,34,78,0.1); border-radius:12px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-pending">0</div>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-pending">0</div>
                 </div>
               </div>
               <div class="filter-chip-enhanced" onclick="adminQuickFilter('confirmed')" id="admin-chip-confirmed" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
                 <div style="display:flex; align-items:center; gap:12px;">
                   <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-check"></i></div>
                   <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Confirmed</span>
-                  <div style="padding:4px 10px; background:rgba(17,34,78,0.1); border-radius:12px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-confirmed">0</div>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-confirmed">0</div>
                 </div>
               </div>
               <div class="filter-chip-enhanced" onclick="adminQuickFilter('completed')" id="admin-chip-completed" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
                 <div style="display:flex; align-items:center; gap:12px;">
                   <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-flag-checkered"></i></div>
                   <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Completed</span>
-                  <div style="padding:4px 10px; background:rgba(17,34,78,0.1); border-radius:12px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-completed">0</div>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-completed">0</div>
                 </div>
               </div>
               <div class="filter-chip-enhanced" onclick="adminQuickFilter('canceled')" id="admin-chip-canceled" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
                 <div style="display:flex; align-items:center; gap:12px;">
                   <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-ban"></i></div>
                   <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Canceled</span>
-                  <div style="padding:4px 10px; background:rgba(17,34,78,0.1); border-radius:12px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-canceled">0</div>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-canceled">0</div>
                 </div>
               </div>
             </div>
@@ -766,12 +766,12 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 chip.style.boxShadow = 'none';
                 chip.style.background = 'white';
                 const span = chip.querySelector('span');
-                const count = chip.querySelector('div:last-child');
+                const countDiv = chip.querySelector('div[id^="admin-count-"]');
                 const iconContainer = chip.querySelector('div > div:first-child');
                 if(span) span.style.color = '#11224e';
-                if(count) {
-                  count.style.background = 'transparent';
-                  count.style.color = '#11224e';
+                if(countDiv) {
+                  countDiv.style.background = 'transparent';
+                  countDiv.style.color = '#11224e';
                 }
                 if(iconContainer) {
                   iconContainer.style.background = 'rgba(17, 34, 78, 0.1)';
@@ -786,19 +786,17 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 activeChip.style.boxShadow = '0 4px 16px rgba(17, 34, 78, 0.2)';
                 activeChip.style.background = '#11224e';
                 const span = activeChip.querySelector('span');
-                const count = activeChip.querySelector('div:last-child');
+                const countDiv = document.getElementById(`admin-count-${status}`);
                 const iconContainer = activeChip.querySelector('div > div:first-child');
                 const icon = iconContainer ? iconContainer.querySelector('i') : null;
                 if(span) {
                   span.style.color = 'white';
                 }
-                if(count) {
-                  count.style.removeProperty('background');
-                  count.style.backgroundColor = 'transparent';
-                  count.style.removeProperty('color');
-                  count.style.color = 'white';
-                  count.style.fontWeight = '700';
-                  count.setAttribute('style', count.getAttribute('style').replace(/background:[^;]+;?/gi, '').replace(/color:[^;]+;?/gi, '') + 'background:transparent!important;color:white!important;font-weight:700;');
+                if(countDiv) {
+                  countDiv.style.background = 'transparent';
+                  countDiv.style.color = 'white';
+                  countDiv.style.fontWeight = '700';
+                  countDiv.style.borderRadius = '0';
                 }
                 if(iconContainer) {
                   iconContainer.style.background = 'transparent';
