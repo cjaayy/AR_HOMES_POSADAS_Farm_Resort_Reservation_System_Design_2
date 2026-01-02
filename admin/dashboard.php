@@ -924,8 +924,24 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                   <td style="padding:16px;">
                     <div style="font-weight:700; color:#1e293b; font-size:15px;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
                     <div style="font-size:11px; color:#64748b;">Down: ₱${parseFloat(r.downpayment_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
-                    <div style="font-size:10px; color:${r.downpayment_verified == 1 ? '#10b981' : (r.downpayment_paid ? '#f59e0b' : '#ef4444')}; font-weight:600;">
-                      ${r.downpayment_verified == 1 ? '✓ Verified' : (r.downpayment_paid ? '⏱ Pending' : '✗ Unpaid')}
+                    <div style="font-size:10px; color:${(() => {
+                      const isFullyPaid = r.full_payment_verified == 1;
+                      const isDownpaymentVerified = r.downpayment_verified == 1;
+                      if (isFullyPaid) return '#10b981';
+                      if (r.full_payment_paid) return '#f59e0b';
+                      if (isDownpaymentVerified) return '#3b82f6';
+                      if (r.downpayment_paid) return '#f59e0b';
+                      return '#ef4444';
+                    })()}; font-weight:600;">
+                      ${(() => {
+                        const isFullyPaid = r.full_payment_verified == 1;
+                        const isDownpaymentVerified = r.downpayment_verified == 1;
+                        if (isFullyPaid) return '✓ Fully Paid';
+                        if (r.full_payment_paid) return '⏱ Full Pending';
+                        if (isDownpaymentVerified) return '◐ Partial';
+                        if (r.downpayment_paid) return '⏱ DP Pending';
+                        return '✗ Unpaid';
+                      })()}
                     </div>
                   </td>
                   <td style="padding:16px 12px; min-width:180px;">
@@ -1085,14 +1101,20 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                         <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Total Amount</div>
                         <div style="font-size:18px; font-weight:700; color:#1e293b;">₱${parseFloat(r.total_amount||0).toLocaleString('en-US', {minimumFractionDigits:2})}</div>
                         <div style="font-size:11px; font-weight:600; color:${(() => {
-                          const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
                           const isFullyPaid = r.full_payment_verified == 1;
-                          return actualRemaining <= 0 || isFullyPaid ? '#10b981' : (r.full_payment_paid ? '#f59e0b' : '#ef4444');
+                          const isDownpaymentVerified = r.downpayment_verified == 1;
+                          if (isFullyPaid) return '#10b981';
+                          if (r.full_payment_paid) return '#f59e0b';
+                          if (isDownpaymentVerified) return '#3b82f6';
+                          return '#ef4444';
                         })()}; margin-top:4px;">
                           ${(() => {
-                            const actualRemaining = parseFloat(r.total_amount||0) - parseFloat(r.downpayment_amount||0);
                             const isFullyPaid = r.full_payment_verified == 1;
-                            return actualRemaining <= 0 || isFullyPaid ? '✓ Fully Paid' : (r.full_payment_paid ? '⏱ Pending Verification' : '✗ Unpaid');
+                            const isDownpaymentVerified = r.downpayment_verified == 1;
+                            if (isFullyPaid) return '✓ Fully Paid';
+                            if (r.full_payment_paid) return '⏱ Pending Verification';
+                            if (isDownpaymentVerified) return '◐ Partially Paid';
+                            return '✗ Unpaid';
                           })()}
                         </div>
                       </div>
