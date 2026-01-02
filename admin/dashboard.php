@@ -502,32 +502,32 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
           <!-- Stats Overview -->
           <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
-            <div class="stat-card-res" style="background:linear-gradient(135deg, #667eea, #764ba2); color:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease;">
-              <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-calendar-check"></i></div>
               <div>
-                <div style="font-size:32px; font-weight:700; margin-bottom:4px;" id="adminTotalReservations">0</div>
-                <div style="font-size:14px; opacity:0.95; font-weight:500;">Total Reservations</div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminTotalReservations">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Reservations</div>
               </div>
             </div>
-            <div class="stat-card-res" style="background:linear-gradient(135deg, #10b981, #059669); color:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease;">
-              <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-check-circle"></i></div>
               <div>
-                <div style="font-size:32px; font-weight:700; margin-bottom:4px;" id="adminConfirmedCount">0</div>
-                <div style="font-size:14px; opacity:0.95; font-weight:500;">Confirmed</div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminConfirmedCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Confirmed</div>
               </div>
             </div>
-            <div class="stat-card-res" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease;">
-              <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;"><i class="fas fa-clock"></i></div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-clock"></i></div>
               <div>
-                <div style="font-size:32px; font-weight:700; margin-bottom:4px;" id="adminPendingCount">0</div>
-                <div style="font-size:14px; opacity:0.95; font-weight:500;">Pending</div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminPendingCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Pending</div>
               </div>
             </div>
-            <div class="stat-card-res" style="background:linear-gradient(135deg, #ef4444, #dc2626); color:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease;">
-              <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-times-circle"></i></div>
               <div>
-                <div style="font-size:32px; font-weight:700; margin-bottom:4px;" id="adminCanceledCount">0</div>
-                <div style="font-size:14px; opacity:0.95; font-weight:500;">Canceled</div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="adminCanceledCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Canceled</div>
               </div>
             </div>
           </div>
@@ -545,39 +545,39 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
             <!-- Quick Status Filters -->
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:16px;">
-              <div class="filter-chip-enhanced active" onclick="adminQuickFilter('all')" id="admin-chip-all" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #667eea; border-radius:12px; transition:all 0.3s ease; box-shadow:0 4px 16px rgba(102,126,234,0.3); background:linear-gradient(135deg, #667eea, #764ba2);">
+              <div class="filter-chip-enhanced active" onclick="adminQuickFilter('all')" id="admin-chip-all" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease; box-shadow:0 4px 16px rgba(17,34,78,0.3); background:#11224e;">
                 <div style="display:flex; align-items:center; gap:12px;">
                   <div style="width:36px; height:36px; background:rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-list"></i></div>
                   <span style="flex:1; font-size:14px; font-weight:600; color:white;">All</span>
                   <div style="padding:4px 10px; background:rgba(255,255,255,0.25); border-radius:12px; font-size:12px; font-weight:700; color:white; min-width:32px; text-align:center;" id="admin-count-all">0</div>
                 </div>
               </div>
-              <div class="filter-chip-enhanced" onclick="adminQuickFilter('pending')" id="admin-chip-pending" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; transition:all 0.3s ease;">
+              <div class="filter-chip-enhanced" onclick="adminQuickFilter('pending')" id="admin-chip-pending" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                  <div style="width:36px; height:36px; background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-clock"></i></div>
-                  <span style="flex:1; font-size:14px; font-weight:600; color:#475569;">Pending</span>
-                  <div style="padding:4px 10px; background:rgba(0,0,0,0.05); border-radius:12px; font-size:12px; font-weight:700; color:#64748b; min-width:32px; text-align:center;" id="admin-count-pending">0</div>
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-clock"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Pending</span>
+                  <div style="padding:4px 10px; background:rgba(17,34,78,0.1); border-radius:12px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-pending">0</div>
                 </div>
               </div>
-              <div class="filter-chip-enhanced" onclick="adminQuickFilter('confirmed')" id="admin-chip-confirmed" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; transition:all 0.3s ease;">
+              <div class="filter-chip-enhanced" onclick="adminQuickFilter('confirmed')" id="admin-chip-confirmed" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                  <div style="width:36px; height:36px; background:linear-gradient(135deg, #10b981, #059669); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-check"></i></div>
-                  <span style="flex:1; font-size:14px; font-weight:600; color:#475569;">Confirmed</span>
-                  <div style="padding:4px 10px; background:rgba(0,0,0,0.05); border-radius:12px; font-size:12px; font-weight:700; color:#64748b; min-width:32px; text-align:center;" id="admin-count-confirmed">0</div>
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-check"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Confirmed</span>
+                  <div style="padding:4px 10px; background:rgba(17,34,78,0.1); border-radius:12px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-confirmed">0</div>
                 </div>
               </div>
-              <div class="filter-chip-enhanced" onclick="adminQuickFilter('completed')" id="admin-chip-completed" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; transition:all 0.3s ease;">
+              <div class="filter-chip-enhanced" onclick="adminQuickFilter('completed')" id="admin-chip-completed" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                  <div style="width:36px; height:36px; background:linear-gradient(135deg, #3b82f6, #2563eb); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-flag-checkered"></i></div>
-                  <span style="flex:1; font-size:14px; font-weight:600; color:#475569;">Completed</span>
-                  <div style="padding:4px 10px; background:rgba(0,0,0,0.05); border-radius:12px; font-size:12px; font-weight:700; color:#64748b; min-width:32px; text-align:center;" id="admin-count-completed">0</div>
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-flag-checkered"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Completed</span>
+                  <div style="padding:4px 10px; background:rgba(17,34,78,0.1); border-radius:12px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-completed">0</div>
                 </div>
               </div>
-              <div class="filter-chip-enhanced" onclick="adminQuickFilter('canceled')" id="admin-chip-canceled" style="cursor:pointer; padding:14px 16px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; transition:all 0.3s ease;">
+              <div class="filter-chip-enhanced" onclick="adminQuickFilter('canceled')" id="admin-chip-canceled" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                  <div style="width:36px; height:36px; background:linear-gradient(135deg, #ef4444, #dc2626); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-ban"></i></div>
-                  <span style="flex:1; font-size:14px; font-weight:600; color:#475569;">Canceled</span>
-                  <div style="padding:4px 10px; background:rgba(0,0,0,0.05); border-radius:12px; font-size:12px; font-weight:700; color:#64748b; min-width:32px; text-align:center;" id="admin-count-canceled">0</div>
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-ban"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Canceled</span>
+                  <div style="padding:4px 10px; background:rgba(17,34,78,0.1); border-radius:12px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="admin-count-canceled">0</div>
                 </div>
               </div>
             </div>
@@ -762,24 +762,24 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               adminCurrentQuickFilter = status;
               document.querySelectorAll('.filter-chip-enhanced').forEach(chip => {
                 chip.classList.remove('active');
-                chip.style.border = '2px solid #e2e8f0';
+                chip.style.border = '2px solid #11224e';
                 chip.style.boxShadow = 'none';
-                chip.style.background = '#f8fafc';
+                chip.style.background = 'white';
                 const span = chip.querySelector('span');
                 const count = chip.querySelector('div:last-child');
-                if(span) span.style.color = '#475569';
+                if(span) span.style.color = '#11224e';
                 if(count) {
-                  count.style.background = 'rgba(0,0,0,0.05)';
-                  count.style.color = '#64748b';
+                  count.style.background = 'rgba(17, 34, 78, 0.1)';
+                  count.style.color = '#11224e';
                 }
               });
               
               const activeChip = document.getElementById(`admin-chip-${status}`);
               if(activeChip){
                 activeChip.classList.add('active');
-                activeChip.style.border = '2px solid #667eea';
-                activeChip.style.boxShadow = '0 4px 16px rgba(102,126,234,0.3)';
-                activeChip.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                activeChip.style.border = '2px solid #11224e';
+                activeChip.style.boxShadow = '0 4px 16px rgba(17, 34, 78, 0.2)';
+                activeChip.style.background = '#11224e';
                 const span = activeChip.querySelector('span');
                 const count = activeChip.querySelector('div:last-child');
                 if(span) span.style.color = 'white';
