@@ -1060,6 +1060,9 @@ async function loadUsers() {
       // Update statistics
       updateUserStatistics();
 
+      // Update filter counts
+      updateUserFilterCounts();
+
       // Display users
       displayUsers();
     } else {
@@ -1117,6 +1120,83 @@ function animateCountUp(elementId, targetValue) {
       element.textContent = newValue;
     }
   }, stepDuration);
+}
+
+// Quick filter for user status with chip UI
+function userQuickFilter(status) {
+  // Update active chip styling
+  const chips = ["all", "active", "inactive"];
+  chips.forEach((s) => {
+    const chip = document.getElementById(`user-chip-${s}`);
+    if (chip) {
+      if (s === status) {
+        chip.style.background = "#11224e";
+        chip.style.boxShadow = "0 4px 16px rgba(17,34,78,0.3)";
+        chip.querySelector("span").style.color = "white";
+        chip.querySelector('div[style*="background"]').style.background =
+          "rgba(255,255,255,0.25)";
+        chip.querySelector('div[style*="background"]').style.color = "white";
+        chip.querySelectorAll("div")[2].style.color = "white";
+      } else {
+        chip.style.background = "white";
+        chip.style.boxShadow = "none";
+        chip.querySelector("span").style.color = "#11224e";
+        chip.querySelector('div[style*="background"]').style.background =
+          "rgba(17,34,78,0.1)";
+        chip.querySelector('div[style*="background"]').style.color = "#11224e";
+        chip.querySelectorAll("div")[2].style.color = "#11224e";
+      }
+    }
+  });
+
+  // Apply filter
+  if (status === "all") {
+    filteredUsers = [...allUsers];
+  } else if (status === "active") {
+    filteredUsers = allUsers.filter((u) => u.is_active == 1);
+  } else if (status === "inactive") {
+    filteredUsers = allUsers.filter((u) => u.is_active == 0);
+  }
+
+  // Also apply search if present
+  const searchTerm = document
+    .getElementById("searchUsers")
+    ?.value.toLowerCase();
+  if (searchTerm) {
+    filteredUsers = filteredUsers.filter((user) => {
+      return (
+        user.full_name.toLowerCase().includes(searchTerm) ||
+        user.username.toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm) ||
+        user.phone_number.includes(searchTerm)
+      );
+    });
+  }
+
+  currentPage = 1;
+  displayUsers();
+  updateUserFilterCounts();
+}
+
+// Clear all user filters
+function userClearFilters() {
+  document.getElementById("searchUsers").value = "";
+  userQuickFilter("all");
+}
+
+// Update filter count badges
+function updateUserFilterCounts() {
+  const totalCount = allUsers.length;
+  const activeCount = allUsers.filter((u) => u.is_active == 1).length;
+  const inactiveCount = allUsers.filter((u) => u.is_active == 0).length;
+
+  const allBadge = document.getElementById("user-count-all");
+  const activeBadge = document.getElementById("user-count-active");
+  const inactiveBadge = document.getElementById("user-count-inactive");
+
+  if (allBadge) allBadge.textContent = totalCount;
+  if (activeBadge) activeBadge.textContent = activeCount;
+  if (inactiveBadge) inactiveBadge.textContent = inactiveCount;
 }
 
 // Display users in the table
@@ -1240,14 +1320,28 @@ function displayUsers() {
   updatePagination();
 }
 
-// Filter users based on search and filters
+// Filter users based on search (status is handled by chips)
 function filterUsers() {
   const searchTerm = document.getElementById("searchUsers").value.toLowerCase();
-  const statusFilter = document.getElementById("statusFilter").value;
+
+  // Get the currently active status filter from chips
+  let statusFilter = "all";
+  if (
+    document.getElementById("user-chip-active")?.style.background ===
+    "rgb(17, 34, 78)"
+  ) {
+    statusFilter = "active";
+  } else if (
+    document.getElementById("user-chip-inactive")?.style.background ===
+    "rgb(17, 34, 78)"
+  ) {
+    statusFilter = "inactive";
+  }
 
   filteredUsers = allUsers.filter((user) => {
     // Search filter
     const matchesSearch =
+      !searchTerm ||
       user.full_name.toLowerCase().includes(searchTerm) ||
       user.username.toLowerCase().includes(searchTerm) ||
       user.email.toLowerCase().includes(searchTerm) ||
@@ -1272,64 +1366,50 @@ function filterUsers() {
 // Update pagination controls
 function updatePagination() {
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-  const pagination = document.getElementById("usersPagination");
+  const startIndex = (currentPage - 1) * usersPerPage + 1;
+  const endIndex = Math.min(currentPage * usersPerPage, filteredUsers.length);
 
-  if (totalPages <= 1) {
-    pagination.innerHTML = "";
-    return;
+  // Update pagination info
+  const paginationInfo = document.getElementById("usersPaginationInfo");
+  if (paginationInfo) {
+    paginationInfo.textContent = `Showing ${startIndex}-${endIndex} of ${filteredUsers.length} users`;
   }
 
-  let paginationHTML = `
-    <button onclick="changePage(${currentPage - 1})" ${
-    currentPage === 1 ? "disabled" : ""
-  }>
-      <i class="fas fa-chevron-left"></i> Previous
-    </button>
-  `;
+  // Update prev/next buttons
+  const prevBtn = document.getElementById("usersPrevPage");
+  const nextBtn = document.getElementById("usersNextPage");
 
-  // Show page numbers
-  for (let i = 1; i <= totalPages; i++) {
-    if (
-      i === 1 ||
-      i === totalPages ||
-      (i >= currentPage - 2 && i <= currentPage + 2)
-    ) {
-      paginationHTML += `
-        <button 
-          onclick="changePage(${i})" 
-          class="${i === currentPage ? "active" : ""}">
-          ${i}
-        </button>
-      `;
-    } else if (i === currentPage - 3 || i === currentPage + 3) {
-      paginationHTML += '<span style="padding: 0 0.5rem;">...</span>';
-    }
+  if (prevBtn) {
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.style.opacity = currentPage === 1 ? "0.5" : "1";
+    prevBtn.style.cursor = currentPage === 1 ? "not-allowed" : "pointer";
   }
 
-  paginationHTML += `
-    <button onclick="changePage(${currentPage + 1})" ${
-    currentPage === totalPages ? "disabled" : ""
-  }>
-      Next <i class="fas fa-chevron-right"></i>
-    </button>
-  `;
-
-  pagination.innerHTML = paginationHTML;
+  if (nextBtn) {
+    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+    nextBtn.style.opacity =
+      currentPage === totalPages || totalPages === 0 ? "0.5" : "1";
+    nextBtn.style.cursor =
+      currentPage === totalPages || totalPages === 0
+        ? "not-allowed"
+        : "pointer";
+  }
 }
 
 // Change page
-function changePage(page) {
+function usersChangePage(delta) {
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const newPage = currentPage + delta;
 
-  if (page < 1 || page > totalPages) return;
+  if (newPage < 1 || newPage > totalPages) return;
 
-  currentPage = page;
+  currentPage = newPage;
   displayUsers();
 
   // Scroll to top of table
   document
     .querySelector(".users-container")
-    .scrollIntoView({ behavior: "smooth" });
+    ?.scrollIntoView({ behavior: "smooth" });
 }
 
 // View user details
@@ -1674,9 +1754,56 @@ function escapeHtml(text) {
 // Make functions globally available
 window.loadUsers = loadUsers;
 window.filterUsers = filterUsers;
-window.changePage = changePage;
+window.userQuickFilter = userQuickFilter;
+window.userClearFilters = userClearFilters;
+window.usersChangePage = usersChangePage;
+window.exportUsersCSV = exportUsersCSV;
 window.viewUser = viewUser;
 window.editUser = editUser;
 window.toggleUserStatus = toggleUserStatus;
 window.deleteUser = deleteUser;
 window.closeUserModal = closeUserModal;
+
+// Export users to CSV
+function exportUsersCSV() {
+  if (!filteredUsers || filteredUsers.length === 0) {
+    alert("No users to export");
+    return;
+  }
+
+  const headers = [
+    "User ID",
+    "Full Name",
+    "Username",
+    "Email",
+    "Phone",
+    "Status",
+    "Member Since",
+    "Last Login",
+  ];
+  const rows = filteredUsers.map((u) => [
+    u.user_id,
+    u.full_name,
+    u.username,
+    u.email,
+    u.phone_formatted,
+    u.is_active == 1 ? "Active" : "Inactive",
+    u.member_since,
+    u.last_login_formatted,
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `users_export_${new Date().toISOString().split("T")[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}

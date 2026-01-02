@@ -1265,73 +1265,109 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             <p style="color:#666; margin:0; font-size:16px;">Manage guest accounts, loyalty levels, and permissions</p>
           </div>
 
-          <!-- Enhanced Stats Cards -->
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
-            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #667eea; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
-              <div style="display:flex; align-items:center; gap:16px;">
-                <div style="width:56px; height:56px; background:linear-gradient(135deg, #667eea, #764ba2); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-users"></i></div>
-                <div>
-                  <div style="font-size:28px; font-weight:700; color:#1e293b;" id="manageTotalUsersCount"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:#667eea;"></i></div>
-                  <div style="font-size:14px; color:#64748b; font-weight:500;">Total Users</div>
-                </div>
+          <!-- Stats Overview -->
+          <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-users"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="manageTotalUsersCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Users</div>
               </div>
             </div>
-            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #10b981; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
-              <div style="display:flex; align-items:center; gap:16px;">
-                <div style="width:56px; height:56px; background:linear-gradient(135deg, #10b981, #059669); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-user-check"></i></div>
-                <div>
-                  <div style="font-size:28px; font-weight:700; color:#1e293b;" id="manageActiveUsersCount"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:#10b981;"></i></div>
-                  <div style="font-size:14px; color:#64748b; font-weight:500;">Active Users</div>
-                </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-user-check"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="manageActiveUsersCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Active Users</div>
               </div>
             </div>
-            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #3b82f6; transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';">
-              <div style="display:flex; align-items:center; gap:16px;">
-                <div style="width:56px; height:56px; background:linear-gradient(135deg, #3b82f6, #2563eb); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;"><i class="fas fa-user-plus"></i></div>
-                <div>
-                  <div style="font-size:28px; font-weight:700; color:#1e293b;" id="manageNewUsersCount"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:#3b82f6;"></i></div>
-                  <div style="font-size:14px; color:#64748b; font-weight:500;">New This Month</div>
-                </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-user-plus"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="manageNewUsersCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">New This Month</div>
               </div>
             </div>
           </div>
 
-          <!-- Enhanced Search and Filter Bar -->
+          <!-- Enhanced Filters Section -->
           <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
-            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
-              <div style="flex:1; min-width:280px; position:relative;">
-                <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;"></i>
-                <input type="text" id="searchUsers" placeholder="Search users by name, email, or username..." style="width:100%; padding:14px 16px 14px 48px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; transition:all 0.3s ease;" onkeyup="filterUsers()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="margin:0; font-size:16px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-filter" style="color:#11224e;"></i> Filter Users
+              </h3>
+              <button onclick="userClearFilters()" style="padding:6px 14px; background:#f1f5f9; border:none; border-radius:6px; font-size:13px; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.2s;">
+                <i class="fas fa-redo"></i> Clear Filters
+              </button>
+            </div>
+
+            <!-- Quick Status Filters -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:16px;">
+              <div class="filter-chip-enhanced active" onclick="userQuickFilter('all')" id="user-chip-all" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease; box-shadow:0 4px 16px rgba(17,34,78,0.3); background:#11224e;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-list"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:white;">All</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:white; min-width:32px; text-align:center;" id="user-count-all">0</div>
+                </div>
               </div>
-              <select id="statusFilter" onchange="filterUsers()" style="padding:14px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; font-weight:500; color:#475569; background:white; cursor:pointer; transition:all 0.3s ease; min-width:140px;">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+              <div class="filter-chip-enhanced" onclick="userQuickFilter('active')" id="user-chip-active" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-user-check"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Active</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="user-count-active">0</div>
+                </div>
+              </div>
+              <div class="filter-chip-enhanced" onclick="userQuickFilter('inactive')" id="user-chip-inactive" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-user-slash"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Inactive</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="user-count-inactive">0</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Enhanced Table -->
           <div class="users-container">
-            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow:visible;">
-              <table class="users-table" id="usersTable" style="width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0;">
-                <thead style="background:linear-gradient(135deg, #667eea, #764ba2); color:white;">
+            <div class="users-header" style="padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+              <div class="search-box" style="flex:1; max-width:400px; position:relative;">
+                <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;"></i>
+                <input type="text" id="searchUsers" placeholder="Search users by name, email, or username..." oninput="filterUsers()" style="width:100%; padding:14px 16px 14px 48px; border:2px solid #11224e; border-radius:12px; font-size:14px; transition:all 0.3s ease;" />
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:16px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <button onclick="loadUsers()" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <span style="color:#64748b; font-size:14px;" id="usersLastUpdate">Last updated: Just now</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button onclick="exportUsersCSV()" style="padding:12px 20px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-file-excel"></i> Export
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow-x:auto; margin-bottom:20px;">
+              <table class="users-table" id="usersTable" style="width:100%; border-collapse:separate; border-spacing:0;">
+                <thead style="background:#11224e; color:white;">
                   <tr>
-                    <th style="padding:14px 10px; text-align:center; width:3%; font-size:13px;">#</th>
-                    <th style="padding:14px 10px; text-align:left; width:14%; font-size:13px;"><i class="fas fa-user"></i> Full Name</th>
-                    <th style="padding:14px 10px; text-align:center; width:11%; font-size:13px;"><i class="fas fa-at"></i> Username</th>
-                    <th style="padding:14px 10px; text-align:center; width:15%; font-size:13px;"><i class="fas fa-envelope"></i> Email</th>
-                    <th style="padding:14px 10px; text-align:left; width:11%; font-size:13px;"><i class="fas fa-phone"></i> Phone</th>
-                    <th style="padding:14px 8px; text-align:center; width:8%; font-size:13px;"><i class="fas fa-toggle-on"></i> Status</th>
-                    <th style="padding:14px 8px; text-align:center; width:12%; font-size:13px;"><i class="fas fa-calendar-alt"></i> Member Since</th>
-                    <th style="padding:14px 8px; text-align:center; width:12%; font-size:13px;"><i class="fas fa-clock"></i> Last Login</th>
-                    <th style="padding:14px 16px 14px 8px; text-align:center; width:14%; font-size:13px;"><i class="fas fa-cog"></i> Actions</th>
+                    <th style="padding:18px 16px; text-align:center; width:60px;">#</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-user"></i> Full Name</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-at"></i> Username</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-envelope"></i> Email</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-phone"></i> Phone</th>
+                    <th style="padding:18px 16px; text-align:center;"><i class="fas fa-toggle-on"></i> Status</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-alt"></i> Member Since</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-clock"></i> Last Login</th>
+                    <th style="padding:18px 16px; text-align:center;"><i class="fas fa-cog"></i> Actions</th>
                   </tr>
                 </thead>
                 <tbody id="usersTableBody">
                   <tr>
                     <td colspan="9" style="text-align: center; padding: 3rem;">
-                      <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #667eea;"></i>
+                      <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #11224e;"></i>
                       <p style="margin-top: 1rem; color: #64748b; font-size:16px; font-weight:600;">Loading users...</p>
                     </td>
                   </tr>
@@ -1339,8 +1375,12 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               </table>
             </div>
 
-            <div class="pagination" id="usersPagination" style="margin-top:20px;">
-              <!-- Pagination will be generated dynamically -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+              <div id="usersPaginationInfo" style="font-size:14px; color:#64748b; font-weight:500;"></div>
+              <div style="display:flex; gap:8px;">
+                <button id="usersPrevPage" onclick="usersChangePage(-1)" disabled style="padding:10px 16px; border:2px solid #e2e8f0; background:white; border-radius:8px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s;">&larr; Prev</button>
+                <button id="usersNextPage" onclick="usersChangePage(1)" disabled style="padding:10px 16px; border:2px solid #e2e8f0; background:white; border-radius:8px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s;">Next &rarr;</button>
+              </div>
             </div>
           </div>
         </section>
