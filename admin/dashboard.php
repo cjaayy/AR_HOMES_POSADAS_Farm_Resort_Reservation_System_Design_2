@@ -619,9 +619,6 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 <span style="color:#64748b; font-size:14px;" id="adminLastUpdate">Last updated: Just now</span>
               </div>
               <div style="display:flex; gap:8px;">
-                <button class="btn-primary" onclick="adminShowCreateForm()" style="display:flex; align-items:center; gap:8px; padding:12px 20px; border-radius:10px;">
-                  <i class="fas fa-plus"></i> Add Walk-in
-                </button>
                 <button onclick="adminExportCSV()" style="padding:12px 20px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
                   <i class="fas fa-file-excel"></i> Export
                 </button>
@@ -630,7 +627,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
             <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow:hidden; margin-bottom:20px;">
               <table class="users-table" id="adminReservationsTable" style="width:100%; border-collapse:separate; border-spacing:0;">
-                <thead style="background:linear-gradient(135deg, #667eea, #764ba2); color:white;">
+                <thead style="background:#11224e; color:white;">
                   <tr>
                     <th style="padding:18px 16px; text-align:center; width:60px;">#</th>
                     <th style="padding:18px 16px; text-align:left;"><i class="fas fa-user"></i> Guest</th>
