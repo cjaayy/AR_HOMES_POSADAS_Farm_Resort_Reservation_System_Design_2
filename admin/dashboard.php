@@ -256,7 +256,11 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
     />
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <!-- PDF and Excel Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
@@ -363,6 +367,18 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               <a href="#reports" class="nav-link" data-section="reports">
                 <i class="fas fa-chart-bar"></i>
                 <span>Reports</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#reviews" class="nav-link" data-section="reviews">
+                <i class="fas fa-star"></i>
+                <span>Guest Reviews</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#calendar" class="nav-link" data-section="calendar">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Calendar</span>
               </a>
             </li>
             <li class="nav-item">
@@ -1754,6 +1770,170 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                     <div id="adminResponseBar" style="background:#667eea; width:0%; height:100%; transition:width 0.3s;"></div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Guest Reviews Section -->
+        <section id="reviews" class="content-section">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Guest Reviews</h2>
+            <p style="color:#666; margin:0; font-size:16px;">View and manage guest feedback and ratings</p>
+          </div>
+
+          <!-- Reviews Stats Overview -->
+          <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-star"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="reviewsAverageRating">0.0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Average Rating</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-comments"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="reviewsTotalCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Reviews</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(16,185,129,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#10b981;"><i class="fas fa-smile"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#10b981;" id="reviewsFiveStar">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">5 Star Reviews</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(245,158,11,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#f59e0b;"><i class="fas fa-thumbs-up"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#f59e0b;" id="reviewsHelpfulCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Helpful Votes</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rating Distribution -->
+          <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:24px;">
+            <h3 style="margin:0 0 20px 0; font-size:18px; font-weight:600; color:#1e293b;"><i class="fas fa-chart-bar" style="margin-right:10px; color:#667eea;"></i>Rating Distribution</h3>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="min-width:60px; font-weight:600; color:#1e293b;">5 Stars</span>
+                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
+                  <div id="rating5Bar" style="background:linear-gradient(135deg, #10b981, #059669); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+                </div>
+                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating5Count">0</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="min-width:60px; font-weight:600; color:#1e293b;">4 Stars</span>
+                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
+                  <div id="rating4Bar" style="background:linear-gradient(135deg, #3b82f6, #2563eb); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+                </div>
+                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating4Count">0</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="min-width:60px; font-weight:600; color:#1e293b;">3 Stars</span>
+                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
+                  <div id="rating3Bar" style="background:linear-gradient(135deg, #f59e0b, #d97706); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+                </div>
+                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating3Count">0</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="min-width:60px; font-weight:600; color:#1e293b;">2 Stars</span>
+                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
+                  <div id="rating2Bar" style="background:linear-gradient(135deg, #f97316, #ea580c); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+                </div>
+                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating2Count">0</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="min-width:60px; font-weight:600; color:#1e293b;">1 Star</span>
+                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
+                  <div id="rating1Bar" style="background:linear-gradient(135deg, #ef4444, #dc2626); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+                </div>
+                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating1Count">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reviews Filters -->
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+              <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <select id="reviewRatingFilter" onchange="loadAdminReviews()" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; cursor:pointer;">
+                  <option value="all">All Ratings</option>
+                  <option value="5">5 Stars</option>
+                  <option value="4">4 Stars</option>
+                  <option value="3">3 Stars</option>
+                  <option value="2">2 Stars</option>
+                  <option value="1">1 Star</option>
+                </select>
+                <select id="reviewStatusFilter" onchange="loadAdminReviews()" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; cursor:pointer;">
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="hidden">Hidden</option>
+                </select>
+              </div>
+              <div style="display:flex; gap:12px; align-items:center;">
+                <input type="text" id="reviewSearchBox" placeholder="Search reviews..." oninput="searchReviews()" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; min-width:250px;">
+                <button onclick="loadAdminReviews()" style="padding:12px 20px; background:#11224e; color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reviews List -->
+          <div id="reviewsContainer" style="display:flex; flex-direction:column; gap:16px;">
+            <div style="background:white; padding:40px; border-radius:16px; text-align:center; color:#94a3b8;">
+              <i class="fas fa-spinner fa-spin" style="font-size:48px; margin-bottom:16px;"></i>
+              <p style="font-size:16px; margin:0;">Loading reviews...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Calendar Section -->
+        <section id="calendar" class="content-section">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Reservation Calendar</h2>
+            <p style="color:#666; margin:0; font-size:16px;">View all reservations and available dates at a glance</p>
+          </div>
+
+          <!-- Legend -->
+          <div style="background:white; padding:16px 24px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px; display:flex; flex-wrap:wrap; gap:20px; align-items:center;">
+            <span style="font-weight:600; color:#1e293b; margin-right:8px;">Legend:</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:16px; height:16px; background:#f59e0b; border-radius:4px;"></span>
+              <span style="font-size:13px; color:#64748b;">Pending</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:16px; height:16px; background:#10b981; border-radius:4px;"></span>
+              <span style="font-size:13px; color:#64748b;">Confirmed</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:16px; height:16px; background:#3b82f6; border-radius:4px;"></span>
+              <span style="font-size:13px; color:#64748b;">Checked In</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:16px; height:16px; background:#8b5cf6; border-radius:4px;"></span>
+              <span style="font-size:13px; color:#64748b;">Completed</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:16px; height:16px; background:#6b7280; border-radius:4px;"></span>
+              <span style="font-size:13px; color:#64748b;">Checked Out</span>
+            </div>
+          </div>
+
+          <!-- Calendar Container -->
+          <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <div id="adminCalendar" style="min-height:600px;"></div>
+          </div>
+
+          <!-- Reservation Detail Modal -->
+          <div id="calendarEventModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+            <div style="background:white; border-radius:16px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+              <div id="calendarEventContent" style="padding:24px;">
+                <!-- Event details will be populated here -->
               </div>
             </div>
           </div>
@@ -3836,6 +4016,338 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           loadAdminReportData('week');
         }
       }, 500);
+
+      // =============================================
+      // GUEST REVIEWS SECTION
+      // =============================================
+      let allAdminReviews = [];
+      
+      async function loadAdminReviews() {
+        const rating = document.getElementById('reviewRatingFilter')?.value || 'all';
+        const status = document.getElementById('reviewStatusFilter')?.value || 'all';
+        const search = document.getElementById('reviewSearchBox')?.value || '';
+        
+        try {
+          const res = await fetch(`get_reviews.php?rating=${rating}&status=${status}&search=${encodeURIComponent(search)}`, { credentials: 'include' });
+          const data = await res.json();
+          
+          if (data.success) {
+            allAdminReviews = data.reviews || [];
+            updateReviewsStats(data.stats);
+            renderReviewsList(allAdminReviews);
+          } else {
+            document.getElementById('reviewsContainer').innerHTML = `
+              <div style="background:white; padding:40px; border-radius:16px; text-align:center; color:#ef4444;">
+                <i class="fas fa-exclamation-triangle" style="font-size:48px; margin-bottom:16px;"></i>
+                <p style="font-size:16px; margin:0;">Failed to load reviews: ${data.message}</p>
+              </div>
+            `;
+          }
+        } catch (err) {
+          console.error('Error loading reviews:', err);
+          document.getElementById('reviewsContainer').innerHTML = `
+            <div style="background:white; padding:40px; border-radius:16px; text-align:center; color:#ef4444;">
+              <i class="fas fa-exclamation-triangle" style="font-size:48px; margin-bottom:16px;"></i>
+              <p style="font-size:16px; margin:0;">Error loading reviews: ${err.message}</p>
+            </div>
+          `;
+        }
+      }
+      
+      function updateReviewsStats(stats) {
+        if (!stats) return;
+        
+        document.getElementById('reviewsAverageRating').textContent = stats.average_rating || '0.0';
+        document.getElementById('reviewsTotalCount').textContent = stats.total_reviews || '0';
+        document.getElementById('reviewsFiveStar').textContent = stats.five_star || '0';
+        document.getElementById('reviewsHelpfulCount').textContent = stats.total_helpful || '0';
+        
+        // Update rating bars
+        const total = parseInt(stats.total_reviews) || 1;
+        const ratings = {
+          5: parseInt(stats.five_star) || 0,
+          4: parseInt(stats.four_star) || 0,
+          3: parseInt(stats.three_star) || 0,
+          2: parseInt(stats.two_star) || 0,
+          1: parseInt(stats.one_star) || 0
+        };
+        
+        for (let i = 5; i >= 1; i--) {
+          const bar = document.getElementById(`rating${i}Bar`);
+          const count = document.getElementById(`rating${i}Count`);
+          if (bar && count) {
+            const percentage = (ratings[i] / total) * 100;
+            bar.style.width = percentage + '%';
+            count.textContent = ratings[i];
+          }
+        }
+      }
+      
+      function renderReviewsList(reviews) {
+        const container = document.getElementById('reviewsContainer');
+        
+        if (!reviews || reviews.length === 0) {
+          container.innerHTML = `
+            <div style="background:white; padding:60px 40px; border-radius:16px; text-align:center; color:#94a3b8;">
+              <i class="fas fa-inbox" style="font-size:64px; margin-bottom:20px; opacity:0.5;"></i>
+              <p style="font-size:18px; font-weight:600; margin:0 0 8px 0; color:#64748b;">No reviews found</p>
+              <p style="font-size:14px; margin:0;">Guests haven't submitted any reviews yet.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const reviewsHtml = reviews.map(review => {
+          const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+          const starColor = review.rating >= 4 ? '#10b981' : (review.rating >= 3 ? '#f59e0b' : '#ef4444');
+          const date = new Date(review.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+          
+          const bookingTypeLabels = {
+            'daytime': '☀️ Daytime',
+            'nighttime': '🌙 Nighttime',
+            '22hours': '⏰ 22 Hours'
+          };
+          const bookingType = bookingTypeLabels[review.booking_type] || review.booking_type || 'N/A';
+          
+          return `
+            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:4px solid ${starColor};">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <div style="width:56px; height:56px; background:linear-gradient(135deg, #667eea, #764ba2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; font-weight:700;">
+                    ${(review.guest_name || 'U')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div style="font-weight:700; color:#1e293b; font-size:18px; margin-bottom:4px;">${escapeHtml(review.guest_name || 'Anonymous')}</div>
+                    <div style="color:#64748b; font-size:13px;">
+                      <i class="fas fa-envelope" style="margin-right:4px;"></i>${escapeHtml(review.guest_email || 'N/A')}
+                    </div>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:24px; color:${starColor}; letter-spacing:2px; margin-bottom:4px;">${stars}</div>
+                  <div style="font-size:12px; color:#94a3b8;">${date}</div>
+                </div>
+              </div>
+              
+              <div style="margin-bottom:16px;">
+                <h4 style="margin:0 0 8px 0; font-size:16px; font-weight:600; color:#1e293b;">${escapeHtml(review.title || 'No Title')}</h4>
+                <p style="margin:0; color:#475569; line-height:1.7; font-size:14px;">${escapeHtml(review.content || 'No content')}</p>
+              </div>
+              
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px solid #e2e8f0; flex-wrap:wrap; gap:12px;">
+                <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                  <span style="font-size:12px; color:#64748b; background:#f1f5f9; padding:6px 12px; border-radius:20px;">
+                    <i class="fas fa-bookmark" style="margin-right:4px; color:#667eea;"></i>Reservation #${review.reservation_id || 'N/A'}
+                  </span>
+                  <span style="font-size:12px; color:#64748b; background:#f1f5f9; padding:6px 12px; border-radius:20px;">
+                    ${bookingType}
+                  </span>
+                  <span style="font-size:12px; color:#64748b; background:#f1f5f9; padding:6px 12px; border-radius:20px;">
+                    <i class="fas fa-thumbs-up" style="margin-right:4px; color:#10b981;"></i>${review.helpful_count || 0} helpful
+                  </span>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <span style="font-size:11px; padding:4px 10px; border-radius:12px; font-weight:600; ${review.status === 'active' ? 'background:#d1fae5; color:#059669;' : 'background:#fee2e2; color:#dc2626;'}">
+                    ${review.status === 'active' ? 'Active' : 'Hidden'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        container.innerHTML = reviewsHtml;
+      }
+      
+      function searchReviews() {
+        const searchTerm = (document.getElementById('reviewSearchBox')?.value || '').toLowerCase();
+        const filtered = allAdminReviews.filter(r => {
+          const searchStr = ((r.guest_name || '') + ' ' + (r.title || '') + ' ' + (r.content || '')).toLowerCase();
+          return searchStr.includes(searchTerm);
+        });
+        renderReviewsList(filtered);
+      }
+      
+      // Initialize reviews when navigating to reviews section
+      const reviewsNavLink = document.querySelector('a[data-section="reviews"]');
+      if (reviewsNavLink) {
+        reviewsNavLink.addEventListener('click', function() {
+          setTimeout(() => loadAdminReviews(), 100);
+        });
+      }
+
+      // =============================================
+      // CALENDAR SECTION
+      // =============================================
+      let adminCalendar = null;
+      
+      function initAdminCalendar() {
+        const calendarEl = document.getElementById('adminCalendar');
+        if (!calendarEl || adminCalendar) return;
+        
+        adminCalendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listMonth'
+          },
+          height: 'auto',
+          editable: false,
+          selectable: true,
+          selectMirror: true,
+          dayMaxEvents: 3,
+          weekends: true,
+          nowIndicator: true,
+          eventDisplay: 'block',
+          eventTimeFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: 'short'
+          },
+          events: function(info, successCallback, failureCallback) {
+            loadCalendarEvents(info.startStr, info.endStr, successCallback, failureCallback);
+          },
+          eventClick: function(info) {
+            showCalendarEventDetails(info.event);
+          },
+          dateClick: function(info) {
+            // Could be used to create new reservation in future
+            console.log('Date clicked:', info.dateStr);
+          },
+          eventDidMount: function(info) {
+            // Add tooltip
+            info.el.title = info.event.title + '\n' + 
+              'Status: ' + (info.event.extendedProps.status || 'N/A') + '\n' +
+              'Phone: ' + (info.event.extendedProps.guest_phone || 'N/A');
+          }
+        });
+        
+        adminCalendar.render();
+      }
+      
+      async function loadCalendarEvents(start, end, successCallback, failureCallback) {
+        try {
+          const res = await fetch(`get_calendar_data.php?start=${start}&end=${end}`, { credentials: 'include' });
+          const data = await res.json();
+          
+          if (data.success) {
+            console.log('Calendar events loaded:', data.events?.length || 0, 'events');
+            successCallback(data.events || []);
+          } else {
+            console.error('Calendar error:', data.message);
+            failureCallback(new Error(data.message));
+          }
+        } catch (err) {
+          console.error('Error loading calendar events:', err);
+          failureCallback(err);
+        }
+      }
+      
+      function showCalendarEventDetails(event) {
+        const props = event.extendedProps;
+        const modal = document.getElementById('calendarEventModal');
+        const content = document.getElementById('calendarEventContent');
+        
+        const statusColors = {
+          'pending': { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
+          'confirmed': { bg: '#d1fae5', border: '#10b981', text: '#065f46' },
+          'checked_in': { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' },
+          'completed': { bg: '#ede9fe', border: '#8b5cf6', text: '#5b21b6' },
+          'checked_out': { bg: '#f3f4f6', border: '#6b7280', text: '#374151' }
+        };
+        
+        const color = statusColors[props.status] || statusColors.pending;
+        
+        const bookingTypeLabels = {
+          'daytime': { icon: '☀️', label: 'DAYTIME (9AM-5PM)' },
+          'nighttime': { icon: '🌙', label: 'NIGHTTIME (7PM-7AM)' },
+          '22hours': { icon: '⏰', label: '22 HOURS (2PM-12NN)' }
+        };
+        const bookingType = bookingTypeLabels[props.booking_type] || { icon: '📅', label: props.booking_type || 'N/A' };
+        
+        content.innerHTML = `
+          <div style="background:${color.bg}; margin:-24px -24px 24px; padding:24px; border-radius:16px 16px 0 0; border-bottom:3px solid ${color.border};">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:56px; height:56px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:${color.text}; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                  ${(props.guest_name || 'U')[0].toUpperCase()}
+                </div>
+                <div>
+                  <div style="font-size:20px; font-weight:700; color:${color.text};">${escapeHtml(props.guest_name || 'Unknown Guest')}</div>
+                  <div style="font-size:13px; color:${color.text}; opacity:0.8;">Reservation #${props.reservation_id || 'N/A'}</div>
+                </div>
+              </div>
+              <button onclick="closeCalendarModal()" style="background:white; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                <i class="fas fa-times" style="color:#64748b;"></i>
+              </button>
+            </div>
+            <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:white; border-radius:20px; font-size:13px; font-weight:600; color:${color.text};">
+              <span>${bookingType.icon}</span> ${bookingType.label}
+            </div>
+          </div>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #10b981;">
+              <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:6px;">Check-in</div>
+              <div style="font-weight:700; color:#1e293b;">${event.startStr}</div>
+              <div style="font-size:12px; color:#64748b; margin-top:4px;"><i class="fas fa-clock"></i> ${props.check_in_time || 'N/A'}</div>
+            </div>
+            <div style="padding:16px; background:#f8fafc; border-radius:12px; border-left:4px solid #ef4444;">
+              <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:6px;">Check-out</div>
+              <div style="font-weight:700; color:#1e293b;">${new Date(new Date(event.endStr).getTime() - 86400000).toISOString().split('T')[0]}</div>
+              <div style="font-size:12px; color:#64748b; margin-top:4px;"><i class="fas fa-clock"></i> ${props.check_out_time || 'N/A'}</div>
+            </div>
+          </div>
+          
+          <div style="background:#f8fafc; padding:16px; border-radius:12px; margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span style="font-size:12px; color:#64748b; font-weight:600;"><i class="fas fa-phone" style="margin-right:6px;"></i>Phone</span>
+              <span style="font-weight:600; color:#1e293b;">${escapeHtml(props.guest_phone || 'N/A')}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span style="font-size:12px; color:#64748b; font-weight:600;"><i class="fas fa-bed" style="margin-right:6px;"></i>Room</span>
+              <span style="font-weight:600; color:#1e293b;">${escapeHtml(props.room || 'TBD')}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:12px; color:#64748b; font-weight:600;"><i class="fas fa-money-bill-wave" style="margin-right:6px;"></i>Total Amount</span>
+              <span style="font-weight:700; color:#10b981; font-size:16px;">₱${parseFloat(props.total_amount || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+            </div>
+          </div>
+          
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; background:${color.bg}; color:${color.text}; border-radius:20px; font-size:13px; font-weight:600; text-transform:capitalize; border:2px solid ${color.border};">
+              <i class="fas fa-circle" style="font-size:8px;"></i>${props.status || 'unknown'}
+            </span>
+            <button onclick="adminViewReservation('${props.reservation_id}')" style="padding:10px 20px; background:linear-gradient(135deg, #667eea, #764ba2); color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
+              <i class="fas fa-eye"></i> View Details
+            </button>
+          </div>
+        `;
+        
+        modal.style.display = 'flex';
+      }
+      
+      function closeCalendarModal() {
+        document.getElementById('calendarEventModal').style.display = 'none';
+      }
+      
+      // Close modal when clicking outside
+      document.getElementById('calendarEventModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeCalendarModal();
+        }
+      });
+      
+      // Initialize calendar when navigating to calendar section
+      const calendarNavLink = document.querySelector('a[data-section="calendar"]');
+      if (calendarNavLink) {
+        calendarNavLink.addEventListener('click', function() {
+          setTimeout(() => {
+            initAdminCalendar();
+          }, 100);
+        });
+      }
 
     </script>
   </body>

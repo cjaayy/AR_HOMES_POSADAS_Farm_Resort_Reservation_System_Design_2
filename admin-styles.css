@@ -2979,3 +2979,120 @@ canvas {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   outline: none;
 }
+
+/* ===== CALENDAR SECTION STYLES ===== */
+#adminCalendar {
+  font-family: "Poppins", sans-serif;
+}
+
+#adminCalendar .fc-toolbar-title {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #1e293b;
+}
+
+#adminCalendar .fc-button {
+  background: #11224e !important;
+  border: none !important;
+  padding: 10px 16px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+#adminCalendar .fc-button:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+#adminCalendar .fc-button-active {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+#adminCalendar .fc-daygrid-day {
+  transition: background 0.2s ease;
+}
+
+#adminCalendar .fc-daygrid-day:hover {
+  background: #f1f5f9;
+}
+
+#adminCalendar .fc-daygrid-day-number {
+  font-weight: 600;
+  color: #1e293b;
+  padding: 8px;
+}
+
+#adminCalendar .fc-day-today {
+  background: rgba(102, 126, 234, 0.1) !important;
+}
+
+#adminCalendar .fc-day-today .fc-daygrid-day-number {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#adminCalendar .fc-event {
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+#adminCalendar .fc-event:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#adminCalendar .fc-col-header-cell {
+  background: #11224e;
+  padding: 12px 0 !important;
+}
+
+#adminCalendar .fc-col-header-cell-cushion {
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+#adminCalendar .fc-scrollgrid {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #e2e8f0 !important;
+}
+
+#adminCalendar .fc-list-event {
+  cursor: pointer;
+}
+
+#adminCalendar .fc-list-event:hover td {
+  background: #f8fafc;
+}
+
+/* ===== REVIEWS SECTION STYLES ===== */
+#reviewsContainer > div {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#reviewsContainer > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+#reviewRatingFilter:focus,
+#reviewStatusFilter:focus,
+#reviewSearchBox:focus {
+  outline: none;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
