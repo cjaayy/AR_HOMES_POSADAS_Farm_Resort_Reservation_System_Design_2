@@ -3733,9 +3733,6 @@ function displayReservations(reservations) {
         <i class="fas fa-history"></i>
         <h3>No Reservation History Found</h3>
         <p>Your completed and cancelled reservations will appear here.</p>
-        <button class="history-action-btn view-btn" style="margin-top: 20px; padding: 12px 24px;" onclick="showSection('my-reservations'); updateActiveNavigation('my-reservations');">
-          <i class="fas fa-calendar-plus"></i> Make a Reservation
-        </button>
       </div>
     `;
     return;
