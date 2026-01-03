@@ -5521,6 +5521,21 @@ document.addEventListener("DOMContentLoaded", function () {
     durationSelect.addEventListener("change", updatePriceSummary);
   }
 
+  // Payment method radio button sync with hidden form input
+  const paymentRadios = document.querySelectorAll(
+    'input[name="paymentMethod"][type="radio"]'
+  );
+  const paymentMethodInput = document.getElementById("paymentMethodInput");
+
+  paymentRadios.forEach((radio) => {
+    radio.addEventListener("change", function () {
+      if (paymentMethodInput) {
+        paymentMethodInput.value = this.value;
+        console.log("Payment method updated to:", this.value);
+      }
+    });
+  });
+
   // Reservation form submission
   const reservationForm = document.getElementById("reservationForm");
   if (reservationForm) {
@@ -5540,7 +5555,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const formData = new FormData(reservationForm);
       const checkInDate = formData.get("checkInDate");
       const duration = parseInt(formData.get("duration"));
-      const groupSize = formData.get("groupSize");
       const groupType = formData.get("groupType");
       const specialRequests = formData.get("specialRequests");
       const paymentMethod = formData.get("paymentMethod");
@@ -5554,11 +5568,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (!duration || isNaN(duration) || duration < 1) {
         showNotification("Please select a valid duration", "error");
-        return;
-      }
-
-      if (!groupSize) {
-        showNotification("Please select group size", "error");
         return;
       }
 
@@ -5615,14 +5624,13 @@ document.addEventListener("DOMContentLoaded", function () {
           bookingType !== "daytime" && bookingType !== "venue-daytime"
             ? duration
             : null,
-        group_size: groupSize,
         group_type: groupType,
         special_requests: specialRequests,
         payment_method: paymentMethod,
       };
 
       // Show loading
-      const submitBtn = reservationForm.querySelector(".btn-submit");
+      const submitBtn = reservationForm.querySelector(".btn-submit-v2");
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML =
         '<i class="fas fa-spinner fa-spin"></i> Processing...';

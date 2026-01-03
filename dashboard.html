@@ -1494,7 +1494,9 @@
                           <i class="fas fa-box-open"></i>
                           <div class="detail-content">
                             <span class="detail-label">Package</span>
-                            <span class="detail-value" id="summaryPackage">-</span>
+                            <span class="detail-value" id="summaryPackage"
+                              >-</span
+                            >
                           </div>
                         </div>
                         <div class="summary-time-row">
@@ -1502,7 +1504,9 @@
                             <i class="fas fa-sign-in-alt"></i>
                             <div>
                               <span class="time-label">Check-in</span>
-                              <span class="time-value" id="summaryCheckInTime">-</span>
+                              <span class="time-value" id="summaryCheckInTime"
+                                >-</span
+                              >
                             </div>
                           </div>
                           <div class="time-divider">
@@ -1512,7 +1516,9 @@
                             <i class="fas fa-sign-out-alt"></i>
                             <div>
                               <span class="time-label">Check-out</span>
-                              <span class="time-value" id="summaryCheckOutTime">-</span>
+                              <span class="time-value" id="summaryCheckOutTime"
+                                >-</span
+                              >
                             </div>
                           </div>
                         </div>
@@ -1532,11 +1538,19 @@
                       </div>
                       <div class="form-card-body">
                         <div class="date-field-container">
-                          <label for="checkInDate">Check-in Date <span class="required">*</span></label>
+                          <label for="checkInDate"
+                            >Check-in Date
+                            <span class="required">*</span></label
+                          >
                           <div class="date-input-wrapper">
                             <div class="custom-date-input">
                               <i class="fas fa-calendar"></i>
-                              <input type="date" id="checkInDate" name="checkInDate" required />
+                              <input
+                                type="date"
+                                id="checkInDate"
+                                name="checkInDate"
+                                required
+                              />
                             </div>
                           </div>
                           <div class="date-hint-box">
@@ -1544,7 +1558,12 @@
                             <span>Click the field above to open calendar</span>
                           </div>
                         </div>
-                        <input type="hidden" id="duration" name="duration" value="1" />
+                        <input
+                          type="hidden"
+                          id="duration"
+                          name="duration"
+                          value="1"
+                        />
                       </div>
                     </div>
 
@@ -1563,39 +1582,51 @@
                             <i class="fas fa-users"></i>
                           </div>
                           <div class="guest-info-content">
-                            <span class="guest-info-title">Minimum: 10 pax • No maximum limit</span>
-                            <span class="guest-info-desc">A minimum of 10 guests is required per booking. You may bring as many guests as you like.</span>
+                            <span class="guest-info-title"
+                              >Minimum: 10 pax • No maximum limit</span
+                            >
+                            <span class="guest-info-desc"
+                              >A minimum of 10 guests is required per booking.
+                              You may bring as many guests as you like.</span
+                            >
                           </div>
                         </div>
-                        
-                        <input type="hidden" id="groupSize" name="groupSize" value="10+" />
-                        
+
+                        <input
+                          type="hidden"
+                          id="groupSize"
+                          name="groupSize"
+                          value="10+"
+                        />
+
                         <div class="form-field">
                           <label for="groupType">
                             <i class="fas fa-tag"></i>
                             Group Type <span class="required">*</span>
                           </label>
                           <div class="select-wrapper">
-                            <select
-                              id="groupType"
-                              name="groupType"
-                              required
-                            >
+                            <select id="groupType" name="groupType" required>
                               <option value="">Select type</option>
                               <option value="family">👨‍👩‍👧‍👦 Family</option>
                               <option value="friends">🎉 Friends</option>
                               <option value="corporate">💼 Corporate</option>
-                              <option value="celebration">🎂 Celebration</option>
+                              <option value="celebration">
+                                🎂 Celebration
+                              </option>
                               <option value="other">📝 Other</option>
                             </select>
                             <i class="fas fa-chevron-down"></i>
                           </div>
                         </div>
-                        
-                        <div class="form-field full-width" style="margin-top: 1rem;">
+
+                        <div
+                          class="form-field full-width"
+                          style="margin-top: 1rem"
+                        >
                           <label for="specialRequests">
                             <i class="fas fa-comment-dots"></i>
-                            Special Requests <span class="optional">(Optional)</span>
+                            Special Requests
+                            <span class="optional">(Optional)</span>
                           </label>
                           <textarea
                             id="specialRequests"
@@ -1620,10 +1651,38 @@
                         <span class="terms-text">
                           <i class="fas fa-file-contract"></i>
                           I agree to the
-                          <a href="#" onclick="showBookingPolicy(); return false;">booking policies</a>
+                          <a
+                            href="#"
+                            onclick="showBookingPolicy(); return false;"
+                            >booking policies</a
+                          >
                           and house rules
                         </span>
                       </label>
+                    </div>
+
+                    <!-- Hidden payment method field -->
+                    <input
+                      type="hidden"
+                      id="paymentMethodInput"
+                      name="paymentMethod"
+                      value="gcash"
+                    />
+
+                    <!-- Submit Button (inside form) -->
+                    <div class="form-submit-section">
+                      <button
+                        type="button"
+                        class="btn-back-v2"
+                        onclick="goBackToRooms()"
+                      >
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back</span>
+                      </button>
+                      <button type="submit" class="btn-submit-v2">
+                        <span>Submit Reservation</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </button>
                     </div>
                   </form>
                 </div>
@@ -1643,17 +1702,19 @@
                         </span>
                         <span class="price-value" id="priceTotal">₱0.00</span>
                       </div>
-                      
+
                       <div class="price-divider"></div>
-                      
+
                       <div class="price-line highlight-orange">
                         <span class="price-label">
                           <i class="fas fa-hand-holding-usd"></i>
                           Required Downpayment
                         </span>
-                        <span class="price-value" id="priceDownpayment">₱1,000.00</span>
+                        <span class="price-value" id="priceDownpayment"
+                          >₱1,000.00</span
+                        >
                       </div>
-                      
+
                       <div class="price-line">
                         <span class="price-label">
                           <i class="fas fa-wallet"></i>
@@ -1661,19 +1722,22 @@
                         </span>
                         <span class="price-value" id="priceBalance">₱0.00</span>
                       </div>
-                      
+
                       <div class="price-line highlight-teal">
                         <span class="price-label">
                           <i class="fas fa-shield-alt"></i>
                           Security Bond
-                          <span class="info-tooltip" title="Refundable after checkout">
+                          <span
+                            class="info-tooltip"
+                            title="Refundable after checkout"
+                          >
                             <i class="fas fa-info-circle"></i>
                           </span>
                         </span>
                         <span class="price-value">₱2,000.00</span>
                       </div>
                     </div>
-                    
+
                     <div class="price-card-footer">
                       <div class="total-due">
                         <span>Total Due Now</span>
@@ -1693,62 +1757,36 @@
                         <i class="fas fa-lock"></i>
                         <span>Secure PayMongo Checkout</span>
                       </div>
-                      <div class="payment-options">
-                        <label class="payment-option-v2">
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="gcash"
-                            required
-                            checked
-                          />
-                          <div class="payment-option-content">
-                            <div class="payment-icons">
-                              <div class="payment-icon gcash">
-                                <i class="fas fa-mobile-alt"></i>
-                              </div>
-                              <div class="payment-icon card">
-                                <i class="fas fa-credit-card"></i>
-                              </div>
-                              <div class="payment-icon bank">
-                                <i class="fas fa-university"></i>
-                              </div>
+                      <div class="payment-display">
+                        <div class="payment-option-content selected">
+                          <div class="payment-icons">
+                            <div class="payment-icon gcash">
+                              <i class="fas fa-mobile-alt"></i>
                             </div>
-                            <div class="payment-text">
-                              <span class="payment-title">GCash, Card, or Bank</span>
-                              <span class="payment-subtitle">Fast & secure payment</span>
+                            <div class="payment-icon card">
+                              <i class="fas fa-credit-card"></i>
                             </div>
-                            <div class="payment-check">
-                              <i class="fas fa-check-circle"></i>
+                            <div class="payment-icon bank">
+                              <i class="fas fa-university"></i>
                             </div>
                           </div>
-                        </label>
+                          <div class="payment-text">
+                            <span class="payment-title"
+                              >GCash, Card, or Bank</span
+                            >
+                            <span class="payment-subtitle"
+                              >Fast & secure payment</span
+                            >
+                          </div>
+                          <div class="payment-check active">
+                            <i class="fas fa-check-circle"></i>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  <!-- Action Buttons -->
-                  <div class="booking-action-buttons">
-                    <button
-                      type="button"
-                      class="btn-back-v2"
-                      onclick="goBackToRooms()"
-                    >
-                      <i class="fas fa-arrow-left"></i>
-                      <span>Back</span>
-                    </button>
-                    <button
-                      type="submit"
-                      form="reservationForm"
-                      class="btn-submit-v2"
-                    >
-                      <span>Submit Reservation</span>
-                      <i class="fas fa-arrow-right"></i>
-                    </button>
-                  </div>
                 </div>
               </div>
-            </div>
             </div>
           </div>
 

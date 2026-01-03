@@ -199,9 +199,15 @@ try {
     }
     
     // Check if dates are available (not already booked)
+    // Only block dates for:
+    // 1. Confirmed reservations with downpayment verified, OR
+    // 2. Pending reservations from OTHER users that have date_locked = 1
+    // This allows users to retry their own unpaid reservations
     $stmt = $pdo->prepare("
         SELECT COUNT(*) as count FROM reservations 
-        WHERE status IN ('pending_payment', 'confirmed') 
+        WHERE status IN ('pending_payment', 'confirmed', 'pending_confirmation', 'checked_in') 
+        AND (downpayment_verified = 1 OR date_locked = 1)
+        AND user_id != ?
         AND (
             (check_in_date <= ? AND check_out_date >= ?)
             OR (check_in_date <= ? AND check_out_date >= ?)
@@ -209,6 +215,7 @@ try {
         )
     ");
     $stmt->execute([
+        $user_id,
         $check_in_date, $check_in_date,
         $check_out_date, $check_out_date,
         $check_in_date, $check_out_date
@@ -216,6 +223,28 @@ try {
     $existing = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($existing['count'] > 0) {
+        throw new Exception('Selected dates are not available. Please choose different dates.');
+    }
+    
+    // Also check for confirmed reservations from ANY user (including self - can't double-book)
+    $stmt2 = $pdo->prepare("
+        SELECT COUNT(*) as count FROM reservations 
+        WHERE status IN ('confirmed', 'pending_confirmation', 'checked_in') 
+        AND downpayment_verified = 1
+        AND (
+            (check_in_date <= ? AND check_out_date >= ?)
+            OR (check_in_date <= ? AND check_out_date >= ?)
+            OR (check_in_date >= ? AND check_out_date <= ?)
+        )
+    ");
+    $stmt2->execute([
+        $check_in_date, $check_in_date,
+        $check_out_date, $check_out_date,
+        $check_in_date, $check_out_date
+    ]);
+    $existing2 = $stmt2->fetch(PDO::FETCH_ASSOC);
+    
+    if ($existing2['count'] > 0) {
         throw new Exception('Selected dates are not available. Please choose different dates.');
     }
     

@@ -5987,14 +5987,45 @@ gallery-slide.active {
   transition: color 0.3s ease;
 }
 
+.payment-check.active {
+  color: #667eea;
+}
+
 .payment-option-v2 input:checked + .payment-option-content .payment-check {
   color: #667eea;
+}
+
+/* Auto-selected payment display */
+.payment-display .payment-option-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #667eea;
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.05) 0%,
+    rgba(118, 75, 162, 0.05) 100%
+  );
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
 }
 
 /* Action Buttons */
 .booking-action-buttons {
   display: flex;
   gap: 0.75rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* Form Submit Section (inside form) */
+.form-submit-section {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
 }
 
 .btn-back-v2 {
@@ -6035,6 +6066,8 @@ gallery-slide.active {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+  position: relative;
+  z-index: 10;
 }
 
 .btn-submit-v2:hover {
