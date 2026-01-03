@@ -30,7 +30,7 @@ function activeClass($file, $current) {
       <li class="nav-item">
         <a href="#users" class="nav-link" data-section="users">
           <i class="fas fa-users"></i>
-          <span>Manage Users</span>
+          <span>View Users</span>
         </a>
       </li>
     </ul>

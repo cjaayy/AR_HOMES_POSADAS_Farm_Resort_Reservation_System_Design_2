@@ -111,7 +111,7 @@ $staffId = $_SESSION['staff_id'] ?? 0;
             <li class="nav-item">
               <a href="#users" class="nav-link" data-section="users">
                 <i class="fas fa-users"></i>
-                <span>Manage Users</span>
+                <span>View Users</span>
               </a>
             </li>
           </ul>
@@ -404,8 +404,8 @@ $staffId = $_SESSION['staff_id'] ?? 0;
         <!-- Users Section -->
         <section id="users" class="content-section">
           <div class="section-header" style="margin-bottom:30px;">
-            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">User Management</h2>
-            <p style="color:#666; margin:0; font-size:16px;">View and manage registered users</p>
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">View Users</h2>
+            <p style="color:#666; margin:0; font-size:16px;">View registered users information</p>
           </div>
 
           <!-- User Stats -->
@@ -760,9 +760,22 @@ $staffId = $_SESSION['staff_id'] ?? 0;
               <span style="padding:6px 12px; background:${getStatusColor(r.status)}20; color:${getStatusColor(r.status)}; border-radius:20px; font-size:12px; font-weight:600; text-transform:capitalize;">${(r.status || '').replace('_', ' ')}</span>
             </td>
             <td style="padding:16px; text-align:center;">
-              <button onclick="staffViewReservation('${r.reservation_id}')" style="padding:8px 16px; background:#11224e; color:white; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">
-                <i class="fas fa-eye"></i> View
-              </button>
+              <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+                <button onclick="staffViewReservation('${r.reservation_id}')" style="padding:6px 12px; background:#11224e; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;" title="View Details">
+                  <i class="fas fa-eye"></i>
+                </button>
+                ${['pending', 'pending_payment', 'pending_confirmation'].includes(r.status) ? `
+                <button onclick="staffApproveReservation('${r.reservation_id}')" style="padding:6px 12px; background:#10b981; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;" title="Approve">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button onclick="staffCancelReservation('${r.reservation_id}')" style="padding:6px 12px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;" title="Cancel">
+                  <i class="fas fa-times"></i>
+                </button>` : ''}
+                ${r.status === 'confirmed' ? `
+                <button onclick="staffCancelReservation('${r.reservation_id}')" style="padding:6px 12px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;" title="Cancel">
+                  <i class="fas fa-times"></i>
+                </button>` : ''}
+              </div>
             </td>
           </tr>
         `).join('');
@@ -783,6 +796,16 @@ $staffId = $_SESSION['staff_id'] ?? 0;
         const r = staffAllReservations.find(x => String(x.reservation_id) === String(id));
         if (!r) return alert('Reservation not found');
         
+        const canApprove = ['pending', 'pending_payment', 'pending_confirmation'].includes(r.status);
+        const canCancel = ['pending', 'pending_payment', 'pending_confirmation', 'confirmed'].includes(r.status);
+        
+        const actionButtons = `
+          <div style="display:flex; gap:12px; justify-content:center; margin-top:20px; padding-top:20px; border-top:1px solid #e2e8f0;">
+            ${canApprove ? `<button onclick="staffApproveReservation('${id}'); document.getElementById('staffModal').remove();" style="padding:12px 24px; background:#10b981; color:white; border:none; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600;"><i class="fas fa-check"></i> Approve</button>` : ''}
+            ${canCancel ? `<button onclick="staffCancelReservation('${id}'); document.getElementById('staffModal').remove();" style="padding:12px 24px; background:#ef4444; color:white; border:none; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600;"><i class="fas fa-times"></i> Cancel</button>` : ''}
+          </div>
+        `;
+        
         const html = `
           <div style="padding:20px;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
@@ -795,9 +818,64 @@ $staffId = $_SESSION['staff_id'] ?? 0;
               <div><strong>Total:</strong> ₱${parseFloat(r.total_amount || 0).toLocaleString()}</div>
               <div><strong>Status:</strong> <span style="color:${getStatusColor(r.status)}; text-transform:capitalize;">${(r.status || '').replace('_', ' ')}</span></div>
             </div>
+            ${actionButtons}
           </div>
         `;
         showModal('Reservation #' + id, html);
+      }
+
+      async function staffApproveReservation(id) {
+        if (!confirm('Are you sure you want to approve this reservation?')) return;
+        
+        try {
+          const formData = new FormData();
+          formData.append('reservation_id', id);
+          formData.append('action', 'approve');
+          
+          const res = await fetch('staff_reservation_actions.php', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            alert('Reservation approved successfully!');
+            staffFetchAllReservations();
+          } else {
+            alert('Failed to approve: ' + (data.message || 'Unknown error'));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Error approving reservation');
+        }
+      }
+
+      async function staffCancelReservation(id) {
+        if (!confirm('Are you sure you want to cancel this reservation?')) return;
+        
+        try {
+          const formData = new FormData();
+          formData.append('reservation_id', id);
+          formData.append('action', 'cancel');
+          
+          const res = await fetch('staff_reservation_actions.php', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            alert('Reservation canceled successfully!');
+            staffFetchAllReservations();
+          } else {
+            alert('Failed to cancel: ' + (data.message || 'Unknown error'));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Error canceling reservation');
+        }
       }
 
       // ============================
