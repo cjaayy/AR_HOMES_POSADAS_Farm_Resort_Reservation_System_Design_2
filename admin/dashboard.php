@@ -1815,43 +1815,60 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           </div>
 
           <!-- Rating Distribution -->
-          <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:24px;">
-            <h3 style="margin:0 0 20px 0; font-size:18px; font-weight:600; color:#1e293b;"><i class="fas fa-chart-bar" style="margin-right:10px; color:#667eea;"></i>Rating Distribution</h3>
-            <div style="display:flex; flex-direction:column; gap:12px;">
-              <div style="display:flex; align-items:center; gap:12px;">
-                <span style="min-width:60px; font-weight:600; color:#1e293b;">5 Stars</span>
-                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
-                  <div id="rating5Bar" style="background:linear-gradient(135deg, #10b981, #059669); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+          <div style="background:white; padding:28px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:24px;">
+            <h3 style="margin:0 0 24px 0; font-size:18px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:10px;">
+              <i class="fas fa-chart-bar" style="color:#667eea;"></i>Rating Distribution
+            </h3>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <!-- 5 Stars -->
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="min-width:90px; display:flex; align-items:center; gap:6px;">
+                  <span style="color:#f59e0b; font-size:16px;">★★★★★</span>
                 </div>
-                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating5Count">0</span>
+                <div style="flex:1; background:#f1f5f9; height:28px; border-radius:14px; overflow:hidden; position:relative;">
+                  <div id="rating5Bar" style="background:linear-gradient(135deg, #10b981, #059669); height:100%; width:0%; transition:width 0.5s ease; border-radius:14px; min-width:0;"></div>
+                </div>
+                <div style="min-width:50px; text-align:center; background:#10b981; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700;" id="rating5Count">0</div>
               </div>
-              <div style="display:flex; align-items:center; gap:12px;">
-                <span style="min-width:60px; font-weight:600; color:#1e293b;">4 Stars</span>
-                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
-                  <div id="rating4Bar" style="background:linear-gradient(135deg, #3b82f6, #2563eb); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+              <!-- 4 Stars -->
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="min-width:90px; display:flex; align-items:center; gap:6px;">
+                  <span style="color:#f59e0b; font-size:16px;">★★★★</span><span style="color:#cbd5e1; font-size:16px;">★</span>
                 </div>
-                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating4Count">0</span>
+                <div style="flex:1; background:#f1f5f9; height:28px; border-radius:14px; overflow:hidden; position:relative;">
+                  <div id="rating4Bar" style="background:linear-gradient(135deg, #3b82f6, #2563eb); height:100%; width:0%; transition:width 0.5s ease; border-radius:14px; min-width:0;"></div>
+                </div>
+                <div style="min-width:50px; text-align:center; background:#3b82f6; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700;" id="rating4Count">0</div>
               </div>
-              <div style="display:flex; align-items:center; gap:12px;">
-                <span style="min-width:60px; font-weight:600; color:#1e293b;">3 Stars</span>
-                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
-                  <div id="rating3Bar" style="background:linear-gradient(135deg, #f59e0b, #d97706); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+              <!-- 3 Stars -->
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="min-width:90px; display:flex; align-items:center; gap:6px;">
+                  <span style="color:#f59e0b; font-size:16px;">★★★</span><span style="color:#cbd5e1; font-size:16px;">★★</span>
                 </div>
-                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating3Count">0</span>
+                <div style="flex:1; background:#f1f5f9; height:28px; border-radius:14px; overflow:hidden; position:relative;">
+                  <div id="rating3Bar" style="background:linear-gradient(135deg, #f59e0b, #d97706); height:100%; width:0%; transition:width 0.5s ease; border-radius:14px; min-width:0;"></div>
+                </div>
+                <div style="min-width:50px; text-align:center; background:#f59e0b; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700;" id="rating3Count">0</div>
               </div>
-              <div style="display:flex; align-items:center; gap:12px;">
-                <span style="min-width:60px; font-weight:600; color:#1e293b;">2 Stars</span>
-                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
-                  <div id="rating2Bar" style="background:linear-gradient(135deg, #f97316, #ea580c); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+              <!-- 2 Stars -->
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="min-width:90px; display:flex; align-items:center; gap:6px;">
+                  <span style="color:#f59e0b; font-size:16px;">★★</span><span style="color:#cbd5e1; font-size:16px;">★★★</span>
                 </div>
-                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating2Count">0</span>
+                <div style="flex:1; background:#f1f5f9; height:28px; border-radius:14px; overflow:hidden; position:relative;">
+                  <div id="rating2Bar" style="background:linear-gradient(135deg, #f97316, #ea580c); height:100%; width:0%; transition:width 0.5s ease; border-radius:14px; min-width:0;"></div>
+                </div>
+                <div style="min-width:50px; text-align:center; background:#f97316; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700;" id="rating2Count">0</div>
               </div>
-              <div style="display:flex; align-items:center; gap:12px;">
-                <span style="min-width:60px; font-weight:600; color:#1e293b;">1 Star</span>
-                <div style="flex:1; background:#e2e8f0; height:24px; border-radius:12px; overflow:hidden;">
-                  <div id="rating1Bar" style="background:linear-gradient(135deg, #ef4444, #dc2626); height:100%; width:0%; transition:width 0.5s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:white; font-size:12px; font-weight:600;"></div>
+              <!-- 1 Star -->
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="min-width:90px; display:flex; align-items:center; gap:6px;">
+                  <span style="color:#f59e0b; font-size:16px;">★</span><span style="color:#cbd5e1; font-size:16px;">★★★★</span>
                 </div>
-                <span style="min-width:40px; text-align:right; font-weight:600; color:#64748b;" id="rating1Count">0</span>
+                <div style="flex:1; background:#f1f5f9; height:28px; border-radius:14px; overflow:hidden; position:relative;">
+                  <div id="rating1Bar" style="background:linear-gradient(135deg, #ef4444, #dc2626); height:100%; width:0%; transition:width 0.5s ease; border-radius:14px; min-width:0;"></div>
+                </div>
+                <div style="min-width:50px; text-align:center; background:#ef4444; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700;" id="rating1Count">0</div>
               </div>
             </div>
           </div>
