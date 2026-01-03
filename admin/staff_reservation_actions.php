@@ -36,7 +36,7 @@ try {
     
     switch ($action) {
         case 'approve':
-            // Check if reservation exists and is in pending status
+            // Check if reservation exists and is in pending or canceled status
             $checkStmt = $conn->prepare("SELECT * FROM reservations WHERE reservation_id = :id");
             $checkStmt->execute([':id' => $reservationId]);
             $reservation = $checkStmt->fetch(PDO::FETCH_ASSOC);
@@ -46,9 +46,10 @@ try {
                 exit;
             }
             
-            $allowedStatuses = ['pending', 'pending_payment', 'pending_confirmation'];
+            // Allow approving pending OR canceled reservations (re-approve)
+            $allowedStatuses = ['pending', 'pending_payment', 'pending_confirmation', 'canceled', 'cancelled'];
             if (!in_array($reservation['status'], $allowedStatuses)) {
-                echo json_encode(['success' => false, 'message' => 'Only pending reservations can be approved']);
+                echo json_encode(['success' => false, 'message' => 'Only pending or canceled reservations can be approved']);
                 exit;
             }
             
@@ -82,24 +83,55 @@ try {
                 exit;
             }
             
-            // Update reservation status to canceled
-            $updateStmt = $conn->prepare("UPDATE reservations SET status = 'canceled', updated_at = NOW() WHERE reservation_id = :id");
+            // First check if cancelled_at column exists in reservations table
+            try {
+                $checkCancelledAtCol = $conn->query("SHOW COLUMNS FROM reservations LIKE 'cancelled_at'");
+                if ($checkCancelledAtCol->rowCount() == 0) {
+                    // Add the column if it doesn't exist
+                    $conn->exec("ALTER TABLE reservations ADD COLUMN cancelled_at DATETIME DEFAULT NULL");
+                }
+            } catch (Exception $e) {
+                error_log("Failed to check/add cancelled_at column: " . $e->getMessage());
+            }
+            
+            // Update reservation status to canceled with cancelled_at timestamp
+            $updateStmt = $conn->prepare("UPDATE reservations SET status = 'canceled', cancelled_at = NOW(), updated_at = NOW() WHERE reservation_id = :id");
             $updateStmt->execute([':id' => $reservationId]);
+            
+            // Increment user's cancellation count
+            if (!empty($reservation['user_id'])) {
+                try {
+                    // First check if cancellation_count column exists
+                    $checkCol = $conn->query("SHOW COLUMNS FROM users LIKE 'cancellation_count'");
+                    if ($checkCol->rowCount() == 0) {
+                        // Add the column if it doesn't exist
+                        $conn->exec("ALTER TABLE users ADD COLUMN cancellation_count INT DEFAULT 0");
+                    }
+                    
+                    $incrStmt = $conn->prepare("UPDATE users SET cancellation_count = COALESCE(cancellation_count, 0) + 1 WHERE user_id = :user_id");
+                    $incrStmt->execute([':user_id' => $reservation['user_id']]);
+                } catch (Exception $e) {
+                    // Log but don't fail the cancellation
+                    error_log("Failed to increment cancellation count: " . $e->getMessage());
+                }
+            }
             
             // Log the action
             logStaffActivity($conn, $staffId, $staffName, 'reservation_canceled', "Canceled reservation #{$reservationId}", $reservationId);
             
             echo json_encode([
                 'success' => true,
-                'message' => 'Reservation canceled successfully'
+                'message' => 'Reservation canceled successfully. Payment is refundable - please process refund if applicable.',
+                'refundable' => true,
+                'total_amount' => $reservation['total_amount'] ?? 0
             ]);
             break;
             
         case 'view':
             // Get reservation details (read-only)
-            $stmt = $conn->prepare("SELECT r.*, u.full_name as guest_name, u.email as guest_email, u.phone as guest_phone 
+            $stmt = $conn->prepare("SELECT r.*, u.full_name as guest_name, u.email as guest_email, u.phone_number as guest_phone 
                                     FROM reservations r 
-                                    LEFT JOIN users u ON r.user_id = u.id 
+                                    LEFT JOIN users u ON r.user_id = u.user_id 
                                     WHERE r.reservation_id = :id");
             $stmt->execute([':id' => $reservationId]);
             $reservation = $stmt->fetch(PDO::FETCH_ASSOC);

@@ -8,14 +8,35 @@
 // ===========================
 
 // Statuses that should go to history, not active bookings
+// Note: 'cancelled' has special handling - stays in My Reservations for 1 day for potential re-approval
 const HISTORY_STATUSES_FLOW = [
   "completed",
   "checked_out",
-  "cancelled",
   "no_show",
   "forfeited",
   "expired",
 ];
+
+/**
+ * Check if a canceled reservation is older than 1 day (should move to history)
+ */
+function isCancelledOlderThan1Day(booking) {
+  if (booking.status !== "cancelled" && booking.status !== "canceled") {
+    return false;
+  }
+
+  // Check cancelled_at or updated_at timestamp
+  const cancelledAt = booking.cancelled_at || booking.updated_at;
+  if (!cancelledAt) {
+    return false; // Keep in My Reservations if we don't know when it was cancelled
+  }
+
+  const cancelDate = new Date(cancelledAt);
+  const now = new Date();
+  const oneDayMs = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+
+  return now - cancelDate > oneDayMs;
+}
 
 /**
  * Check if a reservation should be in history (past check-out date and fully paid)
@@ -24,6 +45,11 @@ function isReservationCompleted(booking) {
   // If already has a history status, it's completed
   if (HISTORY_STATUSES_FLOW.includes(booking.status)) {
     return true;
+  }
+
+  // For cancelled reservations: stay in My Reservations for 1 day, then move to history
+  if (booking.status === "cancelled" || booking.status === "canceled") {
+    return isCancelledOlderThan1Day(booking);
   }
 
   // Check if the reservation is fully paid and past check-out date
@@ -134,8 +160,25 @@ function renderBookings(bookings) {
       const statusClass = getStatusClass(booking.status);
       const statusLabel = booking.status_label || booking.status;
 
+      // Check if this is a cancelled reservation (show refund notice)
+      const isCancelled =
+        booking.status === "cancelled" || booking.status === "canceled";
+      const refundNotice = isCancelled
+        ? `
+        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 8px 12px; margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
+          <div style="font-size: 0.8em;">
+            <div style="font-weight: 600; color: #92400e;">Payment Refundable</div>
+            <div style="color: #a16207; font-size: 0.9em;">Staff may re-approve within 24 hours</div>
+          </div>
+        </div>
+      `
+        : "";
+
       return `
-        <div class="booking-list-item" onclick="openBookingModal(${index})" style="cursor: pointer; padding: 12px 15px; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 10px; transition: all 0.3s ease; border: 2px solid #11224e;">
+        <div class="booking-list-item" onclick="openBookingModal(${index})" style="cursor: pointer; padding: 12px 15px; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 10px; transition: all 0.3s ease; border: 2px solid ${
+        isCancelled ? "#ef4444" : "#11224e"
+      };">
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
             <div style="flex: 1; min-width: 0;">
               <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
@@ -158,6 +201,7 @@ function renderBookings(bookings) {
                   booking.total_amount
                 ).toLocaleString()}
               </div>
+              ${refundNotice}
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;">
               <i class="fas fa-eye" style="color: #11224e; font-size: 1.3em;"></i>
@@ -658,17 +702,27 @@ function renderBookingActions(booking) {
 
   let html = '<div class="booking-actions">';
 
-  // Show cancellation notice for cancelled bookings
-  if (booking.status === "cancelled" && booking.downpayment_paid == 1) {
+  // Show cancellation notice for cancelled bookings (check both spellings)
+  // Cancelled by admin/staff only - users cannot cancel their own reservations
+  const isCancelledStatus =
+    booking.status === "cancelled" || booking.status === "canceled";
+  if (isCancelledStatus) {
     html += `
-      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 8px; margin: 10px 0;">
+      <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 8px; margin: 10px 0;">
         <div style="display: flex; align-items: start; gap: 10px;">
-          <i class="fas fa-info-circle" style="color: #d97706; font-size: 1.2em; margin-top: 2px;"></i>
+          <i class="fas fa-ban" style="color: #ef4444; font-size: 1.2em; margin-top: 2px;"></i>
           <div>
-            <strong style="color: #92400e; display: block; margin-bottom: 4px;">Cancelled Reservation</strong>
-            <p style="margin: 0; color: #78350f; font-size: 0.9em;">Downpayment of ₱${parseFloat(
-              booking.downpayment_amount
-            ).toLocaleString()} is non-refundable as per booking policy.</p>
+            <strong style="color: #991b1b; display: block; margin-bottom: 4px;">Reservation Cancelled by Admin/Staff</strong>
+            <p style="margin: 0; color: #991b1b; font-size: 0.9em;">This reservation has been cancelled by the admin or staff.</p>
+          </div>
+        </div>
+      </div>
+      <div style="background: #dcfce7; border-left: 4px solid #22c55e; padding: 12px; border-radius: 8px; margin: 10px 0;">
+        <div style="display: flex; align-items: start; gap: 10px;">
+          <i class="fas fa-money-bill-wave" style="color: #22c55e; font-size: 1.2em; margin-top: 2px;"></i>
+          <div>
+            <strong style="color: #166534; display: block; margin-bottom: 4px;">💰 Payment Refundable</strong>
+            <p style="margin: 0; color: #166534; font-size: 0.9em;">Your payment is eligible for refund. Admin/Staff may re-approve this reservation within 24 hours, or contact us for refund processing.</p>
           </div>
         </div>
       </div>
@@ -783,7 +837,14 @@ function renderBookingActions(booking) {
   }
 
   // Rebooking Policy Notice for paid reservations (no cancellation allowed)
-  if (booking.downpayment_verified == 1 && !booking.can_rebook) {
+  // Don't show for cancelled reservations
+  const isBookingCancelled =
+    booking.status === "cancelled" || booking.status === "canceled";
+  if (
+    booking.downpayment_verified == 1 &&
+    !booking.can_rebook &&
+    !isBookingCancelled
+  ) {
     // Show policy notice when rebooking not yet available (less than 7 days or outside 3-month window)
     html += `
       <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 6px; margin-top: 10px;">

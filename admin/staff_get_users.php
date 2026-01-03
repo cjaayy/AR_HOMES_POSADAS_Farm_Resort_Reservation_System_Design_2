@@ -20,8 +20,19 @@ require_once '../config/connection.php';
 
 try {
     $db = new Database(); $conn = $db->getConnection();
-        $query = "SELECT 
-                                user_id,
+    
+    // Check if cancellation_count column exists, if not add it
+    try {
+        $checkCol = $conn->query("SHOW COLUMNS FROM users LIKE 'cancellation_count'");
+        if ($checkCol->rowCount() == 0) {
+            $conn->exec("ALTER TABLE users ADD COLUMN cancellation_count INT DEFAULT 0");
+        }
+    } catch (Exception $e) {
+        // Column check failed, continue anyway
+    }
+    
+    $query = "SELECT 
+                user_id,
                 username,
                 email,
                 last_name,
@@ -34,7 +45,8 @@ try {
                 loyalty_level,
                 last_login,
                 created_at,
-                updated_at
+                updated_at,
+                COALESCE(cancellation_count, 0) as cancellation_count
               FROM users
               ORDER BY created_at DESC";
     $stmt = $conn->prepare($query);

@@ -775,6 +775,10 @@ $staffId = $_SESSION['staff_id'] ?? 0;
                 <button onclick="staffCancelReservation('${r.reservation_id}')" style="padding:6px 12px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;" title="Cancel">
                   <i class="fas fa-times"></i>
                 </button>` : ''}
+                ${['canceled', 'cancelled'].includes(r.status) ? `
+                <button onclick="staffApproveReservation('${r.reservation_id}')" style="padding:6px 12px; background:#10b981; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;" title="Re-approve">
+                  <i class="fas fa-redo"></i>
+                </button>` : ''}
               </div>
             </td>
           </tr>
@@ -797,17 +801,31 @@ $staffId = $_SESSION['staff_id'] ?? 0;
         if (!r) return alert('Reservation not found');
         
         const canApprove = ['pending', 'pending_payment', 'pending_confirmation'].includes(r.status);
+        const canReapprove = ['canceled', 'cancelled'].includes(r.status);
         const canCancel = ['pending', 'pending_payment', 'pending_confirmation', 'confirmed'].includes(r.status);
+        const isCanceled = ['canceled', 'cancelled'].includes(r.status);
+        
+        const refundNotice = isCanceled ? `
+          <div style="background:#fef3c7; border:1px solid #f59e0b; border-radius:10px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-info-circle" style="color:#f59e0b; font-size:18px;"></i>
+            <div>
+              <div style="font-weight:600; color:#92400e;">Payment Refundable</div>
+              <div style="font-size:13px; color:#a16207;">This reservation was canceled. Payment of ₱${parseFloat(r.total_amount || 0).toLocaleString()} is eligible for refund.</div>
+            </div>
+          </div>
+        ` : '';
         
         const actionButtons = `
           <div style="display:flex; gap:12px; justify-content:center; margin-top:20px; padding-top:20px; border-top:1px solid #e2e8f0;">
             ${canApprove ? `<button onclick="staffApproveReservation('${id}'); document.getElementById('staffModal').remove();" style="padding:12px 24px; background:#10b981; color:white; border:none; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600;"><i class="fas fa-check"></i> Approve</button>` : ''}
+            ${canReapprove ? `<button onclick="staffApproveReservation('${id}'); document.getElementById('staffModal').remove();" style="padding:12px 24px; background:#10b981; color:white; border:none; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600;"><i class="fas fa-redo"></i> Re-approve</button>` : ''}
             ${canCancel ? `<button onclick="staffCancelReservation('${id}'); document.getElementById('staffModal').remove();" style="padding:12px 24px; background:#ef4444; color:white; border:none; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600;"><i class="fas fa-times"></i> Cancel</button>` : ''}
           </div>
         `;
         
         const html = `
           <div style="padding:20px;">
+            ${refundNotice}
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
               <div><strong>Guest:</strong> ${escapeHtml(r.guest_name || 'N/A')}</div>
               <div><strong>Phone:</strong> ${escapeHtml(r.guest_phone || 'N/A')}</div>
@@ -852,7 +870,7 @@ $staffId = $_SESSION['staff_id'] ?? 0;
       }
 
       async function staffCancelReservation(id) {
-        if (!confirm('Are you sure you want to cancel this reservation?')) return;
+        if (!confirm('Are you sure you want to cancel this reservation?\n\nNote: Payment will be marked as refundable.')) return;
         
         try {
           const formData = new FormData();
@@ -867,8 +885,14 @@ $staffId = $_SESSION['staff_id'] ?? 0;
           const data = await res.json();
           
           if (data.success) {
-            alert('Reservation canceled successfully!');
+            if (data.refundable && data.total_amount > 0) {
+              alert(`Reservation canceled successfully!\n\n⚠️ Payment of ₱${parseFloat(data.total_amount).toLocaleString()} is REFUNDABLE.\nPlease process the refund if payment was already made.`);
+            } else {
+              alert('Reservation canceled successfully!');
+            }
             staffFetchAllReservations();
+            // Also reload users to update cancellation badges
+            loadUsers();
           } else {
             alert('Failed to cancel: ' + (data.message || 'Unknown error'));
           }
@@ -927,22 +951,29 @@ $staffId = $_SESSION['staff_id'] ?? 0;
         const tbody = document.getElementById('usersTableBody');
         
         if (users.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#64748b;">No users found</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#64748b;">No users found</td></tr>';
           return;
         }
         
-        tbody.innerHTML = users.slice(0, 50).map((u, i) => `
+        tbody.innerHTML = users.slice(0, 50).map((u, i) => {
+          const cancelCount = parseInt(u.cancellation_count) || 0;
+          const cancelBadge = cancelCount > 0 ? `<span style="margin-left:8px; padding:2px 8px; background:#fef2f2; color:#ef4444; border-radius:12px; font-size:11px; font-weight:600;" title="${cancelCount} canceled reservation(s)"><i class="fas fa-times-circle"></i> ${cancelCount}</span>` : '';
+          
+          return `
           <tr style="border-bottom:1px solid #f1f5f9;">
             <td style="padding:16px; text-align:center; color:#64748b;">${i + 1}</td>
-            <td style="padding:16px; font-weight:600; color:#1e293b;">${escapeHtml(u.full_name || 'N/A')}</td>
+            <td style="padding:16px;">
+              <span style="font-weight:600; color:#1e293b;">${escapeHtml(u.full_name || 'N/A')}</span>
+              ${cancelBadge}
+            </td>
             <td style="padding:16px; color:#64748b;">${escapeHtml(u.email || 'N/A')}</td>
-            <td style="padding:16px; color:#64748b;">${escapeHtml(u.phone || 'N/A')}</td>
+            <td style="padding:16px; color:#64748b;">${escapeHtml(u.phone_number || u.phone || 'N/A')}</td>
             <td style="padding:16px; color:#64748b;">${u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}</td>
             <td style="padding:16px; text-align:center;">
-              <span style="padding:6px 12px; background:${u.status === 'active' ? '#10b98120' : '#ef444420'}; color:${u.status === 'active' ? '#10b981' : '#ef4444'}; border-radius:20px; font-size:12px; font-weight:600; text-transform:capitalize;">${u.status || 'active'}</span>
+              <span style="padding:6px 12px; background:${u.is_active ? '#10b98120' : '#ef444420'}; color:${u.is_active ? '#10b981' : '#ef4444'}; border-radius:20px; font-size:12px; font-weight:600;">${u.is_active ? 'Active' : 'Inactive'}</span>
             </td>
           </tr>
-        `).join('');
+        `}).join('');
       }
 
       // ============================

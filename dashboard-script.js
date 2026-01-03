@@ -3431,16 +3431,14 @@ function initBookingHistoryFilters() {
 }
 
 function applyFiltersAndSort() {
-  // First filter to only history statuses
-  let filtered = loadedReservations.filter((r) =>
-    HISTORY_STATUSES.includes(r.status)
-  );
+  // First filter to only history statuses (using shouldShowInHistory for cancelled > 1 day logic)
+  let filtered = loadedReservations.filter((r) => shouldShowInHistory(r));
 
   // Apply status filter (for Booking History, only completed/cancelled options)
   if (currentFilter !== "all") {
     const statusMap = {
       completed: ["completed", "checked_out"],
-      cancelled: ["cancelled", "no_show", "forfeited", "expired"],
+      cancelled: ["cancelled", "canceled", "no_show", "forfeited", "expired"],
     };
     const allowedStatuses = statusMap[currentFilter] || [];
     filtered = filtered.filter((r) => allowedStatuses.includes(r.status));
@@ -3486,17 +3484,36 @@ const HISTORY_STATUSES = [
   "completed",
   "checked_out",
   "cancelled",
+  "canceled",
   "no_show",
   "forfeited",
   "expired",
 ];
 
 /**
+ * Check if cancelled reservation is older than 1 day (24 hours)
+ * After 1 day, it moves from My Reservations to Reservation History
+ */
+function isCancelledOlderThan1Day(r) {
+  if (r.status !== "cancelled" && r.status !== "canceled") return false;
+  const cancelledAt = r.cancelled_at || r.updated_at || r.created_at;
+  if (!cancelledAt) return true; // If no date, assume old
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  return new Date() - new Date(cancelledAt) > oneDayMs;
+}
+
+/**
  * Check if a reservation should be shown in history
  * (either has history status OR is fully paid and past check-out date)
+ * Cancelled reservations only show in history after 1 day (24 hours)
  */
 function shouldShowInHistory(r) {
-  // If already has a history status, show in history
+  // For cancelled reservations, only show in history after 1 day
+  if (r.status === "cancelled" || r.status === "canceled") {
+    return isCancelledOlderThan1Day(r);
+  }
+
+  // If already has a history status (except cancelled), show in history
   if (HISTORY_STATUSES.includes(r.status)) {
     return true;
   }
@@ -3584,6 +3601,7 @@ function createHistoryReservationCard(r) {
     completed: "completed",
     checked_out: "completed",
     cancelled: "cancelled",
+    canceled: "cancelled",
     no_show: "cancelled",
     forfeited: "cancelled",
     expired: "cancelled",
@@ -3594,6 +3612,17 @@ function createHistoryReservationCard(r) {
     day: "numeric",
     year: "numeric",
   });
+
+  // Check if this is a cancelled reservation (show refund processed notice)
+  const isCancelled = r.status === "cancelled" || r.status === "canceled";
+  const refundNotice = isCancelled
+    ? `
+    <div style="background: #dcfce7; border: 1px solid #22c55e; border-radius: 6px; padding: 6px 10px; margin-top: 8px; display: flex; align-items: center; gap: 6px;">
+      <i class="fas fa-check-circle" style="color: #22c55e; font-size: 0.9em;"></i>
+      <span style="font-size: 0.75em; color: #166534; font-weight: 500;">Payment refund processed - Contact staff for details</span>
+    </div>
+  `
+    : "";
 
   return `
     <div class="reservation-card ${statusClass}" data-reservation-id="${
@@ -3618,6 +3647,7 @@ function createHistoryReservationCard(r) {
           <i class="fas fa-peso-sign"></i>
           <span>₱${parseFloat(r.total_amount || 0).toLocaleString()}</span>
         </div>
+        ${refundNotice}
       </div>
       <div class="card-actions">
         ${getHistoryActionButtons(r)}
