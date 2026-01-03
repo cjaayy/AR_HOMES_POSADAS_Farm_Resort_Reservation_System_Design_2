@@ -3644,10 +3644,13 @@ function displayReservations(reservations) {
 
   if (historyReservations.length === 0) {
     container.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #94a3b8;">
-        <i class="fas fa-history" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
-        <p style="font-size: 18px; font-weight: 600;">No reservation history found</p>
-        <p style="margin-top: 10px;">Completed and cancelled reservations will appear here</p>
+      <div class="history-empty-state">
+        <i class="fas fa-history"></i>
+        <h3>No Reservation History Found</h3>
+        <p>Your completed and cancelled reservations will appear here.</p>
+        <button class="history-action-btn view-btn" style="margin-top: 20px; padding: 12px 24px;" onclick="showSection('my-reservations'); updateActiveNavigation('my-reservations');">
+          <i class="fas fa-calendar-plus"></i> Make a Reservation
+        </button>
       </div>
     `;
     return;
@@ -3658,7 +3661,7 @@ function displayReservations(reservations) {
     .join("");
 }
 
-// Create a history-specific card (no payment actions)
+// Create a history-specific card (no payment actions) - REDESIGNED
 function createHistoryReservationCard(r) {
   const statusColors = {
     completed: "completed",
@@ -3668,72 +3671,161 @@ function createHistoryReservationCard(r) {
     no_show: "cancelled",
     forfeited: "cancelled",
     expired: "cancelled",
+    rebooked: "rebooked",
   };
   const statusClass = statusColors[r.status] || "pending";
+
   const checkInDate = new Date(r.check_in_date).toLocaleDateString("en-US", {
+    weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
+  const createdDate = r.created_at
+    ? new Date(r.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "N/A";
+
   // Check if this is a cancelled reservation (show refund processed notice)
   const isCancelled = r.status === "cancelled" || r.status === "canceled";
+  const isCompleted = r.status === "completed" || r.status === "checked_out";
+
+  // Status icon mapping
+  const statusIcons = {
+    completed: "check-double",
+    checked_out: "check-double",
+    cancelled: "times-circle",
+    canceled: "times-circle",
+    no_show: "user-slash",
+    forfeited: "exclamation-triangle",
+    expired: "clock",
+    rebooked: "calendar-check",
+    pending: "hourglass-half",
+    confirmed: "check-circle",
+  };
+  const statusIcon = statusIcons[r.status] || "info-circle";
+
+  // Build refund notice for cancelled reservations
   const refundNotice = isCancelled
-    ? `
-    <div style="background: #dcfce7; border: 1px solid #22c55e; border-radius: 6px; padding: 6px 10px; margin-top: 8px; display: flex; align-items: center; gap: 6px;">
-      <i class="fas fa-check-circle" style="color: #22c55e; font-size: 0.9em;"></i>
-      <span style="font-size: 0.75em; color: #166534; font-weight: 500;">Payment refund processed - Contact staff for details</span>
-    </div>
-  `
+    ? `<div class="history-refund-notice">
+        <i class="fas fa-check-circle"></i>
+        <span>Payment refund processed - Contact staff for details</span>
+      </div>`
     : "";
 
+  // Build action buttons
+  const actionButtons = getHistoryActionButtons(r);
+
   return `
-    <div class="reservation-card ${statusClass}" data-reservation-id="${
+    <div class="booking-history-card" data-status="${statusClass}" data-reservation-id="${
     r.reservation_id
-  }">
-      <div class="card-header">
-        <span class="reservation-id">#${r.reservation_id}</span>
-        <span class="status-badge ${statusClass}">${
-    r.status_label || r.status
-  }</span>
-      </div>
-      <div class="card-body">
-        <div class="info-row">
-          <i class="fas fa-calendar"></i>
-          <span>${checkInDate}</span>
+  }" onclick="handleCardClick(event, '${r.reservation_id}')">
+      <div class="history-card-content">
+        <div class="history-card-header">
+          <div class="history-card-id">
+            <span class="reservation-number">
+              <i class="fas fa-ticket-alt"></i>
+              #${r.reservation_id}
+            </span>
+            <span class="reservation-date">Booked: ${createdDate}</span>
+          </div>
+          <span class="history-status-badge ${statusClass}">
+            <i class="fas fa-${statusIcon}"></i>
+            ${r.status_label || r.status}
+          </span>
         </div>
-        <div class="info-row">
-          <i class="fas fa-clock"></i>
-          <span>${r.booking_type_label || r.booking_type || "N/A"}</span>
-        </div>
-        <div class="info-row">
-          <i class="fas fa-peso-sign"></i>
-          <span>₱${parseFloat(r.total_amount || 0).toLocaleString()}</span>
-        </div>
+        
         ${refundNotice}
-      </div>
-      <div class="card-actions">
-        ${getHistoryActionButtons(r)}
+        
+        <div class="history-card-body">
+          <div class="history-package-title">
+            <i class="fas fa-home"></i>
+            ${r.package_type || "Standard Package"} - ${(
+    r.booking_type || "daytime"
+  )
+    .replace("-", " ")
+    .toUpperCase()}
+          </div>
+          
+          <div class="history-info-grid">
+            <div class="history-info-item">
+              <i class="fas fa-calendar-day"></i>
+              <span>${checkInDate}</span>
+            </div>
+            <div class="history-info-item">
+              <i class="fas fa-users"></i>
+              <span>${r.number_of_guests || 1} Guest(s)</span>
+            </div>
+            <div class="history-info-item">
+              <i class="fas fa-peso-sign"></i>
+              <span>₱${parseFloat(r.total_amount || 0).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}</span>
+            </div>
+            <div class="history-info-item">
+              <i class="fas fa-clock"></i>
+              <span>${
+                r.booking_type_label || formatBookingTypeShort(r.booking_type)
+              }</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="history-card-footer">
+          ${actionButtons}
+        </div>
       </div>
     </div>
   `;
 }
 
-// History-specific action buttons (no payment actions)
+// Handle card click - opens details unless a button was clicked
+function handleCardClick(event, reservationId) {
+  // If a button was clicked, don't open details (button has its own handler)
+  if (event.target.closest("button")) {
+    return;
+  }
+  viewReservationDetails(reservationId);
+}
+
+// Helper function for short booking type format
+function formatBookingTypeShort(type) {
+  const types = {
+    daytime: "Daytime",
+    nighttime: "Nighttime",
+    "22hours": "22 Hours",
+    "venue-daytime": "Venue Day",
+    "venue-nighttime": "Venue Night",
+    "venue-22hours": "Venue 22H",
+  };
+  return types[type] || type || "Standard";
+}
+
+// History-specific action buttons (no payment actions) - REDESIGNED
 function getHistoryActionButtons(r) {
-  let buttons = `<button class="btn-secondary" onclick="viewReservationDetails('${r.reservation_id}')">
+  const isCompleted = r.status === "completed" || r.status === "checked_out";
+  const isCancelled = r.status === "cancelled" || r.status === "canceled";
+
+  let buttons = `<button class="history-action-btn view-btn" onclick="event.stopPropagation(); viewReservationDetails('${r.reservation_id}')">
     <i class="fas fa-eye"></i> View Details
   </button>`;
 
   // Only show Review and Book Again for completed reservations
-  if (r.status === "completed" || r.status === "checked_out") {
-    buttons += `<button class="btn-success" onclick="writeReviewForReservation('${r.reservation_id}')">
+  if (isCompleted) {
+    buttons += `<button class="history-action-btn review-btn" onclick="event.stopPropagation(); writeReviewForReservation('${r.reservation_id}')">
       <i class="fas fa-star"></i> Review
     </button>`;
-    buttons += `<button class="btn-primary" onclick="bookAgainFromReservation('${r.reservation_id}')">
+    buttons += `<button class="history-action-btn book-again-btn" onclick="event.stopPropagation(); bookAgainFromReservation('${r.reservation_id}')">
       <i class="fas fa-redo"></i> Book Again
     </button>`;
   }
+
+  // For cancelled reservations, only show View Details
+  // The refund notice is shown in the card body
 
   return buttons;
 }
@@ -3749,45 +3841,94 @@ function createEnhancedReservationCard(r) {
     cancelled: "cancelled",
     no_show: "cancelled",
     forfeited: "cancelled",
-    rebooked: "confirmed",
+    rebooked: "rebooked",
   };
 
   const statusClass = statusColors[r.status] || "pending";
 
+  const checkInDate = new Date(r.check_in_date).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const createdDate = r.created_at
+    ? new Date(r.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "N/A";
+
+  // Status icon mapping
+  const statusIcons = {
+    pending_payment: "clock",
+    pending_confirmation: "hourglass-half",
+    confirmed: "check-circle",
+    checked_in: "sign-in-alt",
+    checked_out: "check-double",
+    completed: "check-double",
+    cancelled: "times-circle",
+    no_show: "user-slash",
+    forfeited: "exclamation-triangle",
+    rebooked: "calendar-check",
+  };
+  const statusIcon = statusIcons[r.status] || "info-circle";
+
   return `
     <div class="booking-history-card" data-status="${statusClass}" data-reservation-id="${
     r.reservation_id
-  }" onclick="viewReservationDetails('${
-    r.reservation_id
-  }')" style="cursor: pointer; padding: 12px 15px; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 10px; transition: all 0.3s ease; border: 2px solid #11224e; border-left: 2px solid #11224e;">
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-        <div style="flex: 1; min-width: 0;">
-          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
-            <span class="status-badge ${statusClass}" style="font-size: 0.75em; padding: 4px 8px;">${
-    r.status_label
-  }</span>
-            <span style="font-weight: 700; color: #1e293b; font-size: 0.9em;">#${
-              r.reservation_id
-            }</span>
-            <span style="color: #94a3b8; font-size: 0.85em;">${formatDate(
-              r.check_in_date
-            )}</span>
+  }" onclick="handleCardClick(event, '${r.reservation_id}')">
+      <div class="history-card-content">
+        <div class="history-card-header">
+          <div class="history-card-id">
+            <span class="reservation-number">
+              <i class="fas fa-ticket-alt"></i>
+              #${r.reservation_id}
+            </span>
+            <span class="reservation-date">Booked: ${createdDate}</span>
           </div>
-          <div style="font-weight: 600; color: #334155; margin-bottom: 4px; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
-            r.package_type || "Package"
-          } - ${(r.booking_type || "").toUpperCase()}</div>
-          <div style="color: #64748b; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            <i class="fas fa-user" style="font-size: 0.9em; color: #64748b;"></i> ${
-              r.number_of_guests || 1
-            } Guest(s) • 
-            <i class="fas fa-tag" style="font-size: 0.9em; color: #64748b;"></i> ₱${parseFloat(
-              r.total_amount
-            ).toLocaleString()}
+          <span class="history-status-badge ${statusClass}">
+            <i class="fas fa-${statusIcon}"></i>
+            ${r.status_label}
+          </span>
+        </div>
+        
+        <div class="history-card-body">
+          <div class="history-package-title">
+            <i class="fas fa-home"></i>
+            ${r.package_type || "Standard Package"} - ${(
+    r.booking_type || "daytime"
+  )
+    .replace("-", " ")
+    .toUpperCase()}
+          </div>
+          
+          <div class="history-info-grid">
+            <div class="history-info-item">
+              <i class="fas fa-calendar-day"></i>
+              <span>${checkInDate}</span>
+            </div>
+            <div class="history-info-item">
+              <i class="fas fa-users"></i>
+              <span>${r.number_of_guests || 1} Guest(s)</span>
+            </div>
+            <div class="history-info-item">
+              <i class="fas fa-peso-sign"></i>
+              <span>₱${parseFloat(r.total_amount || 0).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}</span>
+            </div>
+            <div class="history-info-item">
+              <i class="fas fa-clock"></i>
+              <span>${formatBookingTypeShort(r.booking_type)}</span>
+            </div>
           </div>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;">
-          <i class="fas fa-eye" style="color: #11224e; font-size: 1.3em;"></i>
-          <span style="color: #11224e; font-size: 0.7em; font-weight: 600; white-space: nowrap;">View Details</span>
+        
+        <div class="history-card-footer">
+          ${getEnhancedActionButtons(r)}
         </div>
       </div>
     </div>
@@ -3795,39 +3936,39 @@ function createEnhancedReservationCard(r) {
 }
 
 function getEnhancedActionButtons(r) {
-  let buttons = `<button class="btn-secondary" onclick="viewReservationDetails('${r.reservation_id}')">
+  let buttons = `<button class="history-action-btn view-btn" onclick="event.stopPropagation(); viewReservationDetails('${r.reservation_id}')">
     <i class="fas fa-eye"></i> View Details
   </button>`;
 
   if (r.can_upload_downpayment) {
-    buttons += `<button class="btn-primary" onclick="completePayment('${r.reservation_id}', 'downpayment')">
+    buttons += `<button class="history-action-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;" onclick="event.stopPropagation(); completePayment('${r.reservation_id}', 'downpayment')">
       <i class="fas fa-upload"></i> Upload Payment
     </button>`;
   }
 
   if (r.can_upload_full_payment) {
-    buttons += `<button class="btn-primary" onclick="completePayment('${r.reservation_id}', 'full_payment')">
+    buttons += `<button class="history-action-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;" onclick="event.stopPropagation(); completePayment('${r.reservation_id}', 'full_payment')">
       <i class="fas fa-credit-card"></i> Pay Balance
     </button>`;
   }
 
   if (r.can_rebook) {
-    buttons += `<button class="btn-warning" onclick="showRebookingModal('${r.reservation_id}')">
+    buttons += `<button class="history-action-btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;" onclick="event.stopPropagation(); showRebookingModal('${r.reservation_id}')">
       <i class="fas fa-calendar-alt"></i> Rebook
     </button>`;
   }
 
   if (r.can_cancel) {
-    buttons += `<button class="btn-danger" onclick="cancelReservation('${r.reservation_id}')">
+    buttons += `<button class="history-action-btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;" onclick="event.stopPropagation(); cancelReservation('${r.reservation_id}')">
       <i class="fas fa-times"></i> Cancel
     </button>`;
   }
 
   if (r.status === "completed" || r.status === "checked_out") {
-    buttons += `<button class="btn-success" onclick="writeReviewForReservation('${r.reservation_id}')">
+    buttons += `<button class="history-action-btn review-btn" onclick="event.stopPropagation(); writeReviewForReservation('${r.reservation_id}')">
       <i class="fas fa-star"></i> Review
     </button>`;
-    buttons += `<button class="btn-primary" onclick="bookAgainFromReservation('${r.reservation_id}')">
+    buttons += `<button class="history-action-btn book-again-btn" onclick="event.stopPropagation(); bookAgainFromReservation('${r.reservation_id}')">
       <i class="fas fa-redo"></i> Book Again
     </button>`;
   }
@@ -6153,6 +6294,12 @@ window.cancelReservation = cancelReservation;
 window.printReservationReceipt = printReservationReceipt;
 window.loadMyReservations = loadMyReservations;
 window.applyFiltersAndSort = applyFiltersAndSort;
+window.formatBookingTypeShort = formatBookingTypeShort;
+window.createHistoryReservationCard = createHistoryReservationCard;
+window.getHistoryActionButtons = getHistoryActionButtons;
+window.displayReservations = displayReservations;
+window.completePayment = completePayment;
+window.handleCardClick = handleCardClick;
 
 // Debug: Verify functions are accessible
 // Test button onclick attributes

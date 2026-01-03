@@ -2506,18 +2506,12 @@
             <div class="bookings-history-grid">
               <!-- Booking cards will be loaded dynamically from database -->
               <div
-                style="
-                  grid-column: 1/-1;
-                  text-align: center;
-                  padding: 60px 20px;
-                  color: #94a3b8;
-                "
+                class="history-empty-state"
+                style="animation: pulse 1.5s infinite"
               >
-                <i
-                  class="fas fa-spinner fa-spin"
-                  style="font-size: 48px; margin-bottom: 20px; opacity: 0.5"
-                ></i>
-                <p style="font-size: 16px">Loading your reservations...</p>
+                <i class="fas fa-spinner fa-spin" style="color: #11224e"></i>
+                <h3>Loading Your Reservations...</h3>
+                <p>Please wait while we fetch your booking history</p>
               </div>
             </div>
           </div>
