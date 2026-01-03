@@ -5264,36 +5264,15 @@ let currentUnavailableDates = []; // Store for validation
 let baseUnavailableDates = []; // Original unavailable dates from server
 
 // Calculate which dates should be disabled based on duration
-// If duration is 2, and Jan 15 is booked, then Jan 14 should also be disabled
-// because selecting Jan 14 with 2-day duration would conflict with Jan 15
+// SIMPLIFIED: Only block directly booked dates
+// The server handles complex overlap validation
 function calculateDisabledDates(duration) {
   if (!baseUnavailableDates || baseUnavailableDates.length === 0) {
     return [];
   }
 
-  const disabledSet = new Set(baseUnavailableDates);
-
-  // For each unavailable date, also disable (duration - 1) days before it
-  // because starting on those days would extend into the unavailable date
-  if (duration > 1) {
-    baseUnavailableDates.forEach((dateStr) => {
-      const unavailableDate = new Date(dateStr + "T00:00:00");
-
-      for (let i = 1; i < duration; i++) {
-        const conflictDate = new Date(unavailableDate);
-        conflictDate.setDate(conflictDate.getDate() - i);
-
-        const year = conflictDate.getFullYear();
-        const month = String(conflictDate.getMonth() + 1).padStart(2, "0");
-        const day = String(conflictDate.getDate()).padStart(2, "0");
-        const conflictDateStr = `${year}-${month}-${day}`;
-
-        disabledSet.add(conflictDateStr);
-      }
-    });
-  }
-
-  return Array.from(disabledSet).sort();
+  // Just return the base unavailable dates - server handles overlap logic
+  return [...baseUnavailableDates];
 }
 
 // Refresh the calendar when duration changes
@@ -5361,7 +5340,8 @@ function refreshCalendarForDuration() {
         dayElem.classList.add("unavailable-date");
 
         if (baseUnavailableDates.includes(dateStr)) {
-          dayElem.innerHTML += '<span class="unavailable-indicator">✕</span>';
+          // Direct booking - show "booked" indicator
+          dayElem.innerHTML += '<span class="unavailable-indicator">🚫</span>';
         } else {
           dayElem.classList.add("conflict-date");
           dayElem.innerHTML +=
@@ -5504,7 +5484,8 @@ async function initializeDatePicker(bookingType) {
 
         // Different indicator for direct vs conflict dates
         if (baseUnavailableDates.includes(dateStr)) {
-          dayElem.innerHTML += '<span class="unavailable-indicator">✕</span>';
+          // Direct booking - show "booked" indicator
+          dayElem.innerHTML += '<span class="unavailable-indicator">🚫</span>';
         } else {
           // This date is blocked due to duration conflict
           dayElem.classList.add("conflict-date");
@@ -5693,40 +5674,26 @@ function updatePriceSummary() {
 }
 
 // Validate that selected date + duration doesn't conflict with unavailable dates
+// Validate that selected check-in date is available
+// Server handles complex date range overlap validation
 function validateDateRangeConflict() {
   const checkInDateInput = document.getElementById("checkInDate");
-  const durationSelect = document.getElementById("duration");
   const submitBtn = document.querySelector(".btn-submit-v2");
 
-  if (!checkInDateInput || !durationSelect) return true;
+  if (!checkInDateInput) return true;
 
   const checkInDate = checkInDateInput.value;
-  const duration = parseInt(durationSelect.value) || 1;
 
   if (!checkInDate) return true; // No date selected yet
 
-  // Calculate all dates in the range
-  const conflictingDates = [];
-  const startDate = new Date(checkInDate);
-
-  for (let i = 0; i < duration; i++) {
-    const currentDate = new Date(startDate);
-    currentDate.setDate(currentDate.getDate() + i);
-
-    const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-    const day = String(currentDate.getDate()).padStart(2, "0");
-    const dateStr = `${year}-${month}-${day}`;
-
-    if (currentUnavailableDates.includes(dateStr)) {
-      conflictingDates.push(dateStr);
-    }
-  }
+  // Only check if the check-in date itself is blocked
+  // Server handles the actual overlap logic for multi-day bookings
+  const isBlocked = currentUnavailableDates.includes(checkInDate);
 
   // Show/hide conflict warning
   let conflictWarning = document.getElementById("dateConflictWarning");
 
-  if (conflictingDates.length > 0) {
+  if (isBlocked) {
     // Create warning if doesn't exist
     if (!conflictWarning) {
       conflictWarning = document.createElement("div");
@@ -5744,29 +5711,24 @@ function validateDateRangeConflict() {
         animation: shake 0.5s ease-out;
       `;
 
-      // Insert after duration select
-      const dateCard = durationSelect.closest(".form-card");
+      // Insert after date input
+      const dateCard = checkInDateInput.closest(".form-card");
       if (dateCard) {
         dateCard.appendChild(conflictWarning);
       }
     }
 
-    const formattedDates = conflictingDates
-      .map((d) => {
-        const date = new Date(d + "T00:00:00");
-        return date.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        });
-      })
-      .join(", ");
+    const date = new Date(checkInDate + "T00:00:00");
+    const formattedDate = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
 
     conflictWarning.innerHTML = `
       <i class="fas fa-exclamation-triangle"></i>
       <div>
-        <strong>Date Conflict!</strong><br>
-        <span style="font-size: 0.85rem;">The following date(s) in your range are already booked: ${formattedDates}</span><br>
-        <span style="font-size: 0.85rem;">Please select a different date or reduce the duration.</span>
+        <strong>Date Unavailable!</strong><br>
+        <span style="font-size: 0.85rem;">${formattedDate} is already booked. Please select a different date.</span>
       </div>
     `;
     conflictWarning.style.display = "flex";
@@ -5879,14 +5841,26 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      // Calculate check-out date
+      // Calculate check-out date based on booking type
+      // Daytime: same day (check-in 8AM, check-out 6PM) = +0 days
+      // Nighttime: next day (check-in 8PM, check-out 6AM) = +1 day
+      // 22 Hours: next day (check-in 2PM, check-out 12NN) = +1 day
+      const bookingType = window.reservationData.bookingType;
       const checkIn = new Date(checkInDate);
       const checkOut = new Date(checkIn);
-      checkOut.setDate(checkOut.getDate() + duration);
+
+      // Calculate days to add for check-out date
+      let daysToAdd = 0;
+      if (bookingType === "daytime" || bookingType === "venue-daytime") {
+        daysToAdd = 0; // Same day checkout
+      } else {
+        daysToAdd = 1; // Next day checkout for nighttime and 22hours
+      }
+
+      checkOut.setDate(checkOut.getDate() + daysToAdd);
       const checkOutDate = checkOut.toISOString().split("T")[0];
 
       // Format package type with booking suffix (e.g., 'all-rooms-night' or 'all-rooms-day')
-      const bookingType = window.reservationData.bookingType;
       const packageBase = window.reservationData.packageType;
 
       // For venue packages, the booking type already contains the time slot (venue-daytime, venue-nighttime, venue-22hours)

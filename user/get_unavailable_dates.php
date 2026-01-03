@@ -59,13 +59,15 @@ try {
     
     $unavailable_dates = [];
     
-    // For each reservation, block ALL dates from check-in to check-out
+    // Determine if the requested booking type is overnight (needs day-before blocking)
+    $is_overnight_booking = in_array($booking_type, ['nighttime', '22hours', 'venue-nighttime', 'venue-22hours']);
+    
+    // For each reservation, block dates that would conflict
     while ($row = $stmt->fetch()) {
         $check_in = new DateTime($row['check_in_date']);
         $check_out = new DateTime($row['check_out_date']);
         
-        // Add all dates in the range (inclusive of check-in, exclusive of check-out)
-        // For single-day bookings (daytime), check_in and check_out are the same, so we need to include that date
+        // Block all dates from check-in to check-out (inclusive)
         $current = clone $check_in;
         while ($current <= $check_out) {
             $date_str = $current->format('Y-m-d');
@@ -79,10 +81,24 @@ try {
                 break;
             }
         }
+        
+        // Also block the day BEFORE check-in for overnight bookings only
+        // Because an overnight booking starting that day would have checkout on the blocked check-in date
+        if ($is_overnight_booking) {
+            $day_before = clone $check_in;
+            $day_before->modify('-1 day');
+            $day_before_str = $day_before->format('Y-m-d');
+            if (!in_array($day_before_str, $unavailable_dates)) {
+                $unavailable_dates[] = $day_before_str;
+            }
+        }
     }
     
     // Sort the dates
     sort($unavailable_dates);
+    
+    // Debug log
+    error_log("DEBUG get_unavailable_dates: " . json_encode($unavailable_dates));
     
     echo json_encode([
         'success' => true,

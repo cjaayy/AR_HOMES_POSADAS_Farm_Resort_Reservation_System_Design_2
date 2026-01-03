@@ -179,17 +179,20 @@ try {
     $check_out_time = $config['check_out_time'];
     
     // Calculate dates based on booking type
+    // Daytime: same day checkout (8AM - 6PM)
+    // Nighttime: next day checkout (8PM - 6AM next day) = +1 day
+    // 22 Hours: next day checkout (2PM - 12NN next day) = +1 day
     $number_of_days = null;
     $number_of_nights = null;
     $check_out_date = null;
     
     if ($booking_type === 'daytime' || $booking_type === 'venue-daytime') {
-        $number_of_days = isset($data['number_of_days']) ? (int)$data['number_of_days'] : 1;
-        $check_out_date = date('Y-m-d', strtotime($check_in_date . ' + ' . ($number_of_days - 1) . ' days'));
+        $number_of_days = 1;
+        $check_out_date = $check_in_date; // Same day checkout for daytime
     } elseif ($booking_type === 'nighttime' || $booking_type === '22hours' || 
               $booking_type === 'venue-nighttime' || $booking_type === 'venue-22hours') {
-        $number_of_nights = isset($data['number_of_nights']) ? (int)$data['number_of_nights'] : 1;
-        $check_out_date = date('Y-m-d', strtotime($check_in_date . ' + ' . $number_of_nights . ' days'));
+        $number_of_nights = 1;
+        $check_out_date = date('Y-m-d', strtotime($check_in_date . ' + 1 day')); // Next day checkout
     }
     
     // Validate check-in date is not in the past
@@ -203,49 +206,58 @@ try {
     // 1. Confirmed reservations with downpayment verified, OR
     // 2. Pending reservations from OTHER users that have date_locked = 1
     // This allows users to retry their own unpaid reservations
+    
+    // Debug log
+    error_log("DEBUG make_reservation: user_id=$user_id, check_in=$check_in_date, check_out=$check_out_date");
+    
+    // Proper date range overlap detection:
+    // Two ranges [A,B] and [C,D] overlap if: A <= D AND C <= B
+    // Using <= to block same-day overlaps (checkout day = check-in day of another booking)
     $stmt = $pdo->prepare("
-        SELECT COUNT(*) as count FROM reservations 
+        SELECT reservation_id, check_in_date, check_out_date, status, user_id 
+        FROM reservations 
         WHERE status IN ('pending_payment', 'confirmed', 'pending_confirmation', 'checked_in') 
         AND (downpayment_verified = 1 OR date_locked = 1)
         AND user_id != ?
-        AND (
-            (check_in_date <= ? AND check_out_date >= ?)
-            OR (check_in_date <= ? AND check_out_date >= ?)
-            OR (check_in_date >= ? AND check_out_date <= ?)
-        )
+        AND ? <= check_out_date 
+        AND check_in_date <= ?
     ");
     $stmt->execute([
         $user_id,
-        $check_in_date, $check_in_date,
-        $check_out_date, $check_out_date,
-        $check_in_date, $check_out_date
+        $check_in_date,
+        $check_out_date
     ]);
-    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+    $conflicts1 = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    if ($existing['count'] > 0) {
-        throw new Exception('Selected dates are not available. Please choose different dates.');
+    if (count($conflicts1) > 0) {
+        error_log("DEBUG Query1 conflicts: " . json_encode($conflicts1));
+        throw new Exception('Selected dates are not available (other user). Debug: ' . json_encode($conflicts1));
     }
     
     // Also check for confirmed reservations from ANY user (including self - can't double-book)
+    // Debug logging
+    error_log("DEBUG: Checking dates - check_in_date: $check_in_date, check_out_date: $check_out_date");
+    
+    // Proper date range overlap detection:
+    // Two ranges [A,B] and [C,D] overlap if: A <= D AND C <= B
+    // Using <= to block same-day overlaps (checkout day = check-in day of another booking)
     $stmt2 = $pdo->prepare("
-        SELECT COUNT(*) as count FROM reservations 
+        SELECT reservation_id, check_in_date, check_out_date, status, downpayment_verified 
+        FROM reservations 
         WHERE status IN ('confirmed', 'pending_confirmation', 'checked_in') 
         AND downpayment_verified = 1
-        AND (
-            (check_in_date <= ? AND check_out_date >= ?)
-            OR (check_in_date <= ? AND check_out_date >= ?)
-            OR (check_in_date >= ? AND check_out_date <= ?)
-        )
+        AND ? <= check_out_date 
+        AND check_in_date <= ?
     ");
     $stmt2->execute([
-        $check_in_date, $check_in_date,
-        $check_out_date, $check_out_date,
-        $check_in_date, $check_out_date
+        $check_in_date,
+        $check_out_date
     ]);
-    $existing2 = $stmt2->fetch(PDO::FETCH_ASSOC);
+    $conflicting = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     
-    if ($existing2['count'] > 0) {
-        throw new Exception('Selected dates are not available. Please choose different dates.');
+    if (count($conflicting) > 0) {
+        error_log("DEBUG: Found conflicting reservations: " . json_encode($conflicting));
+        throw new Exception('Selected dates are not available. Please choose different dates. Debug: ' . json_encode($conflicting));
     }
     
     // Calculate pricing based on package
