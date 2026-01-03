@@ -2776,8 +2776,8 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           return;
         }
         
-        // For now, just show a message. You can implement a full edit form later
-        showToast('Edit feature coming soon! Staff ID: ' + id, 'info');
+        // Redirect to edit staff page
+        window.location.href = 'edit_staff.php?id=' + id;
       }
 
       async function toggleStaffStatus(id, currentStatus) {

@@ -114,6 +114,12 @@ $staffId = $_SESSION['staff_id'] ?? 0;
                 <span>View Users</span>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="#settings" class="nav-link" data-section="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+              </a>
+            </li>
           </ul>
         </nav>
       </aside>
@@ -464,6 +470,80 @@ $staffId = $_SESSION['staff_id'] ?? 0;
             </div>
           </div>
         </section>
+
+        <!-- Settings Section -->
+        <section id="settings" class="content-section">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Account Settings</h2>
+            <p style="color:#666; margin:0; font-size:16px;">Manage your account preferences and security</p>
+          </div>
+
+          <div style="max-width: 600px;">
+            <!-- Profile Card -->
+            <div style="background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.08); overflow:hidden; margin-bottom:24px;">
+              <div style="background:linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding:32px; text-align:center;">
+                <div style="width:80px; height:80px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:32px; color:white; font-weight:700;">
+                  <?php echo strtoupper(substr($staffFullName, 0, 1)); ?>
+                </div>
+                <h3 style="color:white; font-size:22px; font-weight:700; margin-bottom:4px;"><?php echo htmlspecialchars($staffFullName); ?></h3>
+                <p style="color:rgba(255,255,255,0.8); font-size:14px;">@<?php echo htmlspecialchars($staffUsername); ?></p>
+                <div style="display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:8px 16px; background:rgba(255,255,255,0.15); border-radius:20px;">
+                  <i class="fas fa-user-tie" style="color:#ffd700;"></i>
+                  <span style="color:white; font-size:13px; font-weight:600;">Front Desk / Reception Staff</span>
+                </div>
+              </div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; gap:12px; padding:16px; background:#f8fafc; border-radius:12px; margin-bottom:12px;">
+                  <div style="width:40px; height:40px; background:#e2e8f0; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#64748b;">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:12px; color:#64748b; font-weight:500;">Email Address</div>
+                    <div style="font-size:14px; color:#1e293b; font-weight:600;"><?php echo htmlspecialchars($staffEmail); ?></div>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; padding:16px; background:#f8fafc; border-radius:12px;">
+                  <div style="width:40px; height:40px; background:#e2e8f0; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#64748b;">
+                    <i class="fas fa-id-badge"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:12px; color:#64748b; font-weight:500;">Staff ID</div>
+                    <div style="font-size:14px; color:#1e293b; font-weight:600;">#<?php echo $staffId; ?></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div style="background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.08); padding:24px;">
+              <h3 style="font-size:18px; font-weight:700; color:#1e293b; margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-shield-alt" style="color:#3a7ca5;"></i>
+                Security Settings
+              </h3>
+              
+              <a href="staff_change_password.php" style="display:flex; align-items:center; gap:16px; padding:20px; background:#f8fafc; border-radius:14px; text-decoration:none; transition:all 0.3s ease; border:2px solid transparent;" onmouseover="this.style.borderColor='#3a7ca5'; this.style.background='white';" onmouseout="this.style.borderColor='transparent'; this.style.background='#f8fafc';">
+                <div style="width:50px; height:50px; background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:20px;">
+                  <i class="fas fa-key"></i>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:16px; font-weight:600; color:#1e293b;">Change Password</div>
+                  <div style="font-size:13px; color:#64748b;">Update your account password for better security</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#94a3b8; font-size:16px;"></i>
+              </a>
+
+              <div style="margin-top:24px; padding:16px; background:linear-gradient(135deg, #dbeafe, #eff6ff); border-radius:12px; border-left:4px solid #3b82f6;">
+                <div style="display:flex; align-items:flex-start; gap:12px;">
+                  <i class="fas fa-info-circle" style="color:#3b82f6; font-size:18px; margin-top:2px;"></i>
+                  <div>
+                    <div style="font-size:14px; font-weight:600; color:#1e3a8a; margin-bottom:4px;">Security Tip</div>
+                    <div style="font-size:13px; color:#1e40af;">Change your password regularly and use a strong combination of letters, numbers, and symbols.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -511,6 +591,7 @@ $staffId = $_SESSION['staff_id'] ?? 0;
           // Load section data
           if (section === 'reservations') staffFetchAllReservations();
           if (section === 'users') loadUsers();
+          if (section === 'settings') { /* Settings section is static */ }
         });
       });
 

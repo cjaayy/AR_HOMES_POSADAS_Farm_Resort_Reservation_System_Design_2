@@ -8,78 +8,109 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
+// Check if user is admin (not staff)
+if (($_SESSION['admin_role'] ?? '') !== 'admin') {
+    header('Location: dashboard.php');
+    exit;
+}
+
 $errors = [];
 $successMessage = '';
+$staff = null;
 
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $fullName = trim($_POST['full_name'] ?? '');
-    $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirmPassword = $_POST['confirm_password'] ?? '';
-    $position = 'Front Desk / Reception Staff'; // Fixed role
-    $status = ($_POST['status'] ?? 'inactive') === 'active' ? 1 : 0;
+// Get staff ID
+$staffId = (int)($_GET['id'] ?? $_POST['admin_id'] ?? 0);
 
-    // Basic validation
-    if ($fullName === '') { $errors[] = 'Full Name is required.'; }
-    if ($username === '') { $errors[] = 'Username is required.'; }
-    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'A valid Email Address is required.'; }
-    if (strlen($password) < 6) { $errors[] = 'Password must be at least 6 characters.'; }
-    if ($password !== $confirmPassword) { $errors[] = 'Passwords do not match.'; }
+if ($staffId <= 0) {
+    header('Location: dashboard.php#staff');
+    exit;
+}
 
-    if (empty($errors)) {
-        try {
-            $db = new Database();
-            $conn = $db->getConnection();
+// Database connection
+try {
+    $db = new Database();
+    $conn = $db->getConnection();
 
-            // Ensure position column exists (add if missing) - safe, idempotent check
-            $colCheck = $conn->prepare("SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = :db AND TABLE_NAME = 'admin_users' AND COLUMN_NAME = 'position'");
-            $colCheck->bindValue(':db', DB_NAME);
-            $colCheck->execute();
-            $colExists = $colCheck->fetchColumn();
-            if (!$colExists) {
-                $conn->exec("ALTER TABLE admin_users ADD COLUMN position VARCHAR(100) DEFAULT NULL AFTER full_name");
-            }
+    // Fetch staff data
+    $stmt = $conn->prepare("SELECT * FROM admin_users WHERE admin_id = :id AND role = 'staff'");
+    $stmt->bindParam(':id', $staffId, PDO::PARAM_INT);
+    $stmt->execute();
+    $staff = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Check username/email uniqueness in admin_users
-            $stmt = $conn->prepare("SELECT admin_id FROM admin_users WHERE username = :username OR email = :email LIMIT 1");
+    if (!$staff) {
+        $_SESSION['flash_error'] = 'Staff member not found.';
+        header('Location: dashboard.php#staff');
+        exit;
+    }
+
+    // Handle form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $fullName = trim($_POST['full_name'] ?? '');
+        $username = trim($_POST['username'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $status = ($_POST['status'] ?? 'inactive') === 'active' ? 1 : 0;
+        $newPassword = $_POST['new_password'] ?? '';
+
+        // Basic validation
+        if ($fullName === '') { $errors[] = 'Full Name is required.'; }
+        if ($username === '') { $errors[] = 'Username is required.'; }
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'A valid Email Address is required.'; }
+        if ($newPassword !== '' && strlen($newPassword) < 6) { $errors[] = 'Password must be at least 6 characters.'; }
+
+        if (empty($errors)) {
+            // Check username/email uniqueness (excluding current staff)
+            $stmt = $conn->prepare("SELECT admin_id FROM admin_users WHERE (username = :username OR email = :email) AND admin_id != :id LIMIT 1");
             $stmt->bindParam(':username', $username);
             $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':id', $staffId, PDO::PARAM_INT);
             $stmt->execute();
+            
             if ($stmt->rowCount() > 0) {
-                $errors[] = 'Username or email already exists for an admin/staff account.';
+                $errors[] = 'Username or email already exists for another account.';
             } else {
-                $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+                // Build update query
+                $updateFields = "full_name = :full_name, username = :username, email = :email, is_active = :is_active";
+                $params = [
+                    ':full_name' => $fullName,
+                    ':username' => $username,
+                    ':email' => $email,
+                    ':is_active' => $status,
+                    ':id' => $staffId
+                ];
 
-                $insertSql = "INSERT INTO admin_users (username, email, password_hash, full_name, role, is_active, position, created_by) VALUES (:username, :email, :password_hash, :full_name, 'staff', :is_active, :position, :created_by)";
-                $ins = $conn->prepare($insertSql);
-                $ins->bindParam(':username', $username);
-                $ins->bindParam(':email', $email);
-                $ins->bindParam(':password_hash', $passwordHash);
-                $ins->bindParam(':full_name', $fullName);
-                $ins->bindParam(':is_active', $status);
-                $ins->bindParam(':position', $position);
-                $createdBy = $_SESSION['admin_id'] ?? null;
-                $ins->bindParam(':created_by', $createdBy);
-                $ins->execute();
+                // Add password if provided
+                if ($newPassword !== '') {
+                    $updateFields .= ", password_hash = :password_hash";
+                    $params[':password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+                }
 
-                // Prepare redirect with flash message to avoid form resubmission
-                $_SESSION['flash_success'] = '✅ Staff account created successfully! The new staff member can now log in using their credentials. You can manage or update their access anytime in Manage Staff Members.';
-                // Optionally include created username
-                $_SESSION['flash_staff_username'] = $username;
-                // Redirect back to dashboard staff section
+                $updateSql = "UPDATE admin_users SET $updateFields WHERE admin_id = :id";
+                $updateStmt = $conn->prepare($updateSql);
+                
+                foreach ($params as $key => $value) {
+                    $updateStmt->bindValue($key, $value);
+                }
+                
+                $updateStmt->execute();
+
+                $_SESSION['flash_success'] = '✅ Staff account updated successfully!';
                 header('Location: dashboard.php#staff');
                 exit;
             }
-
-            $db->closeConnection();
-
-        } catch (Exception $e) {
-            $errors[] = 'Database error: ' . $e->getMessage();
         }
+
+        // Update staff array with posted values for form repopulation
+        $staff['full_name'] = $fullName;
+        $staff['username'] = $username;
+        $staff['email'] = $email;
+        $staff['is_active'] = $status;
     }
+
+    $db->closeConnection();
+
+} catch (Exception $e) {
+    $errors[] = 'Database error: ' . $e->getMessage();
 }
 ?>
 <!doctype html>
@@ -87,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create Staff Account - AR Homes Admin</title>
+    <title>Edit Staff Account - AR Homes Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -106,12 +137,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 20px;
         }
 
-        .create-staff-container {
+        .edit-staff-container {
             width: 100%;
             max-width: 580px;
         }
 
-        /* Back Button */
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -138,7 +168,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             height: 18px;
         }
 
-        /* Main Card */
         .staff-card {
             background: #ffffff;
             border-radius: 24px;
@@ -146,7 +175,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow: hidden;
         }
 
-        /* Card Header */
         .card-header {
             background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
             padding: 32px 40px;
@@ -198,8 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: 400;
         }
 
-        /* Role Badge */
-        .role-badge {
+        .staff-id-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -210,24 +237,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             backdrop-filter: blur(10px);
         }
 
-        .role-badge svg {
+        .staff-id-badge svg {
             width: 18px;
             height: 18px;
             color: #ffd700;
         }
 
-        .role-badge span {
+        .staff-id-badge span {
             color: #ffffff;
             font-size: 0.9rem;
             font-weight: 600;
         }
 
-        /* Card Body */
         .card-body {
             padding: 36px 40px 40px;
         }
 
-        /* Alert Messages */
         .alert {
             padding: 16px 20px;
             border-radius: 14px;
@@ -265,14 +290,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 0;
         }
 
-        .alert-success {
-            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-            border: 1px solid #4ade80;
-            color: #166534;
-            font-weight: 500;
-        }
-
-        /* Form Styles */
         .form-section {
             margin-bottom: 28px;
         }
@@ -359,38 +376,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 0 0 4px rgba(58, 124, 165, 0.1);
         }
 
-        .form-group input:focus + svg,
-        .form-group input:focus ~ .input-wrapper svg {
-            color: #3a7ca5;
-        }
-
         .form-group input::placeholder {
             color: #94a3b8;
         }
 
-        /* Password Strength Indicator */
-        .password-strength {
-            margin-top: 8px;
-            height: 4px;
-            background: #e2e8f0;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .password-strength-bar {
-            height: 100%;
-            width: 0%;
-            transition: all 0.3s ease;
-            border-radius: 2px;
-        }
-
-        .password-hint {
+        .password-note {
             font-size: 0.8rem;
             color: #64748b;
             margin-top: 6px;
+            font-style: italic;
         }
 
-        /* Status Toggle */
         .status-toggle-group {
             display: flex;
             background: #f1f5f9;
@@ -443,7 +439,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             height: 18px;
         }
 
-        /* Action Buttons */
         .form-actions {
             display: flex;
             gap: 14px;
@@ -483,22 +478,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #475569;
         }
 
-        .btn-create {
+        .btn-save {
             background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
             color: #ffffff;
             box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
         }
 
-        .btn-create:hover {
+        .btn-save:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(30, 58, 95, 0.4);
         }
 
-        .btn-create:active {
+        .btn-save:active {
             transform: translateY(0);
         }
 
-        /* Responsive */
         @media (max-width: 600px) {
             .card-header {
                 padding: 28px 24px;
@@ -524,35 +518,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-<div class="create-staff-container">
-    <!-- Back Link -->
+<div class="edit-staff-container">
     <a href="dashboard.php#staff" class="back-link">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Back to Dashboard
+        Back to Manage Staff
     </a>
 
     <div class="staff-card">
-        <!-- Card Header -->
         <div class="card-header">
             <div class="header-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
             </div>
-            <h1>Create Staff Account</h1>
-            <p>Register a new team member for AR Homes Posadas</p>
+            <h1>Edit Staff Account</h1>
+            <p>Update staff member information</p>
             
-            <div class="role-badge">
+            <div class="staff-id-badge">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
                 </svg>
-                <span>Front Desk / Reception Staff</span>
+                <span>Staff ID: #<?php echo $staffId; ?></span>
             </div>
         </div>
 
-        <!-- Card Body -->
         <div class="card-body">
             <?php if (!empty($errors)): ?>
                 <div class="alert alert-error">
@@ -567,11 +558,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endif; ?>
 
-            <?php if ($successMessage): ?>
-                <div class="alert alert-success"><?php echo $successMessage; ?></div>
-            <?php endif; ?>
-
-            <form method="post" id="createStaffForm" novalidate autocomplete="off">
+            <form method="post" id="editStaffForm" novalidate autocomplete="off">
+                <input type="hidden" name="admin_id" value="<?php echo $staffId; ?>">
+                
                 <!-- Personal Information -->
                 <div class="form-section">
                     <div class="section-title">
@@ -585,7 +574,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-group">
                             <label>Full Name <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="text" id="full_name" name="full_name" value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>" required placeholder="Enter staff member's full name">
+                                <input type="text" id="full_name" name="full_name" value="<?php echo htmlspecialchars($staff['full_name'] ?? ''); ?>" required placeholder="Enter staff member's full name">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
@@ -597,7 +586,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-group">
                             <label>Email Address <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required placeholder="staff@example.com">
+                                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($staff['email'] ?? ''); ?>" required placeholder="staff@example.com">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                 </svg>
@@ -607,7 +596,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-group">
                             <label>Contact Number</label>
                             <div class="input-wrapper">
-                                <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>" placeholder="09171234567">
+                                <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($staff['phone'] ?? ''); ?>" placeholder="09171234567">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                                 </svg>
@@ -629,7 +618,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-group">
                             <label>Username <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required placeholder="Choose a unique username">
+                                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($staff['username'] ?? ''); ?>" required placeholder="Choose a unique username">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
@@ -637,29 +626,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <div class="form-row" style="margin-top: 18px;">
+                    <div class="form-row single" style="margin-top: 18px;">
                         <div class="form-group">
-                            <label>Password <span class="required">*</span></label>
+                            <label>New Password</label>
                             <div class="input-wrapper">
-                                <input type="password" id="password" name="password" required placeholder="Minimum 6 characters">
+                                <input type="password" id="new_password" name="new_password" placeholder="Leave empty to keep current password">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
                             </div>
-                            <div class="password-strength">
-                                <div class="password-strength-bar" id="strengthBar"></div>
-                            </div>
-                            <p class="password-hint">Staff can change their password after first login</p>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Confirm Password <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Re-enter password">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                </svg>
-                            </div>
+                            <p class="password-note">Leave blank to keep the current password. Minimum 6 characters if changing.</p>
                         </div>
                     </div>
                 </div>
@@ -676,7 +652,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     <div class="status-toggle-group">
                         <div class="status-option">
-                            <input type="radio" id="status_active" name="status" value="active" <?php echo (($_POST['status'] ?? 'active') === 'active') ? 'checked' : ''; ?>>
+                            <input type="radio" id="status_active" name="status" value="active" <?php echo ($staff['is_active'] == 1) ? 'checked' : ''; ?>>
                             <label for="status_active">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -685,7 +661,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </label>
                         </div>
                         <div class="status-option">
-                            <input type="radio" id="status_inactive" name="status" value="inactive" <?php echo (($_POST['status'] ?? '') === 'inactive') ? 'checked' : ''; ?>>
+                            <input type="radio" id="status_inactive" name="status" value="inactive" <?php echo ($staff['is_active'] == 0) ? 'checked' : ''; ?>>
                             <label for="status_inactive">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
@@ -704,11 +680,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </svg>
                         Cancel
                     </button>
-                    <button type="submit" class="btn btn-create">
+                    <button type="submit" class="btn btn-save">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        Create Account
+                        Save Changes
                     </button>
                 </div>
             </form>
@@ -717,39 +693,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-// Password strength indicator
-const passwordInput = document.getElementById('password');
-const strengthBar = document.getElementById('strengthBar');
-
-passwordInput.addEventListener('input', function() {
-    const password = this.value;
-    let strength = 0;
-    
-    if (password.length >= 6) strength += 25;
-    if (password.length >= 8) strength += 25;
-    if (/[A-Z]/.test(password)) strength += 25;
-    if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 25;
-    
-    strengthBar.style.width = strength + '%';
-    
-    if (strength <= 25) {
-        strengthBar.style.background = '#ef4444';
-    } else if (strength <= 50) {
-        strengthBar.style.background = '#f59e0b';
-    } else if (strength <= 75) {
-        strengthBar.style.background = '#3b82f6';
-    } else {
-        strengthBar.style.background = '#22c55e';
-    }
-});
-
 // Form validation
-document.getElementById('createStaffForm').addEventListener('submit', function(e) {
-    const pw = document.getElementById('password').value;
-    const cpw = document.getElementById('confirm_password').value;
+document.getElementById('editStaffForm').addEventListener('submit', function(e) {
     const fullName = document.getElementById('full_name').value.trim();
     const username = document.getElementById('username').value.trim();
     const email = document.getElementById('email').value.trim();
+    const newPassword = document.getElementById('new_password').value;
     
     let errors = [];
     
@@ -765,12 +714,8 @@ document.getElementById('createStaffForm').addEventListener('submit', function(e
         errors.push('A valid Email Address is required.');
     }
     
-    if (pw.length < 6) {
+    if (newPassword !== '' && newPassword.length < 6) {
         errors.push('Password must be at least 6 characters.');
-    }
-    
-    if (pw !== cpw) {
-        errors.push('Passwords do not match.');
     }
     
     if (errors.length > 0) {
