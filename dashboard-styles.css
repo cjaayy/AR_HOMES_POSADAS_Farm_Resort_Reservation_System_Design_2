@@ -5504,7 +5504,7 @@ gallery-slide.active {
 
 .custom-date-input input {
   width: 100%;
-  max-width: 220px;
+  max-width: 280px;
   padding: 0.75rem 1rem 0.75rem 2.75rem;
   border: 2px solid #e8e8e8;
   border-radius: 12px;
@@ -5519,6 +5519,72 @@ gallery-slide.active {
   border-color: #667eea;
   background: white;
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+/* Date Field Container */
+.date-field-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.date-field-container label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.date-field-container label .required {
+  color: #e74c3c;
+}
+
+/* Date Hint Box */
+.date-hint-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.date-hint-box i {
+  color: #667eea;
+  font-size: 1rem;
+  animation: point-bounce 1.5s ease-in-out infinite;
+}
+
+.date-hint-box span {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+@keyframes point-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Date Hint Text (legacy) */
+.date-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.date-hint i {
+  color: #667eea;
+  font-size: 0.75rem;
 }
 
 /* Custom Select Wrapper */
@@ -6864,6 +6930,42 @@ button:disabled {
   border-radius: 12px;
   border: 1px solid rgba(102, 126, 234, 0.2);
   font-family: "Poppins", sans-serif;
+}
+
+/* Flatpickr Alt Input Styling */
+.flatpickr-input,
+input.flatpickr-input,
+.custom-date-input input[type="text"],
+.custom-date-input input.flatpickr-input {
+  width: 100%;
+  max-width: 280px;
+  padding: 0.75rem 1rem 0.75rem 2.75rem !important;
+  border: 2px solid #e8e8e8 !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem !important;
+  color: #333 !important;
+  background: #fafafa !important;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.custom-date-input input.flatpickr-input:focus,
+.custom-date-input input[type="text"]:focus {
+  outline: none;
+  border-color: #667eea !important;
+  background: white !important;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.custom-date-input input::placeholder {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Hide the original date input when flatpickr is active */
+.custom-date-input input[type="date"][style*="display: none"] + input,
+.custom-date-input input.flatpickr-alt-input {
+  display: block !important;
 }
 
 /* Style for Flatpickr's built-in disabled class */

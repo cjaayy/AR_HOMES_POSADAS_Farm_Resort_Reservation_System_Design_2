@@ -5317,7 +5317,19 @@ async function initializeDatePicker(bookingType) {
   flatpickrInstance = flatpickr(checkInDateInput, {
     minDate: "today",
     dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "F j, Y",
+    placeholder: "Select a date",
     disable: unavailableDates,
+    onReady: function (selectedDates, dateStr, instance) {
+      // Set placeholder on the alt input
+      if (instance.altInput) {
+        instance.altInput.setAttribute(
+          "placeholder",
+          "Select a date (mm/dd/yyyy)"
+        );
+      }
+    },
     onChange: function (selectedDates, dateStr, instance) {
       console.log("📅 Date selected:", dateStr);
       // Update price summary when date changes
