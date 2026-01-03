@@ -2372,7 +2372,7 @@ function showReservationDetailsModal(r) {
         
         <div class="reservation-modal-body">
           <!-- Status Badge -->
-          <div style="text-align: center; margin-bottom: 25px;">
+          <div style="text-align: center; margin-bottom: 20px;">
             <span style="
               display: inline-block;
               padding: 10px 25px;
@@ -2388,6 +2388,25 @@ function showReservationDetailsModal(r) {
       r.status_label
     }
             </span>
+          </div>
+          
+          <!-- Security Bond Notice -->
+          <div style="
+            background: linear-gradient(135deg, #fff8e1, #fffde7);
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+          ">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+              <i class="fas fa-shield-alt" style="color: #f57c00; font-size: 24px;"></i>
+              <span style="font-weight: 700; color: #e65100; font-size: 1.1rem;">₱2,000 Security Bond</span>
+            </div>
+            <p style="margin: 0; color: #795548; font-size: 0.9rem; line-height: 1.5;">
+              <strong>Required upon check-in (refundable)</strong><br>
+              Covers potential damages or extra charges. Can be paid at check-in.
+            </p>
           </div>
           
           <!-- Booking Information -->
@@ -2420,23 +2439,51 @@ function showReservationDetailsModal(r) {
           <!-- Date & Time Information -->
           <div class="details-section">
             <h3><i class="fas fa-clock"></i> Schedule</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <!-- Check-in Box -->
+              <div style="
+                padding: 16px;
+                background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+                border-radius: 12px;
+                border-left: 4px solid #4caf50;
+              ">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                  <i class="fas fa-sign-in-alt" style="color: #4caf50; font-size: 18px;"></i>
+                  <span style="font-weight: 700; color: #2e7d32; text-transform: uppercase; font-size: 0.85rem;">Check-in</span>
+                </div>
+                <div style="font-weight: 700; color: #1b5e20; font-size: 1.1rem; margin-bottom: 4px;">
+                  ${formatDate(r.check_in_date)}
+                </div>
+                <div style="color: #388e3c; font-size: 1rem; font-weight: 600;">
+                  <i class="fas fa-clock" style="margin-right: 4px;"></i> ${formatTime12Hour(
+                    r.check_in_time
+                  )}
+                </div>
+              </div>
+              
+              <!-- Check-out Box -->
+              <div style="
+                padding: 16px;
+                background: linear-gradient(135deg, #ffebee, #fce4ec);
+                border-radius: 12px;
+                border-left: 4px solid #ef5350;
+              ">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                  <i class="fas fa-sign-out-alt" style="color: #ef5350; font-size: 18px;"></i>
+                  <span style="font-weight: 700; color: #c62828; text-transform: uppercase; font-size: 0.85rem;">Check-out</span>
+                </div>
+                <div style="font-weight: 700; color: #b71c1c; font-size: 1.1rem; margin-bottom: 4px;">
+                  ${formatDate(r.check_out_date)}
+                </div>
+                <div style="color: #d32f2f; font-size: 1rem; font-weight: 600;">
+                  <i class="fas fa-clock" style="margin-right: 4px;"></i> ${formatTime12Hour(
+                    r.check_out_time
+                  )}
+                </div>
+              </div>
+            </div>
+            
             <div class="details-grid">
-              <div class="detail-item">
-                <label>Check-in Date</label>
-                <span>${formatDate(r.check_in_date)}</span>
-              </div>
-              <div class="detail-item">
-                <label>Check-out Date</label>
-                <span>${formatDate(r.check_out_date)}</span>
-              </div>
-              <div class="detail-item">
-                <label>Check-in Time</label>
-                <span>${r.check_in_time || "As per package"}</span>
-              </div>
-              <div class="detail-item">
-                <label>Check-out Time</label>
-                <span>${r.check_out_time || "As per package"}</span>
-              </div>
               <div class="detail-item">
                 <label>Duration</label>
                 <span>${(() => {
@@ -2747,6 +2794,22 @@ function formatDateTime(dateString) {
     minute: "2-digit",
     hour12: true,
   });
+}
+
+function formatTime12Hour(timeString) {
+  if (!timeString) return "N/A";
+  // Handle time in HH:MM:SS or HH:MM format
+  const timeParts = timeString.split(":");
+  if (timeParts.length < 2) return timeString;
+
+  let hours = parseInt(timeParts[0], 10);
+  const minutes = timeParts[1];
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours ? hours : 12; // Convert 0 to 12
+
+  return `${hours}:${minutes} ${ampm}`;
 }
 
 // ===== REBOOKING MODAL =====
@@ -3170,27 +3233,38 @@ function printReservationReceipt(reservationId) {
         
         <div class="section">
           <div class="section-title">Schedule</div>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">Check-in Date</div>
-              <div class="info-value">${formatDate(r.check_in_date)}</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div style="padding: 16px; background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border-radius: 12px; border-left: 4px solid #4caf50;">
+              <div style="font-weight: 700; color: #2e7d32; text-transform: uppercase; font-size: 12px; margin-bottom: 8px;">
+                ✓ Check-in
+              </div>
+              <div style="font-weight: 700; color: #1b5e20; font-size: 15px; margin-bottom: 4px;">
+                ${formatDate(r.check_in_date)}
+              </div>
+              <div style="color: #388e3c; font-size: 14px; font-weight: 600;">
+                ${formatTime12Hour(r.check_in_time)}
+              </div>
             </div>
-            <div class="info-item">
-              <div class="info-label">Check-out Date</div>
-              <div class="info-value">${formatDate(r.check_out_date)}</div>
+            <div style="padding: 16px; background: linear-gradient(135deg, #ffebee, #fce4ec); border-radius: 12px; border-left: 4px solid #ef5350;">
+              <div style="font-weight: 700; color: #c62828; text-transform: uppercase; font-size: 12px; margin-bottom: 8px;">
+                ✗ Check-out
+              </div>
+              <div style="font-weight: 700; color: #b71c1c; font-size: 15px; margin-bottom: 4px;">
+                ${formatDate(r.check_out_date)}
+              </div>
+              <div style="color: #d32f2f; font-size: 14px; font-weight: 600;">
+                ${formatTime12Hour(r.check_out_time)}
+              </div>
             </div>
-            <div class="info-item">
-              <div class="info-label">Check-in Time</div>
-              <div class="info-value">${
-                r.check_in_time || "As per package"
-              }</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Check-out Time</div>
-              <div class="info-value">${
-                r.check_out_time || "As per package"
-              }</div>
-            </div>
+          </div>
+        </div>
+        
+        <div class="section" style="background: linear-gradient(135deg, #fff8e1, #fffde7); border: 2px solid #ffc107; border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="font-weight: 700; color: #e65100; font-size: 16px; margin-bottom: 8px;">
+            ⚠️ ₱2,000 Security Bond upon Check-in
+          </div>
+          <div style="color: #795548; font-size: 13px;">
+            Refundable — Covers damages/extra charges. Can be paid at check-in.
           </div>
         </div>
         

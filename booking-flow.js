@@ -350,22 +350,48 @@ function createBookingModalHTML(booking) {
             padding: 20px;
             border-radius: 10px;
           ">
-            <div>
-              <div style="color: #000; font-size: 0.85em; margin-bottom: 4px;">
-                <i class="fas fa-calendar"></i> Check-in Date
+            <!-- Check-in Box -->
+            <div style="
+              padding: 15px;
+              background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+              border-radius: 10px;
+              border-left: 4px solid #4caf50;
+            ">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                <i class="fas fa-sign-in-alt" style="color: #4caf50;"></i>
+                <span style="font-weight: 700; color: #2e7d32; text-transform: uppercase; font-size: 0.8em;">Check-in</span>
               </div>
-              <div style="color: #000; font-weight: 600;">${formatDate(
-                booking.check_in_date
-              )}</div>
-            </div>
-            <div>
-              <div style="color: #000; font-size: 0.85em; margin-bottom: 4px;">
-                <i class="fas fa-clock"></i> Check-in Time
+              <div style="font-weight: 700; color: #1b5e20; font-size: 1em; margin-bottom: 4px;">
+                ${formatDate(booking.check_in_date)}
               </div>
-              <div style="color: #000; font-weight: 600;">${
-                booking.check_in_time
-              }</div>
+              <div style="color: #388e3c; font-size: 0.95em; font-weight: 600;">
+                <i class="fas fa-clock" style="margin-right: 4px;"></i> ${formatTime12Hour(
+                  booking.check_in_time
+                )}
+              </div>
             </div>
+            
+            <!-- Check-out Box -->
+            <div style="
+              padding: 15px;
+              background: linear-gradient(135deg, #ffebee, #fce4ec);
+              border-radius: 10px;
+              border-left: 4px solid #ef5350;
+            ">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                <i class="fas fa-sign-out-alt" style="color: #ef5350;"></i>
+                <span style="font-weight: 700; color: #c62828; text-transform: uppercase; font-size: 0.8em;">Check-out</span>
+              </div>
+              <div style="font-weight: 700; color: #b71c1c; font-size: 1em; margin-bottom: 4px;">
+                ${formatDate(booking.check_out_date)}
+              </div>
+              <div style="color: #d32f2f; font-size: 0.95em; font-weight: 600;">
+                <i class="fas fa-clock" style="margin-right: 4px;"></i> ${formatTime12Hour(
+                  booking.check_out_time
+                )}
+              </div>
+            </div>
+            
             <div>
               <div style="color: #000; font-size: 0.85em; margin-bottom: 4px;">
                 <i class="fas fa-user"></i> Guest Name
@@ -1293,6 +1319,25 @@ function formatDate(dateString) {
   const date = new Date(dateString);
   const options = { year: "numeric", month: "short", day: "numeric" };
   return date.toLocaleDateString("en-US", options);
+}
+
+/**
+ * Format time to 12-hour AM/PM format
+ */
+function formatTime12Hour(timeString) {
+  if (!timeString) return "N/A";
+  // Handle time in HH:MM:SS or HH:MM format
+  const timeParts = timeString.split(":");
+  if (timeParts.length < 2) return timeString;
+
+  let hours = parseInt(timeParts[0], 10);
+  const minutes = timeParts[1];
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours ? hours : 12; // Convert 0 to 12
+
+  return `${hours}:${minutes} ${ampm}`;
 }
 
 // ===========================

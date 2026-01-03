@@ -1742,17 +1742,57 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
         <!-- Settings Section -->
         <section id="settings" class="content-section">
-          <div class="section-header" style="background:linear-gradient(135deg,#f59e0b,#d97706); padding:24px; border-radius:12px; margin-bottom:30px; box-shadow:0 4px 12px rgba(245,158,11,0.25);">
-            <h2 style="font-size:32px; font-weight:700; color:white; margin-bottom:8px;">Settings</h2>
-            <p style="color:rgba(255,255,255,0.95); font-size:16px; margin:0;">Configure system and resort settings</p>
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Settings</h2>
+            <p style="color:#666; margin:0; font-size:16px;">Configure system and resort settings</p>
+          </div>
+
+          <!-- Stats Overview -->
+          <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-user-shield"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="settingsStaffCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Staff</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-users"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="settingsUsersCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Users</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-calendar-check"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="settingsReservationsCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Reservations</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-signal"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="settingsActiveSessions">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Active Sessions</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:16px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button onclick="loadSettingsData()" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+              <span style="color:#64748b; font-size:14px;" id="settingsLastUpdate">Last updated: Just now</span>
+            </div>
           </div>
 
           <!-- Settings Menu -->
           <div class="settings-menu">
-            <div
-              class="settings-option"
-              onclick="toggleSettingsPanel('admin-profile')"
-            >
+            <!-- Admin Profile Settings -->
+            <div class="settings-option" onclick="toggleSettingsPanel('admin-profile')">
               <div class="option-header">
                 <div class="option-info">
                   <i class="fas fa-user-shield"></i>
@@ -1771,52 +1811,29 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                     <label for="adminFullName">Full Name</label>
                     <div class="input-wrapper">
                       <i class="fas fa-user"></i>
-                      <input
-                        type="text"
-                        id="adminFullName"
-                        name="fullName"
-                        value="<?php echo htmlspecialchars($adminFullName); ?>"
-                        readonly
-                        placeholder="Enter full name"
-                        required
-                      />
-                      <button type="button" class="field-edit-btn" aria-label="Edit full name" onclick="toggleEditField('adminFullName')">
-                        <span class="field-edit-label">Edit</span>
-                      </button>
+                      <input type="text" id="adminFullName" name="fullName" value="<?php echo htmlspecialchars($adminFullName); ?>" placeholder="Enter full name" required />
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label for="adminUsername">Username</label>
+                    <label for="adminEmail">Email Address</label>
                     <div class="input-wrapper">
-                      <i class="fas fa-at"></i>
-                      <input
-                        type="email"
-                        id="adminUsername"
-                        name="username"
-                        value="<?php echo htmlspecialchars($adminEmail); ?>"
-                        placeholder="Enter username/email"
-                        required
-                      />
+                      <i class="fas fa-envelope"></i>
+                      <input type="email" id="adminEmail" name="email" value="<?php echo htmlspecialchars($adminEmail); ?>" placeholder="Enter email address" required />
                     </div>
                   </div>
 
+                  <div style="border-top:1px solid #e2e8f0; margin:20px 0; padding-top:20px;">
+                    <h4 style="color:#333; margin-bottom:16px; font-size:16px;"><i class="fas fa-lock" style="margin-right:8px; color:#11224e;"></i>Change Password</h4>
+                    <p style="color:#666; font-size:13px; margin-bottom:16px;">Leave password fields empty if you don't want to change your password.</p>
+                  </div>
+
                   <div class="form-group">
-                    <label for="currentPassword">Current Password</label>
+                    <label for="currentPassword">Current Password <span style="color:#ef4444;">*</span></label>
                     <div class="input-wrapper">
                       <i class="fas fa-lock"></i>
-                      <input
-                        type="password"
-                        id="currentPassword"
-                        name="currentPassword"
-                        placeholder="Enter current password"
-                        required
-                      />
-                      <button
-                        type="button"
-                        class="password-toggle"
-                        onclick="toggleSettingsPassword('currentPassword')"
-                      >
+                      <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter current password to save changes" required />
+                      <button type="button" class="password-toggle" onclick="toggleSettingsPassword('currentPassword')">
                         <i class="fas fa-eye"></i>
                       </button>
                     </div>
@@ -1826,18 +1843,8 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                     <label for="newPassword">New Password</label>
                     <div class="input-wrapper">
                       <i class="fas fa-key"></i>
-                      <input
-                        type="password"
-                        id="newPassword"
-                        name="newPassword"
-                        placeholder="Enter new password (min 6 characters)"
-                        minlength="6"
-                      />
-                      <button
-                        type="button"
-                        class="password-toggle"
-                        onclick="toggleSettingsPassword('newPassword')"
-                      >
+                      <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password (min 6 characters)" minlength="6" />
+                      <button type="button" class="password-toggle" onclick="toggleSettingsPassword('newPassword')">
                         <i class="fas fa-eye"></i>
                       </button>
                     </div>
@@ -1847,31 +1854,18 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                     <label for="confirmPassword">Confirm New Password</label>
                     <div class="input-wrapper">
                       <i class="fas fa-key"></i>
-                      <input
-                        type="password"
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        placeholder="Confirm new password"
-                      />
-                      <button
-                        type="button"
-                        class="password-toggle"
-                        onclick="toggleSettingsPassword('confirmPassword')"
-                      >
+                      <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password" />
+                      <button type="button" class="password-toggle" onclick="toggleSettingsPassword('confirmPassword')">
                         <i class="fas fa-eye"></i>
                       </button>
                     </div>
                   </div>
 
-                  <div class="form-actions">
-                    <button
-                      type="button"
-                      class="btn-secondary"
-                      onclick="resetProfileForm()"
-                    >
+                  <div class="form-actions" style="display:flex; gap:12px; margin-top:24px; padding-top:20px; border-top:1px solid #e2e8f0;">
+                    <button type="button" class="btn-secondary" onclick="resetProfileForm()" style="padding:12px 24px; background:#f1f5f9; border:none; border-radius:10px; font-size:14px; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
                       <i class="fas fa-undo"></i> Reset
                     </button>
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn-primary" style="padding:12px 24px; background:linear-gradient(135deg, #11224e, #1e3a8a); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
                       <i class="fas fa-save"></i> Save Changes
                     </button>
                   </div>
@@ -1879,10 +1873,8 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               </div>
             </div>
 
-            <div
-              class="settings-option"
-              onclick="toggleSettingsPanel('system-settings')"
-            >
+            <!-- System Settings -->
+            <div class="settings-option" onclick="toggleSettingsPanel('system-settings')">
               <div class="option-header">
                 <div class="option-info">
                   <i class="fas fa-cogs"></i>
@@ -1896,44 +1888,114 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
               <!-- System Settings Panel -->
               <div class="settings-panel" id="system-settings-panel">
-                <div class="setting-item">
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:12px; margin-bottom:12px;">
                   <div class="setting-info">
-                    <h4>Resort Name</h4>
-                    <p>AR Homes Posadas Farm Resort</p>
+                    <h4 style="font-size:15px; font-weight:600; color:#1e293b; margin:0 0 4px 0;">Resort Name</h4>
+                    <p style="color:#64748b; margin:0; font-size:13px;" id="setting-resort-name">AR Homes Posadas Farm Resort</p>
                   </div>
-                  <button class="btn-edit">
+                  <button onclick="editSystemSetting('resort_name', 'Resort Name')" style="padding:8px 16px; background:white; border:2px solid #11224e; border-radius:8px; font-size:13px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-edit"></i> Edit
                   </button>
                 </div>
 
-                <div class="setting-item">
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:12px; margin-bottom:12px;">
                   <div class="setting-info">
-                    <h4>Contact Email</h4>
-                    <p>info@arheosposadas.com</p>
+                    <h4 style="font-size:15px; font-weight:600; color:#1e293b; margin:0 0 4px 0;">Contact Email</h4>
+                    <p style="color:#64748b; margin:0; font-size:13px;" id="setting-contact-email">info@arhomesposadas.com</p>
                   </div>
-                  <button class="btn-edit">
+                  <button onclick="editSystemSetting('contact_email', 'Contact Email')" style="padding:8px 16px; background:white; border:2px solid #11224e; border-radius:8px; font-size:13px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-edit"></i> Edit
                   </button>
                 </div>
 
-                <div class="setting-item">
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:12px; margin-bottom:12px;">
                   <div class="setting-info">
-                    <h4>System Language</h4>
-                    <p>English (US)</p>
+                    <h4 style="font-size:15px; font-weight:600; color:#1e293b; margin:0 0 4px 0;">Contact Phone</h4>
+                    <p style="color:#64748b; margin:0; font-size:13px;" id="setting-contact-phone">+63 912 345 6789</p>
                   </div>
-                  <button class="btn-edit">
+                  <button onclick="editSystemSetting('contact_phone', 'Contact Phone')" style="padding:8px 16px; background:white; border:2px solid #11224e; border-radius:8px; font-size:13px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-edit"></i> Edit
                   </button>
                 </div>
 
-                <div class="setting-item">
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:12px; margin-bottom:12px;">
                   <div class="setting-info">
-                    <h4>Time Zone</h4>
-                    <p>Asia/Manila (UTC+8)</p>
+                    <h4 style="font-size:15px; font-weight:600; color:#1e293b; margin:0 0 4px 0;">System Language</h4>
+                    <p style="color:#64748b; margin:0; font-size:13px;" id="setting-language">English (US)</p>
                   </div>
-                  <button class="btn-edit">
+                  <button onclick="editSystemSetting('language', 'System Language')" style="padding:8px 16px; background:white; border:2px solid #11224e; border-radius:8px; font-size:13px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-edit"></i> Edit
                   </button>
+                </div>
+
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:12px; margin-bottom:12px;">
+                  <div class="setting-info">
+                    <h4 style="font-size:15px; font-weight:600; color:#1e293b; margin:0 0 4px 0;">Time Zone</h4>
+                    <p style="color:#64748b; margin:0; font-size:13px;" id="setting-timezone">Asia/Manila (UTC+8)</p>
+                  </div>
+                  <button onclick="editSystemSetting('timezone', 'Time Zone')" style="padding:8px 16px; background:white; border:2px solid #11224e; border-radius:8px; font-size:13px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                </div>
+
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border-radius:12px; margin-bottom:12px;">
+                  <div class="setting-info">
+                    <h4 style="font-size:15px; font-weight:600; color:#1e293b; margin:0 0 4px 0;">Session Timeout</h4>
+                    <p style="color:#64748b; margin:0; font-size:13px;" id="setting-session-timeout">30 minutes</p>
+                  </div>
+                  <button onclick="editSystemSetting('session_timeout', 'Session Timeout')" style="padding:8px 16px; background:white; border:2px solid #11224e; border-radius:8px; font-size:13px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="settings-option" onclick="toggleSettingsPanel('about-system')">
+              <div class="option-header">
+                <div class="option-info">
+                  <i class="fas fa-info-circle"></i>
+                  <div>
+                    <h3>About System</h3>
+                    <p>System information and version details</p>
+                  </div>
+                </div>
+                <i class="fas fa-chevron-right option-arrow"></i>
+              </div>
+
+              <!-- About Panel -->
+              <div class="settings-panel" id="about-system-panel">
+                <div style="text-align:center; padding:20px;">
+                  <img src="../logo/ar-homes-logo.png" alt="AR Homes Logo" style="width:100px; height:100px; border-radius:16px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                  <h3 style="color:#1e293b; font-size:20px; margin:0 0 8px 0;">AR Homes Posadas Farm Resort</h3>
+                  <p style="color:#64748b; font-size:14px; margin:0 0 20px 0;">Reservation Management System</p>
+                </div>
+                
+                <div style="display:grid; gap:12px;">
+                  <div style="display:flex; justify-content:space-between; padding:12px 16px; background:#f8fafc; border-radius:8px;">
+                    <span style="color:#64748b; font-weight:500;">Version</span>
+                    <span style="color:#1e293b; font-weight:600;">2.0.0</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:12px 16px; background:#f8fafc; border-radius:8px;">
+                    <span style="color:#64748b; font-weight:500;">PHP Version</span>
+                    <span style="color:#1e293b; font-weight:600;"><?php echo phpversion(); ?></span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:12px 16px; background:#f8fafc; border-radius:8px;">
+                    <span style="color:#64748b; font-weight:500;">Server</span>
+                    <span style="color:#1e293b; font-weight:600;">Apache (XAMPP)</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:12px 16px; background:#f8fafc; border-radius:8px;">
+                    <span style="color:#64748b; font-weight:500;">Database</span>
+                    <span style="color:#1e293b; font-weight:600;">MySQL</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:12px 16px; background:#f8fafc; border-radius:8px;">
+                    <span style="color:#64748b; font-weight:500;">Last Updated</span>
+                    <span style="color:#1e293b; font-weight:600;"><?php echo date('M d, Y'); ?></span>
+                  </div>
+                </div>
+
+                <div style="margin-top:24px; padding:16px; background:linear-gradient(135deg, #11224e, #1e3a8a); border-radius:12px; text-align:center;">
+                  <p style="color:white; margin:0; font-size:14px;">© <?php echo date('Y'); ?> AR Homes Posadas Farm Resort. All rights reserved.</p>
                 </div>
               </div>
             </div>

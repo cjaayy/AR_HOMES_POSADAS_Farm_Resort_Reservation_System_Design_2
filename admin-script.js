@@ -695,13 +695,28 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+// Store original profile values for reset
+let originalProfileValues = {
+  fullName: "",
+  email: "",
+};
+
 // Reset profile form
 function resetProfileForm() {
   const form = document.getElementById("adminProfileForm");
   if (form) {
-    // Reset to default values
-    document.getElementById("adminFullName").value = "Administrator";
-    document.getElementById("adminUsername").value = "admin@resort.com";
+    // Reset to original values (from when page loaded or last saved)
+    const fullNameInput = document.getElementById("adminFullName");
+    const emailInput = document.getElementById("adminEmail");
+
+    if (fullNameInput && originalProfileValues.fullName) {
+      fullNameInput.value = originalProfileValues.fullName;
+    }
+    if (emailInput && originalProfileValues.email) {
+      emailInput.value = originalProfileValues.email;
+    }
+
+    // Clear password fields
     document.getElementById("currentPassword").value = "";
     document.getElementById("newPassword").value = "";
     document.getElementById("confirmPassword").value = "";
@@ -710,7 +725,7 @@ function resetProfileForm() {
     clearFormErrors();
 
     // Show confirmation
-    showNotification("Form reset to default values", "info");
+    showNotification("Form reset to original values", "info");
   }
 }
 
@@ -722,17 +737,103 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       handleProfileUpdate();
     });
+
+    // Store original values
+    const fullNameInput = document.getElementById("adminFullName");
+    const emailInput = document.getElementById("adminEmail");
+    if (fullNameInput) originalProfileValues.fullName = fullNameInput.value;
+    if (emailInput) originalProfileValues.email = emailInput.value;
+  }
+
+  // Load settings data when navigating to settings section
+  const settingsNavLink = document.querySelector('a[data-section="settings"]');
+  if (settingsNavLink) {
+    settingsNavLink.addEventListener("click", function () {
+      setTimeout(loadSettingsData, 100);
+    });
   }
 });
 
-// Handle profile update
-function handleProfileUpdate() {
+// Load settings data from server
+async function loadSettingsData() {
+  try {
+    const res = await fetch("get_settings.php");
+    const data = await res.json();
+
+    if (data.success) {
+      // Update stats
+      animateSettingsCount("settingsStaffCount", data.stats.total_staff || 0);
+      animateSettingsCount("settingsUsersCount", data.stats.total_users || 0);
+      animateSettingsCount(
+        "settingsReservationsCount",
+        data.stats.total_reservations || 0
+      );
+      animateSettingsCount(
+        "settingsActiveSessions",
+        data.stats.active_sessions || 0
+      );
+
+      // Update system settings display
+      if (data.settings) {
+        updateSettingDisplay("resort-name", data.settings.resort_name);
+        updateSettingDisplay("contact-email", data.settings.contact_email);
+        updateSettingDisplay("contact-phone", data.settings.contact_phone);
+        updateSettingDisplay("language", data.settings.language);
+        updateSettingDisplay("timezone", data.settings.timezone);
+        updateSettingDisplay("session-timeout", data.settings.session_timeout);
+      }
+
+      // Update last update time
+      const lastUpdateEl = document.getElementById("settingsLastUpdate");
+      if (lastUpdateEl) {
+        lastUpdateEl.textContent =
+          "Last updated: " + new Date().toLocaleTimeString();
+      }
+    }
+  } catch (error) {
+    console.error("Error loading settings:", error);
+  }
+}
+
+function animateSettingsCount(elementId, value) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  const startTime = Date.now();
+  const duration = 800;
+  const startValue = parseInt(element.textContent) || 0;
+  const difference = value - startValue;
+
+  function step() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const current = Math.floor(startValue + difference * progress);
+
+    element.textContent = current.toLocaleString();
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+function updateSettingDisplay(settingId, value) {
+  const element = document.getElementById("setting-" + settingId);
+  if (element && value) {
+    element.textContent = value;
+  }
+}
+
+// Handle profile update with real API call
+async function handleProfileUpdate() {
   const form = document.getElementById("adminProfileForm");
   const formData = new FormData(form);
 
   // Get form values
   const fullName = formData.get("fullName").trim();
-  const username = formData.get("username").trim();
+  const email = formData.get("email").trim();
   const currentPassword = formData.get("currentPassword").trim();
   const newPassword = formData.get("newPassword").trim();
   const confirmPassword = formData.get("confirmPassword").trim();
@@ -748,13 +849,16 @@ function handleProfileUpdate() {
     isValid = false;
   }
 
-  if (!username || !isValidEmail(username)) {
-    showFieldError("adminUsername", "Valid email is required");
+  if (!email || !isValidEmail(email)) {
+    showFieldError("adminEmail", "Valid email is required");
     isValid = false;
   }
 
   if (!currentPassword) {
-    showFieldError("currentPassword", "Current password is required");
+    showFieldError(
+      "currentPassword",
+      "Current password is required to save changes"
+    );
     isValid = false;
   }
 
@@ -779,35 +883,163 @@ function handleProfileUpdate() {
     return;
   }
 
-  // Simulate API call
+  // Submit to server
   const submitBtn = form.querySelector('button[type="submit"]');
   const originalText = submitBtn.innerHTML;
 
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
   submitBtn.disabled = true;
 
-  setTimeout(() => {
-    // Simulate successful update
-    submitBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+  try {
+    const response = await fetch("update_admin_profile.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fullName: fullName,
+        email: email,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+      }),
+    });
 
-    // Update header display name if changed
-    const headerName = document.querySelector(".admin-name");
-    if (headerName && fullName !== "Administrator") {
-      headerName.textContent = fullName;
+    const result = await response.json();
+
+    if (result.success) {
+      submitBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+
+      // Update header display name
+      const headerName = document.querySelector(".admin-name");
+      if (headerName) {
+        headerName.textContent = fullName;
+      }
+
+      // Update original values for reset
+      originalProfileValues.fullName = fullName;
+      originalProfileValues.email = email;
+
+      // Clear password fields for security
+      document.getElementById("currentPassword").value = "";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("confirmPassword").value = "";
+
+      showNotification(
+        result.message || "Profile updated successfully!",
+        "success"
+      );
+    } else {
+      submitBtn.innerHTML = '<i class="fas fa-times"></i> Failed';
+      showNotification(result.message || "Failed to update profile", "error");
     }
+  } catch (error) {
+    console.error("Profile update error:", error);
+    submitBtn.innerHTML = '<i class="fas fa-times"></i> Error';
+    showNotification("An error occurred while updating profile", "error");
+  }
 
-    // Clear password fields for security
-    document.getElementById("currentPassword").value = "";
-    document.getElementById("newPassword").value = "";
-    document.getElementById("confirmPassword").value = "";
+  setTimeout(() => {
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }, 2000);
+}
 
-    showNotification("Profile updated successfully!", "success");
+// Edit system setting
+function editSystemSetting(key, label) {
+  const currentValue =
+    document.getElementById("setting-" + key.replace(/_/g, "-"))?.textContent ||
+    "";
 
-    setTimeout(() => {
-      submitBtn.innerHTML = originalText;
-      submitBtn.disabled = false;
-    }, 2000);
-  }, 1500);
+  // Create modal
+  const modal = document.createElement("div");
+  modal.style.cssText =
+    "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10000; animation:fadeIn 0.2s ease;";
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.remove();
+  };
+
+  modal.innerHTML = `
+    <div style="background:white; border-radius:16px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:slideInDown 0.3s ease;" onclick="event.stopPropagation();">
+      <div style="background:linear-gradient(135deg,#11224e,#1e3a8a); padding:24px; border-radius:16px 16px 0 0; color:white;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h3 style="font-size:20px; font-weight:700; margin:0;">Edit ${label}</h3>
+            <p style="opacity:0.9; margin:4px 0 0 0; font-size:14px;">Update system setting</p>
+          </div>
+          <button onclick="this.closest('[style*=fixed]').remove()" style="width:36px; height:36px; border:none; background:rgba(255,255,255,0.2); color:white; border-radius:8px; cursor:pointer; font-size:18px;">×</button>
+        </div>
+      </div>
+      <div style="padding:24px;">
+        <div style="margin-bottom:20px;">
+          <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:8px;">${label}</label>
+          <input type="text" id="editSettingInput" value="${currentValue}" style="width:100%; padding:14px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; transition:all 0.3s; box-sizing:border-box;" onfocus="this.style.borderColor='#11224e';" onblur="this.style.borderColor='#e2e8f0';">
+        </div>
+        <div style="display:flex; gap:12px;">
+          <button onclick="saveSystemSetting('${key}', '${label}')" style="flex:1; padding:14px; background:linear-gradient(135deg,#11224e,#1e3a8a); color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; font-size:14px;">
+            <i class="fas fa-save" style="margin-right:8px;"></i>Save
+          </button>
+          <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1; padding:14px; background:#f1f5f9; color:#64748b; border:none; border-radius:10px; font-weight:600; cursor:pointer; font-size:14px;">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Focus the input
+  setTimeout(() => {
+    const input = document.getElementById("editSettingInput");
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }, 100);
+}
+
+// Save system setting
+async function saveSystemSetting(key, label) {
+  const input = document.getElementById("editSettingInput");
+  const value = input?.value.trim() || "";
+
+  if (!value) {
+    showNotification("Please enter a value", "warning");
+    return;
+  }
+
+  try {
+    const response = await fetch("update_settings.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ key, value }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // Update display
+      const displayId = "setting-" + key.replace(/_/g, "-");
+      const displayEl = document.getElementById(displayId);
+      if (displayEl) {
+        displayEl.textContent = value;
+      }
+
+      // Close modal
+      const modal = document.querySelector('[style*="position:fixed"]');
+      if (modal) modal.remove();
+
+      showNotification(label + " updated successfully!", "success");
+    } else {
+      showNotification(result.message || "Failed to update setting", "error");
+    }
+  } catch (error) {
+    console.error("Settings update error:", error);
+    showNotification("An error occurred while saving", "error");
+  }
 }
 
 // Email validation function
