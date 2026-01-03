@@ -13,8 +13,9 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-// Check if user is admin (not staff)
-if (($_SESSION['admin_role'] ?? '') !== 'admin') {
+// Check if user is admin (not staff) - accepts admin or super_admin roles
+$userRole = strtolower($_SESSION['admin_role'] ?? '');
+if ($userRole !== 'admin' && $userRole !== 'super_admin') {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Admin access required']);
     exit;

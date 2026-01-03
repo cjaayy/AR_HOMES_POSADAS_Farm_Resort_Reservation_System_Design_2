@@ -238,6 +238,184 @@ class Mailer {
     }
 
     /**
+     * Send staff password reset email (admin-initiated)
+     * 
+     * @param string $recipientEmail
+     * @param string $recipientName
+     * @param string $newPassword
+     * @param string $username
+     * @return bool
+     */
+    public function sendStaffPasswordResetEmail($recipientEmail, $recipientName, $newPassword, $username) {
+        try {
+            // Recipients
+            $this->mail->addAddress($recipientEmail, $recipientName);
+            
+            // Content
+            $this->mail->isHTML(true);
+            $this->mail->Subject = 'Your Password Has Been Reset - ' . APP_NAME;
+            
+            // Email body
+            $emailBody = $this->getStaffPasswordResetTemplate($recipientName, $newPassword, $username);
+            $this->mail->Body = $emailBody;
+            
+            // Alternative plain text
+            $this->mail->AltBody = "Hello {$recipientName},\n\nYour password for " . APP_NAME . " staff portal has been reset by an administrator.\n\nUsername: {$username}\nNew Password: {$newPassword}\n\nPlease login and change your password immediately.\n\nBest regards,\n" . APP_NAME . " Team";
+
+            // Send email
+            $result = $this->mail->send();
+            
+            $this->mail->clearAddresses();
+            $this->mail->clearAttachments();
+            
+            return $result;
+
+        } catch (Exception $e) {
+            $this->error = "Message could not be sent. Mailer Error: {$this->mail->ErrorInfo}";
+            error_log($this->error);
+            return false;
+        }
+    }
+
+    /**
+     * Get staff password reset HTML template (admin-initiated)
+     */
+    private function getStaffPasswordResetTemplate($recipientName, $newPassword, $username) {
+        return "
+        <!DOCTYPE html>
+        <html lang='en'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Password Reset</title>
+            <style>
+                body {
+                    font-family: 'Arial', 'Helvetica', sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+                .email-container {
+                    max-width: 600px;
+                    margin: 30px auto;
+                    background: #ffffff;
+                    border-radius: 10px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+                .email-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: #ffffff;
+                    padding: 40px 20px;
+                    text-align: center;
+                }
+                .email-header h1 {
+                    margin: 0;
+                    font-size: 28px;
+                    font-weight: 600;
+                }
+                .email-header .icon {
+                    font-size: 60px;
+                    margin-bottom: 15px;
+                }
+                .email-body {
+                    padding: 40px 30px;
+                }
+                .email-body h2 {
+                    color: #333;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                }
+                .email-body p {
+                    margin-bottom: 15px;
+                    font-size: 16px;
+                    color: #666;
+                }
+                .credentials-box {
+                    background-color: #f8f9fa;
+                    border: 2px solid #667eea;
+                    padding: 20px;
+                    margin: 25px 0;
+                    border-radius: 8px;
+                    text-align: center;
+                }
+                .credentials-box .label {
+                    font-size: 14px;
+                    color: #666;
+                    margin-bottom: 5px;
+                }
+                .credentials-box .value {
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #333;
+                    background: #fff;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    display: inline-block;
+                    margin: 5px 0 15px 0;
+                    border: 1px solid #ddd;
+                    font-family: 'Courier New', monospace;
+                    letter-spacing: 1px;
+                }
+                .warning-box {
+                    background-color: #fff3cd;
+                    border-left: 4px solid #ffc107;
+                    padding: 15px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .warning-box strong {
+                    color: #856404;
+                }
+                .footer {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    text-align: center;
+                    font-size: 14px;
+                    color: #666;
+                }
+                .footer p {
+                    margin: 5px 0;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-container'>
+                <div class='email-header'>
+                    <div class='icon'>🔐</div>
+                    <h1>" . APP_NAME . "</h1>
+                    <p>Staff Password Reset</p>
+                </div>
+                <div class='email-body'>
+                    <h2>Hello, {$recipientName}!</h2>
+                    <p>Your password for the staff portal has been reset by an administrator. Please use the credentials below to log in:</p>
+                    
+                    <div class='credentials-box'>
+                        <div class='label'>Username</div>
+                        <div class='value'>{$username}</div>
+                        <div class='label'>New Password</div>
+                        <div class='value'>{$newPassword}</div>
+                    </div>
+                    
+                    <div class='warning-box'>
+                        <strong>⚠️ Important:</strong> For security reasons, please change your password immediately after logging in. Go to Settings → Change Password.
+                    </div>
+                    
+                    <p>If you did not expect this password reset, please contact your administrator immediately.</p>
+                </div>
+                <div class='footer'>
+                    <p>This is an automated message from " . APP_NAME . "</p>
+                    <p>Please do not reply to this email.</p>
+                    <p>&copy; " . date('Y') . " " . APP_NAME . ". All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+    }
+
+    /**
      * Get email verification email HTML template
      */
     private function getEmailVerificationTemplate($recipientName, $verificationLink, $expiresAt) {

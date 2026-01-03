@@ -2843,7 +2843,15 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           const data = await res.json();
           
           if (data.success) {
-            showToast('Password reset successfully! New password: ' + (data.new_password || 'Check email'), 'success');
+            let message = '';
+            if (data.email_sent) {
+              message = `Password reset successfully!\n\nEmail sent to: ${staff.email}\nNew password: ${data.new_password}`;
+              showToast('Password reset! Email sent to ' + staff.email, 'success');
+            } else {
+              message = `Password reset successfully!\n\n⚠️ Email could not be sent.\nPlease share this password manually:\n\nNew password: ${data.new_password}`;
+              showToast('Password reset! Email failed - please share manually: ' + data.new_password, 'warning');
+            }
+            alert(message);
           } else {
             showToast('Failed to reset password: ' + (data.message || 'Unknown error'), 'error');
           }
