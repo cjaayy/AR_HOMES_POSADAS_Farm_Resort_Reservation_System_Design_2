@@ -2714,22 +2714,42 @@ gallery-slide.active {
 .room-package-card {
   background: #eeeeee !important;
   border-radius: 20px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   border: 2px solid #ffc50f !important;
   position: relative;
-  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  height: auto;
 }
 
-/* Make venue card match the height of other cards */
+/* Ensure consistent card heights across all packages */
+[data-package="daytime"],
+[data-package="nighttime"],
+[data-package="22hours"],
 [data-package="venue"] {
-  max-height: 650px;
+  height: auto;
+  min-height: auto;
+  max-height: none;
 }
 
-[data-package="venue"] .package-content {
-  overflow-y: auto;
-  max-height: 500px;
+/* Make package content scrollable with button always visible */
+.room-package-card .package-content {
+  flex: 1;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 1rem;
+}
+
+/* Keep select button always visible at bottom */
+.room-package-card .select-package-btn {
+  position: relative;
+  bottom: auto;
+  margin-top: 1rem;
+  z-index: 1;
+  background: #11224e;
 }
 
 .room-package-card:hover {
