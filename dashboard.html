@@ -1551,48 +1551,42 @@
                         <h3>Group Details</h3>
                       </div>
                       <div class="form-card-body">
-                        <div class="form-grid">
-                          <div class="form-field">
-                            <label for="groupSize">
-                              <i class="fas fa-user-friends"></i>
-                              Group Size <span class="required">*</span>
-                            </label>
-                            <div class="select-wrapper">
-                              <select id="groupSize" name="groupSize" required>
-                                <option value="">Select size</option>
-                                <option value="5-10">5-10 guests</option>
-                                <option value="11-20">11-20 guests</option>
-                                <option value="21-30">21-30 guests</option>
-                                <option value="31-40">31-40 guests</option>
-                                <option value="41-50">41-50 guests</option>
-                                <option value="50+">50+ guests</option>
-                              </select>
-                              <i class="fas fa-chevron-down"></i>
-                            </div>
+                        <!-- Guest Info Notice -->
+                        <div class="guest-info-notice">
+                          <div class="guest-info-icon">
+                            <i class="fas fa-users"></i>
                           </div>
-                          <div class="form-field">
-                            <label for="groupType">
-                              <i class="fas fa-tag"></i>
-                              Group Type <span class="required">*</span>
-                            </label>
-                            <div class="select-wrapper">
-                              <select
-                                id="groupType"
-                                name="groupType"
-                                required
-                              >
-                                <option value="">Select type</option>
-                                <option value="family">👨‍👩‍👧‍👦 Family</option>
-                                <option value="friends">🎉 Friends</option>
-                                <option value="corporate">💼 Corporate</option>
-                                <option value="celebration">🎂 Celebration</option>
-                                <option value="other">📝 Other</option>
-                              </select>
-                              <i class="fas fa-chevron-down"></i>
-                            </div>
+                          <div class="guest-info-content">
+                            <span class="guest-info-title">Minimum: 10 pax • No maximum limit</span>
+                            <span class="guest-info-desc">A minimum of 10 guests is required per booking. You may bring as many guests as you like.</span>
                           </div>
                         </div>
-                        <div class="form-field full-width">
+                        
+                        <input type="hidden" id="groupSize" name="groupSize" value="10+" />
+                        
+                        <div class="form-field">
+                          <label for="groupType">
+                            <i class="fas fa-tag"></i>
+                            Group Type <span class="required">*</span>
+                          </label>
+                          <div class="select-wrapper">
+                            <select
+                              id="groupType"
+                              name="groupType"
+                              required
+                            >
+                              <option value="">Select type</option>
+                              <option value="family">👨‍👩‍👧‍👦 Family</option>
+                              <option value="friends">🎉 Friends</option>
+                              <option value="corporate">💼 Corporate</option>
+                              <option value="celebration">🎂 Celebration</option>
+                              <option value="other">📝 Other</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                          </div>
+                        </div>
+                        
+                        <div class="form-field full-width" style="margin-top: 1rem;">
                           <label for="specialRequests">
                             <i class="fas fa-comment-dots"></i>
                             Special Requests <span class="optional">(Optional)</span>
