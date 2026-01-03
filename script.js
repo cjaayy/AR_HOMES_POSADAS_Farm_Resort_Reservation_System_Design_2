@@ -438,11 +438,12 @@ document
 // Open location map modal
 function openLocationMap() {
   const modal = document.getElementById("mapModal");
-  modal.classList.add("show");
+  if (!modal) return;
+  
   modal.style.display = "flex";
-
-  // Prevent body scrolling when modal is open
-  document.body.style.overflow = "hidden";
+  // Force reflow to enable transition
+  modal.offsetHeight;
+  modal.classList.add("show");
 
   // Add escape key listener
   document.addEventListener("keydown", handleMapModalEscape);
@@ -456,10 +457,9 @@ function openLocationMap() {
 // Close location map modal
 function closeLocationMap() {
   const modal = document.getElementById("mapModal");
-  modal.classList.remove("show");
+  if (!modal) return;
 
-  // Restore body scrolling
-  document.body.style.overflow = "auto";
+  modal.classList.remove("show");
 
   // Remove escape key listener
   document.removeEventListener("keydown", handleMapModalEscape);
@@ -637,13 +637,13 @@ document.addEventListener("click", function (e) {
   const contactModal = document.getElementById("contactModal");
   const reviewsModal = document.getElementById("reviewsModal");
 
-  if (e.target === mapModal) {
+  if (mapModal && e.target === mapModal) {
     closeLocationMap();
   }
-  if (e.target === contactModal) {
+  if (contactModal && e.target === contactModal) {
     closeContactModal();
   }
-  if (e.target === reviewsModal) {
+  if (reviewsModal && e.target === reviewsModal) {
     closeReviewsModal();
   }
 });
@@ -709,11 +709,12 @@ window.shareLocation = shareLocation;
 // Open contact modal
 function openContactModal() {
   const modal = document.getElementById("contactModal");
-  modal.classList.add("show");
+  if (!modal) return;
+  
   modal.style.display = "flex";
-
-  // Prevent body scrolling when modal is open
-  document.body.style.overflow = "hidden";
+  // Force reflow to enable transition
+  modal.offsetHeight;
+  modal.classList.add("show");
 
   // Add escape key listener
   document.addEventListener("keydown", handleContactModalEscape);
@@ -722,10 +723,9 @@ function openContactModal() {
 // Close contact modal
 function closeContactModal() {
   const modal = document.getElementById("contactModal");
-  modal.classList.remove("show");
+  if (!modal) return;
 
-  // Restore body scrolling
-  document.body.style.overflow = "auto";
+  modal.classList.remove("show");
 
   // Remove escape key listener
   document.removeEventListener("keydown", handleContactModalEscape);
@@ -752,11 +752,12 @@ window.closeContactModal = closeContactModal;
 // Open reviews modal
 function openReviewsModal() {
   const modal = document.getElementById("reviewsModal");
-  modal.classList.add("show");
+  if (!modal) return;
+  
   modal.style.display = "flex";
-
-  // Prevent body scrolling when modal is open
-  document.body.style.overflow = "hidden";
+  // Force reflow to enable transition
+  modal.offsetHeight;
+  modal.classList.add("show");
 
   // Add escape key listener
   document.addEventListener("keydown", handleReviewsModalEscape);
@@ -765,10 +766,9 @@ function openReviewsModal() {
 // Close reviews modal
 function closeReviewsModal() {
   const modal = document.getElementById("reviewsModal");
-  modal.classList.remove("show");
+  if (!modal) return;
 
-  // Restore body scrolling
-  document.body.style.overflow = "auto";
+  modal.classList.remove("show");
 
   // Remove escape key listener
   document.removeEventListener("keydown", handleReviewsModalEscape);
