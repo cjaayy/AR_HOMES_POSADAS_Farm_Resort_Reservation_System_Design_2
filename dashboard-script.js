@@ -2796,9 +2796,6 @@ function getModalActionButtons(r) {
   }
 
   if (r.status === "completed" || r.status === "checked_out") {
-    buttons += `<button class="modal-btn success" onclick="closeReservationDetailsModal(); writeReviewForReservation('${r.reservation_id}');">
-      <i class="fas fa-star"></i> Write Review
-    </button>`;
     buttons += `<button class="modal-btn primary" onclick="closeReservationDetailsModal(); bookAgainFromReservation('${r.reservation_id}');">
       <i class="fas fa-redo"></i> Book Again
     </button>`;
@@ -3727,6 +3724,9 @@ function displayReservations(reservations) {
     }
   });
 
+  // Update history stats
+  updateHistoryStats(historyReservations);
+
   if (historyReservations.length === 0) {
     container.innerHTML = `
       <div class="history-empty-state">
@@ -3746,7 +3746,34 @@ function displayReservations(reservations) {
     .join("");
 }
 
-// Create a history-specific card (no payment actions) - REDESIGNED
+// Update history stats cards
+function updateHistoryStats(historyReservations) {
+  const completedCount = historyReservations.filter(
+    (r) => r.status === "completed" || r.status === "checked_out"
+  ).length;
+
+  const cancelledCount = historyReservations.filter(
+    (r) =>
+      r.status === "cancelled" ||
+      r.status === "canceled" ||
+      r.status === "no_show" ||
+      r.status === "forfeited" ||
+      r.status === "expired"
+  ).length;
+
+  const totalCount = historyReservations.length;
+
+  // Update DOM elements
+  const completedEl = document.getElementById("historyCompletedCount");
+  const cancelledEl = document.getElementById("historyCancelledCount");
+  const totalEl = document.getElementById("historyTotalCount");
+
+  if (completedEl) completedEl.textContent = completedCount;
+  if (cancelledEl) cancelledEl.textContent = cancelledCount;
+  if (totalEl) totalEl.textContent = totalCount;
+}
+
+// Create a history-specific card (no payment actions) - REDESIGNED TO MATCH MY RESERVATIONS
 function createHistoryReservationCard(r) {
   const statusColors = {
     completed: "completed",
@@ -3756,49 +3783,35 @@ function createHistoryReservationCard(r) {
     no_show: "cancelled",
     forfeited: "cancelled",
     expired: "cancelled",
-    rebooked: "rebooked",
+    rebooked: "confirmed",
   };
   const statusClass = statusColors[r.status] || "pending";
 
   const checkInDate = new Date(r.check_in_date).toLocaleDateString("en-US", {
-    weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
-  const createdDate = r.created_at
-    ? new Date(r.created_at).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "N/A";
-
   // Check if this is a cancelled reservation (show refund processed notice)
   const isCancelled = r.status === "cancelled" || r.status === "canceled";
   const isCompleted = r.status === "completed" || r.status === "checked_out";
 
-  // Status icon mapping
-  const statusIcons = {
-    completed: "check-double",
-    checked_out: "check-double",
-    cancelled: "times-circle",
-    canceled: "times-circle",
-    no_show: "user-slash",
-    forfeited: "exclamation-triangle",
-    expired: "clock",
-    rebooked: "calendar-check",
-    pending: "hourglass-half",
-    confirmed: "check-circle",
-  };
-  const statusIcon = statusIcons[r.status] || "info-circle";
+  // Border color based on status
+  const borderColor = isCancelled
+    ? "#ef4444"
+    : isCompleted
+    ? "#22c55e"
+    : "#11224e";
 
   // Build refund notice for cancelled reservations
   const refundNotice = isCancelled
-    ? `<div class="history-refund-notice">
-        <i class="fas fa-check-circle"></i>
-        <span>Payment refund processed - Contact staff for details</span>
+    ? `<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 8px 12px; margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-check-circle" style="color: #22c55e;"></i>
+        <div style="font-size: 0.8em;">
+          <div style="font-weight: 600; color: #92400e;">Refund Processed</div>
+          <div style="color: #a16207; font-size: 0.9em;">Contact staff for details</div>
+        </div>
       </div>`
     : "";
 
@@ -3806,62 +3819,43 @@ function createHistoryReservationCard(r) {
   const actionButtons = getHistoryActionButtons(r);
 
   return `
-    <div class="booking-history-card" data-status="${statusClass}" data-reservation-id="${
-    r.reservation_id
-  }" onclick="handleCardClick(event, '${r.reservation_id}')">
-      <div class="history-card-content">
-        <div class="history-card-header">
-          <div class="history-card-id">
-            <span class="reservation-number">
-              <i class="fas fa-ticket-alt"></i>
-              #${r.reservation_id}
-            </span>
-            <span class="reservation-date">Booked: ${createdDate}</span>
+    <div class="booking-list-item" data-reservation-id="${
+      r.reservation_id
+    }" style="cursor: pointer; padding: 12px 15px; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 10px; transition: all 0.3s ease; border: 2px solid ${borderColor};">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+            <span class="status-badge ${statusClass}" style="font-size: 0.75em; padding: 4px 8px;">${
+    r.status_label || r.status
+  }</span>
+            <span style="font-weight: 700; color: #1e293b; font-size: 0.9em;">#${
+              r.reservation_id
+            }</span>
+            <span style="color: #94a3b8; font-size: 0.85em;">${checkInDate}</span>
           </div>
-          <span class="history-status-badge ${statusClass}">
-            <i class="fas fa-${statusIcon}"></i>
-            ${r.status_label || r.status}
-          </span>
-        </div>
-        
-        ${refundNotice}
-        
-        <div class="history-card-body">
-          <div class="history-package-title">
-            <i class="fas fa-home"></i>
-            ${r.package_type || "Standard Package"} - ${(
-    r.booking_type || "daytime"
-  )
+          <div style="font-weight: 600; color: #334155; margin-bottom: 4px; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
+            r.package_type || "Package"
+          } - ${(r.booking_type || "daytime")
     .replace("-", " ")
-    .toUpperCase()}
+    .toUpperCase()}</div>
+          <div style="color: #64748b; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <i class="fas fa-users" style="font-size: 0.9em;"></i> ${
+              r.number_of_guests || 1
+            } Guest(s) • 
+            <i class="fas fa-tag" style="font-size: 0.9em;"></i> ₱${parseFloat(
+              r.total_amount || 0
+            ).toLocaleString()}
           </div>
-          
-          <div class="history-info-grid">
-            <div class="history-info-item">
-              <i class="fas fa-calendar-day"></i>
-              <span>${checkInDate}</span>
-            </div>
-            <div class="history-info-item">
-              <i class="fas fa-users"></i>
-              <span>${r.number_of_guests || 1} Guest(s)</span>
-            </div>
-            <div class="history-info-item">
-              <i class="fas fa-peso-sign"></i>
-              <span>₱${parseFloat(r.total_amount || 0).toLocaleString("en-PH", {
-                minimumFractionDigits: 2,
-              })}</span>
-            </div>
-            <div class="history-info-item">
-              <i class="fas fa-clock"></i>
-              <span>${
-                r.booking_type_label || formatBookingTypeShort(r.booking_type)
-              }</span>
-            </div>
+          ${refundNotice}
+          <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+            ${actionButtons}
           </div>
         </div>
-        
-        <div class="history-card-footer">
-          ${actionButtons}
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;" onclick="event.stopPropagation(); viewReservationDetails('${
+          r.reservation_id
+        }')">
+          <i class="fas fa-eye" style="color: #11224e; font-size: 1.3em;"></i>
+          <span style="color: #11224e; font-size: 0.7em; font-weight: 600; white-space: nowrap;">View Details</span>
         </div>
       </div>
     </div>
@@ -3890,14 +3884,16 @@ function formatBookingTypeShort(type) {
   return types[type] || type || "Standard";
 }
 
-// History-specific action buttons (no payment actions) - REDESIGNED
+// History-specific action buttons with inline styles - COMPACT DESIGN
 function getHistoryActionButtons(r) {
   const isCompleted = r.status === "completed" || r.status === "checked_out";
   const isCancelled = r.status === "cancelled" || r.status === "canceled";
 
-  let buttons = `<button class="history-action-btn view-btn" onclick="event.stopPropagation(); viewReservationDetails('${r.reservation_id}')">
-    <i class="fas fa-eye"></i> View Details
-  </button>`;
+  // Common button style
+  const btnStyle =
+    "padding: 6px 12px; font-size: 0.75em; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s ease;";
+
+  let buttons = "";
 
   // Only show Review/Edit Review and Book Again for completed reservations
   if (isCompleted) {
@@ -3912,34 +3908,34 @@ function getHistoryActionButtons(r) {
       // Check if review was deleted
       if (reviewInfo.status === "deleted") {
         // Review was deleted - show disabled button
-        buttons += `<button class="history-action-btn review-btn reviewed disabled" disabled title="Review deleted">
+        buttons += `<button style="${btnStyle} background: #e5e7eb; color: #9ca3af; cursor: not-allowed;" disabled title="Review deleted">
           <i class="fas fa-trash-alt"></i> Review Deleted
         </button>`;
       } else if (reviewInfo.can_edit) {
         // Show Edit Review button if review exists and can still be edited
         const editsRemaining = 3 - reviewInfo.edit_count;
-        buttons += `<button class="history-action-btn edit-review-btn" onclick="event.stopPropagation(); editReview(${reviewInfo.review_id})" title="${editsRemaining} edit(s) remaining">
-          <i class="fas fa-edit"></i> Edit Review (${editsRemaining} left)
+        buttons += `<button style="${btnStyle} background: #f59e0b; color: white;" onclick="event.stopPropagation(); editReview(${reviewInfo.review_id})" title="${editsRemaining} edit(s) remaining">
+          <i class="fas fa-edit"></i> Edit (${editsRemaining})
         </button>`;
       } else {
         // Show disabled button when edit limit reached
-        buttons += `<button class="history-action-btn edit-review-btn disabled" disabled title="Maximum edits reached">
-          <i class="fas fa-ban"></i> Edit Limit Reached
+        buttons += `<button style="${btnStyle} background: #e5e7eb; color: #9ca3af; cursor: not-allowed;" disabled title="Maximum edits reached">
+          <i class="fas fa-ban"></i> No Edits Left
         </button>`;
       }
     } else if (hasReview) {
       // Has review but no reviewInfo - show disabled "Reviewed" button
-      buttons += `<button class="history-action-btn review-btn reviewed disabled" disabled title="Already reviewed">
+      buttons += `<button style="${btnStyle} background: #e5e7eb; color: #9ca3af; cursor: not-allowed;" disabled title="Already reviewed">
         <i class="fas fa-check-circle"></i> Reviewed
       </button>`;
     } else {
       // Show Write Review button if not yet reviewed
-      buttons += `<button class="history-action-btn review-btn" onclick="event.stopPropagation(); writeReviewForReservation('${r.reservation_id}')">
+      buttons += `<button style="${btnStyle} background: #f59e0b; color: white;" onclick="event.stopPropagation(); writeReviewForReservation('${r.reservation_id}')">
         <i class="fas fa-star"></i> Review
       </button>`;
     }
 
-    buttons += `<button class="history-action-btn book-again-btn" onclick="event.stopPropagation(); bookAgainFromReservation('${r.reservation_id}')">
+    buttons += `<button style="${btnStyle} background: #11224e; color: white;" onclick="event.stopPropagation(); bookAgainFromReservation('${r.reservation_id}')">
       <i class="fas fa-redo"></i> Book Again
     </button>`;
   }

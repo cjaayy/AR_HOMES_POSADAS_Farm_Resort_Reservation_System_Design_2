@@ -2437,72 +2437,83 @@
 
           <!-- Reservation History Section -->
           <div class="content-section" id="bookings-history-section">
-            <div class="section-header-inline">
+            <div class="section-header-inline" style="margin-bottom: 25px">
               <h2>
                 <i class="fas fa-history" style="color: #11224e"></i>
                 Reservation History
               </h2>
-              <div
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 15px;
-                  flex-wrap: wrap;
-                "
+              <button
+                onclick="loadMyReservations()"
+                class="btn-primary"
+                title="Refresh reservations"
               >
-                <button
-                  onclick="loadMyReservations()"
-                  class="refresh-btn"
-                  title="Refresh reservations"
-                  style="
-                    background: #11224e;
-                    color: white;
-                    border: none;
-                    padding: 10px 20px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-weight: 600;
-                    font-size: 0.9em;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 2px 8px rgba(17, 34, 78, 0.3);
-                  "
-                  onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(17, 34, 78, 0.5)'"
-                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(17, 34, 78, 0.3)'"
-                >
-                  <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-                <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="all">
-                    All History
-                  </button>
-                  <button class="filter-btn" data-filter="completed">
-                    Completed
-                  </button>
-                  <button class="filter-btn" data-filter="cancelled">
-                    Cancelled
-                  </button>
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+
+            <!-- History Stats Cards - Same style as Dashboard -->
+            <div class="history-stats">
+              <div class="history-stat-card">
+                <div class="stat-icon completed">
+                  <i class="fas fa-check-double"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="historyCompletedCount">0</div>
+                  <div class="stat-label">Completed Stays</div>
+                </div>
+              </div>
+              <div class="history-stat-card">
+                <div class="stat-icon cancelled">
+                  <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="historyCancelledCount">0</div>
+                  <div class="stat-label">Cancelled</div>
+                </div>
+              </div>
+              <div class="history-stat-card">
+                <div class="stat-icon total">
+                  <i class="fas fa-history"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="historyTotalCount">0</div>
+                  <div class="stat-label">Total History</div>
                 </div>
               </div>
             </div>
-            <div class="search-filter-section">
-              <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input
-                  type="text"
-                  id="bookingSearch"
-                  placeholder="Search history..."
-                />
+
+            <!-- Filters and Search -->
+            <div class="history-controls">
+              <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">
+                  All History
+                </button>
+                <button class="filter-btn" data-filter="completed">
+                  Completed
+                </button>
+                <button class="filter-btn" data-filter="cancelled">
+                  Cancelled
+                </button>
               </div>
-              <select id="sortBookings" class="sort-select">
-                <option value="date-desc">Date (Newest)</option>
-                <option value="date-asc">Date (Oldest)</option>
-                <option value="price-desc">Price (High to Low)</option>
-                <option value="price-asc">Price (Low to High)</option>
-              </select>
+              <div class="search-sort-wrapper">
+                <div class="search-box">
+                  <i class="fas fa-search"></i>
+                  <input
+                    type="text"
+                    id="bookingSearch"
+                    placeholder="Search history..."
+                  />
+                </div>
+                <select id="sortBookings" class="sort-select">
+                  <option value="date-desc">Date (Newest)</option>
+                  <option value="date-asc">Date (Oldest)</option>
+                  <option value="price-desc">Price (High to Low)</option>
+                  <option value="price-asc">Price (Low to High)</option>
+                </select>
+              </div>
             </div>
+
+            <!-- History Cards Grid -->
             <div class="bookings-history-grid">
               <!-- Booking cards will be loaded dynamically from database -->
               <div
@@ -2736,16 +2747,31 @@
             </div>
             <div class="reviews-stats">
               <div class="review-stat">
-                <div class="stat-value" id="avgRatingValue">0.0</div>
-                <div class="stat-label">Average Rating Given</div>
+                <div class="stat-icon">
+                  <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="avgRatingValue">0.0</div>
+                  <div class="stat-label">Average Rating Given</div>
+                </div>
               </div>
               <div class="review-stat">
-                <div class="stat-value" id="totalReviewsValue">0</div>
-                <div class="stat-label">Total Reviews</div>
+                <div class="stat-icon">
+                  <i class="fas fa-comment-alt"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="totalReviewsValue">0</div>
+                  <div class="stat-label">Total Reviews</div>
+                </div>
               </div>
               <div class="review-stat">
-                <div class="stat-value" id="totalHelpfulValue">0</div>
-                <div class="stat-label">Helpful Votes</div>
+                <div class="stat-icon">
+                  <i class="fas fa-thumbs-up"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="totalHelpfulValue">0</div>
+                  <div class="stat-label">Helpful Votes</div>
+                </div>
               </div>
             </div>
             <div class="reviews-list" id="reviewsList">
