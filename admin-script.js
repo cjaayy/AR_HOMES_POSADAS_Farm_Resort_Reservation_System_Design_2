@@ -1649,6 +1649,34 @@ function viewUser(userId) {
   const user = allUsers.find((u) => u.user_id === userId);
   if (!user) return;
 
+  // Check for pending email
+  let pendingEmailHtml = "";
+  if (user.has_pending_email && user.pending_email) {
+    const isPendingExpired = user.pending_email_expired;
+    pendingEmailHtml = `
+      <div style="grid-column: 1 / -1; background: ${
+        isPendingExpired ? "#fee2e2" : "#fef3c7"
+      }; padding: 0.75rem; border-radius: 8px; border-left: 4px solid ${
+      isPendingExpired ? "#ef4444" : "#f59e0b"
+    };">
+        <strong><i class="fas fa-envelope-open-text"></i> Pending Email Change:</strong><br>
+        <span style="color: ${isPendingExpired ? "#dc2626" : "#d97706"};">
+          ${escapeHtml(user.pending_email)}
+          ${
+            isPendingExpired
+              ? ' <span style="color: #dc2626;">(Expired)</span>'
+              : ""
+          }
+        </span>
+        ${
+          user.pending_email_expires_formatted
+            ? `<br><small>Expires: ${user.pending_email_expires_formatted}</small>`
+            : ""
+        }
+      </div>
+    `;
+  }
+
   const modalContent = `
     <div style="padding: 1rem;">
       <h3 style="color: #667eea; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -1683,6 +1711,7 @@ function viewUser(userId) {
           <strong>Phone:</strong><br>
           <span>${escapeHtml(user.phone_number)}</span>
         </div>
+        ${pendingEmailHtml}
         <div>
           <strong>Member Since:</strong><br>
           <span>${user.member_since}</span>
@@ -1732,6 +1761,9 @@ function editUser(userId) {
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email:</label>
           <input type="email" id="edit_email" value="${escapeHtml(user.email)}" 
                  style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+          <small style="display: block; margin-top: 0.25rem; color: #f59e0b; font-size: 0.8rem;">
+            <i class="fas fa-exclamation-triangle"></i> Changing email requires verification. A verification email will be sent to the new address.
+          </small>
         </div>
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Phone:</label>
@@ -1762,11 +1794,30 @@ function editUser(userId) {
     .addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      const newEmail = document.getElementById("edit_email").value;
+      const originalEmail = user.email;
+      const emailChanged = newEmail !== originalEmail;
+
+      // If email is being changed, show a confirmation dialog
+      if (emailChanged) {
+        const confirmChange = confirm(
+          `⚠️ Email Change Warning\n\n` +
+            `You are changing the email from:\n${originalEmail}\n\nTo:\n${newEmail}\n\n` +
+            `The user will need to verify the new email address before it becomes active. ` +
+            `A verification email will be sent to the new address.\n\n` +
+            `The old email will continue to work until the new one is verified.\n\n` +
+            `Do you want to proceed?`
+        );
+        if (!confirmChange) {
+          return;
+        }
+      }
+
       const updatedData = {
         user_id: userId,
         full_name: document.getElementById("edit_full_name").value,
         username: document.getElementById("edit_username").value,
-        email: document.getElementById("edit_email").value,
+        email: newEmail,
         phone_number: document.getElementById("edit_phone").value,
       };
 
@@ -1782,7 +1833,15 @@ function editUser(userId) {
         const result = await response.json();
 
         if (result.success) {
-          showNotification("User updated successfully!", "success");
+          if (result.email_changed && result.verification_required) {
+            showNotification(
+              "User updated! A verification email has been sent to the new email address. " +
+                "The email will only change after verification.",
+              "success"
+            );
+          } else {
+            showNotification("User updated successfully!", "success");
+          }
           closeUserModal();
           loadUsers(); // Reload the users list
         } else {

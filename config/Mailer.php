@@ -110,6 +110,51 @@ class Mailer {
     }
 
     /**
+     * Send email change verification email
+     * 
+     * @param string $newEmail - The new email address to verify
+     * @param string $recipientName
+     * @param string $verificationLink
+     * @param string $expiresAt
+     * @param string $oldEmail - The current/old email address
+     * @return bool
+     */
+    public function sendEmailChangeVerificationEmail($newEmail, $recipientName, $verificationLink, $expiresAt, $oldEmail) {
+        try {
+            // Send to the NEW email address
+            $this->mail->addAddress($newEmail, $recipientName);
+            
+            // Reply to
+            $this->mail->addReplyTo(MAIL_FROM_EMAIL, MAIL_FROM_NAME);
+
+            // Content
+            $this->mail->isHTML(true);
+            $this->mail->Subject = 'Verify Your New Email Address - ' . APP_NAME;
+            
+            // Email body
+            $emailBody = $this->getEmailChangeVerificationTemplate($recipientName, $verificationLink, $expiresAt, $oldEmail, $newEmail);
+            $this->mail->Body = $emailBody;
+            
+            // Alternative plain text body
+            $this->mail->AltBody = $this->getEmailChangeVerificationPlainText($recipientName, $verificationLink, $expiresAt, $oldEmail, $newEmail);
+
+            // Send email
+            $result = $this->mail->send();
+            
+            // Clear all addresses and attachments for next email
+            $this->mail->clearAddresses();
+            $this->mail->clearAttachments();
+            
+            return $result;
+
+        } catch (Exception $e) {
+            $this->error = "Message could not be sent. Mailer Error: {$this->mail->ErrorInfo}";
+            error_log($this->error);
+            return false;
+        }
+    }
+
+    /**
      * Send email verification email
      * 
      * @param string $recipientEmail
@@ -341,6 +386,180 @@ class Mailer {
             </div>
         </body>
         </html>
+        ";
+    }
+
+    /**
+     * Get email change verification email HTML template
+     */
+    private function getEmailChangeVerificationTemplate($recipientName, $verificationLink, $expiresAt, $oldEmail, $newEmail) {
+        $expiryTime = date('F j, Y \a\t g:i A', strtotime($expiresAt));
+        
+        return "
+        <!DOCTYPE html>
+        <html lang='en'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Verify Your New Email Address</title>
+            <style>
+                body {
+                    font-family: 'Arial', 'Helvetica', sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+                .email-container {
+                    max-width: 600px;
+                    margin: 30px auto;
+                    background: #ffffff;
+                    border-radius: 10px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+                .email-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: #ffffff;
+                    padding: 40px 20px;
+                    text-align: center;
+                }
+                .email-header h1 {
+                    margin: 0;
+                    font-size: 28px;
+                    font-weight: 600;
+                }
+                .email-body {
+                    padding: 40px 30px;
+                }
+                .email-body h2 {
+                    color: #333;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                }
+                .email-body p {
+                    margin-bottom: 15px;
+                    font-size: 16px;
+                    color: #666;
+                }
+                .verify-button {
+                    display: inline-block;
+                    padding: 15px 40px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: #ffffff !important;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: 600;
+                    margin: 20px 0;
+                    text-align: center;
+                    font-size: 18px;
+                }
+                .info-box {
+                    background-color: #f8f9fa;
+                    border-left: 4px solid #667eea;
+                    padding: 15px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .warning-box {
+                    background-color: #fff3cd;
+                    border-left: 4px solid #ffc107;
+                    padding: 15px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .footer {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    text-align: center;
+                    font-size: 14px;
+                    color: #666;
+                }
+                .email-display {
+                    font-weight: 600;
+                    color: #667eea;
+                    background: #f0f0ff;
+                    padding: 3px 10px;
+                    border-radius: 3px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-container'>
+                <div class='email-header'>
+                    <div style='font-size: 60px; margin-bottom: 15px;'>📧</div>
+                    <h1>" . APP_NAME . "</h1>
+                </div>
+                <div class='email-body'>
+                    <h2>Verify Your New Email Address</h2>
+                    <p>Hello, <strong>" . htmlspecialchars($recipientName) . "</strong>!</p>
+                    <p>A request was made to change your email address for your " . APP_NAME . " account.</p>
+                    
+                    <div class='info-box'>
+                        <p><strong>Email Change Details:</strong></p>
+                        <p>Current email: <span class='email-display'>" . htmlspecialchars($oldEmail) . "</span></p>
+                        <p>New email: <span class='email-display'>" . htmlspecialchars($newEmail) . "</span></p>
+                    </div>
+                    
+                    <p>To confirm this change, please click the button below:</p>
+                    
+                    <div style='text-align: center;'>
+                        <a href='" . $verificationLink . "' class='verify-button'>Verify New Email</a>
+                    </div>
+                    
+                    <div class='warning-box'>
+                        <p><strong>⚠️ Important:</strong></p>
+                        <p>• This link expires on: <strong>" . $expiryTime . "</strong></p>
+                        <p>• Until you verify, you will continue using your current email.</p>
+                        <p>• If you did not request this change, please ignore this email or contact support.</p>
+                    </div>
+                    
+                    <p style='font-size: 14px; color: #888;'>If the button doesn't work, copy and paste this link:</p>
+                    <p style='font-size: 12px; word-break: break-all; color: #667eea;'>" . $verificationLink . "</p>
+                </div>
+                <div class='footer'>
+                    <p>&copy; " . date('Y') . " " . APP_NAME . ". All rights reserved.</p>
+                    <p>This is an automated message, please do not reply to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+    }
+
+    /**
+     * Get email change verification plain text version
+     */
+    private function getEmailChangeVerificationPlainText($recipientName, $verificationLink, $expiresAt, $oldEmail, $newEmail) {
+        $expiryTime = date('F j, Y \a\t g:i A', strtotime($expiresAt));
+        
+        return "
+" . APP_NAME . "
+
+Verify Your New Email Address
+
+Hello, " . $recipientName . "!
+
+A request was made to change your email address for your " . APP_NAME . " account.
+
+Email Change Details:
+- Current email: " . $oldEmail . "
+- New email: " . $newEmail . "
+
+To confirm this change, please click the link below:
+
+" . $verificationLink . "
+
+This link will expire on: " . $expiryTime . "
+
+IMPORTANT:
+- Until you verify, you will continue using your current email address.
+- If you did not request this change, please ignore this email or contact support immediately.
+
+---
+© " . date('Y') . " " . APP_NAME . ". All rights reserved.
+This is an automated message, please do not reply to this email.
         ";
     }
 

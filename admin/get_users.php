@@ -23,11 +23,13 @@ try {
     $database = new Database();
     $conn = $database->getConnection();
 
-    // Get all users from database
+    // Get all users from database (including pending email info)
     $query = "SELECT 
                 user_id,
                 username,
                 email,
+                pending_email,
+                pending_email_expires,
                 last_name,
                 given_name,
                 middle_name,
@@ -54,6 +56,14 @@ try {
             $user['last_login_formatted'] = date('M d, Y', strtotime($user['last_login'])) . '<br><small style="color: #666; font-size: 0.85em;">' . date('h:i A', strtotime($user['last_login'])) . '</small>';
         } else {
             $user['last_login_formatted'] = 'Never';
+        }
+        
+        // Check for pending email change
+        $user['has_pending_email'] = !empty($user['pending_email']);
+        if ($user['has_pending_email'] && $user['pending_email_expires']) {
+            $expiresAt = strtotime($user['pending_email_expires']);
+            $user['pending_email_expired'] = time() > $expiresAt;
+            $user['pending_email_expires_formatted'] = date('M d, Y h:i A', $expiresAt);
         }
         
         // Format member_since

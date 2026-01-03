@@ -3535,6 +3535,7 @@
               data.data.memberSince || new Date().getFullYear();
             window.userData.totalBookings = data.data.totalBookings || 0;
             window.userData.reviewsGiven = data.data.reviewsGiven || 0;
+            window.userData.pending_email = data.data.pending_email || null;
 
             // Update UI immediately
             updateUserInterface();
@@ -3594,6 +3595,28 @@
           if (element) {
             element.textContent = value || "-";
             console.log(`✅ ${fieldId} display updated:`, value);
+          }
+        }
+
+        // Show pending email notification if there's one
+        if (window.userData.pending_email) {
+          const displayEmailElement = document.getElementById("displayEmail");
+          if (displayEmailElement && displayEmailElement.parentNode) {
+            // Check if pending email notice already exists
+            let pendingNotice = document.getElementById("pendingEmailNotice");
+            if (!pendingNotice) {
+              pendingNotice = document.createElement("div");
+              pendingNotice.id = "pendingEmailNotice";
+              pendingNotice.style.cssText =
+                "margin-top: 8px; padding: 8px 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.85em; color: #92400e;";
+              pendingNotice.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Pending Email Change:</strong><br>
+                ${window.userData.pending_email}<br>
+                <small>Please check your inbox to verify the new email address.</small>
+              `;
+              displayEmailElement.parentNode.appendChild(pendingNotice);
+            }
           }
         }
 
