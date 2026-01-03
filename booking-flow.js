@@ -349,15 +349,6 @@ function createBookingModalHTML(booking) {
                 : ""
             }</span>
           </div>
-          <!-- Security Bond Information for Fully Paid -->
-          <div style="background: #fef9e7; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #f59e0b; margin: 10px 0; font-size: 0.85em;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <i class="fas fa-shield-alt" style="color: #d97706; font-size: 1em;"></i>
-              <div style="flex: 1; color: #000;">
-                <strong>₱2,000 Security Bond</strong> upon check-in (refundable) — Covers damages/extra charges. Can be paid at check-in.
-              </div>
-            </div>
-          </div>
           `
               : booking.status === "confirmed" &&
                 booking.downpayment_verified == 1
@@ -640,6 +631,19 @@ function renderPaymentStatus(booking) {
     `;
   }
 
+  // Security Bond Information - always show for confirmed reservations
+  html += `
+    <div style="background: #fef9e7; padding: 12px; border-radius: 8px; border-left: 3px solid #f59e0b; margin-top: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-shield-alt" style="color: #d97706; font-size: 1.2em;"></i>
+        <div style="flex: 1; color: #000;">
+          <strong>₱2,000 Security Bond</strong> upon check-in (refundable)<br>
+          <span style="font-size: 0.9em; color: #666;">Covers damages/extra charges. Can be paid at check-in.</span>
+        </div>
+      </div>
+    </div>
+  `;
+
   html += "</div>";
   return html;
 }
@@ -805,6 +809,19 @@ function renderBookingActions(booking) {
     `;
   }
 
+  // Print Receipt button for confirmed/fully paid reservations
+  if (
+    booking.status === "confirmed" ||
+    booking.status === "completed" ||
+    booking.status === "checked_out"
+  ) {
+    html += `
+      <button class="btn-secondary" type="button" onclick="printBookingReceipt('${booking.reservation_id}')" style="margin-top: 10px; background: #11224e; color: white; border-color: #11224e;">
+        <i class="fas fa-print"></i> Print Receipt
+      </button>
+    `;
+  }
+
   html += "</div>";
   return html;
 }
@@ -878,6 +895,262 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+// ===========================
+// PRINT BOOKING RECEIPT
+// ===========================
+
+/**
+ * Print booking receipt
+ */
+function printBookingReceipt(reservationId) {
+  // Find the booking data from the hidden div
+  let booking = null;
+  let index = 0;
+  while (true) {
+    const bookingDataDiv = document.getElementById(`booking-data-${index}`);
+    if (!bookingDataDiv) break;
+    const data = JSON.parse(bookingDataDiv.getAttribute("data-booking"));
+    if (data.reservation_id === reservationId) {
+      booking = data;
+      break;
+    }
+    index++;
+  }
+
+  if (!booking) {
+    alert("Booking data not found. Please refresh and try again.");
+    return;
+  }
+
+  const remainingBalance =
+    parseFloat(booking.total_amount) - parseFloat(booking.downpayment_amount);
+
+  const receiptHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Reservation Receipt - #${booking.reservation_id}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f5f5f5; }
+        .receipt { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #11224e, #1e3a6e); color: white; padding: 25px; text-align: center; }
+        .logo { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
+        .subtitle { font-size: 12px; opacity: 0.9; }
+        .receipt-title { margin-top: 15px; font-size: 18px; font-weight: 600; }
+        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 10px; }
+        .status-confirmed { background: #e3f2fd; color: #1565c0; }
+        .status-completed { background: #e8f5e9; color: #2e7d32; }
+        .section { padding: 20px; border-bottom: 1px solid #eee; }
+        .section-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .info-item { }
+        .info-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+        .info-value { font-size: 14px; color: #333; font-weight: 500; }
+        .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .schedule-box { padding: 15px; border-radius: 10px; }
+        .schedule-box.checkin { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border-left: 4px solid #4caf50; }
+        .schedule-box.checkout { background: linear-gradient(135deg, #ffebee, #fce4ec); border-left: 4px solid #ef5350; }
+        .schedule-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+        .schedule-date { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+        .schedule-time { font-size: 13px; font-weight: 600; }
+        .payment-table { width: 100%; border-collapse: collapse; }
+        .payment-table td { padding: 10px 0; font-size: 14px; }
+        .payment-table td:last-child { text-align: right; font-weight: 500; }
+        .total-row { background: #f8f9fa; }
+        .total-row td { font-size: 16px; font-weight: 700; padding: 15px 10px; }
+        .security-bond { background: #fef9e7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .footer { padding: 25px; text-align: center; background: #f8f9fa; }
+        .footer p { font-size: 12px; color: #888; margin: 5px 0; }
+        @media print {
+          body { padding: 0; background: white; }
+          .receipt { box-shadow: none; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="receipt">
+        <div class="header">
+          <div class="logo">🏡 AR Homes Posadas Farm Resort</div>
+          <div class="subtitle">Your Home Away From Home</div>
+          <div class="receipt-title">Reservation Receipt</div>
+          <span class="status-badge status-${
+            booking.status === "confirmed" ? "confirmed" : "completed"
+          }">
+            ${booking.status_label || booking.status}
+          </span>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Reservation Details</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Reservation ID</div>
+              <div class="info-value">#${booking.reservation_id}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Booking Type</div>
+              <div class="info-value">${getBookingTypeLabel(
+                booking.booking_type
+              )}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Package</div>
+              <div class="info-value">${
+                booking.package_name || "Standard"
+              }</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Duration</div>
+              <div class="info-value">${
+                booking.booking_type === "daytime"
+                  ? booking.number_of_days + " Day(s)"
+                  : booking.number_of_nights + " Night(s)"
+              }</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Guest Information</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Guest Name</div>
+              <div class="info-value">${booking.guest_name || "N/A"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Number of Guests</div>
+              <div class="info-value">${
+                booking.number_of_guests || 1
+              } guest(s)</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value">${booking.guest_email || "N/A"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Phone</div>
+              <div class="info-value">${booking.guest_phone || "N/A"}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Schedule</div>
+          <div class="schedule-grid">
+            <div class="schedule-box checkin">
+              <div class="schedule-label" style="color: #2e7d32;">✓ Check-in</div>
+              <div class="schedule-date" style="color: #1b5e20;">${formatDate(
+                booking.check_in_date
+              )}</div>
+              <div class="schedule-time" style="color: #388e3c;">${formatTime12Hour(
+                booking.check_in_time
+              )}</div>
+            </div>
+            <div class="schedule-box checkout">
+              <div class="schedule-label" style="color: #c62828;">✗ Check-out</div>
+              <div class="schedule-date" style="color: #b71c1c;">${formatDate(
+                booking.check_out_date
+              )}</div>
+              <div class="schedule-time" style="color: #d32f2f;">${formatTime12Hour(
+                booking.check_out_time
+              )}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Payment Summary</div>
+          <table class="payment-table">
+            <tr>
+              <td>Base Price</td>
+              <td>₱${parseFloat(booking.base_price || 0).toLocaleString(
+                "en-PH",
+                { minimumFractionDigits: 2 }
+              )}</td>
+            </tr>
+            <tr>
+              <td>Downpayment (50%) - ${
+                booking.downpayment_status || "Pending"
+              }</td>
+              <td>₱${parseFloat(booking.downpayment_amount).toLocaleString(
+                "en-PH",
+                { minimumFractionDigits: 2 }
+              )}</td>
+            </tr>
+            <tr>
+              <td>Remaining Balance - ${
+                booking.full_payment_status || "Pending"
+              }</td>
+              <td>₱${remainingBalance.toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}</td>
+            </tr>
+            <tr class="total-row">
+              <td>Total Amount</td>
+              <td>₱${parseFloat(booking.total_amount).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+              })}</td>
+            </tr>
+          </table>
+          
+          <div class="security-bond">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.2em;">🛡️</span>
+              <div>
+                <strong style="color: #e65100;">₱2,000 Security Bond upon Check-in</strong><br>
+                <span style="font-size: 12px; color: #795548;">Refundable — Covers damages/extra charges. Can be paid at check-in.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p><strong>AR Homes Posadas Farm Resort</strong></p>
+          <p>Thank you for choosing us for your stay!</p>
+          <p style="margin-top: 10px;">For inquiries, contact us at: arhomesresort@gmail.com</p>
+          <p style="margin-top: 15px; font-size: 10px; color: #aaa;">
+            Receipt generated on ${new Date().toLocaleString()}
+          </p>
+        </div>
+        
+        <div class="no-print" style="text-align: center; padding: 20px;">
+          <button onclick="window.print()" style="
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #11224e, #1e3a6e);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+          ">
+            🖨️ Print Receipt
+          </button>
+          <button onclick="window.close()" style="
+            padding: 12px 30px;
+            background: #e9ecef;
+            color: #495057;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+          ">
+            Close
+          </button>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Open in new window for printing
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(receiptHTML);
+  printWindow.document.close();
+}
 
 // ===========================
 // REBOOKING REQUEST
