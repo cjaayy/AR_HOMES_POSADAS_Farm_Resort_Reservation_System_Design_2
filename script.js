@@ -439,7 +439,7 @@ document
 function openLocationMap() {
   const modal = document.getElementById("mapModal");
   if (!modal) return;
-  
+
   modal.style.display = "flex";
   // Force reflow to enable transition
   modal.offsetHeight;
@@ -710,7 +710,7 @@ window.shareLocation = shareLocation;
 function openContactModal() {
   const modal = document.getElementById("contactModal");
   if (!modal) return;
-  
+
   modal.style.display = "flex";
   // Force reflow to enable transition
   modal.offsetHeight;
@@ -753,7 +753,7 @@ window.closeContactModal = closeContactModal;
 function openReviewsModal() {
   const modal = document.getElementById("reviewsModal");
   if (!modal) return;
-  
+
   modal.style.display = "flex";
   // Force reflow to enable transition
   modal.offsetHeight;
