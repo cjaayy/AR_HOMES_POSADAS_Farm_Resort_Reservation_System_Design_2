@@ -1468,536 +1468,287 @@
 
             <!-- Step 2: Booking Details (was Step 3) -->
             <div class="booking-step" id="step2" style="display: none">
-              <h2>Step 2: Complete Your Booking</h2>
-
-              <!-- Selected Booking Summary -->
-              <div class="selected-summary" id="selectedSummary">
-                <h3>Your Selection:</h3>
-                <div class="summary-grid">
-                  <div class="summary-item">
-                    <span class="label">Booking Type:</span>
-                    <span class="value" id="summaryBookingType">-</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="label">Package:</span>
-                    <span class="value" id="summaryPackage">-</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="label">Check-in:</span>
-                    <span class="value" id="summaryCheckInTime">-</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="label">Check-out:</span>
-                    <span class="value" id="summaryCheckOutTime">-</span>
-                  </div>
+              <div class="step2-header">
+                <div class="step2-header-icon">
+                  <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="step2-header-text">
+                  <h2>Complete Your Booking</h2>
+                  <p>Review your selection and fill in the details</p>
                 </div>
               </div>
 
-              <!-- Booking Form -->
-              <form id="reservationForm" class="reservation-form">
-                <div
-                  class="form-section"
-                  style="
-                    margin-bottom: 0.75rem;
-                    background: linear-gradient(
-                      135deg,
-                      rgba(102, 126, 234, 0.08),
-                      rgba(118, 75, 162, 0.08)
-                    );
-                    border-radius: 10px;
-                    padding: 0.75rem;
-                    border-left: 3px solid #667eea;
-                  "
-                >
-                  <h3
-                    style="
-                      font-size: 0.9rem;
-                      margin-bottom: 0.5rem;
-                      color: #667eea;
-                      display: flex;
-                      align-items: center;
-                      gap: 0.4rem;
-                    "
-                  >
-                    <i class="fas fa-calendar-alt"></i> Select Dates
-                  </h3>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label
-                        for="checkInDate"
-                        style="
-                          font-size: 0.75rem;
-                          color: #555;
-                          font-weight: 600;
-                        "
-                        >Check-in Date *</label
-                      >
-                      <input
-                        type="date"
-                        id="checkInDate"
-                        name="checkInDate"
-                        required
-                        style="
-                          padding: 0.45rem 0.6rem;
-                          font-size: 0.8rem;
-                          max-width: 180px;
-                          border: 1.5px solid #ddd;
-                          border-radius: 8px;
-                          background: #fff;
-                          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                          transition: all 0.3s ease;
-                        "
-                      />
+              <div class="step2-container">
+                <!-- Left Column - Form -->
+                <div class="step2-form-column">
+                  <!-- Selected Booking Summary Card -->
+                  <div class="booking-summary-card" id="selectedSummary">
+                    <div class="summary-card-header">
+                      <i class="fas fa-bookmark"></i>
+                      <span>Your Selection</span>
                     </div>
-                    <!-- Duration field hidden - single session booking only -->
-                    <input
-                      type="hidden"
-                      id="duration"
-                      name="duration"
-                      value="1"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  class="form-section"
-                  style="
-                    margin-bottom: 0.75rem;
-                    background: linear-gradient(
-                      135deg,
-                      rgba(102, 126, 234, 0.08),
-                      rgba(118, 75, 162, 0.08)
-                    );
-                    border-radius: 10px;
-                    padding: 0.75rem;
-                    border-left: 3px solid #764ba2;
-                  "
-                >
-                  <h3
-                    style="
-                      font-size: 0.9rem;
-                      margin-bottom: 0.5rem;
-                      color: #764ba2;
-                      display: flex;
-                      align-items: center;
-                      gap: 0.4rem;
-                    "
-                  >
-                    <i class="fas fa-users"></i> Group Details
-                  </h3>
-                  <div
-                    class="form-row"
-                    style="
-                      display: flex;
-                      gap: 0.75rem;
-                      flex-wrap: wrap;
-                      margin-bottom: 0.5rem;
-                    "
-                  >
-                    <div class="form-group" style="flex: 0 1 auto">
-                      <label
-                        for="groupSize"
-                        style="
-                          font-size: 0.75rem;
-                          color: #555;
-                          font-weight: 600;
-                        "
-                        ><i
-                          class="fas fa-user-friends"
-                          style="color: #667eea; margin-right: 0.25rem"
-                        ></i
-                        >Group Size *</label
-                      >
-                      <select
-                        id="groupSize"
-                        name="groupSize"
-                        required
-                        style="
-                          padding: 0.45rem 0.6rem;
-                          font-size: 0.8rem;
-                          max-width: 140px;
-                          border: 1.5px solid #ddd;
-                          border-radius: 8px;
-                          background: #fff;
-                          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                          cursor: pointer;
-                        "
-                      >
-                        <option value="">Select size</option>
-                        <option value="5-10">5-10</option>
-                        <option value="11-20">11-20</option>
-                        <option value="21-30">21-30</option>
-                        <option value="31-40">31-40</option>
-                        <option value="41-50">41-50</option>
-                        <option value="50+">50+</option>
-                      </select>
-                    </div>
-                    <div class="form-group" style="flex: 0 1 auto">
-                      <label
-                        for="groupType"
-                        style="
-                          font-size: 0.75rem;
-                          color: #555;
-                          font-weight: 600;
-                        "
-                        ><i
-                          class="fas fa-tag"
-                          style="color: #764ba2; margin-right: 0.25rem"
-                        ></i
-                        >Group Type *</label
-                      >
-                      <select
-                        id="groupType"
-                        name="groupType"
-                        required
-                        style="
-                          padding: 0.45rem 0.6rem;
-                          font-size: 0.8rem;
-                          max-width: 140px;
-                          border: 1.5px solid #ddd;
-                          border-radius: 8px;
-                          background: #fff;
-                          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                          cursor: pointer;
-                        "
-                      >
-                        <option value="">Select type</option>
-                        <option value="family">Family</option>
-                        <option value="friends">Friends</option>
-                        <option value="corporate">Corporate</option>
-                        <option value="celebration">Celebration</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label
-                      for="specialRequests"
-                      style="font-size: 0.75rem; color: #555; font-weight: 600"
-                      ><i
-                        class="fas fa-comment-dots"
-                        style="color: #667eea; margin-right: 0.25rem"
-                      ></i
-                      >Special Requests (Optional)</label
-                    >
-                    <textarea
-                      id="specialRequests"
-                      name="specialRequests"
-                      rows="2"
-                      placeholder="Any special requests..."
-                      style="
-                        padding: 0.45rem 0.6rem;
-                        font-size: 0.8rem;
-                        max-width: 300px;
-                        resize: vertical;
-                        border: 1.5px solid #ddd;
-                        border-radius: 8px;
-                        background: #fff;
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                      "
-                    ></textarea>
-                  </div>
-                </div>
-
-                <!-- Price Summary -->
-                <div
-                  class="price-summary"
-                  style="
-                    background: linear-gradient(
-                      135deg,
-                      rgba(40, 167, 69, 0.08),
-                      rgba(32, 201, 151, 0.08)
-                    );
-                    border-radius: 10px;
-                    padding: 0.75rem;
-                    border-left: 3px solid #28a745;
-                    margin-bottom: 0.75rem;
-                  "
-                >
-                  <h3
-                    style="
-                      font-size: 0.9rem;
-                      margin-bottom: 0.5rem;
-                      color: #28a745;
-                      display: flex;
-                      align-items: center;
-                      gap: 0.4rem;
-                    "
-                  >
-                    <i class="fas fa-receipt"></i> Price Breakdown
-                  </h3>
-                  <div
-                    class="price-row total"
-                    style="
-                      display: flex;
-                      justify-content: space-between;
-                      padding: 0.4rem 0;
-                      border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
-                      font-weight: 600;
-                    "
-                  >
-                    <span
-                      ><i
-                        class="fas fa-peso-sign"
-                        style="color: #28a745; margin-right: 0.25rem"
-                      ></i
-                      >Package Price:</span
-                    >
-                    <span
-                      id="priceTotal"
-                      style="color: #28a745; font-weight: 700"
-                      >₱0.00</span
-                    >
-                  </div>
-                  <div
-                    class="price-row downpayment"
-                    style="
-                      display: flex;
-                      justify-content: space-between;
-                      padding: 0.4rem 0;
-                      border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
-                      color: #ff8c00;
-                    "
-                  >
-                    <span
-                      ><i
-                        class="fas fa-hand-holding-usd"
-                        style="margin-right: 0.25rem"
-                      ></i
-                      >₱1,000 Downpayment:</span
-                    >
-                    <span id="priceDownpayment" style="font-weight: 600"
-                      >₱0.00</span
-                    >
-                  </div>
-                  <div
-                    class="price-row"
-                    style="
-                      display: flex;
-                      justify-content: space-between;
-                      padding: 0.4rem 0;
-                      border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
-                    "
-                  >
-                    <span
-                      ><i
-                        class="fas fa-wallet"
-                        style="color: #667eea; margin-right: 0.25rem"
-                      ></i
-                      >Remaining Balance:</span
-                    >
-                    <span id="priceBalance" style="font-weight: 600"
-                      >₱0.00</span
-                    >
-                  </div>
-                  <div
-                    class="price-row security"
-                    style="
-                      display: flex;
-                      justify-content: space-between;
-                      padding: 0.4rem 0;
-                      color: #17a2b8;
-                    "
-                  >
-                    <span
-                      ><i
-                        class="fas fa-shield-alt"
-                        style="margin-right: 0.25rem"
-                      ></i
-                      >Security Bond:</span
-                    >
-                    <span style="font-weight: 600">₱2,000.00</span>
-                  </div>
-                </div>
-
-                <!-- Payment Method -->
-                <div
-                  class="form-section"
-                  style="
-                    margin-bottom: 0.75rem;
-                    background: linear-gradient(
-                      135deg,
-                      rgba(0, 123, 255, 0.08),
-                      rgba(0, 86, 179, 0.08)
-                    );
-                    border-radius: 10px;
-                    padding: 0.75rem;
-                    border-left: 3px solid #007bff;
-                  "
-                >
-                  <h3
-                    style="
-                      font-size: 0.9rem;
-                      margin-bottom: 0.5rem;
-                      color: #007bff;
-                      display: flex;
-                      align-items: center;
-                      gap: 0.4rem;
-                    "
-                  >
-                    <i class="fas fa-credit-card"></i> Payment Method
-                  </h3>
-                  <p
-                    style="
-                      color: #555;
-                      font-size: 0.75rem;
-                      margin-bottom: 0.5rem;
-                      background: rgba(255, 255, 255, 0.7);
-                      padding: 0.5rem;
-                      border-radius: 6px;
-                    "
-                  >
-                    <i
-                      class="fas fa-lock"
-                      style="color: #28a745; margin-right: 0.25rem"
-                    ></i>
-                    <strong>Secure PayMongo Checkout</strong> - GCash, Card, or
-                    Online Banking
-                  </p>
-                  <div
-                    class="payment-methods"
-                    style="display: flex; justify-content: flex-start"
-                  >
-                    <label class="payment-option" style="cursor: pointer">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="gcash"
-                        required
-                        checked
-                        style="display: none"
-                      />
-                      <div
-                        class="payment-card"
-                        style="
-                          background: linear-gradient(135deg, #667eea, #764ba2);
-                          color: white;
-                          padding: 0.6rem 1rem;
-                          border-radius: 8px;
-                          text-align: center;
-                          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-                          max-width: 200px;
-                        "
-                      >
-                        <i
-                          class="fas fa-mobile-alt"
-                          style="
-                            font-size: 1.2rem;
-                            margin-bottom: 0.25rem;
-                            display: block;
-                          "
-                        ></i>
-                        <span
-                          style="
-                            font-size: 0.8rem;
-                            font-weight: 600;
-                            display: block;
-                          "
-                          >GCash / Card / Bank</span
-                        >
-                        <small style="font-size: 0.65rem; opacity: 0.9"
-                          ><i class="fas fa-lock"></i> Secure checkout</small
-                        >
+                    <div class="summary-card-body">
+                      <div class="summary-badge" id="summaryBookingType">-</div>
+                      <div class="summary-details">
+                        <div class="summary-detail-item">
+                          <i class="fas fa-box-open"></i>
+                          <div class="detail-content">
+                            <span class="detail-label">Package</span>
+                            <span class="detail-value" id="summaryPackage">-</span>
+                          </div>
+                        </div>
+                        <div class="summary-time-row">
+                          <div class="time-item">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <div>
+                              <span class="time-label">Check-in</span>
+                              <span class="time-value" id="summaryCheckInTime">-</span>
+                            </div>
+                          </div>
+                          <div class="time-divider">
+                            <i class="fas fa-arrow-right"></i>
+                          </div>
+                          <div class="time-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <div>
+                              <span class="time-label">Check-out</span>
+                              <span class="time-value" id="summaryCheckOutTime">-</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </label>
+                    </div>
+                  </div>
+
+                  <!-- Booking Form -->
+                  <form id="reservationForm" class="reservation-form-v2">
+                    <!-- Date Selection Card -->
+                    <div class="form-card">
+                      <div class="form-card-header">
+                        <div class="form-card-icon date-icon">
+                          <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3>Select Date</h3>
+                      </div>
+                      <div class="form-card-body">
+                        <div class="date-input-wrapper">
+                          <label for="checkInDate">Check-in Date <span class="required">*</span></label>
+                          <div class="custom-date-input">
+                            <i class="fas fa-calendar"></i>
+                            <input type="date" id="checkInDate" name="checkInDate" required />
+                          </div>
+                        </div>
+                        <input type="hidden" id="duration" name="duration" value="1" />
+                      </div>
+                    </div>
+
+                    <!-- Group Details Card -->
+                    <div class="form-card">
+                      <div class="form-card-header">
+                        <div class="form-card-icon group-icon">
+                          <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Group Details</h3>
+                      </div>
+                      <div class="form-card-body">
+                        <div class="form-grid">
+                          <div class="form-field">
+                            <label for="groupSize">
+                              <i class="fas fa-user-friends"></i>
+                              Group Size <span class="required">*</span>
+                            </label>
+                            <div class="select-wrapper">
+                              <select id="groupSize" name="groupSize" required>
+                                <option value="">Select size</option>
+                                <option value="5-10">5-10 guests</option>
+                                <option value="11-20">11-20 guests</option>
+                                <option value="21-30">21-30 guests</option>
+                                <option value="31-40">31-40 guests</option>
+                                <option value="41-50">41-50 guests</option>
+                                <option value="50+">50+ guests</option>
+                              </select>
+                              <i class="fas fa-chevron-down"></i>
+                            </div>
+                          </div>
+                          <div class="form-field">
+                            <label for="groupType">
+                              <i class="fas fa-tag"></i>
+                              Group Type <span class="required">*</span>
+                            </label>
+                            <div class="select-wrapper">
+                              <select
+                                id="groupType"
+                                name="groupType"
+                                required
+                              >
+                                <option value="">Select type</option>
+                                <option value="family">👨‍👩‍👧‍👦 Family</option>
+                                <option value="friends">🎉 Friends</option>
+                                <option value="corporate">💼 Corporate</option>
+                                <option value="celebration">🎂 Celebration</option>
+                                <option value="other">📝 Other</option>
+                              </select>
+                              <i class="fas fa-chevron-down"></i>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-field full-width">
+                          <label for="specialRequests">
+                            <i class="fas fa-comment-dots"></i>
+                            Special Requests <span class="optional">(Optional)</span>
+                          </label>
+                          <textarea
+                            id="specialRequests"
+                            name="specialRequests"
+                            rows="3"
+                            placeholder="Tell us about any special arrangements, dietary requirements, or accessibility needs..."
+                          ></textarea>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="terms-card">
+                      <label class="custom-checkbox">
+                        <input
+                          type="checkbox"
+                          id="agreeTerms"
+                          name="agreeTerms"
+                          required
+                        />
+                        <span class="checkmark"></span>
+                        <span class="terms-text">
+                          <i class="fas fa-file-contract"></i>
+                          I agree to the
+                          <a href="#" onclick="showBookingPolicy(); return false;">booking policies</a>
+                          and house rules
+                        </span>
+                      </label>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Right Column - Price Summary -->
+                <div class="step2-price-column">
+                  <div class="price-summary-card">
+                    <div class="price-card-header">
+                      <i class="fas fa-receipt"></i>
+                      <span>Price Summary</span>
+                    </div>
+                    <div class="price-card-body">
+                      <div class="price-line main-price">
+                        <span class="price-label">
+                          <i class="fas fa-tag"></i>
+                          Package Price
+                        </span>
+                        <span class="price-value" id="priceTotal">₱0.00</span>
+                      </div>
+                      
+                      <div class="price-divider"></div>
+                      
+                      <div class="price-line highlight-orange">
+                        <span class="price-label">
+                          <i class="fas fa-hand-holding-usd"></i>
+                          Required Downpayment
+                        </span>
+                        <span class="price-value" id="priceDownpayment">₱1,000.00</span>
+                      </div>
+                      
+                      <div class="price-line">
+                        <span class="price-label">
+                          <i class="fas fa-wallet"></i>
+                          Balance (Pay on arrival)
+                        </span>
+                        <span class="price-value" id="priceBalance">₱0.00</span>
+                      </div>
+                      
+                      <div class="price-line highlight-teal">
+                        <span class="price-label">
+                          <i class="fas fa-shield-alt"></i>
+                          Security Bond
+                          <span class="info-tooltip" title="Refundable after checkout">
+                            <i class="fas fa-info-circle"></i>
+                          </span>
+                        </span>
+                        <span class="price-value">₱2,000.00</span>
+                      </div>
+                    </div>
+                    
+                    <div class="price-card-footer">
+                      <div class="total-due">
+                        <span>Total Due Now</span>
+                        <span class="total-amount">₱1,000.00</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Payment Method Card -->
+                  <div class="payment-method-card">
+                    <div class="payment-card-header">
+                      <i class="fas fa-credit-card"></i>
+                      <span>Payment Method</span>
+                    </div>
+                    <div class="payment-card-body">
+                      <div class="secure-badge">
+                        <i class="fas fa-lock"></i>
+                        <span>Secure PayMongo Checkout</span>
+                      </div>
+                      <div class="payment-options">
+                        <label class="payment-option-v2">
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            value="gcash"
+                            required
+                            checked
+                          />
+                          <div class="payment-option-content">
+                            <div class="payment-icons">
+                              <div class="payment-icon gcash">
+                                <i class="fas fa-mobile-alt"></i>
+                              </div>
+                              <div class="payment-icon card">
+                                <i class="fas fa-credit-card"></i>
+                              </div>
+                              <div class="payment-icon bank">
+                                <i class="fas fa-university"></i>
+                              </div>
+                            </div>
+                            <div class="payment-text">
+                              <span class="payment-title">GCash, Card, or Bank</span>
+                              <span class="payment-subtitle">Fast & secure payment</span>
+                            </div>
+                            <div class="payment-check">
+                              <i class="fas fa-check-circle"></i>
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="booking-action-buttons">
+                    <button
+                      type="button"
+                      class="btn-back-v2"
+                      onclick="goBackToRooms()"
+                    >
+                      <i class="fas fa-arrow-left"></i>
+                      <span>Back</span>
+                    </button>
+                    <button
+                      type="submit"
+                      form="reservationForm"
+                      class="btn-submit-v2"
+                    >
+                      <span>Submit Reservation</span>
+                      <i class="fas fa-arrow-right"></i>
+                    </button>
                   </div>
                 </div>
-
-                <!-- Terms and Conditions -->
-                <div
-                  class="form-section"
-                  style="
-                    margin-bottom: 0.75rem;
-                    background: rgba(255, 193, 7, 0.1);
-                    border-radius: 10px;
-                    padding: 0.6rem;
-                    border-left: 3px solid #ffc107;
-                  "
-                >
-                  <label
-                    class="checkbox-label"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 0.5rem;
-                      cursor: pointer;
-                      font-size: 0.8rem;
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="agreeTerms"
-                      name="agreeTerms"
-                      required
-                      style="
-                        width: 18px;
-                        height: 18px;
-                        accent-color: #667eea;
-                        cursor: pointer;
-                      "
-                    />
-                    <span style="color: #555">
-                      <i
-                        class="fas fa-file-contract"
-                        style="color: #ffc107; margin-right: 0.25rem"
-                      ></i>
-                      I agree to the
-                      <a
-                        href="#"
-                        onclick="showBookingPolicy(); return false;"
-                        style="
-                          color: #667eea;
-                          font-weight: 600;
-                          text-decoration: none;
-                        "
-                        >booking policies</a
-                      >
-                      and house rules
-                    </span>
-                  </label>
-                </div>
-
-                <!-- Form Actions -->
-                <div
-                  class="booking-actions"
-                  style="
-                    display: flex !important;
-                    justify-content: center !important;
-                    align-items: center !important;
-                    gap: 0.75rem !important;
-                    flex-wrap: wrap !important;
-                    margin-top: 1rem !important;
-                  "
-                >
-                  <button
-                    type="button"
-                    class="btn-back"
-                    onclick="goBackToRooms()"
-                    style="
-                      flex: 0 0 auto !important;
-                      width: auto !important;
-                      padding: 0.6rem 1.25rem !important;
-                      font-size: 0.9rem !important;
-                      border-radius: 8px !important;
-                    "
-                  >
-                    <i class="fas fa-arrow-left"></i> Back
-                  </button>
-                  <button
-                    type="submit"
-                    class="btn-submit"
-                    style="
-                      flex: 0 0 auto !important;
-                      width: auto !important;
-                      padding: 0.6rem 1.25rem !important;
-                      font-size: 0.9rem !important;
-                      border-radius: 8px !important;
-                    "
-                  >
-                    <i class="fas fa-check"></i> Submit Reservation
-                  </button>
-                </div>
-              </form>
+              </div>
+            </div>
             </div>
           </div>
 
