@@ -749,6 +749,135 @@ window.closeContactModal = closeContactModal;
 
 // ===== REVIEWS MODAL FUNCTIONALITY =====
 
+// Load public reviews from API
+async function loadPublicReviews() {
+  const reviewsList = document.getElementById("publicReviewsList");
+  const avgRating = document.getElementById("publicAvgRating");
+  const ratingStars = document.getElementById("publicRatingStars");
+  const reviewCount = document.getElementById("publicReviewCount");
+
+  if (!reviewsList) return;
+
+  try {
+    const res = await fetch("user/get_public_reviews.php?limit=10");
+    const data = await res.json();
+
+    if (data.success) {
+      // Update stats
+      const avg = data.stats?.average_rating || 0;
+      const total = data.stats?.total_reviews || 0;
+
+      if (avgRating) avgRating.textContent = avg.toFixed(1);
+      if (reviewCount)
+        reviewCount.textContent = `Based on ${total} review${
+          total !== 1 ? "s" : ""
+        }`;
+
+      // Update stars
+      if (ratingStars) {
+        const fullStars = Math.floor(avg);
+        const hasHalf = avg - fullStars >= 0.5;
+        let starsHtml = "";
+        for (let i = 1; i <= 5; i++) {
+          if (i <= fullStars) {
+            starsHtml += '<i class="fas fa-star"></i>';
+          } else if (i === fullStars + 1 && hasHalf) {
+            starsHtml += '<i class="fas fa-star-half-alt"></i>';
+          } else {
+            starsHtml += '<i class="far fa-star"></i>';
+          }
+        }
+        ratingStars.innerHTML = starsHtml;
+      }
+
+      // Render reviews
+      if (data.reviews && data.reviews.length > 0) {
+        reviewsList.innerHTML = data.reviews
+          .map((review) => {
+            const date = new Date(review.created_at);
+            const monthYear = date.toLocaleDateString("en-US", {
+              month: "short",
+              year: "numeric",
+            });
+            const stars = generateStarsHtml(review.rating);
+            const initial = (review.guest_name || "G")[0].toUpperCase();
+
+            return `
+              <div class="review-card">
+                <div class="review-header">
+                  <div class="reviewer-avatar" style="background:linear-gradient(135deg, #667eea, #764ba2); color:white; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;">
+                    ${initial}
+                  </div>
+                  <div class="reviewer-info">
+                    <h5>${escapeHtmlPublic(review.guest_name || "Guest")}</h5>
+                    <div class="review-stars">${stars}</div>
+                  </div>
+                  <span class="review-date">${monthYear}</span>
+                </div>
+                ${
+                  review.title
+                    ? `<h6 style="margin:12px 0 8px; font-weight:600; color:#1e293b;">"${escapeHtmlPublic(
+                        review.title
+                      )}"</h6>`
+                    : ""
+                }
+                <p class="review-text">${escapeHtmlPublic(
+                  review.content || ""
+                )}</p>
+              </div>
+            `;
+          })
+          .join("");
+      } else {
+        reviewsList.innerHTML = `
+          <div style="text-align:center; padding:40px; color:#64748b;">
+            <i class="fas fa-comments" style="font-size:48px; margin-bottom:16px; opacity:0.5;"></i>
+            <p style="font-size:16px; margin:0;">No reviews yet. Be the first to share your experience!</p>
+          </div>
+        `;
+      }
+    } else {
+      reviewsList.innerHTML = `
+        <div style="text-align:center; padding:40px; color:#ef4444;">
+          <i class="fas fa-exclamation-triangle" style="font-size:32px; margin-bottom:12px;"></i>
+          <p>Failed to load reviews</p>
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error("Error loading reviews:", err);
+    reviewsList.innerHTML = `
+      <div style="text-align:center; padding:40px; color:#ef4444;">
+        <i class="fas fa-exclamation-triangle" style="font-size:32px; margin-bottom:12px;"></i>
+        <p>Error loading reviews</p>
+      </div>
+    `;
+  }
+}
+
+// Generate star icons HTML
+function generateStarsHtml(rating) {
+  let html = "";
+  for (let i = 1; i <= 5; i++) {
+    if (i <= rating) {
+      html += '<i class="fas fa-star"></i>';
+    } else {
+      html += '<i class="far fa-star"></i>';
+    }
+  }
+  return html;
+}
+
+// Escape HTML for public display
+function escapeHtmlPublic(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 // Open reviews modal
 function openReviewsModal() {
   const modal = document.getElementById("reviewsModal");
@@ -758,6 +887,9 @@ function openReviewsModal() {
   // Force reflow to enable transition
   modal.offsetHeight;
   modal.classList.add("show");
+
+  // Load reviews
+  loadPublicReviews();
 
   // Add escape key listener
   document.addEventListener("keydown", handleReviewsModalEscape);

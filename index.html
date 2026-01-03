@@ -444,85 +444,24 @@
         <div class="map-modal-body">
           <div class="reviews-summary">
             <div class="rating-overview">
-              <div class="rating-score">4.8</div>
-              <div class="rating-stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
+              <div class="rating-score" id="publicAvgRating">-</div>
+              <div class="rating-stars" id="publicRatingStars">
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
               </div>
-              <p>Based on 250+ reviews</p>
+              <p id="publicReviewCount">Loading reviews...</p>
             </div>
           </div>
-          <div class="reviews-list">
-            <div class="review-card">
-              <div class="review-header">
-                <div class="reviewer-avatar">
-                  <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="reviewer-info">
-                  <h5>Maria Santos</h5>
-                  <div class="review-stars">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                  </div>
-                </div>
-                <span class="review-date">Dec 2025</span>
-              </div>
-              <p class="review-text">
-                "Amazing experience! The resort is beautiful and the staff is
-                very accommodating. Perfect for family getaways. Will definitely
-                come back!"
-              </p>
-            </div>
-            <div class="review-card">
-              <div class="review-header">
-                <div class="reviewer-avatar">
-                  <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="reviewer-info">
-                  <h5>Juan Dela Cruz</h5>
-                  <div class="review-stars">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                  </div>
-                </div>
-                <span class="review-date">Nov 2025</span>
-              </div>
-              <p class="review-text">
-                "The pools are well-maintained and the rooms are clean. Great
-                value for money. Highly recommended for team buildings!"
-              </p>
-            </div>
-            <div class="review-card">
-              <div class="review-header">
-                <div class="reviewer-avatar">
-                  <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="reviewer-info">
-                  <h5>Anna Reyes</h5>
-                  <div class="review-stars">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="far fa-star"></i>
-                  </div>
-                </div>
-                <span class="review-date">Oct 2025</span>
-              </div>
-              <p class="review-text">
-                "Lovely place for a weekend retreat. The nature views are
-                breathtaking. Food options could be more varied but overall a
-                great stay."
-              </p>
+          <div class="reviews-list" id="publicReviewsList">
+            <div style="text-align: center; padding: 40px; color: #64748b">
+              <i
+                class="fas fa-spinner fa-spin"
+                style="font-size: 32px; margin-bottom: 12px"
+              ></i>
+              <p>Loading reviews...</p>
             </div>
           </div>
         </div>
