@@ -18,6 +18,24 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
+// Check if user has admin role (not staff)
+// Staff members should use staff_dashboard.php
+$userRole = strtolower($_SESSION['admin_role'] ?? '');
+if ($userRole === 'staff') {
+    // Staff member trying to access admin dashboard - redirect to staff dashboard
+    header('Location: staff_dashboard.php');
+    exit;
+}
+
+// Only allow admin and super_admin roles
+if ($userRole !== 'admin' && $userRole !== 'super_admin') {
+    // Unknown role - redirect to login
+    session_unset();
+    session_destroy();
+    header('Location: ../index.html');
+    exit;
+}
+
 // Check session timeout
 require_once '../config/database.php';
 $timeout = SESSION_TIMEOUT;
@@ -2223,21 +2241,50 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         
         console.log("✅ handleLogoutClick function loaded globally");
         
-        // CRITICAL: Continuously check database connection every 3 seconds
-        // If XAMPP MySQL is stopped, this will detect it immediately
+        // CRITICAL: Continuously check database connection every 30 seconds
+        // Only show database error for actual connection failures, not session issues
+        let connectionCheckFailCount = 0;
+        
         function checkDatabaseConnection() {
             fetch('check_session.php')
-                .then(response => response.json())
+                .then(response => {
+                    // If we get a response (even with error status), the server is running
+                    if (!response.ok) {
+                        // Server responded but with error - likely session issue
+                        return response.json().then(data => {
+                            if (!data.logged_in) {
+                                // Session expired or invalid - redirect to login
+                                console.log('Session invalid, redirecting to login...');
+                                window.location.href = '../index.html';
+                            }
+                            // Reset fail count since server responded
+                            connectionCheckFailCount = 0;
+                        });
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (!data.success || !data.logged_in) {
-                        // Database is disconnected or session invalid
-                        showConnectionError();
+                    if (data) {
+                        // Reset fail count on successful response
+                        connectionCheckFailCount = 0;
+                        
+                        if (!data.success || !data.logged_in) {
+                            // Session invalid - redirect to login
+                            console.log('Session invalid, redirecting to login...');
+                            window.location.href = '../index.html';
+                        }
                     }
                 })
                 .catch(error => {
-                    // Fetch failed - XAMPP is definitely OFF
-                    console.error('Database connection lost:', error);
-                    showConnectionError();
+                    // Fetch completely failed - XAMPP might be OFF
+                    connectionCheckFailCount++;
+                    console.error('Connection check failed (attempt ' + connectionCheckFailCount + '):', error);
+                    
+                    // Only show error after 3 consecutive failures (9 seconds)
+                    // This prevents false positives from temporary network hiccups
+                    if (connectionCheckFailCount >= 3) {
+                        showConnectionError();
+                    }
                 });
         }
         
@@ -2342,11 +2389,11 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
             document.body.style.overflow = 'hidden';
         }
         
-        // Start monitoring immediately
-        checkDatabaseConnection();
+        // Start monitoring after a short delay to let page load
+        setTimeout(checkDatabaseConnection, 5000);
         
-        // Check every 3 seconds (will detect XAMPP stop within 3 seconds)
-        window.connectionCheckInterval = setInterval(checkDatabaseConnection, 3000);
+        // Check every 30 seconds (less aggressive, more reliable)
+        window.connectionCheckInterval = setInterval(checkDatabaseConnection, 30000);
         
         // Add CSS animations
         const dashboardAnimationStyle = document.createElement('style');
