@@ -3794,40 +3794,133 @@
 
       // Load Dashboard Stats
       async function loadDashboardStats() {
+        console.log("📊 Loading dashboard stats...");
         try {
           const response = await fetch("user/get_my_reservations.php", {
             method: "GET",
             credentials: "include",
           });
 
+          console.log("📊 API Response status:", response.status);
+
           if (!response.ok) {
-            throw new Error("Failed to load reservations");
+            throw new Error(
+              "Failed to load reservations - Status: " + response.status
+            );
           }
 
           const data = await response.json();
+          console.log("📊 API Response data:", data);
 
           if (data.success && Array.isArray(data.reservations)) {
             const reservations = data.reservations;
+            console.log("📊 Found", reservations.length, "reservations");
 
-            // Calculate stats
+            // Log each reservation status for debugging
+            if (reservations.length > 0) {
+              console.log(
+                "📊 Reservation statuses:",
+                reservations.map((r) => r.status)
+              );
+            }
+
+            // Helper function to check if reservation is effectively completed
+            // (either has completed status OR is fully paid and past check-out date)
+            function isEffectivelyCompleted(r) {
+              // Check actual completed statuses
+              if (r.status === "completed" || r.status === "checked_out") {
+                return true;
+              }
+
+              // Check if fully paid and past check-out date
+              const isFullyPaid =
+                r.full_payment_verified == 1 ||
+                (r.downpayment_verified == 1 && r.full_payment_verified == 1);
+
+              if (isFullyPaid && r.check_out_date) {
+                const now = new Date();
+                const checkOutDate = new Date(r.check_out_date);
+
+                // If check-out time is provided, use it; otherwise default to end of day
+                if (r.check_out_time) {
+                  const timeParts = r.check_out_time.split(":");
+                  checkOutDate.setHours(
+                    parseInt(timeParts[0], 10),
+                    parseInt(timeParts[1], 10),
+                    0,
+                    0
+                  );
+                } else {
+                  checkOutDate.setHours(23, 59, 59, 999);
+                }
+
+                // If current date/time is past check-out, consider completed
+                if (now > checkOutDate) {
+                  return true;
+                }
+              }
+
+              return false;
+            }
+
+            // Calculate stats - handles ALL status values for old AND new accounts
+            // Define status categories to handle both legacy and current statuses
+            const pendingStatuses = [
+              "pending",
+              "pending_payment",
+              "pending_confirmation",
+              "expired",
+            ];
+            const approvedStatuses = [
+              "approved",
+              "confirmed",
+              "checked_in",
+              "rebooked",
+            ];
+            // Note: cancelled, canceled, no_show, forfeited are not counted in any positive category
+
             const total = reservations.length;
-            const pending = reservations.filter(
-              (r) => r.status === "pending"
-            ).length;
-            const approved = reservations.filter(
-              (r) => r.status === "approved" || r.status === "confirmed"
-            ).length;
-            const completed = reservations.filter(
-              (r) => r.status === "completed"
+            const pending = reservations.filter((r) =>
+              pendingStatuses.includes(r.status)
             ).length;
 
-            // Update stats display
-            document.getElementById("totalReservations").textContent = total;
-            document.getElementById("pendingReservations").textContent =
-              pending;
-            document.getElementById("approvedReservations").textContent =
-              approved;
-            document.getElementById("completedStays").textContent = completed;
+            // Count completed stays using the same logic as reservation history
+            const completed = reservations.filter((r) =>
+              isEffectivelyCompleted(r)
+            ).length;
+
+            // Approved = confirmed but NOT yet completed (exclude effectively completed)
+            const approved = reservations.filter(
+              (r) =>
+                approvedStatuses.includes(r.status) &&
+                !isEffectivelyCompleted(r)
+            ).length;
+
+            console.log("📊 Calculated stats:", {
+              total,
+              pending,
+              approved,
+              completed,
+            });
+
+            // Update stats display with null checks
+            const totalEl = document.getElementById("totalReservations");
+            const pendingEl = document.getElementById("pendingReservations");
+            const approvedEl = document.getElementById("approvedReservations");
+            const completedEl = document.getElementById("completedStays");
+
+            if (totalEl) totalEl.textContent = total;
+            if (pendingEl) pendingEl.textContent = pending;
+            if (approvedEl) approvedEl.textContent = approved;
+            if (completedEl) completedEl.textContent = completed;
+
+            // Also update userData for dashboard-script.js compatibility
+            if (window.userData) {
+              window.userData.totalReservations = total;
+              window.userData.pendingReservations = pending;
+              window.userData.approvedReservations = approved;
+              window.userData.completedStays = completed;
+            }
 
             // Load recent activity
             loadRecentActivity(reservations);
@@ -3838,15 +3931,47 @@
               approved,
               completed,
             });
+          } else {
+            // API returned but no data or error
+            console.warn(
+              "⚠️ No reservations data returned:",
+              data.message || "Unknown error"
+            );
+            // Set stats to 0 if no data
+            const totalEl = document.getElementById("totalReservations");
+            const pendingEl = document.getElementById("pendingReservations");
+            const approvedEl = document.getElementById("approvedReservations");
+            const completedEl = document.getElementById("completedStays");
+
+            if (totalEl) totalEl.textContent = "0";
+            if (pendingEl) pendingEl.textContent = "0";
+            if (approvedEl) approvedEl.textContent = "0";
+            if (completedEl) completedEl.textContent = "0";
           }
         } catch (error) {
           console.error("❌ Error loading dashboard stats:", error);
+          // Set stats to show error state
+          const totalEl = document.getElementById("totalReservations");
+          const pendingEl = document.getElementById("pendingReservations");
+          const approvedEl = document.getElementById("approvedReservations");
+          const completedEl = document.getElementById("completedStays");
+
+          if (totalEl) totalEl.textContent = "-";
+          if (pendingEl) pendingEl.textContent = "-";
+          if (approvedEl) approvedEl.textContent = "-";
+          if (completedEl) completedEl.textContent = "-";
         }
       }
 
       // Load Recent Activity
       function loadRecentActivity(reservations) {
         const activityList = document.getElementById("activityList");
+
+        // Null check for activityList element
+        if (!activityList) {
+          console.warn("⚠️ Activity list element not found");
+          return;
+        }
 
         if (!reservations || reservations.length === 0) {
           activityList.innerHTML = `
@@ -3869,25 +3994,51 @@
 
         const activityHTML = recentReservations
           .map((reservation) => {
+            // Map status to icons - handles ALL database status values (legacy + current)
             const statusIcons = {
+              // Legacy statuses
               pending: "fa-clock",
               approved: "fa-check-circle",
+              canceled: "fa-times-circle",
+              // Current statuses
+              pending_payment: "fa-credit-card",
+              pending_confirmation: "fa-hourglass-half",
               confirmed: "fa-calendar-check",
+              checked_in: "fa-door-open",
+              checked_out: "fa-door-closed",
               completed: "fa-star",
               cancelled: "fa-times-circle",
+              no_show: "fa-user-slash",
+              forfeited: "fa-ban",
+              rebooked: "fa-calendar-alt",
+              expired: "fa-clock",
             };
 
+            // Map status to labels - handles ALL database status values (legacy + current)
             const statusLabels = {
+              // Legacy statuses
               pending: "Reservation Pending",
               approved: "Reservation Approved",
+              canceled: "Reservation Cancelled",
+              // Current statuses
+              pending_payment: "Awaiting Payment",
+              pending_confirmation: "Pending Verification",
               confirmed: "Reservation Confirmed",
+              checked_in: "Checked In",
+              checked_out: "Checked Out",
               completed: "Stay Completed",
               cancelled: "Reservation Cancelled",
+              no_show: "No Show",
+              forfeited: "Booking Forfeited",
+              rebooked: "Rebooked",
+              expired: "Reservation Expired",
             };
 
             const icon = statusIcons[reservation.status] || "fa-calendar";
             const label =
-              statusLabels[reservation.status] || "Reservation Update";
+              statusLabels[reservation.status] ||
+              reservation.status_label ||
+              "Reservation Update";
             const checkIn =
               reservation.check_in_date || reservation.booking_date;
             const checkOut = reservation.check_out_date || "";

@@ -20,8 +20,12 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     $user_id = $_SESSION['user_id'];
+    // Check both possible session keys for email (different parts of the system use different keys)
+    $user_email = $_SESSION['user_email'] ?? $_SESSION['email'] ?? null;
     $status_filter = $_GET['status'] ?? 'all'; // Filter by status if needed
     
+    // Build query to fetch reservations by user_id OR by email (for legacy reservations)
+    // This ensures old accounts that made reservations before proper user_id linking still see their bookings
     $sql = "
         SELECT 
             reservation_id,
@@ -100,8 +104,7 @@ try {
             created_at,
             updated_at
         FROM reservations 
-        WHERE user_id = :user_id
-    ";
+        WHERE (user_id = :user_id" . ($user_email ? " OR guest_email = :user_email" : "") . ")";
     
     if ($status_filter !== 'all') {
         $sql .= " AND status = :status";
@@ -111,6 +114,11 @@ try {
     
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':user_id', $user_id);
+    
+    // Bind email parameter if user has email in session (for legacy reservations)
+    if ($user_email) {
+        $stmt->bindParam(':user_email', $user_email, PDO::PARAM_STR);
+    }
     
     if ($status_filter !== 'all') {
         $stmt->bindParam(':status', $status_filter, PDO::PARAM_STR);
@@ -213,8 +221,13 @@ try {
             $reservation['full_payment_status'] = 'Not Paid';
         }
         
-        // Status display
+        // Status display - handles ALL status values (legacy + current)
         $status_labels = [
+            // Legacy statuses
+            'pending' => 'Pending',
+            'approved' => 'Approved',
+            'canceled' => 'Cancelled',
+            // Current statuses
             'pending_payment' => 'Pending Payment',
             'pending_confirmation' => 'Pending Admin Verification',
             'confirmed' => 'Confirmed',
@@ -224,9 +237,10 @@ try {
             'cancelled' => 'Cancelled',
             'no_show' => 'No Show',
             'forfeited' => 'Forfeited',
-            'rebooked' => 'Rebooked'
+            'rebooked' => 'Rebooked',
+            'expired' => 'Expired'
         ];
-        $reservation['status_label'] = $status_labels[$reservation['status']] ?? $reservation['status'];
+        $reservation['status_label'] = $status_labels[$reservation['status']] ?? ucwords(str_replace('_', ' ', $reservation['status']));
     }
     
     echo json_encode([

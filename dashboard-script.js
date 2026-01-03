@@ -299,11 +299,10 @@ function updateUserData() {
     if (element) element.textContent = userData.name;
   });
 
-  // Update statistics
-  updateStatistic("totalReservations", userData.totalReservations);
-  updateStatistic("pendingReservations", userData.pendingReservations);
-  updateStatistic("approvedReservations", userData.approvedReservations);
-  updateStatistic("completedStays", userData.completedStays);
+  // NOTE: Stats are now loaded by dashboard.html's loadDashboardStats() function
+  // which fetches real data from the server. We skip updating stats here to avoid
+  // overwriting the actual data with zeros from the initial userData object.
+  // The loadDashboardStats() function updates window.userData with the real values.
 
   // Update profile form
   updateProfileForm();
@@ -1957,22 +1956,86 @@ async function loadMyReservations() {
 }
 
 function updateDashboardCounts(reservations) {
+  // Helper function to check if reservation is effectively completed
+  // (either has completed status OR is fully paid and past check-out date)
+  function isEffectivelyCompleted(r) {
+    // Check actual completed statuses
+    if (r.status === "completed" || r.status === "checked_out") {
+      return true;
+    }
+
+    // Check if fully paid and past check-out date
+    const isFullyPaid =
+      r.full_payment_verified == 1 ||
+      (r.downpayment_verified == 1 && r.full_payment_verified == 1);
+
+    if (isFullyPaid && r.check_out_date) {
+      const now = new Date();
+      const checkOutDate = new Date(r.check_out_date);
+
+      // If check-out time is provided, use it; otherwise default to end of day
+      if (r.check_out_time) {
+        const timeParts = r.check_out_time.split(":");
+        checkOutDate.setHours(
+          parseInt(timeParts[0], 10),
+          parseInt(timeParts[1], 10),
+          0,
+          0
+        );
+      } else {
+        checkOutDate.setHours(23, 59, 59, 999);
+      }
+
+      // If current date/time is past check-out, consider completed
+      if (now > checkOutDate) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Define status categories - handles ALL status values for old AND new accounts
+  const pendingStatuses = [
+    "pending",
+    "pending_payment",
+    "pending_confirmation",
+    "expired",
+  ];
+  const approvedStatuses = ["approved", "confirmed", "checked_in", "rebooked"];
+
   const total = reservations.length;
-  const pending = reservations.filter(
-    (r) => r.status === "pending_payment" || r.status === "pending_confirmation"
+  const pending = reservations.filter((r) =>
+    pendingStatuses.includes(r.status)
   ).length;
-  const confirmed = reservations.filter((r) => r.status === "confirmed").length;
-  const completed = reservations.filter((r) => r.status === "completed").length;
+
+  // Count completed stays using same logic as reservation history
+  const completed = reservations.filter((r) =>
+    isEffectivelyCompleted(r)
+  ).length;
+
+  // Approved = confirmed but NOT yet completed (exclude effectively completed)
+  const confirmed = reservations.filter(
+    (r) => approvedStatuses.includes(r.status) && !isEffectivelyCompleted(r)
+  ).length;
 
   const totalEl = document.getElementById("totalReservations");
   const pendingEl = document.getElementById("pendingReservations");
   const approvedEl = document.getElementById("approvedReservations");
-  const completedEl = document.getElementById("completedReservations");
+  const completedEl = document.getElementById("completedStays");
 
   if (totalEl) totalEl.textContent = total;
   if (pendingEl) pendingEl.textContent = pending;
   if (approvedEl) approvedEl.textContent = confirmed;
   if (completedEl) completedEl.textContent = completed;
+
+  // Also update userData for consistency
+  if (window.userData) {
+    window.userData.totalReservations = total;
+    window.userData.pendingReservations = pending;
+    window.userData.approvedReservations = confirmed;
+    window.userData.completedStays = completed;
+  }
 }
 
 // Note: displayReservations is defined in the ENHANCED BOOKING HISTORY FUNCTIONS section below
