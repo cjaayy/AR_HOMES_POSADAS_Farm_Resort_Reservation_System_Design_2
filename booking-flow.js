@@ -591,8 +591,8 @@ function attachModalPaymentListeners(booking) {
  * Render payment status indicators
  */
 function renderPaymentStatus(booking) {
-  // Don't show payment status for cancelled bookings
-  if (booking.status === "cancelled") {
+  // Don't show payment status for cancelled bookings (check both spellings)
+  if (booking.status === "cancelled" || booking.status === "canceled") {
     return "";
   }
 
@@ -1652,6 +1652,7 @@ function getStatusClass(status) {
     checked_out: "success",
     completed: "completed",
     cancelled: "cancelled",
+    canceled: "cancelled",
     no_show: "cancelled",
     forfeited: "cancelled",
     rebooked: "info",

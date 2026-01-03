@@ -948,7 +948,7 @@ $staffId = $_SESSION['staff_id'] ?? 0;
       const total = allReservations.length;
       const confirmed = allReservations.filter(r => r.status === 'confirmed').length;
       const pending = allReservations.filter(r => r.status === 'pending' || r.status === 'pending_confirmation').length;
-      const canceled = allReservations.filter(r => r.status === 'canceled').length;
+      const canceled = allReservations.filter(r => r.status === 'cancelled' || r.status === 'canceled').length;
       const completed = allReservations.filter(r => r.status === 'completed').length;
       const rebooking = allReservations.filter(r => r.rebooking_requested == 1 && !r.rebooking_approved).length;
       
@@ -1102,7 +1102,7 @@ $staffId = $_SESSION['staff_id'] ?? 0;
                 </button>
               ` : `
                 <button onclick="updateStatus('${r.reservation_id}', 'confirmed')" class="btn-action btn-approve" title="Approve" aria-label="Approve reservation"><i class="fas fa-check"></i></button>
-                <button onclick="updateStatus('${r.reservation_id}', 'canceled')" class="btn-action btn-cancel" title="Cancel" aria-label="Cancel reservation"><i class="fas fa-times"></i></button>
+                <button onclick="updateStatus('${r.reservation_id}', 'cancelled')" class="btn-action btn-cancel" title="Cancel" aria-label="Cancel reservation"><i class="fas fa-times"></i></button>
               `}
               <button onclick="viewReservation('${r.reservation_id}')" class="btn-action btn-view" title="View" aria-label="View reservation"><i class="fas fa-eye"></i></button>
             </div>

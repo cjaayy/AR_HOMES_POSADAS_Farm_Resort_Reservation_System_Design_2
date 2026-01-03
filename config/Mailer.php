@@ -945,6 +945,230 @@ We look forward to welcoming you!
     }
 
     /**
+     * Send cancellation email to user
+     * 
+     * @param string $recipientEmail
+     * @param string $recipientName
+     * @param array $reservationDetails
+     * @return bool
+     */
+    public function sendCancellationEmail($recipientEmail, $recipientName, $reservationDetails) {
+        try {
+            $this->mail->addAddress($recipientEmail, $recipientName);
+            $this->mail->addReplyTo(MAIL_FROM_EMAIL, MAIL_FROM_NAME);
+            
+            $this->mail->isHTML(true);
+            $this->mail->Subject = 'Reservation Cancelled - #' . $reservationDetails['reservation_id'] . ' - ' . APP_NAME;
+            
+            $emailBody = $this->getCancellationTemplate($recipientName, $reservationDetails);
+            $this->mail->Body = $emailBody;
+            
+            $this->mail->AltBody = $this->getCancellationPlainText($recipientName, $reservationDetails);
+            
+            $result = $this->mail->send();
+            
+            $this->mail->clearAddresses();
+            $this->mail->clearAttachments();
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            $this->error = "Message could not be sent. Mailer Error: {$this->mail->ErrorInfo}";
+            error_log($this->error);
+            return false;
+        }
+    }
+    
+    /**
+     * Get cancellation email HTML template
+     */
+    private function getCancellationTemplate($recipientName, $details) {
+        $checkInDate = date('F j, Y', strtotime($details['check_in_date']));
+        $checkOutDate = isset($details['check_out_date']) ? date('F j, Y', strtotime($details['check_out_date'])) : 'N/A';
+        
+        return "
+        <!DOCTYPE html>
+        <html lang='en'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Reservation Cancelled</title>
+            <style>
+                body {
+                    font-family: 'Arial', 'Helvetica', sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+                .email-container {
+                    max-width: 600px;
+                    margin: 30px auto;
+                    background: #ffffff;
+                    border-radius: 10px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+                .email-header {
+                    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                    color: #ffffff;
+                    padding: 40px 20px;
+                    text-align: center;
+                }
+                .email-header h1 {
+                    margin: 0;
+                    font-size: 28px;
+                    font-weight: 600;
+                }
+                .email-body {
+                    padding: 40px 30px;
+                }
+                .email-body h2 {
+                    color: #ef4444;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                }
+                .email-body p {
+                    margin-bottom: 15px;
+                    font-size: 16px;
+                    color: #666;
+                }
+                .warning-box {
+                    background-color: #fef3c7;
+                    border-left: 4px solid #f59e0b;
+                    padding: 20px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .refund-box {
+                    background-color: #dcfce7;
+                    border-left: 4px solid #22c55e;
+                    padding: 20px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .info-section {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin: 20px 0;
+                }
+                .info-row {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 10px 0;
+                    border-bottom: 1px solid #eee;
+                }
+                .info-row:last-child {
+                    border-bottom: none;
+                }
+                .email-footer {
+                    background-color: #11224e;
+                    color: #ffffff;
+                    padding: 30px;
+                    text-align: center;
+                    font-size: 14px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-container'>
+                <div class='email-header'>
+                    <h1>❌ Reservation Cancelled</h1>
+                </div>
+                
+                <div class='email-body'>
+                    <h2>Hello, {$recipientName}!</h2>
+                    
+                    <p>We regret to inform you that your reservation has been <strong>cancelled by our admin/staff</strong>.</p>
+                    
+                    <div class='warning-box'>
+                        <strong style='color: #92400e;'>Reservation Cancelled</strong>
+                        <p style='margin: 10px 0 0 0; color: #78350f;'>Reservation ID: <strong>#{$details['reservation_id']}</strong></p>
+                    </div>
+                    
+                    <div class='info-section'>
+                        <h3 style='margin-top: 0; color: #333;'>Cancelled Reservation Details</h3>
+                        <div class='info-row'>
+                            <span>Check-in Date:</span>
+                            <strong>{$checkInDate}</strong>
+                        </div>
+                        <div class='info-row'>
+                            <span>Check-out Date:</span>
+                            <strong>{$checkOutDate}</strong>
+                        </div>
+                        <div class='info-row'>
+                            <span>Booking Type:</span>
+                            <strong>" . ucfirst($details['booking_type'] ?? 'N/A') . "</strong>
+                        </div>
+                        <div class='info-row'>
+                            <span>Total Amount:</span>
+                            <strong>₱" . number_format($details['total_amount'] ?? 0, 2) . "</strong>
+                        </div>
+                    </div>
+                    
+                    <div class='refund-box'>
+                        <strong style='color: #166534;'>💰 Payment Refundable</strong>
+                        <p style='margin: 10px 0 0 0; color: #166534;'>Your payment is eligible for a refund. Our staff may also re-approve this reservation within 24 hours. If you have any questions, please contact us.</p>
+                    </div>
+                    
+                    <p>If you believe this cancellation was made in error, please contact us immediately.</p>
+                    
+                    <p style='margin-top: 30px;'>
+                        <strong>Contact Us:</strong><br>
+                        Phone: +63 917 123 4567<br>
+                        Email: " . MAIL_FROM_EMAIL . "
+                    </p>
+                </div>
+                
+                <div class='email-footer'>
+                    <p style='margin: 0;'>© " . date('Y') . " " . APP_NAME . ". All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+    }
+    
+    /**
+     * Get cancellation email plain text version
+     */
+    private function getCancellationPlainText($recipientName, $details) {
+        $checkInDate = date('F j, Y', strtotime($details['check_in_date']));
+        $checkOutDate = isset($details['check_out_date']) ? date('F j, Y', strtotime($details['check_out_date'])) : 'N/A';
+        
+        return "
+" . APP_NAME . "
+
+RESERVATION CANCELLED
+
+Dear " . $recipientName . ",
+
+We regret to inform you that your reservation has been CANCELLED by our admin/staff.
+
+Cancelled Reservation Details:
+- Reservation ID: #" . $details['reservation_id'] . "
+- Booking Type: " . ucfirst($details['booking_type'] ?? 'N/A') . "
+- Check-in: " . $checkInDate . "
+- Check-out: " . $checkOutDate . "
+- Total Amount: ₱" . number_format($details['total_amount'] ?? 0, 2) . "
+
+PAYMENT REFUNDABLE:
+Your payment is eligible for a refund. Our staff may also re-approve this reservation within 24 hours. If you have any questions, please contact us.
+
+If you believe this cancellation was made in error, please contact us immediately.
+
+Contact us:
+Phone: +63 917 123 4567
+Email: " . MAIL_FROM_EMAIL . "
+
+---
+© " . date('Y') . " " . APP_NAME . ". All rights reserved.
+        ";
+    }
+
+    /**
      * Get last error message
      */
     public function getError() {

@@ -98,7 +98,7 @@ try {
     // Get reservations metrics (only FULLY PAID reservations - full_payment_verified = 1)
     $sql = "SELECT 
                 COUNT(*) as total_reservations,
-                SUM(CASE WHEN status = 'canceled' THEN 1 ELSE 0 END) as cancellations,
+                SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancellations,
                 SUM(CASE WHEN status = 'confirmed' OR status = 'completed' THEN 1 ELSE 0 END) as confirmed_reservations
             FROM reservations
             WHERE DATE(created_at) BETWEEN :start AND :end
@@ -108,13 +108,13 @@ try {
     $stmt->execute([':start' => $start, ':end' => $end]);
     $metrics = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Calculate total revenue from all non-canceled reservations
+    // Calculate total revenue from all non-cancelled reservations
     $totalRevenue = 0;
     try {
         if ($priceColumn) {
             $revSql = "SELECT SUM($priceColumn) as revenue FROM reservations 
                        WHERE DATE(created_at) BETWEEN :start AND :end 
-                       AND status NOT IN ('canceled', 'rejected')
+                       AND status NOT IN ('cancelled', 'rejected')
                        AND full_payment_verified = 1
                        AND $priceColumn IS NOT NULL AND $priceColumn > 0";
             $revStmt = $conn->prepare($revSql);

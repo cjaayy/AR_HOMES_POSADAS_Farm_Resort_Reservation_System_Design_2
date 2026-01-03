@@ -37,7 +37,12 @@ try {
     switch ($action) {
         case 'approve':
             // Check if reservation exists and is in pending or canceled status
-            $checkStmt = $conn->prepare("SELECT * FROM reservations WHERE reservation_id = :id");
+            $checkStmt = $conn->prepare("
+                SELECT r.*, u.email as user_email, u.full_name as user_name
+                FROM reservations r
+                LEFT JOIN users u ON r.user_id = u.user_id
+                WHERE r.reservation_id = :id
+            ");
             $checkStmt->execute([':id' => $reservationId]);
             $reservation = $checkStmt->fetch(PDO::FETCH_ASSOC);
             
@@ -45,6 +50,9 @@ try {
                 echo json_encode(['success' => false, 'message' => 'Reservation not found']);
                 exit;
             }
+            
+            // Check if this is a re-approval (from cancelled status)
+            $wasCancel = in_array($reservation['status'], ['canceled', 'cancelled']);
             
             // Allow approving pending OR canceled reservations (re-approve)
             $allowedStatuses = ['pending', 'pending_payment', 'pending_confirmation', 'canceled', 'cancelled'];
@@ -57,12 +65,54 @@ try {
             $updateStmt = $conn->prepare("UPDATE reservations SET status = 'confirmed', updated_at = NOW() WHERE reservation_id = :id");
             $updateStmt->execute([':id' => $reservationId]);
             
+            // Send notification and email
+            if (!empty($reservation['user_id'])) {
+                // Create in-app notification
+                try {
+                    $notifTitle = $wasCancel ? 'Reservation Re-Approved!' : 'Booking Confirmed!';
+                    $notifType = $wasCancel ? 'booking_reapproved' : 'booking_confirmed';
+                    $notifMessage = $wasCancel 
+                        ? "Great news! Your reservation #{$reservationId} has been re-approved by staff. Check-in: " . date('M j, Y', strtotime($reservation['check_in_date']))
+                        : "Your reservation #{$reservationId} has been confirmed! Check-in: " . date('M j, Y', strtotime($reservation['check_in_date']));
+                    
+                    $notif_stmt = $conn->prepare("
+                        INSERT INTO notifications (user_id, type, title, message, link, created_at)
+                        VALUES (:user_id, :type, :title, :message, :link, NOW())
+                    ");
+                    $notif_link = "dashboard.html?section=my-reservations&reservation=" . $reservationId;
+                    
+                    $notif_stmt->execute([
+                        ':user_id' => $reservation['user_id'],
+                        ':type' => $notifType,
+                        ':title' => $notifTitle,
+                        ':message' => $notifMessage,
+                        ':link' => $notif_link
+                    ]);
+                } catch (Exception $e) {
+                    error_log('Approval notification error: ' . $e->getMessage());
+                }
+                
+                // Send confirmation email
+                try {
+                    require_once '../config/Mailer.php';
+                    $mailer = new Mailer();
+                    $mailer->sendBookingConfirmationEmail(
+                        $reservation['user_email'],
+                        $reservation['user_name'],
+                        $reservation
+                    );
+                } catch (Exception $e) {
+                    error_log('Approval email error: ' . $e->getMessage());
+                }
+            }
+            
             // Log the action
-            logStaffActivity($conn, $staffId, $staffName, 'reservation_approved', "Approved reservation #{$reservationId}", $reservationId);
+            $logAction = $wasCancel ? 'reservation_reapproved' : 'reservation_approved';
+            logStaffActivity($conn, $staffId, $staffName, $logAction, "Approved reservation #{$reservationId}", $reservationId);
             
             echo json_encode([
                 'success' => true,
-                'message' => 'Reservation approved successfully'
+                'message' => $wasCancel ? 'Reservation re-approved successfully' : 'Reservation approved successfully'
             ]);
             break;
             
@@ -94,8 +144,9 @@ try {
                 error_log("Failed to check/add cancelled_at column: " . $e->getMessage());
             }
             
-            // Update reservation status to canceled with cancelled_at timestamp
-            $updateStmt = $conn->prepare("UPDATE reservations SET status = 'canceled', cancelled_at = NOW(), updated_at = NOW() WHERE reservation_id = :id");
+            // Update reservation status to cancelled with cancelled_at timestamp
+            // Note: Database ENUM uses 'cancelled' (double 'l')
+            $updateStmt = $conn->prepare("UPDATE reservations SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW() WHERE reservation_id = :id");
             $updateStmt->execute([':id' => $reservationId]);
             
             // Increment user's cancellation count
@@ -113,6 +164,37 @@ try {
                 } catch (Exception $e) {
                     // Log but don't fail the cancellation
                     error_log("Failed to increment cancellation count: " . $e->getMessage());
+                }
+                
+                // Send in-app notification for cancellation
+                try {
+                    $notif_stmt = $conn->prepare("
+                        INSERT INTO notifications (user_id, type, title, message, link, created_at)
+                        VALUES (:user_id, 'booking_cancelled', 'Reservation Cancelled', :message, :link, NOW())
+                    ");
+                    $notif_message = "Your reservation #{$reservationId} has been cancelled by staff. Payment is refundable - contact us for refund processing or wait for re-approval within 24 hours.";
+                    $notif_link = "dashboard.html?section=my-reservations&reservation=" . $reservationId;
+                    
+                    $notif_stmt->execute([
+                        ':user_id' => $reservation['user_id'],
+                        ':message' => $notif_message,
+                        ':link' => $notif_link
+                    ]);
+                } catch (Exception $e) {
+                    error_log('Cancellation notification error: ' . $e->getMessage());
+                }
+                
+                // Send cancellation email
+                try {
+                    require_once '../config/Mailer.php';
+                    $mailer = new Mailer();
+                    $mailer->sendCancellationEmail(
+                        $reservation['user_email'],
+                        $reservation['user_name'],
+                        $reservation
+                    );
+                } catch (Exception $e) {
+                    error_log('Cancellation email error: ' . $e->getMessage());
                 }
             }
             

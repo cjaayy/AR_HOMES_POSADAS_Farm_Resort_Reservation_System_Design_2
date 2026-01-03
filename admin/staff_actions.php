@@ -84,6 +84,17 @@ try {
         $status = trim($_POST['status'] ?? '');
         if ($id === '' || $status === '') { echo json_encode(['success'=>false,'message'=>'Invalid']); exit; }
         
+        // Normalize 'canceled' to 'cancelled' to match database ENUM
+        if ($status === 'canceled') {
+            $status = 'cancelled';
+        }
+        
+        // Get current reservation status first to check if it's a re-approval
+        $checkStmt = $conn->prepare("SELECT status FROM reservations WHERE reservation_id = :id");
+        $checkStmt->execute([':id' => $id]);
+        $currentReservation = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        $wasCancel = $currentReservation && in_array($currentReservation['status'], ['canceled', 'cancelled']);
+        
         // Update status - if confirming, also verify downpayment
         if ($status === 'confirmed') {
             $admin_id = $_SESSION['admin_id'] ?? 0;
@@ -102,6 +113,56 @@ try {
             $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
             $stmt->bindParam(':id', $id);
             $stmt->execute();
+        } elseif ($status === 'cancelled') {
+            // For cancellation, also set cancelled_at timestamp
+            $stmt = $conn->prepare("UPDATE reservations SET status = :s, cancelled_at = NOW(), updated_at = NOW() WHERE reservation_id = :id");
+            $stmt->bindParam(':s', $status);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            
+            // Send notification for cancellation
+            $stmt2 = $conn->prepare("
+                SELECT r.*, u.email as user_email, u.full_name as user_name
+                FROM reservations r
+                JOIN users u ON r.user_id = u.user_id
+                WHERE r.reservation_id = :id
+            ");
+            $stmt2->bindParam(':id', $id);
+            $stmt2->execute();
+            $reservation = $stmt2->fetch(PDO::FETCH_ASSOC);
+            
+            if ($reservation) {
+                // Create in-app notification for cancellation
+                try {
+                    $notif_stmt = $conn->prepare("
+                        INSERT INTO notifications (user_id, type, title, message, link, created_at)
+                        VALUES (:user_id, 'booking_cancelled', 'Reservation Cancelled', :message, :link, NOW())
+                    ");
+                    $notif_message = "Your reservation #" . $id . " has been cancelled by admin/staff. Payment is refundable - contact us for refund processing or wait for re-approval within 24 hours.";
+                    $notif_link = "dashboard.html?section=my-reservations&reservation=" . $id;
+                    
+                    $notif_stmt->execute([
+                        ':user_id' => $reservation['user_id'],
+                        ':message' => $notif_message,
+                        ':link' => $notif_link
+                    ]);
+                } catch (Exception $e) {
+                    error_log('Cancellation notification error: ' . $e->getMessage());
+                }
+                
+                // Send cancellation email
+                try {
+                    require_once '../config/Mailer.php';
+                    $mailer = new Mailer();
+                    $mailer->sendCancellationEmail(
+                        $reservation['user_email'],
+                        $reservation['user_name'],
+                        $reservation
+                    );
+                } catch (Exception $e) {
+                    error_log('Cancellation email error: ' . $e->getMessage());
+                }
+            }
         } else {
             // For other status changes, just update status
             $stmt = $conn->prepare("UPDATE reservations SET status = :s, updated_at = NOW() WHERE reservation_id = :id");
@@ -146,19 +207,26 @@ try {
                     error_log('Email error: ' . $e->getMessage());
                 }
                 
-                // Create in-app notification
+                // Create in-app notification (different message for re-approval)
                 $notificationStatus = 'not_created';
                 try {
+                    $notifTitle = $wasCancel ? 'Reservation Re-Approved!' : 'Booking Confirmed!';
+                    $notifType = $wasCancel ? 'booking_reapproved' : 'booking_confirmed';
+                    $notifMessage = $wasCancel 
+                        ? "Great news! Your reservation #" . $id . " has been re-approved! Check-in: " . date('M j, Y', strtotime($reservation['check_in_date']))
+                        : "Your reservation #" . $id . " has been confirmed! Check-in: " . date('M j, Y', strtotime($reservation['check_in_date']));
+                    
                     $notif_stmt = $conn->prepare("
                         INSERT INTO notifications (user_id, type, title, message, link, created_at)
-                        VALUES (:user_id, 'booking_confirmed', 'Booking Confirmed!', :message, :link, NOW())
+                        VALUES (:user_id, :type, :title, :message, :link, NOW())
                     ");
-                    $notif_message = "Your reservation #" . $id . " has been confirmed! Check-in: " . date('M j, Y', strtotime($reservation['check_in_date']));
-                    $notif_link = "dashboard.html?section=bookings-history&reservation=" . $id;
+                    $notif_link = "dashboard.html?section=my-reservations&reservation=" . $id;
                     
                     $notif_stmt->execute([
                         ':user_id' => $reservation['user_id'],
-                        ':message' => $notif_message,
+                        ':type' => $notifType,
+                        ':title' => $notifTitle,
+                        ':message' => $notifMessage,
                         ':link' => $notif_link
                     ]);
                     $notificationStatus = 'created';
