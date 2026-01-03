@@ -5340,8 +5340,8 @@ function refreshCalendarForDuration() {
         dayElem.classList.add("unavailable-date");
 
         if (baseUnavailableDates.includes(dateStr)) {
-          // Direct booking - show "booked" indicator
-          dayElem.innerHTML += '<span class="unavailable-indicator">🚫</span>';
+          // Direct booking - show X indicator
+          dayElem.innerHTML += '<span class="unavailable-indicator">✕</span>';
         } else {
           dayElem.classList.add("conflict-date");
           dayElem.innerHTML +=
@@ -5484,8 +5484,8 @@ async function initializeDatePicker(bookingType) {
 
         // Different indicator for direct vs conflict dates
         if (baseUnavailableDates.includes(dateStr)) {
-          // Direct booking - show "booked" indicator
-          dayElem.innerHTML += '<span class="unavailable-indicator">🚫</span>';
+          // Direct booking - show X indicator
+          dayElem.innerHTML += '<span class="unavailable-indicator">✕</span>';
         } else {
           // This date is blocked due to duration conflict
           dayElem.classList.add("conflict-date");
