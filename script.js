@@ -223,6 +223,14 @@ function handleLogin(email, password) {
         }
         return;
       } else {
+        // Check if it's an inactive account error - show immediately without trying guest login
+        if (data.message && data.message.toLowerCase().includes("inactive")) {
+          loginBtn.classList.remove("loading");
+          loginBtn.disabled = false;
+          showLoginError(data.message);
+          return;
+        }
+
         // Admin login failed; try guest login
         // Proceed to guest login
         return fetch("user/login.php", {

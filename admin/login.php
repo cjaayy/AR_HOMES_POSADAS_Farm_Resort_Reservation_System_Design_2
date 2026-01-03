@@ -71,7 +71,7 @@ try {
 
     // Check if account is active
     if ($admin['is_active'] != 1) {
-        $response['message'] = 'Account is inactive. Please contact the system administrator.';
+        $response['message'] = 'Account is inactive. Please contact support.';
         echo json_encode($response);
         exit;
     }
