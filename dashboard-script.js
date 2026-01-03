@@ -5260,6 +5260,125 @@ document.addEventListener("click", function (event) {
 
 // Initialize date picker with unavailable dates
 let flatpickrInstance = null;
+let currentUnavailableDates = []; // Store for validation
+let baseUnavailableDates = []; // Original unavailable dates from server
+
+// Calculate which dates should be disabled based on duration
+// If duration is 2, and Jan 15 is booked, then Jan 14 should also be disabled
+// because selecting Jan 14 with 2-day duration would conflict with Jan 15
+function calculateDisabledDates(duration) {
+  if (!baseUnavailableDates || baseUnavailableDates.length === 0) {
+    return [];
+  }
+
+  const disabledSet = new Set(baseUnavailableDates);
+
+  // For each unavailable date, also disable (duration - 1) days before it
+  // because starting on those days would extend into the unavailable date
+  if (duration > 1) {
+    baseUnavailableDates.forEach((dateStr) => {
+      const unavailableDate = new Date(dateStr + "T00:00:00");
+
+      for (let i = 1; i < duration; i++) {
+        const conflictDate = new Date(unavailableDate);
+        conflictDate.setDate(conflictDate.getDate() - i);
+
+        const year = conflictDate.getFullYear();
+        const month = String(conflictDate.getMonth() + 1).padStart(2, "0");
+        const day = String(conflictDate.getDate()).padStart(2, "0");
+        const conflictDateStr = `${year}-${month}-${day}`;
+
+        disabledSet.add(conflictDateStr);
+      }
+    });
+  }
+
+  return Array.from(disabledSet).sort();
+}
+
+// Refresh the calendar when duration changes
+function refreshCalendarForDuration() {
+  const durationSelect = document.getElementById("duration");
+  const checkInDateInput = document.getElementById("checkInDate");
+  if (!durationSelect || !checkInDateInput || !flatpickrInstance) return;
+
+  const duration = parseInt(durationSelect.value) || 1;
+  const newDisabledDates = calculateDisabledDates(duration);
+  currentUnavailableDates = newDisabledDates;
+
+  console.log("📅 Refreshing calendar for duration:", duration);
+  console.log("📊 Disabled dates count:", newDisabledDates.length);
+
+  // Save current selected date
+  const currentSelectedDate = flatpickrInstance.selectedDates[0];
+  let savedDateStr = null;
+  if (currentSelectedDate) {
+    const year = currentSelectedDate.getFullYear();
+    const month = String(currentSelectedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(currentSelectedDate.getDate()).padStart(2, "0");
+    savedDateStr = `${year}-${month}-${day}`;
+  }
+
+  // Destroy current instance
+  flatpickrInstance.destroy();
+
+  // Reinitialize with new disabled dates
+  flatpickrInstance = flatpickr(checkInDateInput, {
+    minDate: "today",
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "F j, Y",
+    placeholder: "Select a date",
+    disable: newDisabledDates,
+    defaultDate:
+      savedDateStr && !newDisabledDates.includes(savedDateStr)
+        ? savedDateStr
+        : null,
+    onReady: function (selectedDates, dateStr, instance) {
+      if (instance.altInput) {
+        instance.altInput.setAttribute(
+          "placeholder",
+          "Select a date (mm/dd/yyyy)"
+        );
+      }
+    },
+    onChange: function (selectedDates, dateStr, instance) {
+      console.log("📅 Date selected:", dateStr);
+      if (typeof updatePriceSummary === "function") {
+        updatePriceSummary();
+      }
+      if (typeof validateDateRangeConflict === "function") {
+        validateDateRangeConflict();
+      }
+    },
+    onDayCreate: function (dObj, dStr, fp, dayElem) {
+      const year = dayElem.dateObj.getFullYear();
+      const month = String(dayElem.dateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(dayElem.dateObj.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      if (currentUnavailableDates.includes(dateStr)) {
+        dayElem.classList.add("unavailable-date");
+
+        if (baseUnavailableDates.includes(dateStr)) {
+          dayElem.innerHTML += '<span class="unavailable-indicator">✕</span>';
+        } else {
+          dayElem.classList.add("conflict-date");
+          dayElem.innerHTML +=
+            '<span class="unavailable-indicator" style="color: #f59e0b;">⚠</span>';
+        }
+      }
+    },
+  });
+
+  // Notify user if their date became unavailable
+  if (savedDateStr && newDisabledDates.includes(savedDateStr)) {
+    showNotification(
+      "Your selected date is no longer available for this duration. Please choose another date.",
+      "warning"
+    );
+  }
+}
 
 async function fetchUnavailableDates(bookingType) {
   try {
@@ -5303,14 +5422,44 @@ async function initializeDatePicker(bookingType) {
   // Fetch unavailable dates for THIS specific booking type
   console.log("📅 Fetching unavailable dates for:", bookingType);
   const unavailableDates = await fetchUnavailableDates(bookingType);
+  baseUnavailableDates = unavailableDates; // Store original dates from server
+
+  // Determine duration based on booking type
+  // Daytime = 1 day (same day checkout)
+  // Nighttime = 2 days (spans overnight)
+  // 22 Hours = 2 days (2PM to 12NN next day)
+  let duration = 1;
+  if (
+    bookingType === "nighttime" ||
+    bookingType === "22hours" ||
+    bookingType === "venue-nighttime" ||
+    bookingType === "venue-22hours"
+  ) {
+    duration = 2;
+  }
+
+  // Update the hidden duration input
+  const durationInput = document.getElementById("duration");
+  if (durationInput) {
+    durationInput.value = duration;
+    console.log(
+      "📊 Duration set to:",
+      duration,
+      "for booking type:",
+      bookingType
+    );
+  }
+
+  currentUnavailableDates = calculateDisabledDates(duration);
+
   console.log(
     "✅ Unavailable dates fetched for " + bookingType + ":",
     unavailableDates
   );
-  console.log("📊 Total dates blocked:", unavailableDates.length);
+  console.log("📊 Base dates blocked:", unavailableDates.length);
   console.log(
-    "🔍 Exact dates that will be blocked:",
-    JSON.stringify(unavailableDates)
+    "📊 Total dates blocked (with duration " + duration + "):",
+    currentUnavailableDates.length
   );
 
   // Initialize Flatpickr with disabled dates
@@ -5320,7 +5469,7 @@ async function initializeDatePicker(bookingType) {
     altInput: true,
     altFormat: "F j, Y",
     placeholder: "Select a date",
-    disable: unavailableDates,
+    disable: currentUnavailableDates,
     onReady: function (selectedDates, dateStr, instance) {
       // Set placeholder on the alt input
       if (instance.altInput) {
@@ -5336,6 +5485,10 @@ async function initializeDatePicker(bookingType) {
       if (typeof updatePriceSummary === "function") {
         updatePriceSummary();
       }
+      // Validate date range for conflicts
+      if (typeof validateDateRangeConflict === "function") {
+        validateDateRangeConflict();
+      }
     },
     onDayCreate: function (dObj, dStr, fp, dayElem) {
       // Add visual styling to unavailable dates
@@ -5345,19 +5498,45 @@ async function initializeDatePicker(bookingType) {
       const day = String(dayElem.dateObj.getDate()).padStart(2, "0");
       const dateStr = `${year}-${month}-${day}`;
 
-      if (unavailableDates.includes(dateStr)) {
-        console.log("🚫 Marking date as unavailable:", dateStr);
+      // Check if this date is in the current disabled list
+      if (currentUnavailableDates.includes(dateStr)) {
         dayElem.classList.add("unavailable-date");
-        dayElem.innerHTML += '<span class="unavailable-indicator">✕</span>';
+
+        // Different indicator for direct vs conflict dates
+        if (baseUnavailableDates.includes(dateStr)) {
+          dayElem.innerHTML += '<span class="unavailable-indicator">✕</span>';
+        } else {
+          // This date is blocked due to duration conflict
+          dayElem.classList.add("conflict-date");
+          dayElem.innerHTML +=
+            '<span class="unavailable-indicator" style="color: #f59e0b;">⚠</span>';
+        }
       }
     },
   });
 
   console.log(
     "✅ Flatpickr initialized with",
-    unavailableDates.length,
+    currentUnavailableDates.length,
     "disabled dates"
   );
+
+  // Attach duration change listener HERE (after Step 2 is visible)
+  const durationSelectEl = document.getElementById("duration");
+  if (durationSelectEl) {
+    // Remove any existing listener first to avoid duplicates
+    durationSelectEl.removeEventListener("change", handleDurationChange);
+    durationSelectEl.addEventListener("change", handleDurationChange);
+    console.log("✅ Duration change listener attached");
+  }
+}
+
+// Handler for duration change - separated so we can remove/add listener
+function handleDurationChange() {
+  console.log("🔄 Duration changed, refreshing calendar...");
+  updatePriceSummary();
+  refreshCalendarForDuration();
+  validateDateRangeConflict();
 }
 
 // Go back to package selection (Step 1)
@@ -5513,12 +5692,126 @@ function updatePriceSummary() {
     "₱" + balance.toLocaleString("en-PH", { minimumFractionDigits: 2 });
 }
 
+// Validate that selected date + duration doesn't conflict with unavailable dates
+function validateDateRangeConflict() {
+  const checkInDateInput = document.getElementById("checkInDate");
+  const durationSelect = document.getElementById("duration");
+  const submitBtn = document.querySelector(".btn-submit-v2");
+
+  if (!checkInDateInput || !durationSelect) return true;
+
+  const checkInDate = checkInDateInput.value;
+  const duration = parseInt(durationSelect.value) || 1;
+
+  if (!checkInDate) return true; // No date selected yet
+
+  // Calculate all dates in the range
+  const conflictingDates = [];
+  const startDate = new Date(checkInDate);
+
+  for (let i = 0; i < duration; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(currentDate.getDate() + i);
+
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const day = String(currentDate.getDate()).padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
+
+    if (currentUnavailableDates.includes(dateStr)) {
+      conflictingDates.push(dateStr);
+    }
+  }
+
+  // Show/hide conflict warning
+  let conflictWarning = document.getElementById("dateConflictWarning");
+
+  if (conflictingDates.length > 0) {
+    // Create warning if doesn't exist
+    if (!conflictWarning) {
+      conflictWarning = document.createElement("div");
+      conflictWarning.id = "dateConflictWarning";
+      conflictWarning.style.cssText = `
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        animation: shake 0.5s ease-out;
+      `;
+
+      // Insert after duration select
+      const dateCard = durationSelect.closest(".form-card");
+      if (dateCard) {
+        dateCard.appendChild(conflictWarning);
+      }
+    }
+
+    const formattedDates = conflictingDates
+      .map((d) => {
+        const date = new Date(d + "T00:00:00");
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      })
+      .join(", ");
+
+    conflictWarning.innerHTML = `
+      <i class="fas fa-exclamation-triangle"></i>
+      <div>
+        <strong>Date Conflict!</strong><br>
+        <span style="font-size: 0.85rem;">The following date(s) in your range are already booked: ${formattedDates}</span><br>
+        <span style="font-size: 0.85rem;">Please select a different date or reduce the duration.</span>
+      </div>
+    `;
+    conflictWarning.style.display = "flex";
+
+    // Disable submit button
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = "0.5";
+      submitBtn.style.cursor = "not-allowed";
+    }
+
+    return false;
+  } else {
+    // Remove warning if exists
+    if (conflictWarning) {
+      conflictWarning.style.display = "none";
+    }
+
+    // Enable submit button
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = "1";
+      submitBtn.style.cursor = "pointer";
+    }
+
+    return true;
+  }
+}
+
 // Setup reservation form listeners
 document.addEventListener("DOMContentLoaded", function () {
   // Duration change listener
   const durationSelect = document.getElementById("duration");
   if (durationSelect) {
-    durationSelect.addEventListener("change", updatePriceSummary);
+    durationSelect.addEventListener("change", function () {
+      updatePriceSummary();
+      refreshCalendarForDuration(); // Refresh calendar to show new conflicts
+      validateDateRangeConflict();
+    });
+  }
+
+  // Also validate when date changes
+  const checkInDateInput = document.getElementById("checkInDate");
+  if (checkInDateInput) {
+    checkInDateInput.addEventListener("change", validateDateRangeConflict);
   }
 
   // Payment method radio button sync with hidden form input
