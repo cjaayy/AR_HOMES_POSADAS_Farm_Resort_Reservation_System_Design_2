@@ -1,29 +1,46 @@
 <?php
 /**
  * Shared header + sidebar for staff pages
- * Usage: include 'staff_header.php'; Ensure session is available.
+ * Uses staff-specific session variables (separate from admin)
+ * Design matches admin dashboard exactly
  */
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-// Only allow staff
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
+// Only allow staff with staff-specific session
+if (!isset($_SESSION['staff_logged_in']) || $_SESSION['staff_logged_in'] !== true) {
     header('Location: ../index.html');
     exit;
 }
 
-$staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
+$staffName = $_SESSION['staff_full_name'] ?? 'Staff Member';
 ?>
-<!-- Header -->
+<!-- Header - Same design as Admin -->
 <header class="admin-header">
   <div class="header-left">
-    <div class="logo"><img src="../logo/ar-homes-logo.png" alt="Logo"></div>
-    <div class="resort-info"><h1>AR Homes Posadas Farm Resort</h1></div>
+    <div class="logo">
+      <img src="../logo/ar-homes-logo.png" alt="AR Homes Resort Logo" />
+    </div>
+    <div class="resort-info">
+      <h1>AR Homes Posadas Farm Resort</h1>
+    </div>
   </div>
   <div class="header-right">
     <div class="admin-profile">
-      <div class="profile-info"><span class="admin-name"><?php echo htmlspecialchars($staffName); ?></span><span class="admin-role">Staff</span></div>
+      <div class="profile-info">
+        <span class="admin-name"><?php echo htmlspecialchars($staffName); ?></span>
+        <span class="admin-role">Staff</span>
+      </div>
+      <div class="profile-avatar">
+        <i class="fas fa-user-tie"></i>
+      </div>
     </div>
-    <button class="logout-btn" onclick="showLogoutModal()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></button>
+    <button class="logout-btn" id="logoutButton" onclick="showLogoutModal()" style="z-index: 1000; position: relative;">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </button>
+  </div>
+  <div class="mobile-toggle" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
   </div>
 </header>
 
@@ -78,19 +95,14 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   }
   
   function confirmLogout() {
-    // Call the existing logout function
-    if (typeof logout === 'function') {
-      logout();
-    } else {
-      // Fallback logout
-      fetch('logout.php', { method: 'POST', credentials: 'include' })
-        .then(() => {
-          window.location.href = '../index.html';
-        })
-        .catch(() => {
-          window.location.href = '../index.html';
-        });
-    }
+    // Use staff-specific logout (doesn't affect admin session)
+    fetch('staff_logout.php', { method: 'POST', credentials: 'include' })
+      .then(() => {
+        window.location.href = '../index.html';
+      })
+      .catch(() => {
+        window.location.href = '../index.html';
+      });
   }
   
   // Close modal when clicking outside

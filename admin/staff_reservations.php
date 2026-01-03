@@ -1,13 +1,15 @@
 <?php
 /**
  * Staff Reservations Management
+ * Uses staff-specific session variables (separate from admin)
  */
 session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
+if (!isset($_SESSION['staff_logged_in']) || $_SESSION['staff_logged_in'] !== true) {
     header('Location: ../index.html');
     exit;
 }
-$staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
+$staffName = $_SESSION['staff_full_name'] ?? 'Staff Member';
+$staffId = $_SESSION['staff_id'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,24 +25,18 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Bungee+Spice&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
   <script>
-    // Lightweight logout fallback available immediately. admin-script.js will overwrite
-    window.logout = window.logout || function(){
-      // Prefer fetch POST so browser doesn't render raw JSON; include credentials
+    // Staff-specific logout function - only clears staff session, not admin
+    window.logout = function(){
       try{
-        fetch('logout.php', { method: 'POST', credentials: 'include' })
+        fetch('staff_logout.php', { method: 'POST', credentials: 'include' })
           .then(res => res.json().catch(() => null))
           .then(() => {
-            const isInAdmin = window.location.pathname.includes('/admin/');
-            const indexPath = isInAdmin ? '../index.html' : 'index.html';
-            window.location.href = indexPath;
+            window.location.href = '../index.html';
           })
           .catch(() => {
-            const isInAdmin = window.location.pathname.includes('/admin/');
-            window.location.href = isInAdmin ? '../index.html' : 'index.html';
+            window.location.href = '../index.html';
           });
-      }catch(e){
-        window.location.href = 'logout.php';
-      }
+      }catch(e){ window.location.href='staff_logout.php'; }
     };
   </script>
   <style>

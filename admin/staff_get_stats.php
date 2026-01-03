@@ -1,17 +1,18 @@
 <?php
 /**
  * Staff Dashboard Stats API
- * Returns simplified reservation stats for staff users only
+ * Returns simplified reservation stats for staff users
+ * Supports both admin session and staff-specific session
  */
 
 session_start();
 header('Content-Type: application/json');
 
-// Allow admin, super_admin, and staff roles
-$allowedRoles = ['admin', 'super_admin', 'staff'];
-$userRole = $_SESSION['admin_role'] ?? '';
+// Check for either admin session or staff-specific session
+$isAdminLoggedIn = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+$isStaffLoggedIn = isset($_SESSION['staff_logged_in']) && $_SESSION['staff_logged_in'] === true;
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !in_array($userRole, $allowedRoles)) {
+if (!$isAdminLoggedIn && !$isStaffLoggedIn) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;

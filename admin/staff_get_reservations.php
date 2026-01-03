@@ -2,16 +2,17 @@
 /**
  * Staff - Get Reservations (JSON)
  * Accepts optional GET params: status, limit, offset
+ * Supports both admin session and staff-specific session
  */
 session_start();
 header('Content-Type: application/json');
 
-// Allow admin, super_admin, and staff roles to access reservations
-$allowedRoles = ['admin', 'super_admin', 'staff'];
-$userRole = $_SESSION['admin_role'] ?? '';
-$isLoggedIn = $_SESSION['admin_logged_in'] ?? false;
+// Check for either admin session or staff-specific session
+$isAdminLoggedIn = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+$isStaffLoggedIn = isset($_SESSION['staff_logged_in']) && $_SESSION['staff_logged_in'] === true;
 
-if (!$isLoggedIn || !in_array($userRole, $allowedRoles)) {
+// Allow access if either admin or staff is logged in
+if (!$isAdminLoggedIn && !$isStaffLoggedIn) {
     http_response_code(401);
     echo json_encode([
         'success' => false, 

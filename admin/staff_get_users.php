@@ -1,11 +1,16 @@
 <?php
 /**
  * Staff Get Users API - returns users for staff views (read-only)
+ * Supports both admin session and staff-specific session
  */
 session_start();
+header('Content-Type: application/json');
 
-// Allow admin or staff
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !in_array($_SESSION['admin_role'] ?? '', ['admin','staff'])) {
+// Check for either admin session or staff-specific session
+$isAdminLoggedIn = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+$isStaffLoggedIn = isset($_SESSION['staff_logged_in']) && $_SESSION['staff_logged_in'] === true;
+
+if (!$isAdminLoggedIn && !$isStaffLoggedIn) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;

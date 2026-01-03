@@ -6,11 +6,14 @@
 session_start();
 header('Content-Type: application/json');
 
-// Allow admin, super_admin, and staff roles
+// Allow admin, super_admin, and staff roles (both admin session and staff-specific session)
 $allowedRoles = ['admin', 'super_admin', 'staff'];
 $userRole = $_SESSION['admin_role'] ?? '';
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !in_array($userRole, $allowedRoles)) {
+$isAdminSession = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true && in_array($userRole, $allowedRoles);
+$isStaffSession = isset($_SESSION['staff_logged_in']) && $_SESSION['staff_logged_in'] === true;
+
+if (!$isAdminSession && !$isStaffSession) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;

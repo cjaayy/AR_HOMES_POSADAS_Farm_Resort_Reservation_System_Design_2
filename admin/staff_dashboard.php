@@ -1,611 +1,912 @@
 <?php
 /**
- * Staff Dashboard - Simplified view for staff users
+ * Staff Dashboard - Full featured dashboard matching admin design
+ * Uses separate session variables from admin to allow concurrent logins
+ * Contains 3 sections: Dashboard, Manage Reservations, Manage Users
  */
+
+// Prevent browser caching
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 session_start();
 
-// Allow only staff role
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
+// Check if staff is logged in using staff-specific session
+if (!isset($_SESSION['staff_logged_in']) || $_SESSION['staff_logged_in'] !== true) {
     header('Location: ../index.html');
     exit;
 }
 
-$staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
+// CRITICAL: Check if database connection is active
+try {
+    require_once '../config/connection.php';
+    $database = new Database();
+    $conn = $database->getConnection();
+} catch (PDOException $e) {
+    session_unset();
+    session_destroy();
+    die('<div style="padding:40px; text-align:center; font-family:sans-serif;"><h1 style="color:#ef4444;">Database Connection Failed</h1><p>Please ensure XAMPP MySQL is running.</p><a href="../index.html">Return to Login</a></div>');
+}
 
+// Get staff data from session
+$staffFullName = $_SESSION['staff_full_name'] ?? 'Staff Member';
+$staffUsername = $_SESSION['staff_username'] ?? 'staff';
+$staffEmail = $_SESSION['staff_email'] ?? '';
+$staffId = $_SESSION['staff_id'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Staff Dashboard – AR Homes Posadas Farm Resort</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staff Dashboard - AR Homes Posadas Farm Resort</title>
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="../logo/ar-homes-logo.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="../logo/ar-homes-logo.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="../logo/ar-homes-logo.png" />
-    <link rel="stylesheet" href="../admin-styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Bungee+Spice&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="../admin-styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Bungee+Spice&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      /* Staff Dashboard Styles - Matching User Dashboard Design */
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-      }
-
-      .stats-card {
-        background: #eeeeee;
-        backdrop-filter: blur(20px);
-        border-radius: 16px;
-        padding: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
-      }
-
-      .stats-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-      }
-
-      .stats-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        color: white;
-        background: #11224e;
-      }
-
-      .stats-content h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 0;
-        line-height: 1;
-      }
-
-      .stats-content p {
-        font-size: 0.85rem;
-        color: #666;
-        font-weight: 500;
-        margin-top: 0.1rem;
-        line-height: 1.2;
-      }
-
-      /* Recent Activity Section */
-      .recent-activity {
-        background: #eeeeee;
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        margin-top: 2rem;
-      }
-
-      .recent-activity h3 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 1.5rem;
-      }
-
-      .activity-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .activity-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1rem;
-        background: transparent;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-      }
-
-      .activity-item:hover {
-        background: rgba(255, 255, 255, 0.5);
-      }
-
-      .activity-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        background: #11224e;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 0.9rem;
-        flex-shrink: 0;
-      }
-
-      .activity-content h4 {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 0.3rem;
-      }
-
-      .activity-content p {
-        font-size: 0.9rem;
-        color: #666;
-        margin-bottom: 0.3rem;
-      }
-
-      .activity-date {
-        font-size: 0.8rem;
-        color: #999;
-      }
-
-      /* Dashboard Grid for Charts/Notifications */
-      .dashboard-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 24px;
-        margin-top: 24px;
-      }
-
-      .chart-card {
-        background: #eeeeee;
-        padding: 24px;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      }
-
-      .chart-card h3 {
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 20px;
-      }
-
-      .notification-item {
-        padding: 16px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.5);
-        margin-bottom: 12px;
-        border-left: 4px solid #11224e;
-        cursor: pointer;
-      }
-
-      .notification-item:hover {
-        background: rgba(255, 255, 255, 0.8);
-      }
-
-      .notification-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 8px;
-      }
-
-      .notification-title {
-        font-weight: 600;
-        color: #333;
-        font-size: 14px;
-      }
-
-      .notification-time {
-        font-size: 12px;
-        color: #999;
-      }
-
-      .notification-body {
-        font-size: 13px;
-        color: #666;
-        line-height: 1.5;
-      }
-
-      .notifications { margin-top: 12px; }
-
-      @media (max-width: 1024px) {
-        .dashboard-grid {
-          grid-template-columns: 1fr;
-        }
+      #staffFilterFrom:focus,
+      #staffFilterTo:focus {
+        outline: none;
+        border-color: #11224e !important;
+        box-shadow: 0 0 0 3px rgba(17, 34, 78, 0.1);
       }
     </style>
-    <script>
-      // Lightweight logout fallback available immediately. admin-script.js will overwrite
-      window.logout = window.logout || function(){
-        try{
-          fetch('logout.php', { method: 'POST', credentials: 'include' })
-            .then(res => res.json().catch(() => null))
-            .then(() => {
-              const isInAdmin = window.location.pathname.includes('/admin/');
-              const indexPath = isInAdmin ? '../index.html' : 'index.html';
-              window.location.href = indexPath;
-            })
-            .catch(() => {
-              const isInAdmin = window.location.pathname.includes('/admin/');
-              window.location.href = isInAdmin ? '../index.html' : 'index.html';
-            });
-        }catch(e){ window.location.href='logout.php'; }
-      };
-    </script>
 </head>
 <body>
-  <div class="admin-container">
-    <?php include 'staff_header.php'; ?>
-
-  <main class="main-content" style="padding:20px; padding-top:100px;">
-      <section class="content-section active">
-        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:30px;">
-          <div>
-            <h2 style="font-size:32px; font-weight:700; color:#333; margin-bottom:8px;">Welcome back, <?php echo htmlspecialchars($staffName); ?>! 👋</h2>
-            <p style="margin-top:6px; color:#666; font-size:16px;">Here's what's happening with your resort today</p>
+    <div class="admin-container">
+      <!-- Header -->
+      <header class="admin-header">
+        <div class="header-left">
+          <div class="logo">
+            <img src="../logo/ar-homes-logo.png" alt="AR Homes Resort Logo" />
           </div>
-          <div style="display:flex; gap:12px;">
-            <button onclick="refreshDashboard()" class="btn-primary" style="display:flex; align-items:center; gap:8px; background:#11224e; border:none; color:white; padding:10px 20px; border-radius:8px; cursor:pointer;">
-              <i class="fas fa-sync-alt"></i> Refresh
-            </button>
+          <div class="resort-info">
+            <h1>AR Homes Posadas Farm Resort</h1>
           </div>
         </div>
-
-        <!-- Stats Cards - User Dashboard Style -->
-        <div class="stats-grid">
-          <div class="stats-card">
-            <div class="stats-icon">
-              <i class="fas fa-calendar-day"></i>
+        <div class="header-right">
+          <div class="admin-profile">
+            <div class="profile-info">
+              <span class="admin-name"><?php echo htmlspecialchars($staffFullName); ?></span>
+              <span class="admin-role">Staff</span>
             </div>
-            <div class="stats-content">
-              <h3 id="statTodayReservations">—</h3>
-              <p>Today's Reservations</p>
+            <div class="profile-avatar">
+              <i class="fas fa-user-tie"></i>
             </div>
           </div>
-
-          <div class="stats-card">
-            <div class="stats-icon">
-              <i class="fas fa-user-check"></i>
-            </div>
-            <div class="stats-content">
-              <h3 id="statArrivals">—</h3>
-              <p>Check-ins Today</p>
-            </div>
-          </div>
-
-          <div class="stats-card">
-            <div class="stats-icon">
-              <i class="fas fa-door-open"></i>
-            </div>
-            <div class="stats-content">
-              <h3 id="statCheckouts">—</h3>
-              <p>Check-outs Today</p>
-            </div>
-          </div>
-
-          <div class="stats-card">
-            <div class="stats-icon">
-              <i class="fas fa-clock"></i>
-            </div>
-            <div class="stats-content">
-              <h3 id="statPending">—</h3>
-              <p>Pending Requests</p>
-            </div>
-          </div>
+          <button class="logout-btn" id="logoutButton" onclick="handleLogoutClick(event)" style="z-index: 1000; position: relative;">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </button>
         </div>
-
-        <div id="statsError" style="display:none; margin-top:8px;"></div>
-
-        <!-- Recent Activity Section - User Dashboard Style -->
-        <div class="recent-activity">
-          <h3>Recent Activity</h3>
-          <div class="activity-list" id="activityFeed">
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i class="fas fa-spinner fa-spin"></i>
-              </div>
-              <div class="activity-content">
-                <h4>Loading activities...</h4>
-                <p>Please wait while we fetch recent activity</p>
-                <span class="activity-date">Just now</span>
-              </div>
-            </div>
-          </div>
+        <div class="mobile-toggle" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
         </div>
+      </header>
 
-        <!-- Main Dashboard Grid -->
-        <div class="dashboard-grid">
-          <!-- Left Column: Charts -->
-          <div>
-            <!-- Reservations Chart -->
-            <div class="chart-card">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3 style="margin:0;">Reservation Trends</h3>
-                <select id="chartPeriod" onchange="updateChart()" style="padding:8px 12px; border-radius:8px; border:1px solid #ddd; background:#fff;">
-                  <option value="week">This Week</option>
-                  <option value="month">This Month</option>
-                  <option value="year">This Year</option>
-                </select>
+      <!-- Sidebar - 3 Sections Only -->
+      <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="#dashboard" class="nav-link" data-section="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#reservations" class="nav-link" data-section="reservations">
+                <i class="fas fa-calendar-check"></i>
+                <span>Manage Reservations</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#users" class="nav-link" data-section="users">
+                <i class="fas fa-users"></i>
+                <span>Manage Users</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Dashboard Overview</h2>
+            <p style="color:#666; margin:0; font-size:16px;">
+              Welcome back, <?php echo htmlspecialchars($staffFullName); ?>! Here's what's happening at the resort today.
+            </p>
+          </div>
+
+          <!-- Dashboard Container -->
+          <div style="max-width: 800px; margin: 0 auto;">
+            <!-- Dashboard Statistics Cards -->
+            <div class="dashboard-stats-grid">
+              <!-- Total Users Card -->
+              <div class="stat-card primary">
+                <div class="stat-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="totalUsersCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </div>
+                  <div class="stat-label">Total Users</div>
+                  <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span id="newUsersMonth">0</span> this month
+                  </div>
+                </div>
               </div>
-              <canvas id="reservationsChart" height="100"></canvas>
+
+              <!-- Active Users Card -->
+              <div class="stat-card success">
+                <div class="stat-icon">
+                  <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="activeUsersCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </div>
+                  <div class="stat-label">Active Users</div>
+                  <div class="stat-change">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="activePercentage">0%</span> of total
+                  </div>
+                </div>
+              </div>
+
+              <!-- Total Reservations Card -->
+              <div class="stat-card primary">
+                <div class="stat-icon">
+                  <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="totalReservationsCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </div>
+                  <div class="stat-label">Total Reservations</div>
+                  <div class="stat-change">
+                    <i class="fas fa-chart-line"></i>
+                    All time
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pending Reservations Card -->
+              <div class="stat-card warning">
+                <div class="stat-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="pendingReservationsCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </div>
+                  <div class="stat-label">Pending</div>
+                  <div class="stat-change">
+                    <i class="fas fa-hourglass-half"></i>
+                    Awaiting approval
+                  </div>
+                </div>
+              </div>
+
+              <!-- Confirmed Reservations Card -->
+              <div class="stat-card success">
+                <div class="stat-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="confirmedReservationsCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </div>
+                  <div class="stat-label">Confirmed</div>
+                  <div class="stat-change positive">
+                    <i class="fas fa-thumbs-up"></i>
+                    Approved bookings
+                  </div>
+                </div>
+              </div>
+
+              <!-- Completed Reservations Card -->
+              <div class="stat-card info">
+                <div class="stat-icon">
+                  <i class="fas fa-flag-checkered"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="completedReservationsCount">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </div>
+                  <div class="stat-label">Completed</div>
+                  <div class="stat-change">
+                    <i class="fas fa-history"></i>
+                    Past stays
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activities Section -->
+            <div class="recent-activities-section" style="max-width: 800px; margin: 0 auto;">
+              <div class="section-header-inline">
+                <h3><i class="fas fa-history"></i> Recent Activities</h3>
+                <button class="refresh-btn" onclick="loadDashboardStats()" title="Refresh data">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
+              <div class="activities-container" id="recentActivitiesContainer">
+                <div class="loading-activities">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <p>Loading recent activities...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reservations Section -->
+        <section id="reservations" class="content-section">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Reservations Management</h2>
+            <p style="color:#666; margin:0; font-size:16px;">View and manage all resort reservations efficiently</p>
+          </div>
+
+          <!-- Stats Overview -->
+          <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-calendar-check"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="staffTotalReservations">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Reservations</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="staffConfirmedCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Confirmed</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-clock"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="staffPendingCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Pending</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-times-circle"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="staffCanceledCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Canceled</div>
+              </div>
             </div>
           </div>
 
-          <!-- Right Column: Notifications and Quick Stats -->
-          <div>
-            <!-- Notifications -->
-            <div class="chart-card">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h3 style="margin:0;">Notifications <span id="notifBadge" style="background:#11224e; color:#fff; padding:2px 8px; border-radius:12px; font-size:12px; margin-left:8px;">0</span></h3>
-                <button onclick="markAllRead()" style="background:#11224e; border:none; color:#fff; cursor:pointer; font-size:13px; padding:6px 12px; border-radius:8px; font-weight:600;">Mark all read</button>
-              </div>
-              <div id="notifications" class="notifications">Loading...</div>
+          <!-- Enhanced Filters Section -->
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="margin:0; font-size:16px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-filter" style="color:#11224e;"></i> Filter Reservations
+              </h3>
+              <button onclick="staffClearFilters()" style="padding:6px 14px; background:#f1f5f9; border:none; border-radius:6px; font-size:13px; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.2s;">
+                <i class="fas fa-redo"></i> Clear Filters
+              </button>
             </div>
 
-            <!-- Quick Stats -->
-            <div class="chart-card" style="margin-top:24px;">
-              <h3>Today's Summary</h3>
-              <div style="margin-top:16px;">
-                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #ddd;">
-                  <span style="color:#666;">Occupied Rooms</span>
-                  <strong id="occupiedRooms">—</strong>
+            <!-- Quick Status Filters -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:16px;">
+              <div class="filter-chip-enhanced active" onclick="staffQuickFilter('all')" id="staff-chip-all" style="cursor:pointer; padding:14px 16px; background:#11224e; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease; box-shadow:0 4px 16px rgba(17,34,78,0.3);">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;"><i class="fas fa-list"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:white;">All</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:white; min-width:32px; text-align:center;" id="staff-count-all">0</div>
                 </div>
-                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #ddd;">
-                  <span style="color:#666;">Available Rooms</span>
-                  <strong id="availableRooms">—</strong>
+              </div>
+              <div class="filter-chip-enhanced" onclick="staffQuickFilter('pending')" id="staff-chip-pending" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-clock"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Pending</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="staff-count-pending">0</div>
                 </div>
-                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #ddd;">
-                  <span style="color:#666;">Occupancy Rate</span>
-                  <strong id="occupancyRate">—</strong>
+              </div>
+              <div class="filter-chip-enhanced" onclick="staffQuickFilter('confirmed')" id="staff-chip-confirmed" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-check"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Confirmed</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="staff-count-confirmed">0</div>
                 </div>
-                <div style="display:flex; justify-content:space-between; padding:12px 0;">
-                  <span style="color:#666;">Active Guests</span>
-                  <strong id="activeGuests">—</strong>
+              </div>
+              <div class="filter-chip-enhanced" onclick="staffQuickFilter('completed')" id="staff-chip-completed" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-flag-checkered"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Completed</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="staff-count-completed">0</div>
                 </div>
+              </div>
+              <div class="filter-chip-enhanced" onclick="staffQuickFilter('canceled')" id="staff-chip-canceled" style="cursor:pointer; padding:14px 16px; background:white; border:2px solid #11224e; border-radius:12px; transition:all 0.3s ease;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:36px; height:36px; background:rgba(17,34,78,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#11224e; font-size:16px;"><i class="fas fa-ban"></i></div>
+                  <span style="flex:1; font-size:14px; font-weight:600; color:#11224e;">Canceled</span>
+                  <div style="padding:4px 10px; font-size:12px; font-weight:700; color:#11224e; min-width:32px; text-align:center;" id="staff-count-canceled">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div style="display:flex; gap:12px; padding-top:16px; border-top:2px solid #f1f5f9;">
+              <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#11224e;"></i> From Date</label>
+                <input type="date" id="staffFilterFrom" onchange="staffApplyFilters()" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                <label style="font-size:13px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;"><i class="fas fa-calendar-day" style="color:#11224e;"></i> To Date</label>
+                <input type="date" id="staffFilterTo" onchange="staffApplyFilters()" style="padding:12px 16px; border:2px solid #11224e; border-radius:10px; font-size:14px; font-weight:500; color:#475569; background:white; transition:all 0.3s ease; cursor:pointer;">
               </div>
             </div>
           </div>
+
+          <div class="users-container">
+            <div class="users-header" style="padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+              <div class="search-box" style="flex:1; max-width:400px; position:relative;">
+                <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;"></i>
+                <input type="text" id="staffSearchBox" placeholder="Search guest, room, or contact..." oninput="staffApplyFilters()" style="width:100%; padding:14px 16px 14px 48px; border:2px solid #11224e; border-radius:12px; font-size:14px; transition:all 0.3s ease;" />
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:16px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <button onclick="staffFetchAllReservations()" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <span style="color:#64748b; font-size:14px;" id="staffLastUpdate">Last updated: Just now</span>
+              </div>
+            </div>
+
+            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow-x:auto; margin-bottom:20px;">
+              <table class="users-table" id="staffReservationsTable" style="width:100%; border-collapse:separate; border-spacing:0;">
+                <thead style="background:#11224e; color:white;">
+                  <tr>
+                    <th style="padding:18px 16px; text-align:center; width:60px;">#</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-user"></i> Guest</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-cube"></i> Booking Details</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-check"></i> Check-in</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar-times"></i> Check-out</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-money-bill-wave"></i> Payment</th>
+                    <th style="padding:18px 16px; text-align:left; min-width:180px;"><i class="fas fa-tag"></i> Status</th>
+                    <th style="padding:18px 16px; text-align:center;"><i class="fas fa-cog"></i> Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="staffReservationsBody"><tr><td colspan="8" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+              </table>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px;">
+              <div id="staffPaginationInfo" style="font-size:14px; color:#64748b; font-weight:500;"></div>
+              <div style="display:flex; gap:8px;">
+                <button id="staffPrevPage" onclick="staffChangePage(-1)" disabled style="padding:10px 16px; border:2px solid #e2e8f0; background:white; border-radius:8px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s;">&larr; Prev</button>
+                <button id="staffNextPage" onclick="staffChangePage(1)" disabled style="padding:10px 16px; border:2px solid #e2e8f0; background:white; border-radius:8px; font-size:14px; font-weight:600; color:#475569; cursor:pointer; transition:all 0.2s;">Next &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Users Section -->
+        <section id="users" class="content-section">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">User Management</h2>
+            <p style="color:#666; margin:0; font-size:16px;">View and manage registered users</p>
+          </div>
+
+          <!-- User Stats -->
+          <div class="users-stats" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-users"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; color:#11224e;" id="usersTotalCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Users</div>
+              </div>
+            </div>
+            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; border:2px solid #10b981;">
+              <div style="width:64px; height:64px; background:rgba(16,185,129,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#10b981;"><i class="fas fa-user-check"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; color:#10b981;" id="usersActiveCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#10b981;">Active Users</div>
+              </div>
+            </div>
+            <div style="background:white; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; border:2px solid #f59e0b;">
+              <div style="width:64px; height:64px; background:rgba(245,158,11,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#f59e0b;"><i class="fas fa-user-plus"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; color:#f59e0b;" id="usersNewCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#f59e0b;">New This Month</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="users-container">
+            <div class="users-header" style="padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+              <div class="search-box" style="flex:1; max-width:400px; position:relative;">
+                <i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;"></i>
+                <input type="text" id="usersSearchBox" placeholder="Search by name, email, or phone..." oninput="filterUsers()" style="width:100%; padding:14px 16px 14px 48px; border:2px solid #11224e; border-radius:12px; font-size:14px; transition:all 0.3s ease;" />
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:16px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+              <button onclick="loadUsers()" style="padding:12px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+
+            <div class="table-container" style="background:white; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow-x:auto;">
+              <table class="users-table" style="width:100%; border-collapse:separate; border-spacing:0;">
+                <thead style="background:#11224e; color:white;">
+                  <tr>
+                    <th style="padding:18px 16px; text-align:center; width:60px;">#</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-user"></i> Name</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-envelope"></i> Email</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-phone"></i> Phone</th>
+                    <th style="padding:18px 16px; text-align:left;"><i class="fas fa-calendar"></i> Registered</th>
+                    <th style="padding:18px 16px; text-align:center;"><i class="fas fa-info-circle"></i> Status</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody"><tr><td colspan="6" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+      <div style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 32px 28px; border-radius: 20px; max-width: 420px; width: 90vw; box-shadow: 0 12px 40px rgba(0,0,0,0.2); text-align: center;">
+        <div style="width: 64px; height: 64px; background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #fff; font-size: 32px;">
+          <i class="fas fa-sign-out-alt"></i>
         </div>
-      </section>
-    </main>
-  </div>
+        <h3 style="color: #1e293b; margin-bottom: 12px; font-size: 24px; font-weight: 700;">Confirm Logout</h3>
+        <p style="color: #64748b; font-size: 15px; margin-bottom: 28px;">Are you sure you want to logout from your staff account?</p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button onclick="closeLogoutModal()" style="flex: 1; padding: 12px 24px; border: 2px solid #e2e8f0; background: #fff; color: #64748b; border-radius: 12px; cursor: pointer; font-weight: 600;">Cancel</button>
+          <button onclick="confirmLogout()" style="flex: 1; padding: 12px 24px; border: none; background: linear-gradient(180deg, #f8b500 0%, #ff6f00 35%, #e53935 65%, #6a1b9a 100%); color: #fff; border-radius: 12px; cursor: pointer; font-weight: 600;">Logout</button>
+        </div>
+      </div>
+    </div>
 
-  <script>
-    let reservationsChart = null;
-    
-    // Initialize Chart
-    function initChart() {
-      const ctx = document.getElementById('reservationsChart').getContext('2d');
-      reservationsChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          datasets: [{
-            label: 'Reservations',
-            data: [0, 0, 0, 0, 0, 0, 0],
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: '#f1f5f9'
-              }
-            },
-            x: {
-              grid: {
-                display: false
-              }
-            }
-          }
-        }
+    <script>
+      // ============================
+      // NAVIGATION & UI
+      // ============================
+      function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('active');
+      }
+
+      // Section Navigation
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const section = this.dataset.section;
+          
+          // Update active nav item
+          document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+          this.closest('.nav-item').classList.add('active');
+          
+          // Show section
+          document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+          document.getElementById(section).classList.add('active');
+          
+          // Update URL hash
+          window.location.hash = section;
+          
+          // Load section data
+          if (section === 'reservations') staffFetchAllReservations();
+          if (section === 'users') loadUsers();
+        });
       });
-    }
 
-    async function loadStats() {
-      const statsErrorEl = document.getElementById('statsError');
-      statsErrorEl.style.display = 'none';
-      try {
-        let res = await fetch('staff_get_stats.php', { credentials: 'include' });
-        
-        if (!res.ok) {
-          const fallbackRes = await fetch('get_dashboard_stats.php', { credentials: 'include' });
-          if (!fallbackRes.ok) {
-            throw new Error('Failed to load stats');
+      // Handle hash on load
+      window.addEventListener('load', function() {
+        const hash = window.location.hash.replace('#', '') || 'dashboard';
+        const link = document.querySelector(`[data-section="${hash}"]`);
+        if (link) link.click();
+      });
+
+      // ============================
+      // LOGOUT FUNCTIONS
+      // ============================
+      function handleLogoutClick(e) {
+        e.preventDefault();
+        document.getElementById('logoutModal').style.display = 'flex';
+      }
+
+      function closeLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+      }
+
+      function confirmLogout() {
+        fetch('staff_logout.php', { method: 'POST', credentials: 'include' })
+          .then(() => window.location.href = '../index.html')
+          .catch(() => window.location.href = '../index.html');
+      }
+
+      // ============================
+      // DASHBOARD STATS
+      // ============================
+      async function loadDashboardStats() {
+        try {
+          const res = await fetch('get_dashboard_stats.php', { credentials: 'include' });
+          const data = await res.json();
+          
+          if (data.success && data.stats) {
+            const s = data.stats;
+            document.getElementById('totalUsersCount').textContent = s.total_users || 0;
+            document.getElementById('activeUsersCount').textContent = s.active_users || 0;
+            document.getElementById('totalReservationsCount').textContent = s.total_reservations || 0;
+            document.getElementById('pendingReservationsCount').textContent = s.pending_reservations || 0;
+            document.getElementById('confirmedReservationsCount').textContent = s.confirmed_reservations || 0;
+            document.getElementById('completedReservationsCount').textContent = s.completed_reservations || 0;
+            document.getElementById('newUsersMonth').textContent = s.new_users_month || 0;
+            document.getElementById('activePercentage').textContent = s.total_users > 0 ? Math.round((s.active_users / s.total_users) * 100) + '%' : '0%';
           }
-          const fallbackData = await fallbackRes.json().catch(() => null);
-          if (fallbackData && fallbackData.success && fallbackData.stats) {
-            const s2 = fallbackData.stats;
-            document.getElementById('statTodayReservations').textContent = s2.total_reservations ?? '—';
-            document.getElementById('statArrivals').textContent = '—';
-            document.getElementById('statCheckouts').textContent = '—';
-            document.getElementById('statPending').textContent = s2.pending_reservations ?? '—';
-            
-            // Update quick stats
-            updateQuickStats();
+          
+          // Load recent activities
+          loadRecentActivities();
+        } catch (err) {
+          console.error('Error loading dashboard stats:', err);
+        }
+      }
+
+      async function loadRecentActivities() {
+        const container = document.getElementById('recentActivitiesContainer');
+        try {
+          const res = await fetch('staff_get_reservations.php?limit=5', { credentials: 'include' });
+          const data = await res.json();
+          
+          if (data.success && data.reservations && data.reservations.length > 0) {
+            container.innerHTML = data.reservations.map(r => `
+              <div class="activity-item" style="display:flex; align-items:center; gap:16px; padding:16px; background:#f8fafc; border-radius:12px; margin-bottom:12px;">
+                <div style="width:48px; height:48px; background:#11224e; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">
+                  <i class="fas fa-calendar-check"></i>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-weight:600; color:#1e293b;">${escapeHtml(r.guest_name || 'Guest')}</div>
+                  <div style="font-size:13px; color:#64748b;">${r.check_in_date} - ${r.status}</div>
+                </div>
+                <span style="padding:4px 12px; background:${getStatusColor(r.status)}20; color:${getStatusColor(r.status)}; border-radius:20px; font-size:12px; font-weight:600; text-transform:capitalize;">${r.status}</span>
+              </div>
+            `).join('');
+          } else {
+            container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-inbox" style="font-size:48px; margin-bottom:16px; opacity:0.3;"></i><p>No recent activities</p></div>';
+          }
+        } catch (err) {
+          container.innerHTML = '<div style="text-align:center; padding:40px; color:#ef4444;">Failed to load activities</div>';
+        }
+      }
+
+      function getStatusColor(status) {
+        const colors = {
+          'pending': '#f59e0b',
+          'pending_payment': '#f59e0b',
+          'pending_confirmation': '#f59e0b',
+          'confirmed': '#10b981',
+          'completed': '#3b82f6',
+          'checked_out': '#3b82f6',
+          'canceled': '#ef4444',
+          'cancelled': '#ef4444',
+          'checked_in': '#8b5cf6'
+        };
+        return colors[status] || '#64748b';
+      }
+
+      // ============================
+      // RESERVATIONS MANAGEMENT
+      // ============================
+      let staffAllReservations = [];
+      let staffFilteredReservations = [];
+      let staffCurrentPage = 1;
+      const staffPageSize = 12;
+      let staffCurrentQuickFilter = 'all';
+
+      async function staffFetchAllReservations() {
+        try {
+          const res = await fetch('staff_get_reservations.php?limit=1000', { credentials: 'include' });
+          const data = await res.json();
+          
+          if (!data.success) {
+            document.getElementById('staffReservationsBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;">Failed to load reservations</td></tr>';
             return;
           }
+          
+          staffAllReservations = data.reservations || [];
+          staffUpdateStatsCards();
+          staffApplyFilters();
+          staffUpdateLastUpdateTime();
+        } catch (err) {
+          console.error(err);
+          document.getElementById('staffReservationsBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;">Error loading reservations</td></tr>';
         }
-
-        const rawBody = await res.text().catch(() => null);
-        let data = null;
-        try {
-          data = rawBody ? JSON.parse(rawBody) : null;
-        } catch (parseErr) {
-          statsErrorEl.textContent = 'Failed to parse stats response';
-          statsErrorEl.style.display = 'block';
-          return;
-        }
-
-        if (!data || !data.success) {
-          const msg = data && data.message ? data.message : 'Unknown error';
-          statsErrorEl.textContent = 'Failed to load staff stats: ' + msg;
-          statsErrorEl.style.display = 'block';
-          return;
-        }
-
-        const s = data.stats || {};
-        document.getElementById('statTodayReservations').textContent = typeof s.today_reservations !== 'undefined' ? s.today_reservations : '—';
-        document.getElementById('statArrivals').textContent = typeof s.arrivals_today !== 'undefined' ? s.arrivals_today : '—';
-        document.getElementById('statCheckouts').textContent = typeof s.checkouts_today !== 'undefined' ? s.checkouts_today : '—';
-        document.getElementById('statPending').textContent = typeof s.pending_requests !== 'undefined' ? s.pending_requests : '—';
-        
-        updateQuickStats();
-      } catch (err) {
-        console.error(err);
-        statsErrorEl.textContent = 'Error loading stats';
-        statsErrorEl.style.display = 'block';
       }
-    }
 
-    async function updateQuickStats() {
-      // Keep showing placeholder dash
-      document.getElementById('occupiedRooms').textContent = '—';
-      document.getElementById('availableRooms').textContent = '—';
-      document.getElementById('occupancyRate').textContent = '—';
-      document.getElementById('activeGuests').textContent = '—';
-    }
-
-    async function loadNotifications() {
-      try {
-        const res = await fetch('staff_get_reservations.php?status=pending&limit=5');
-        const data = await res.json();
-        const el = document.getElementById('notifications');
-        const badge = document.getElementById('notifBadge');
+      function staffUpdateStatsCards() {
+        const total = staffAllReservations.length;
+        const confirmed = staffAllReservations.filter(r => r.status === 'confirmed').length;
+        const pending = staffAllReservations.filter(r => r.status === 'pending' || r.status === 'pending_payment' || r.status === 'pending_confirmation').length;
+        const canceled = staffAllReservations.filter(r => r.status === 'canceled' || r.status === 'cancelled').length;
+        const completed = staffAllReservations.filter(r => r.status === 'completed' || r.status === 'checked_out').length;
         
-        if (!data.success) {
-          el.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">Failed to load notifications</div>';
+        document.getElementById('staffTotalReservations').textContent = total;
+        document.getElementById('staffConfirmedCount').textContent = confirmed;
+        document.getElementById('staffPendingCount').textContent = pending;
+        document.getElementById('staffCanceledCount').textContent = canceled;
+        
+        document.getElementById('staff-count-all').textContent = total;
+        document.getElementById('staff-count-pending').textContent = pending;
+        document.getElementById('staff-count-confirmed').textContent = confirmed;
+        document.getElementById('staff-count-completed').textContent = completed;
+        document.getElementById('staff-count-canceled').textContent = canceled;
+      }
+
+      function staffUpdateLastUpdateTime() {
+        const now = new Date();
+        document.getElementById('staffLastUpdate').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+      }
+
+      function staffQuickFilter(status) {
+        staffCurrentQuickFilter = status;
+        
+        // Update chip styles
+        document.querySelectorAll('[id^="staff-chip-"]').forEach(chip => {
+          chip.style.background = 'white';
+          chip.style.boxShadow = 'none';
+          chip.querySelectorAll('span, div[id^="staff-count-"]').forEach(el => el.style.color = '#11224e');
+          const iconDiv = chip.querySelector('div > div:first-child');
+          if (iconDiv) {
+            iconDiv.style.background = 'rgba(17,34,78,0.1)';
+            iconDiv.style.color = '#11224e';
+          }
+        });
+        
+        const activeChip = document.getElementById(`staff-chip-${status}`);
+        if (activeChip) {
+          activeChip.style.background = '#11224e';
+          activeChip.style.boxShadow = '0 4px 16px rgba(17,34,78,0.3)';
+          activeChip.querySelectorAll('span, div[id^="staff-count-"]').forEach(el => el.style.color = 'white');
+          const iconDiv = activeChip.querySelector('div > div:first-child');
+          if (iconDiv) {
+            iconDiv.style.background = 'rgba(255,255,255,0.25)';
+            iconDiv.style.color = 'white';
+          }
+        }
+        
+        staffApplyFilters();
+      }
+
+      function staffApplyFilters() {
+        const search = (document.getElementById('staffSearchBox').value || '').toLowerCase();
+        const fromDate = document.getElementById('staffFilterFrom').value;
+        const toDate = document.getElementById('staffFilterTo').value;
+        
+        staffFilteredReservations = staffAllReservations.filter(r => {
+          // Status filter
+          if (staffCurrentQuickFilter !== 'all') {
+            if (staffCurrentQuickFilter === 'pending' && !['pending', 'pending_payment', 'pending_confirmation'].includes(r.status)) return false;
+            if (staffCurrentQuickFilter === 'confirmed' && r.status !== 'confirmed') return false;
+            if (staffCurrentQuickFilter === 'completed' && !['completed', 'checked_out'].includes(r.status)) return false;
+            if (staffCurrentQuickFilter === 'canceled' && !['canceled', 'cancelled'].includes(r.status)) return false;
+          }
+          
+          // Search filter
+          if (search) {
+            const searchStr = `${r.guest_name} ${r.guest_email} ${r.guest_phone} ${r.room} ${r.reservation_id}`.toLowerCase();
+            if (!searchStr.includes(search)) return false;
+          }
+          
+          // Date filter
+          if (fromDate && r.check_in_date < fromDate) return false;
+          if (toDate && r.check_in_date > toDate) return false;
+          
+          return true;
+        });
+        
+        staffCurrentPage = 1;
+        staffRenderReservations();
+      }
+
+      function staffClearFilters() {
+        document.getElementById('staffSearchBox').value = '';
+        document.getElementById('staffFilterFrom').value = '';
+        document.getElementById('staffFilterTo').value = '';
+        staffQuickFilter('all');
+      }
+
+      function staffRenderReservations() {
+        const tbody = document.getElementById('staffReservationsBody');
+        const start = (staffCurrentPage - 1) * staffPageSize;
+        const end = start + staffPageSize;
+        const pageData = staffFilteredReservations.slice(start, end);
+        
+        if (pageData.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b;"><i class="fas fa-inbox" style="font-size:48px;margin-bottom:16px;opacity:0.3;display:block;"></i>No reservations found</td></tr>';
           return;
         }
         
-        if (!data.reservations || data.reservations.length === 0) {
-          el.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;"><i class="fas fa-bell-slash" style="font-size:24px; margin-bottom:8px; display:block;"></i>No new notifications</div>';
-          badge.textContent = '0';
-          return;
-        }
+        tbody.innerHTML = pageData.map((r, i) => `
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:16px; text-align:center; color:#64748b;">${start + i + 1}</td>
+            <td style="padding:16px;">
+              <div style="font-weight:600; color:#1e293b;">${escapeHtml(r.guest_name || 'N/A')}</div>
+              <div style="font-size:12px; color:#64748b;">${escapeHtml(r.guest_phone || '')}</div>
+            </td>
+            <td style="padding:16px;">
+              <div style="font-weight:500; color:#1e293b;">${escapeHtml(r.room || 'TBD')}</div>
+              <div style="font-size:12px; color:#64748b;">${escapeHtml(r.package_type || r.booking_type || 'N/A')}</div>
+            </td>
+            <td style="padding:16px; color:#1e293b;">${r.check_in_date || 'N/A'}</td>
+            <td style="padding:16px; color:#1e293b;">${r.check_out_date || 'N/A'}</td>
+            <td style="padding:16px;">
+              <div style="font-weight:600; color:#10b981;">₱${parseFloat(r.total_amount || 0).toLocaleString()}</div>
+            </td>
+            <td style="padding:16px;">
+              <span style="padding:6px 12px; background:${getStatusColor(r.status)}20; color:${getStatusColor(r.status)}; border-radius:20px; font-size:12px; font-weight:600; text-transform:capitalize;">${(r.status || '').replace('_', ' ')}</span>
+            </td>
+            <td style="padding:16px; text-align:center;">
+              <button onclick="staffViewReservation('${r.reservation_id}')" style="padding:8px 16px; background:#11224e; color:white; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">
+                <i class="fas fa-eye"></i> View
+              </button>
+            </td>
+          </tr>
+        `).join('');
         
-        badge.textContent = data.reservations.length;
+        // Update pagination
+        const totalPages = Math.ceil(staffFilteredReservations.length / staffPageSize);
+        document.getElementById('staffPaginationInfo').textContent = `Showing ${start + 1}-${Math.min(end, staffFilteredReservations.length)} of ${staffFilteredReservations.length}`;
+        document.getElementById('staffPrevPage').disabled = staffCurrentPage <= 1;
+        document.getElementById('staffNextPage').disabled = staffCurrentPage >= totalPages;
+      }
+
+      function staffChangePage(delta) {
+        staffCurrentPage += delta;
+        staffRenderReservations();
+      }
+
+      function staffViewReservation(id) {
+        const r = staffAllReservations.find(x => String(x.reservation_id) === String(id));
+        if (!r) return alert('Reservation not found');
         
-        el.innerHTML = data.reservations.map(r => `
-          <div class="notification-item" onclick="viewNotification('${r.reservation_id}')">
-            <div class="notification-header">
-              <div class="notification-title">New ${r.status || 'pending'} reservation</div>
-              <div class="notification-time">${timeAgo(r.created_at)}</div>
-            </div>
-            <div class="notification-body">
-              <strong>${r.guest_name || 'Guest'}</strong> - ${r.room || 'Room TBD'}
-              <br>Check-in: ${r.check_in_date || 'TBD'}
+        const html = `
+          <div style="padding:20px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+              <div><strong>Guest:</strong> ${escapeHtml(r.guest_name || 'N/A')}</div>
+              <div><strong>Phone:</strong> ${escapeHtml(r.guest_phone || 'N/A')}</div>
+              <div><strong>Email:</strong> ${escapeHtml(r.guest_email || 'N/A')}</div>
+              <div><strong>Room:</strong> ${escapeHtml(r.room || 'TBD')}</div>
+              <div><strong>Check-in:</strong> ${r.check_in_date || 'N/A'}</div>
+              <div><strong>Check-out:</strong> ${r.check_out_date || 'N/A'}</div>
+              <div><strong>Total:</strong> ₱${parseFloat(r.total_amount || 0).toLocaleString()}</div>
+              <div><strong>Status:</strong> <span style="color:${getStatusColor(r.status)}; text-transform:capitalize;">${(r.status || '').replace('_', ' ')}</span></div>
             </div>
           </div>
-        `).join('');
-      } catch (err) {
-        console.error(err);
+        `;
+        showModal('Reservation #' + id, html);
       }
-    }
 
-    async function loadActivityFeed() {
-      const feed = document.getElementById('activityFeed');
-      feed.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;"><i class="fas fa-history" style="font-size:32px; margin-bottom:12px; display:block; opacity:0.5;"></i><p>No recent activity</p></div>';
-    }
+      // ============================
+      // USER MANAGEMENT
+      // ============================
+      let allUsers = [];
 
-    function timeAgo(dateString) {
-      if (!dateString) return 'Just now';
-      const date = new Date(dateString);
-      const now = new Date();
-      const seconds = Math.floor((now - date) / 1000);
-      
-      if (seconds < 60) return 'Just now';
-      if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
-      if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
-      return Math.floor(seconds / 86400) + ' days ago';
-    }
+      async function loadUsers() {
+        try {
+          const res = await fetch('staff_get_users.php', { credentials: 'include' });
+          const data = await res.json();
+          
+          if (!data.success) {
+            document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Failed to load users</td></tr>';
+            return;
+          }
+          
+          allUsers = data.users || [];
+          
+          // Update stats
+          document.getElementById('usersTotalCount').textContent = allUsers.length;
+          document.getElementById('usersActiveCount').textContent = allUsers.filter(u => u.status === 'active').length;
+          
+          // Count new users this month
+          const now = new Date();
+          const thisMonth = allUsers.filter(u => {
+            const created = new Date(u.created_at);
+            return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+          }).length;
+          document.getElementById('usersNewCount').textContent = thisMonth;
+          
+          renderUsers(allUsers);
+        } catch (err) {
+          console.error(err);
+          document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading users</td></tr>';
+        }
+      }
 
-    function viewNotification(id) {
-      window.location.href = `staff_reservations.php?highlight=${id}`;
-    }
+      function filterUsers() {
+        const search = (document.getElementById('usersSearchBox').value || '').toLowerCase();
+        const filtered = allUsers.filter(u => {
+          const str = `${u.full_name} ${u.email} ${u.phone}`.toLowerCase();
+          return str.includes(search);
+        });
+        renderUsers(filtered);
+      }
 
-    function markAllRead() {
-      showToast('All notifications marked as read', 'success');
-      document.getElementById('notifBadge').textContent = '0';
-    }
+      function renderUsers(users) {
+        const tbody = document.getElementById('usersTableBody');
+        
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#64748b;">No users found</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = users.slice(0, 50).map((u, i) => `
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:16px; text-align:center; color:#64748b;">${i + 1}</td>
+            <td style="padding:16px; font-weight:600; color:#1e293b;">${escapeHtml(u.full_name || 'N/A')}</td>
+            <td style="padding:16px; color:#64748b;">${escapeHtml(u.email || 'N/A')}</td>
+            <td style="padding:16px; color:#64748b;">${escapeHtml(u.phone || 'N/A')}</td>
+            <td style="padding:16px; color:#64748b;">${u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}</td>
+            <td style="padding:16px; text-align:center;">
+              <span style="padding:6px 12px; background:${u.status === 'active' ? '#10b98120' : '#ef444420'}; color:${u.status === 'active' ? '#10b981' : '#ef4444'}; border-radius:20px; font-size:12px; font-weight:600; text-transform:capitalize;">${u.status || 'active'}</span>
+            </td>
+          </tr>
+        `).join('');
+      }
 
-    function refreshDashboard() {
-      showToast('Refreshing dashboard...', 'info');
-      loadStats();
-      loadNotifications();
-      loadActivityFeed();
-      setTimeout(() => {
-        showToast('Dashboard refreshed successfully!', 'success');
-      }, 500);
-    }
+      // ============================
+      // UTILITY FUNCTIONS
+      // ============================
+      function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
 
-    function updateChart() {
-      // This would update the chart based on selected period
-      showToast('Chart updated', 'success');
-    }
+      function showModal(title, content) {
+        const existing = document.getElementById('staffModal');
+        if (existing) existing.remove();
+        
+        const modal = document.createElement('div');
+        modal.id = 'staffModal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+        modal.innerHTML = `
+          <div style="background:white;border-radius:16px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="padding:20px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
+              <h3 style="margin:0;font-size:18px;font-weight:700;color:#1e293b;">${title}</h3>
+              <button onclick="document.getElementById('staffModal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;">&times;</button>
+            </div>
+            ${content}
+          </div>
+        `;
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+        document.body.appendChild(modal);
+      }
 
-    function showToast(message, type = 'info') {
-      const colors = {
-        success: '#10b981',
-        error: '#ef4444',
-        info: '#3b82f6',
-        warning: '#f59e0b'
-      };
-      
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background: ${colors[type]};
-        color: white;
-        padding: 16px 24px;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        z-index: 10000;
-        font-weight: 500;
-        animation: slideIn 0.3s ease-out;
-      `;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease-out';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      initChart();
-      loadStats();
-      loadNotifications();
-      loadActivityFeed();
-      
-      // Refresh every 30 seconds
-      setInterval(() => {
-        loadStats();
-        loadNotifications();
-        loadActivityFeed();
-      }, 30000);
-    });
-  </script>
+      // ============================
+      // INITIALIZATION
+      // ============================
+      document.addEventListener('DOMContentLoaded', function() {
+        loadDashboardStats();
+        
+        // Auto-refresh every 60 seconds
+        setInterval(loadDashboardStats, 60000);
+      });
+    </script>
     <script src="../admin-script.js"></script>
 </body>
 </html>

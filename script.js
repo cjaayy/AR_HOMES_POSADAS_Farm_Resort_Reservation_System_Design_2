@@ -174,7 +174,7 @@ function handleLogin(email, password) {
 
   const cleanEmail = email.trim().toLowerCase();
 
-  // Try admin/staff login first. If that fails, fall back to guest login.
+  // Try admin login first (admin only, not staff)
   fetch("admin/login.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -183,20 +183,44 @@ function handleLogin(email, password) {
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
-        // Admin/staff login succeeded. Redirect based on role.
-        loginBtn.classList.remove("loading");
-        loginBtn.disabled = false;
-        loginBtn.classList.add("success");
-        loginBtn.innerHTML = '<i class="fas fa-check"></i> Access Granted!';
-
-        setTimeout(() => {
-          // If role is staff, send to staff dashboard; admins keep using admin dashboard
-          if (data.data && data.data.role === "staff") {
-            window.location.href = "admin/staff_dashboard.php";
-          } else {
+        // Check if this is a staff user - redirect to staff login endpoint
+        if (data.data && data.data.role === "staff") {
+          // Staff user detected - use separate staff login to avoid overwriting admin session
+          return fetch("admin/staff_login.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: email.trim(),
+              password: password,
+            }),
+          })
+            .then((r) => r.json())
+            .then((staffData) => {
+              if (staffData.success) {
+                loginBtn.classList.remove("loading");
+                loginBtn.disabled = false;
+                loginBtn.classList.add("success");
+                loginBtn.innerHTML =
+                  '<i class="fas fa-check"></i> Access Granted!';
+                setTimeout(() => {
+                  window.location.href = "admin/staff_dashboard.php";
+                }, 800);
+              } else {
+                loginBtn.classList.remove("loading");
+                loginBtn.disabled = false;
+                showLoginError(staffData.message || "Staff login failed");
+              }
+            });
+        } else {
+          // Admin login succeeded
+          loginBtn.classList.remove("loading");
+          loginBtn.disabled = false;
+          loginBtn.classList.add("success");
+          loginBtn.innerHTML = '<i class="fas fa-check"></i> Access Granted!';
+          setTimeout(() => {
             window.location.href = "admin/dashboard.php";
-          }
-        }, 800);
+          }, 800);
+        }
         return;
       } else {
         // Admin login failed; try guest login

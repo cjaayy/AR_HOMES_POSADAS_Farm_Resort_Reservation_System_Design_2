@@ -5,7 +5,11 @@
 session_start();
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
+// Accept both admin session (with staff role) OR staff-specific session
+$isAdminAsStaff = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true && ($_SESSION['admin_role'] ?? '') === 'staff';
+$isStaffSession = isset($_SESSION['staff_logged_in']) && $_SESSION['staff_logged_in'] === true;
+
+if (!$isAdminAsStaff && !$isStaffSession) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
@@ -17,7 +21,8 @@ try {
     $db = new Database();
     $conn = $db->getConnection();
     
-    $staffId = $_SESSION['admin_id'] ?? 0;
+    // Get staff ID from appropriate session
+    $staffId = $isStaffSession ? ($_SESSION['staff_id'] ?? 0) : ($_SESSION['admin_id'] ?? 0);
     $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
     
     // Check if table exists

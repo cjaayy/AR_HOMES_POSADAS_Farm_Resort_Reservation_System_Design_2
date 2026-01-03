@@ -9,11 +9,15 @@ header("Pragma: no-cache");
 header("Expires: 0");
 
 session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || ($_SESSION['admin_role'] ?? '') !== 'staff') {
+// Accept both admin session (with staff role) OR staff-specific session
+$isAdminAsStaff = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true && ($_SESSION['admin_role'] ?? '') === 'staff';
+$isStaffSession = isset($_SESSION['staff_logged_in']) && $_SESSION['staff_logged_in'] === true;
+
+if (!$isAdminAsStaff && !$isStaffSession) {
     header('Location: ../index.html');
     exit;
 }
-$staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
+$staffName = $isStaffSession ? ($_SESSION['staff_full_name'] ?? 'Staff Member') : ($_SESSION['admin_full_name'] ?? 'Staff Member');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,11 +40,11 @@ $staffName = $_SESSION['admin_full_name'] ?? 'Staff Member';
   <script>
     window.logout = window.logout || function(){
       try{
-        fetch('logout.php', { method: 'POST', credentials: 'include' })
+        fetch('staff_logout.php', { method: 'POST', credentials: 'include' })
           .then(res => res.json().catch(() => null))
           .then(() => window.location.href = '../index.html')
           .catch(() => window.location.href = '../index.html');
-      }catch(e){ window.location.href = 'logout.php'; }
+      }catch(e){ window.location.href = 'staff_logout.php'; }
     };
   </script>
   <style>
