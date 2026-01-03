@@ -69,10 +69,11 @@ try {
                 rebooking_approved,
                 status, 
                 created_at 
-            FROM reservations";
+            FROM reservations
+            WHERE NOT (status = 'pending_payment' AND (downpayment_verified = 0 OR downpayment_verified IS NULL))";
     $params = [];
     if ($status) {
-        $sql .= " WHERE status = :status";
+        $sql .= " AND status = :status";
         $params[':status'] = $status;
     }
     $sql .= " ORDER BY created_at DESC LIMIT :offset, :limit";

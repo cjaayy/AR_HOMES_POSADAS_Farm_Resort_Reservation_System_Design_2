@@ -104,7 +104,8 @@ try {
             created_at,
             updated_at
         FROM reservations 
-        WHERE (user_id = :user_id" . ($user_email ? " OR guest_email = :user_email" : "") . ")";
+        WHERE (user_id = :user_id" . ($user_email ? " OR guest_email = :user_email" : "") . ")
+        AND NOT (status = 'pending_payment' AND (downpayment_verified = 0 OR downpayment_verified IS NULL))";
     
     if ($status_filter !== 'all') {
         $sql .= " AND status = :status";

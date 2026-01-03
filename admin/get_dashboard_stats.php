@@ -52,26 +52,29 @@ try {
     // Check if reservations table exists
     $tableCheck = $conn->query("SHOW TABLES LIKE 'reservations'");
     if ($tableCheck->rowCount() > 0) {
-        // Total reservations
-        $reservationsQuery = "SELECT COUNT(*) as total FROM reservations";
+        // Exclude abandoned reservations (pending_payment with no downpayment verified)
+        $excludeAbandoned = "NOT (status = 'pending_payment' AND (downpayment_verified = 0 OR downpayment_verified IS NULL))";
+        
+        // Total reservations (excluding abandoned)
+        $reservationsQuery = "SELECT COUNT(*) as total FROM reservations WHERE $excludeAbandoned";
         $stmt = $conn->prepare($reservationsQuery);
         $stmt->execute();
         $totalReservations = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
         // Pending reservations
-        $pendingQuery = "SELECT COUNT(*) as total FROM reservations WHERE status = 'pending'";
+        $pendingQuery = "SELECT COUNT(*) as total FROM reservations WHERE status = 'pending' AND $excludeAbandoned";
         $stmt = $conn->prepare($pendingQuery);
         $stmt->execute();
         $pendingReservations = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
         // Confirmed reservations
-        $confirmedQuery = "SELECT COUNT(*) as total FROM reservations WHERE status = 'confirmed'";
+        $confirmedQuery = "SELECT COUNT(*) as total FROM reservations WHERE status = 'confirmed' AND $excludeAbandoned";
         $stmt = $conn->prepare($confirmedQuery);
         $stmt->execute();
         $confirmedReservations = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
         // Completed reservations
-        $completedQuery = "SELECT COUNT(*) as total FROM reservations WHERE status = 'completed'";
+        $completedQuery = "SELECT COUNT(*) as total FROM reservations WHERE status = 'completed' AND $excludeAbandoned";
         $stmt = $conn->prepare($completedQuery);
         $stmt->execute();
         $completedReservations = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
@@ -88,7 +91,7 @@ try {
     // Get recent activities from various sources
     $recentActivities = [];
 
-    // 1. Get recent reservations
+    // 1. Get recent reservations (excluding abandoned)
     if ($tableCheck->rowCount() > 0) {
         $recentReservationsQuery = "SELECT 
                                         r.reservation_id,
@@ -99,6 +102,7 @@ try {
                                         r.created_at,
                                         r.updated_at
                                      FROM reservations r
+                                     WHERE NOT (r.status = 'pending_payment' AND (r.downpayment_verified = 0 OR r.downpayment_verified IS NULL))
                                      ORDER BY r.updated_at DESC 
                                      LIMIT 5";
         $stmt = $conn->prepare($recentReservationsQuery);
