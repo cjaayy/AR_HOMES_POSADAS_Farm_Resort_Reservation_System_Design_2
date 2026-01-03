@@ -23,10 +23,7 @@
       sizes="180x180"
       href="logo/ar-homes-logo.png"
     />
-    <link
-      rel="shortcut icon"
-      href="logo/ar-homes-logo.png"
-    />
+    <link rel="shortcut icon" href="logo/ar-homes-logo.png" />
 
     <!-- Meta tags for better SEO and PWA support -->
     <meta name="theme-color" content="#667eea" />
@@ -46,10 +43,7 @@
       property="og:description"
       content="Experience luxury at AR Homes Posadas Farm Resort. Book your perfect getaway today."
     />
-    <meta
-      property="og:image"
-      content="logo/ar-homes-logo.png"
-    />
+    <meta property="og:image" content="logo/ar-homes-logo.png" />
     <meta property="og:type" content="website" />
 
     <link rel="stylesheet" href="styles.css" />
@@ -186,22 +180,6 @@
       <!-- Right Side - Login Form -->
       <div class="login-section">
         <div class="login-container">
-          <!-- Map Icon - Top Right Corner -->
-          <div class="map-icon-container top-right">
-            <button
-              class="map-icon-btn"
-              onclick="openLocationMap()"
-              title="View Resort Location"
-            >
-              <img
-                src="location_icon/map.png"
-                alt="Resort Location"
-                class="map-icon"
-              />
-              <span class="map-tooltip">Find Us</span>
-            </button>
-          </div>
-
           <div class="header">
             <div class="logo">
               <img
@@ -274,6 +252,34 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Quick Links - Fixed Bottom Right Corner -->
+    <div class="quick-links-container fixed-bottom-right">
+      <button
+        class="quick-link-btn"
+        onclick="openLocationMap()"
+        title="View Resort Location"
+      >
+        <i class="fas fa-map-marker-alt"></i>
+        <span class="quick-link-tooltip">Find Us</span>
+      </button>
+      <button
+        class="quick-link-btn"
+        onclick="openContactModal()"
+        title="Contact & Social Media"
+      >
+        <i class="fas fa-address-book"></i>
+        <span class="quick-link-tooltip">Contact</span>
+      </button>
+      <button
+        class="quick-link-btn"
+        onclick="openReviewsModal()"
+        title="Guest Reviews"
+      >
+        <i class="fas fa-star"></i>
+        <span class="quick-link-tooltip">Reviews</span>
+      </button>
     </div>
 
     <!-- Forgot Password Modal -->
@@ -369,6 +375,188 @@
               <i class="fas fa-share-alt"></i>
               Share Location
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact & Social Modal -->
+    <div id="contactModal" class="map-modal">
+      <div class="map-modal-content">
+        <div class="map-modal-header">
+          <h3>Contact & Social Media</h3>
+          <button class="map-close-btn" onclick="closeContactModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="map-modal-body">
+          <div class="contact-info-grid">
+            <div class="contact-info-card">
+              <div class="contact-icon">
+                <i class="fas fa-phone-alt"></i>
+              </div>
+              <h4>Phone</h4>
+              <p><a href="tel:+639123456789">+63 912 345 6789</a></p>
+              <p><a href="tel:+639987654321">+63 998 765 4321</a></p>
+            </div>
+            <div class="contact-info-card">
+              <div class="contact-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <h4>Email</h4>
+              <p>
+                <a href="mailto:info@arhomesresort.com"
+                  >info@arhomesresort.com</a
+                >
+              </p>
+              <p>
+                <a href="mailto:reservations@arhomesresort.com"
+                  >reservations@arhomesresort.com</a
+                >
+              </p>
+            </div>
+            <div class="contact-info-card">
+              <div class="contact-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <h4>Office Hours</h4>
+              <p>Monday - Sunday</p>
+              <p>8:00 AM - 8:00 PM</p>
+            </div>
+          </div>
+          <div class="social-links-section">
+            <h4>Follow Us</h4>
+            <div class="social-buttons">
+              <a
+                href="https://facebook.com/arhomesposadas"
+                target="_blank"
+                class="social-btn facebook"
+              >
+                <i class="fab fa-facebook-f"></i>
+                <span>Facebook</span>
+              </a>
+              <a
+                href="https://instagram.com/arhomesposadas"
+                target="_blank"
+                class="social-btn instagram"
+              >
+                <i class="fab fa-instagram"></i>
+                <span>Instagram</span>
+              </a>
+              <a
+                href="https://twitter.com/arhomesposadas"
+                target="_blank"
+                class="social-btn twitter"
+              >
+                <i class="fab fa-twitter"></i>
+                <span>Twitter</span>
+              </a>
+              <a
+                href="https://tiktok.com/@arhomesposadas"
+                target="_blank"
+                class="social-btn tiktok"
+              >
+                <i class="fab fa-tiktok"></i>
+                <span>TikTok</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Modal -->
+    <div id="reviewsModal" class="map-modal">
+      <div class="map-modal-content reviews-modal-content">
+        <div class="map-modal-header">
+          <h3>Guest Reviews</h3>
+          <button class="map-close-btn" onclick="closeReviewsModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="map-modal-body">
+          <div class="reviews-summary">
+            <div class="rating-overview">
+              <div class="rating-score">4.8</div>
+              <div class="rating-stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+              <p>Based on 250+ reviews</p>
+            </div>
+          </div>
+          <div class="reviews-list">
+            <div class="review-card">
+              <div class="review-header">
+                <div class="reviewer-avatar">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="reviewer-info">
+                  <h5>Maria Santos</h5>
+                  <div class="review-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                  </div>
+                </div>
+                <span class="review-date">Dec 2025</span>
+              </div>
+              <p class="review-text">
+                "Amazing experience! The resort is beautiful and the staff is
+                very accommodating. Perfect for family getaways. Will definitely
+                come back!"
+              </p>
+            </div>
+            <div class="review-card">
+              <div class="review-header">
+                <div class="reviewer-avatar">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="reviewer-info">
+                  <h5>Juan Dela Cruz</h5>
+                  <div class="review-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                  </div>
+                </div>
+                <span class="review-date">Nov 2025</span>
+              </div>
+              <p class="review-text">
+                "The pools are well-maintained and the rooms are clean. Great
+                value for money. Highly recommended for team buildings!"
+              </p>
+            </div>
+            <div class="review-card">
+              <div class="review-header">
+                <div class="reviewer-avatar">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="reviewer-info">
+                  <h5>Anna Reyes</h5>
+                  <div class="review-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                  </div>
+                </div>
+                <span class="review-date">Oct 2025</span>
+              </div>
+              <p class="review-text">
+                "Lovely place for a weekend retreat. The nature views are
+                breathtaking. Food options could be more varied but overall a
+                great stay."
+              </p>
+            </div>
           </div>
         </div>
       </div>

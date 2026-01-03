@@ -633,9 +633,18 @@ function getNotificationColor(type) {
 
 // Close modal when clicking outside
 document.addEventListener("click", function (e) {
-  const modal = document.getElementById("mapModal");
-  if (e.target === modal) {
+  const mapModal = document.getElementById("mapModal");
+  const contactModal = document.getElementById("contactModal");
+  const reviewsModal = document.getElementById("reviewsModal");
+
+  if (e.target === mapModal) {
     closeLocationMap();
+  }
+  if (e.target === contactModal) {
+    closeContactModal();
+  }
+  if (e.target === reviewsModal) {
+    closeReviewsModal();
   }
 });
 
@@ -694,6 +703,92 @@ window.openLocationMap = openLocationMap;
 window.closeLocationMap = closeLocationMap;
 window.openDirections = openDirections;
 window.shareLocation = shareLocation;
+
+// ===== CONTACT MODAL FUNCTIONALITY =====
+
+// Open contact modal
+function openContactModal() {
+  const modal = document.getElementById("contactModal");
+  modal.classList.add("show");
+  modal.style.display = "flex";
+
+  // Prevent body scrolling when modal is open
+  document.body.style.overflow = "hidden";
+
+  // Add escape key listener
+  document.addEventListener("keydown", handleContactModalEscape);
+}
+
+// Close contact modal
+function closeContactModal() {
+  const modal = document.getElementById("contactModal");
+  modal.classList.remove("show");
+
+  // Restore body scrolling
+  document.body.style.overflow = "auto";
+
+  // Remove escape key listener
+  document.removeEventListener("keydown", handleContactModalEscape);
+
+  // Hide modal after animation
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 300);
+}
+
+// Handle escape key for contact modal
+function handleContactModalEscape(e) {
+  if (e.key === "Escape") {
+    closeContactModal();
+  }
+}
+
+// Make contact functions globally available
+window.openContactModal = openContactModal;
+window.closeContactModal = closeContactModal;
+
+// ===== REVIEWS MODAL FUNCTIONALITY =====
+
+// Open reviews modal
+function openReviewsModal() {
+  const modal = document.getElementById("reviewsModal");
+  modal.classList.add("show");
+  modal.style.display = "flex";
+
+  // Prevent body scrolling when modal is open
+  document.body.style.overflow = "hidden";
+
+  // Add escape key listener
+  document.addEventListener("keydown", handleReviewsModalEscape);
+}
+
+// Close reviews modal
+function closeReviewsModal() {
+  const modal = document.getElementById("reviewsModal");
+  modal.classList.remove("show");
+
+  // Restore body scrolling
+  document.body.style.overflow = "auto";
+
+  // Remove escape key listener
+  document.removeEventListener("keydown", handleReviewsModalEscape);
+
+  // Hide modal after animation
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 300);
+}
+
+// Handle escape key for reviews modal
+function handleReviewsModalEscape(e) {
+  if (e.key === "Escape") {
+    closeReviewsModal();
+  }
+}
+
+// Make reviews functions globally available
+window.openReviewsModal = openReviewsModal;
+window.closeReviewsModal = closeReviewsModal;
 
 // ===== FORGOT PASSWORD MODAL FUNCTIONALITY =====
 
