@@ -224,13 +224,16 @@ const activityData = [
 const mobileToggle = document.querySelector(".mobile-toggle");
 
 // ===== INITIALIZATION =====
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   initializeDashboard();
   updateUserData();
   setupEventListeners();
   setupFormValidation();
 
-  // Pre-load reservations for booking history
+  // Load reviews FIRST so we know which reservations have been reviewed
+  await loadUserReviews();
+
+  // Pre-load reservations for booking history (will now have review info available)
   loadMyReservations();
 
   // Initialize booking history filters
@@ -3025,68 +3028,116 @@ async function submitRebooking(event, reservationId) {
 
 // ===== WRITE REVIEW FOR RESERVATION =====
 function writeReviewForReservation(reservationId) {
-  const reservation = loadedReservations.find(
-    (r) => r.reservation_id == reservationId
-  );
+  try {
+    // Check if this reservation has already been reviewed
+    const hasReview = reviewedReservationIds.includes(parseInt(reservationId));
+    const reviewInfo = reviewedReservationsMap[reservationId];
 
-  const modalHTML = `
-    <div id="reviewModal" class="reservation-modal-overlay" onclick="closeReviewModal(event)">
-      <div class="reservation-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()">
-        <div class="reservation-modal-header" style="background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);">
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h2 style="color: white; margin: 0;">
-              <i class="fas fa-star"></i> Write a Review
-            </h2>
-            <button onclick="closeReviewModal()" class="modal-close-btn">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        </div>
-        
-        <div class="reservation-modal-body">
-          <div style="text-align: center; margin-bottom: 25px;">
-            <p style="color: #666; margin-bottom: 15px;">How was your stay?</p>
-            <div id="starRating" style="font-size: 2.5rem; cursor: pointer;">
-              <i class="far fa-star" data-rating="1" onclick="setRating(1)"></i>
-              <i class="far fa-star" data-rating="2" onclick="setRating(2)"></i>
-              <i class="far fa-star" data-rating="3" onclick="setRating(3)"></i>
-              <i class="far fa-star" data-rating="4" onclick="setRating(4)"></i>
-              <i class="far fa-star" data-rating="5" onclick="setRating(5)"></i>
+    if (hasReview && reviewInfo) {
+      // Reservation already reviewed, redirect to edit
+      if (reviewInfo.can_edit) {
+        showNotification(
+          "You have already reviewed this reservation. Opening edit mode...",
+          "info"
+        );
+        editReview(reviewInfo.review_id);
+      } else {
+        showNotification(
+          "You have already reviewed this reservation and reached the maximum edit limit.",
+          "warning"
+        );
+      }
+      return;
+    }
+
+    const reservation = loadedReservations.find(
+      (r) => r.reservation_id == reservationId
+    );
+
+    // Reset rating before showing modal
+    selectedRating = 0;
+
+    // Get reservation info for display
+    const reservationInfo = reservation
+      ? `
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: left;">
+        <p style="margin: 0 0 8px 0; font-size: 0.9rem;"><strong>Reservation:</strong> #${
+          reservation.reservation_id
+        }</p>
+        <p style="margin: 0 0 8px 0; font-size: 0.9rem;"><strong>Package:</strong> ${
+          reservation.package_type || "Standard"
+        }</p>
+        <p style="margin: 0; font-size: 0.9rem;"><strong>Check-in Date:</strong> ${formatDate(
+          reservation.check_in_date
+        )}</p>
+      </div>
+    `
+      : "";
+
+    const modalHTML = `
+      <div id="reviewModal" class="reservation-modal-overlay" onclick="closeReviewModal(event)">
+        <div class="reservation-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()">
+          <div class="reservation-modal-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <h2 style="color: white; margin: 0;">
+                <i class="fas fa-star"></i> Write a Review
+              </h2>
+              <button onclick="closeReviewModal()" class="modal-close-btn">
+                <i class="fas fa-times"></i>
+              </button>
             </div>
-            <p id="ratingText" style="color: #ffc107; font-weight: 600; margin-top: 10px;">Select a rating</p>
           </div>
           
-          <form id="reviewForm" onsubmit="submitReview(event, ${reservationId})">
-            <input type="hidden" name="rating" id="ratingInput" value="0">
-            <input type="hidden" name="reservation_id" value="${reservationId}">
+          <div class="reservation-modal-body">
+            ${reservationInfo}
             
-            <div style="margin-bottom: 20px;">
-              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
-                <i class="fas fa-heading"></i> Review Title
-              </label>
-              <input type="text" name="title" placeholder="Give your review a title..." required
-                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+            <div style="text-align: center; margin-bottom: 25px;">
+              <p style="color: #666; margin-bottom: 15px;">How was your stay?</p>
+              <div id="starRating" style="font-size: 2.5rem; cursor: pointer;">
+                <i class="far fa-star" data-rating="1" onclick="setRating(1)" style="color: #ddd; transition: all 0.2s;"></i>
+                <i class="far fa-star" data-rating="2" onclick="setRating(2)" style="color: #ddd; transition: all 0.2s;"></i>
+                <i class="far fa-star" data-rating="3" onclick="setRating(3)" style="color: #ddd; transition: all 0.2s;"></i>
+                <i class="far fa-star" data-rating="4" onclick="setRating(4)" style="color: #ddd; transition: all 0.2s;"></i>
+                <i class="far fa-star" data-rating="5" onclick="setRating(5)" style="color: #ddd; transition: all 0.2s;"></i>
+              </div>
+              <p id="ratingText" style="color: #f59e0b; font-weight: 600; margin-top: 10px;">Select a rating</p>
             </div>
             
-            <div style="margin-bottom: 20px;">
-              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
-                <i class="fas fa-comment-alt"></i> Your Review
-              </label>
-              <textarea name="content" rows="4" placeholder="Share your experience with other guests..." required
-                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
-            </div>
-            
-            <button type="submit" class="modal-btn success" style="width: 100%;">
-              <i class="fas fa-paper-plane"></i> Submit Review
-            </button>
-          </form>
+            <form id="reviewForm" onsubmit="submitReview(event, '${reservationId}')">
+              <input type="hidden" name="rating" id="ratingInput" value="0">
+              <input type="hidden" name="reservation_id" value="${reservationId}">
+              
+              <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
+                  <i class="fas fa-heading"></i> Review Title *
+                </label>
+                <input type="text" name="title" placeholder="Give your review a title..." required
+                  style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+              </div>
+              
+              <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
+                  <i class="fas fa-comment-alt"></i> Your Review *
+                </label>
+                <textarea name="content" rows="4" placeholder="Share your experience with other guests... (minimum 10 characters)" required minlength="10"
+                  style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;"></textarea>
+              </div>
+              
+              <button type="submit" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease;">
+                <i class="fas fa-paper-plane"></i> Submit Review
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-  `;
+    `;
 
-  document.body.insertAdjacentHTML("beforeend", modalHTML);
-  document.body.style.overflow = "hidden";
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+    document.body.style.overflow = "hidden";
+  } catch (error) {
+    console.error("Error opening review modal:", error);
+    showNotification("Failed to open review form. Please try again.", "error");
+  }
 }
 
 let selectedRating = 0;
@@ -3101,7 +3152,7 @@ function setRating(rating) {
     if (index < rating) {
       star.classList.remove("far");
       star.classList.add("fas");
-      star.style.color = "#ffc107";
+      star.style.color = "#f59e0b";
     } else {
       star.classList.remove("fas");
       star.classList.add("far");
@@ -3118,6 +3169,8 @@ function closeReviewModal(event) {
   if (modal) {
     modal.remove();
     document.body.style.overflow = "";
+    // Reset rating when modal closes
+    selectedRating = 0;
   }
 }
 
@@ -3158,16 +3211,30 @@ async function submitReview(event, reservationId) {
         "Thank you for your review! It has been submitted successfully.",
         "success"
       );
+
+      // Close the review modal first
       closeReviewModal();
+
+      // Reset the rating for next use
+      selectedRating = 0;
 
       // Reload reviews to update the list
       if (typeof loadUserReviews === "function") {
-        loadUserReviews();
+        await loadUserReviews();
       }
 
-      // Navigate to reviews section
-      showSection("reviews");
-      updateActiveNavigation("reviews");
+      // Navigate to reviews section by clicking nav button
+      try {
+        const navBtn = document.querySelector('[data-section="reviews"]');
+        if (navBtn) {
+          navBtn.click();
+        } else {
+          showSection("reviews");
+          updateActiveNavigation("reviews");
+        }
+      } catch (navError) {
+        console.log("Navigation handled:", navError);
+      }
     } else {
       showNotification(data.message || "Failed to submit review", "error");
       submitBtn.innerHTML = originalText;
@@ -3832,11 +3899,46 @@ function getHistoryActionButtons(r) {
     <i class="fas fa-eye"></i> View Details
   </button>`;
 
-  // Only show Review and Book Again for completed reservations
+  // Only show Review/Edit Review and Book Again for completed reservations
   if (isCompleted) {
-    buttons += `<button class="history-action-btn review-btn" onclick="event.stopPropagation(); writeReviewForReservation('${r.reservation_id}')">
-      <i class="fas fa-star"></i> Review
-    </button>`;
+    // Check if this reservation has already been reviewed (including deleted reviews)
+    // reviewedReservationsMap uses reservation_id as key (string)
+    const reviewInfo = reviewedReservationsMap[r.reservation_id];
+    const hasReview =
+      reviewInfo !== undefined ||
+      reviewedReservationIds.includes(r.reservation_id);
+
+    if (hasReview && reviewInfo) {
+      // Check if review was deleted
+      if (reviewInfo.status === "deleted") {
+        // Review was deleted - show disabled button
+        buttons += `<button class="history-action-btn review-btn reviewed disabled" disabled title="Review deleted">
+          <i class="fas fa-trash-alt"></i> Review Deleted
+        </button>`;
+      } else if (reviewInfo.can_edit) {
+        // Show Edit Review button if review exists and can still be edited
+        const editsRemaining = 3 - reviewInfo.edit_count;
+        buttons += `<button class="history-action-btn edit-review-btn" onclick="event.stopPropagation(); editReview(${reviewInfo.review_id})" title="${editsRemaining} edit(s) remaining">
+          <i class="fas fa-edit"></i> Edit Review (${editsRemaining} left)
+        </button>`;
+      } else {
+        // Show disabled button when edit limit reached
+        buttons += `<button class="history-action-btn edit-review-btn disabled" disabled title="Maximum edits reached">
+          <i class="fas fa-ban"></i> Edit Limit Reached
+        </button>`;
+      }
+    } else if (hasReview) {
+      // Has review but no reviewInfo - show disabled "Reviewed" button
+      buttons += `<button class="history-action-btn review-btn reviewed disabled" disabled title="Already reviewed">
+        <i class="fas fa-check-circle"></i> Reviewed
+      </button>`;
+    } else {
+      // Show Write Review button if not yet reviewed
+      buttons += `<button class="history-action-btn review-btn" onclick="event.stopPropagation(); writeReviewForReservation('${r.reservation_id}')">
+        <i class="fas fa-star"></i> Review
+      </button>`;
+    }
+
     buttons += `<button class="history-action-btn book-again-btn" onclick="event.stopPropagation(); bookAgainFromReservation('${r.reservation_id}')">
       <i class="fas fa-redo"></i> Book Again
     </button>`;
@@ -4580,13 +4682,15 @@ async function handleNotificationLink(link, notificationId) {
 // Initialize notifications badge on page load
 document.addEventListener("DOMContentLoaded", function () {
   initNotificationBadge();
-  loadUserReviews(); // Load reviews on page load
+  // Reviews are now loaded in the main initialization to ensure proper order
 });
 
 // ===== REVIEWS FUNCTIONS =====
 // Global reviews data storage
 let loadedReviewsData = [];
 let reviewableReservations = [];
+let reviewedReservationIds = []; // IDs of reservations that have been reviewed
+let reviewedReservationsMap = {}; // Map of reservation_id => {review_id, edit_count, can_edit}
 
 // Load user reviews from the server
 async function loadUserReviews() {
@@ -4597,6 +4701,8 @@ async function loadUserReviews() {
     if (data.success) {
       loadedReviewsData = data.reviews || [];
       reviewableReservations = data.reviewable_reservations || [];
+      reviewedReservationIds = data.reviewed_reservation_ids || [];
+      reviewedReservationsMap = data.reviewed_reservations_map || {};
 
       // Update stats
       updateReviewStats(data.stats);
@@ -4610,6 +4716,18 @@ async function loadUserReviews() {
       );
       if (reviewsGivenElement) {
         reviewsGivenElement.textContent = data.stats.total_reviews || 0;
+      }
+
+      // Re-render reservation history cards to update Review buttons
+      if (typeof renderReservationHistory === "function") {
+        // Only re-render if we have cached reservations
+        const historyContainer = document.querySelector(
+          ".booking-history-cards, .bookings-history-grid"
+        );
+        if (historyContainer && historyContainer.children.length > 0) {
+          // Just update the buttons, don't reload entire history
+          updateHistoryCardButtons();
+        }
       }
     } else {
       console.error("Failed to load reviews:", data.message);
@@ -4671,6 +4789,11 @@ function createReviewCard(review) {
     review.package_type
   );
 
+  // Get edit count info
+  const editCount = parseInt(review.edit_count) || 0;
+  const canEdit = editCount < 3;
+  const editsRemaining = 3 - editCount;
+
   return `
     <div class="review-card" data-review-id="${review.review_id}">
       <div class="review-header">
@@ -4694,9 +4817,19 @@ function createReviewCard(review) {
           } found this helpful
         </span>
         <div class="review-actions">
-          <button class="btn-text" onclick="editReview(${review.review_id})">
-            <i class="fas fa-edit"></i> Edit
-          </button>
+          ${
+            canEdit
+              ? `
+            <button class="btn-text" onclick="editReview(${review.review_id})" title="${editsRemaining} edit(s) remaining">
+              <i class="fas fa-edit"></i> Edit (${editsRemaining} left)
+            </button>
+          `
+              : `
+            <button class="btn-text" disabled style="color: #999; cursor: not-allowed;" title="Maximum edits reached">
+              <i class="fas fa-ban"></i> Edit Limit Reached
+            </button>
+          `
+          }
           <button class="btn-text text-danger" onclick="deleteReview(${
             review.review_id
           })">
@@ -4763,6 +4896,69 @@ function showReviewsError() {
       </div>
     `;
   }
+}
+
+// Update history card buttons after reviews are loaded
+function updateHistoryCardButtons() {
+  const historyCards = document.querySelectorAll(".booking-history-card");
+  historyCards.forEach((card) => {
+    const reservationId = card.dataset.reservationId;
+    if (!reservationId) return;
+
+    // Find the action buttons container
+    const actionsContainer = card.querySelector(".history-card-actions");
+    if (!actionsContainer) return;
+
+    // Check if this reservation has been reviewed
+    const reviewInfo = reviewedReservationsMap[reservationId];
+    const hasReview = reviewedReservationIds.includes(parseInt(reservationId));
+
+    // Only update if it's a completed reservation
+    const statusBadge = card.querySelector(".status-badge");
+    const isCompleted =
+      statusBadge &&
+      (statusBadge.textContent.toLowerCase().includes("completed") ||
+        statusBadge.textContent.toLowerCase().includes("checked out"));
+
+    if (!isCompleted) return;
+
+    // Find the review button
+    const reviewBtn = actionsContainer.querySelector(".review-btn");
+    const editReviewBtn = actionsContainer.querySelector(".edit-review-btn");
+
+    if (hasReview && reviewInfo) {
+      // Remove old review button if exists
+      if (reviewBtn) reviewBtn.remove();
+
+      // Update or add edit review button
+      if (!editReviewBtn) {
+        const bookAgainBtn = actionsContainer.querySelector(".book-again-btn");
+        const newBtn = document.createElement("button");
+
+        if (reviewInfo.can_edit) {
+          const editsRemaining = 3 - reviewInfo.edit_count;
+          newBtn.className = "history-action-btn edit-review-btn";
+          newBtn.onclick = function (e) {
+            e.stopPropagation();
+            editReview(reviewInfo.review_id);
+          };
+          newBtn.title = `${editsRemaining} edit(s) remaining`;
+          newBtn.innerHTML = `<i class="fas fa-edit"></i> Edit Review (${editsRemaining} left)`;
+        } else {
+          newBtn.className = "history-action-btn edit-review-btn disabled";
+          newBtn.disabled = true;
+          newBtn.title = "Maximum edits reached";
+          newBtn.innerHTML = '<i class="fas fa-ban"></i> Edit Limit Reached';
+        }
+
+        if (bookAgainBtn) {
+          actionsContainer.insertBefore(newBtn, bookAgainBtn);
+        } else {
+          actionsContainer.appendChild(newBtn);
+        }
+      }
+    }
+  });
 }
 
 // Write new review - shows modal with available reservations
@@ -4944,6 +5140,18 @@ function editReview(reviewId) {
     return;
   }
 
+  // Check if edit limit has been reached
+  const editCount = parseInt(review.edit_count) || 0;
+  if (editCount >= 3) {
+    showNotification(
+      "You have reached the maximum number of edits (3) for this review.",
+      "error"
+    );
+    return;
+  }
+
+  const editsRemaining = 3 - editCount;
+
   const modalHTML = `
     <div id="editReviewModal" class="reservation-modal-overlay" onclick="closeEditReviewModal(event)">
       <div class="reservation-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()">
@@ -4959,6 +5167,12 @@ function editReview(reviewId) {
         </div>
         
         <div class="reservation-modal-body">
+          <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+            <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+              <i class="fas fa-info-circle"></i> <strong>Edit Limit:</strong> You have <strong>${editsRemaining}</strong> edit(s) remaining for this review.
+            </p>
+          </div>
+          
           <form id="editReviewForm" onsubmit="submitEditReview(event, ${reviewId})">
             <div style="text-align: center; margin-bottom: 25px;">
               <p style="color: #666; margin-bottom: 15px;">Update your rating</p>
@@ -5085,9 +5299,11 @@ async function submitEditReview(event, reviewId) {
     const data = await response.json();
 
     if (data.success) {
-      showNotification("Review updated successfully!", "success");
+      // Show message with remaining edits info if available
+      let message = data.message || "Review updated successfully!";
+      showNotification(message, "success");
       closeEditReviewModal();
-      loadUserReviews(); // Reload reviews
+      loadUserReviews(); // Reload reviews to update edit counts
     } else {
       showNotification(data.message || "Failed to update review", "error");
       submitBtn.innerHTML = originalText;

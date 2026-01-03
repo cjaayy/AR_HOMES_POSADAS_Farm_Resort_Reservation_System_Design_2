@@ -75,21 +75,35 @@ try {
     $conn = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Check if review exists and belongs to user
-    $checkSql = "SELECT review_id FROM reviews WHERE review_id = :review_id AND user_id = :user_id AND status = 'active'";
+    // Check if review exists and belongs to user, also get edit count
+    $checkSql = "SELECT review_id, COALESCE(edit_count, 0) as edit_count FROM reviews WHERE review_id = :review_id AND user_id = :user_id AND status = 'active'";
     $checkStmt = $conn->prepare($checkSql);
     $checkStmt->execute(['review_id' => $review_id, 'user_id' => $user_id]);
     
-    if (!$checkStmt->fetch()) {
+    $review = $checkStmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$review) {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'Review not found or does not belong to you']);
         exit;
     }
     
-    // Update the review
+    // Check if edit limit reached (maximum 3 edits allowed)
+    if ($review['edit_count'] >= 3) {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false, 
+            'message' => 'You have reached the maximum number of edits (3) for this review.',
+            'edit_count' => $review['edit_count']
+        ]);
+        exit;
+    }
+    
+    // Update the review and increment edit count
     $updateSql = "
         UPDATE reviews 
-        SET rating = :rating, title = :title, content = :content, updated_at = NOW()
+        SET rating = :rating, title = :title, content = :content, 
+            edit_count = COALESCE(edit_count, 0) + 1, updated_at = NOW()
         WHERE review_id = :review_id AND user_id = :user_id
     ";
     
@@ -102,9 +116,14 @@ try {
         'user_id' => $user_id
     ]);
     
+    $new_edit_count = $review['edit_count'] + 1;
+    $edits_remaining = 3 - $new_edit_count;
+    
     echo json_encode([
         'success' => true,
-        'message' => 'Review updated successfully!'
+        'message' => 'Review updated successfully!' . ($edits_remaining > 0 ? " You have $edits_remaining edit(s) remaining." : ' This was your last edit.'),
+        'edit_count' => $new_edit_count,
+        'edits_remaining' => $edits_remaining
     ]);
     
 } catch (PDOException $e) {
