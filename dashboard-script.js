@@ -3491,6 +3491,50 @@ const HISTORY_STATUSES = [
   "expired",
 ];
 
+/**
+ * Check if a reservation should be shown in history
+ * (either has history status OR is fully paid and past check-out date)
+ */
+function shouldShowInHistory(r) {
+  // If already has a history status, show in history
+  if (HISTORY_STATUSES.includes(r.status)) {
+    return true;
+  }
+
+  // Check if the reservation is fully paid and past check-out date
+  const isFullyPaid =
+    r.full_payment_verified == 1 ||
+    (r.downpayment_verified == 1 && r.full_payment_verified == 1);
+
+  if (isFullyPaid && r.check_out_date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Parse check-out date and time
+    const checkOutDate = new Date(r.check_out_date);
+
+    // If check-out time is provided, use it; otherwise default to end of day
+    if (r.check_out_time) {
+      const timeParts = r.check_out_time.split(":");
+      checkOutDate.setHours(
+        parseInt(timeParts[0], 10),
+        parseInt(timeParts[1], 10),
+        0,
+        0
+      );
+    } else {
+      checkOutDate.setHours(23, 59, 59, 999);
+    }
+
+    // If current date/time is past check-out, show in history
+    if (new Date() > checkOutDate) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Override displayReservations to also store data - BOOKING HISTORY ONLY (past reservations)
 const originalDisplayReservations = displayReservations;
 function displayReservations(reservations) {
@@ -3505,10 +3549,18 @@ function displayReservations(reservations) {
   const container = document.querySelector(".bookings-history-grid");
   if (!container) return;
 
-  // Filter to only show HISTORY statuses (completed, cancelled, etc.) - not active reservations
+  // Filter to show HISTORY reservations (completed statuses OR fully paid past check-out date)
   const historyReservations = reservations.filter((r) =>
-    HISTORY_STATUSES.includes(r.status)
+    shouldShowInHistory(r)
   );
+
+  // Update status label for auto-completed reservations (fully paid past check-out)
+  historyReservations.forEach((r) => {
+    if (!HISTORY_STATUSES.includes(r.status) && shouldShowInHistory(r)) {
+      r.status = "completed";
+      r.status_label = "Completed";
+    }
+  });
 
   if (historyReservations.length === 0) {
     container.innerHTML = `

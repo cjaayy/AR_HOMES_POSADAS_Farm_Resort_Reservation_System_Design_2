@@ -7,6 +7,59 @@
 // MY BOOKINGS MANAGEMENT
 // ===========================
 
+// Statuses that should go to history, not active bookings
+const HISTORY_STATUSES_FLOW = [
+  "completed",
+  "checked_out",
+  "cancelled",
+  "no_show",
+  "forfeited",
+  "expired",
+];
+
+/**
+ * Check if a reservation should be in history (past check-out date and fully paid)
+ */
+function isReservationCompleted(booking) {
+  // If already has a history status, it's completed
+  if (HISTORY_STATUSES_FLOW.includes(booking.status)) {
+    return true;
+  }
+
+  // Check if the reservation is fully paid and past check-out date
+  const isFullyPaid =
+    booking.full_payment_verified == 1 ||
+    (booking.downpayment_verified == 1 && booking.full_payment_verified == 1);
+
+  if (isFullyPaid && booking.check_out_date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Parse check-out date and time
+    const checkOutDate = new Date(booking.check_out_date);
+
+    // If check-out time is provided, use it; otherwise default to end of day
+    if (booking.check_out_time) {
+      const timeParts = booking.check_out_time.split(":");
+      checkOutDate.setHours(
+        parseInt(timeParts[0], 10),
+        parseInt(timeParts[1], 10),
+        0,
+        0
+      );
+    } else {
+      checkOutDate.setHours(23, 59, 59, 999);
+    }
+
+    // If current date/time is past check-out, it's completed
+    if (new Date() > checkOutDate) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Load user's reservations
  */
@@ -33,10 +86,21 @@ async function loadMyBookings() {
     if (loadingState) loadingState.style.display = "none";
 
     if (data.success && data.reservations && data.reservations.length > 0) {
-      // Display bookings
+      // Filter out reservations that are completed (past check-out date and fully paid)
+      // These should go to Reservation History, not My Reservations
+      const activeReservations = data.reservations.filter(
+        (booking) => !isReservationCompleted(booking)
+      );
+
+      // Display only active bookings
       if (bookingsGrid) {
-        bookingsGrid.style.display = "grid";
-        renderBookings(data.reservations);
+        if (activeReservations.length > 0) {
+          bookingsGrid.style.display = "grid";
+          renderBookings(activeReservations);
+        } else {
+          // All reservations are completed - show empty state
+          if (emptyState) emptyState.style.display = "block";
+        }
       }
     } else {
       // Show empty state
