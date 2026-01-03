@@ -894,7 +894,10 @@ window.addEventListener("error", function (e) {
       e.message.includes("viewReservationDetails") ||
       e.message.includes("showReservationDetailsModal") ||
       e.message.includes("closeReservationDetailsModal") ||
-      e.message.includes("closePayRemainingBalanceModal"))
+      e.message.includes("closePayRemainingBalanceModal") ||
+      e.message.includes("bookAgainFromReservation") ||
+      e.message.includes("selectBookingType") ||
+      e.message.includes("writeReviewForReservation"))
   ) {
     // Let the function handle its own errors
     return;
@@ -3423,41 +3426,56 @@ function printReservationReceipt(reservationId) {
 
 // ===== BOOK AGAIN FUNCTIONALITY =====
 function bookAgainFromReservation(reservationId) {
-  const reservation = loadedReservations.find(
-    (r) => r.reservation_id == reservationId
-  );
-
-  if (reservation) {
-    // Store the previous booking details for pre-filling
-    sessionStorage.setItem(
-      "bookAgainData",
-      JSON.stringify({
-        booking_type: reservation.booking_type,
-        package_type: reservation.package_type,
-        number_of_guests: reservation.number_of_guests,
-        group_type: reservation.group_type,
-        special_requests: reservation.special_requests,
-      })
+  try {
+    const reservation = loadedReservations.find(
+      (r) => r.reservation_id == reservationId
     );
 
-    showNotification(
-      "Pre-filling your previous booking preferences...",
-      "info"
-    );
+    if (reservation) {
+      // Store the previous booking details for pre-filling
+      sessionStorage.setItem(
+        "bookAgainData",
+        JSON.stringify({
+          booking_type: reservation.booking_type,
+          package_type: reservation.package_type,
+          number_of_guests: reservation.number_of_guests,
+          group_type: reservation.group_type,
+          special_requests: reservation.special_requests,
+        })
+      );
 
-    // Navigate to reservation section
-    showSection("my-reservations");
-    updateActiveNavigation("my-reservations");
+      showNotification("Redirecting to Make Reservation...", "info");
+    }
 
-    // Try to pre-select the booking type if the function exists
-    setTimeout(() => {
-      if (typeof selectBookingType === "function" && reservation.booking_type) {
-        selectBookingType(reservation.booking_type);
+    // Navigate to Make Reservation section by clicking nav button directly
+    const navBtn = document.querySelector('[data-section="my-reservations"]');
+    if (navBtn) {
+      navBtn.click();
+
+      // Try to pre-select the booking type if the function exists
+      if (reservation && reservation.booking_type) {
+        setTimeout(() => {
+          try {
+            if (typeof selectBookingType === "function") {
+              selectBookingType(reservation.booking_type);
+            }
+          } catch (err) {
+            console.log("Could not pre-select booking type:", err);
+          }
+        }, 800);
       }
-    }, 500);
-  } else {
-    showSection("my-reservations");
-    updateActiveNavigation("my-reservations");
+    } else {
+      // Fallback: use showSection
+      showSection("my-reservations");
+      updateActiveNavigation("my-reservations");
+    }
+  } catch (error) {
+    console.error("Book again error:", error);
+    // Last resort: just navigate to the section
+    const navBtn = document.querySelector('[data-section="my-reservations"]');
+    if (navBtn) {
+      navBtn.click();
+    }
   }
 }
 
