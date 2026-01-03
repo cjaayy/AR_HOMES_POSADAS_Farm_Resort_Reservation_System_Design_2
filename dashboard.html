@@ -2091,7 +2091,7 @@
                     0
                   </div>
                   <div style="font-size: 0.85em; color: #64748b">
-                    Total Bookings
+                    Total Reservations
                   </div>
                 </div>
                 <div style="text-align: center">
@@ -3489,6 +3489,9 @@
         middle_name: "",
         last_name: "",
         phone_number: "",
+        memberSince: new Date().getFullYear(),
+        totalBookings: 0,
+        reviewsGiven: 0,
       };
 
       // Check authentication and load user data
@@ -3518,6 +3521,10 @@
             window.userData.middle_name = data.data.middle_name || "";
             window.userData.last_name = data.data.last_name || "";
             window.userData.phone_number = data.data.phone_number || "";
+            window.userData.memberSince =
+              data.data.memberSince || new Date().getFullYear();
+            window.userData.totalBookings = data.data.totalBookings || 0;
+            window.userData.reviewsGiven = data.data.reviewsGiven || 0;
 
             // Update UI immediately
             updateUserInterface();
@@ -3580,7 +3587,7 @@
           }
         }
 
-        // Update profile stats (you can customize these based on actual data)
+        // Update profile stats (using actual data from server)
         const totalBookingsElement = document.getElementById(
           "profileTotalBookings"
         );
@@ -3590,14 +3597,15 @@
         const memberSinceElement =
           document.getElementById("profileMemberSince");
 
-        if (totalBookingsElement) totalBookingsElement.textContent = "0"; // Will be updated from actual data
-        if (reviewsGivenElement) reviewsGivenElement.textContent = "0"; // Will be updated from actual data
+        if (totalBookingsElement) {
+          totalBookingsElement.textContent = window.userData.totalBookings || 0;
+        }
+        if (reviewsGivenElement) {
+          reviewsGivenElement.textContent = window.userData.reviewsGiven || 0;
+        }
         if (memberSinceElement) {
-          // Extract year from created_at if available, otherwise use 2024
-          const memberYear = window.userData.created_at
-            ? new Date(window.userData.created_at).getFullYear()
-            : "2024";
-          memberSinceElement.textContent = memberYear;
+          memberSinceElement.textContent =
+            window.userData.memberSince || new Date().getFullYear();
         }
 
         // Refresh userData in dashboard-script.js if the function exists
@@ -3735,6 +3743,14 @@
               window.userData.pendingReservations = pending;
               window.userData.approvedReservations = approved;
               window.userData.completedStays = completed;
+
+              // Also update profile Total Bookings to match Dashboard Total Reservations
+              window.userData.totalBookings = total;
+              const profileTotalBookingsEl = document.getElementById(
+                "profileTotalBookings"
+              );
+              if (profileTotalBookingsEl)
+                profileTotalBookingsEl.textContent = total;
             }
 
             // Load recent activity

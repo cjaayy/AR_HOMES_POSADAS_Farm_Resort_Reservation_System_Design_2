@@ -36,8 +36,68 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
 // Update last activity time
 $_SESSION['last_activity'] = time();
 
-// Return user data
-$memberSince = isset($_SESSION['login_time']) ? date('Y', $_SESSION['login_time']) : date('Y');
+// Include database configuration
+require_once '../config/database.php';
+
+// Default values
+$memberSince = date('Y');
+$totalBookings = 0;
+$reviewsGiven = 0;
+
+// Fetch user data from database
+try {
+    $conn = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    $user_id = $_SESSION['user_id'] ?? null;
+    $user_email = $_SESSION['user_email'] ?? '';
+    
+    if ($user_id) {
+        // Get user's created_at date (member since)
+        $userStmt = $conn->prepare("SELECT created_at FROM users WHERE user_id = :user_id LIMIT 1");
+        $userStmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $userStmt->execute();
+        $userData = $userStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($userData && !empty($userData['created_at'])) {
+            $memberSince = date('Y', strtotime($userData['created_at']));
+        }
+        
+        // Get total bookings count (by user_id or email)
+        // Excludes pending_payment without verified downpayment (same as dashboard)
+        $bookingsStmt = $conn->prepare("
+            SELECT COUNT(*) as total 
+            FROM reservations 
+            WHERE (user_id = :user_id OR guest_email = :email)
+            AND NOT (status = 'pending_payment' AND (downpayment_verified = 0 OR downpayment_verified IS NULL))
+        ");
+        $bookingsStmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $bookingsStmt->bindParam(':email', $user_email, PDO::PARAM_STR);
+        $bookingsStmt->execute();
+        $bookingsData = $bookingsStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($bookingsData) {
+            $totalBookings = (int)$bookingsData['total'];
+        }
+        
+        // Get total reviews given
+        $reviewsStmt = $conn->prepare("
+            SELECT COUNT(*) as total 
+            FROM reviews 
+            WHERE user_id = :user_id
+        ");
+        $reviewsStmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $reviewsStmt->execute();
+        $reviewsData = $reviewsStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($reviewsData) {
+            $reviewsGiven = (int)$reviewsData['total'];
+        }
+    }
+} catch (PDOException $e) {
+    // Log error but don't break the response
+    error_log("Error fetching user stats: " . $e->getMessage());
+}
 
 echo json_encode([
     'success' => true,
@@ -52,6 +112,8 @@ echo json_encode([
         'middle_name' => $_SESSION['user_middle_name'] ?? '',
         'phone_number' => $_SESSION['user_phone'] ?? '',
         'memberSince' => $memberSince,
+        'totalBookings' => $totalBookings,
+        'reviewsGiven' => $reviewsGiven,
         'loyaltyLevel' => 'Regular'
     ]
 ]);
