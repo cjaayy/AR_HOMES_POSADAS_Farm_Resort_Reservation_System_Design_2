@@ -2694,12 +2694,32 @@ function showReservationDetailsModal(r) {
             r.rebooking_requested == 1
               ? `
           <!-- Rebooking Request -->
-          <div class="details-section" style="background: #fff3e0; border-left: 4px solid #ff9800;">
-            <h3 style="color: #e65100;"><i class="fas fa-calendar-check"></i> Rebooking Request</h3>
+          <div class="details-section" style="background: ${
+            r.rebooking_approved == 1
+              ? "#f0fdf4"
+              : r.rebooking_approved == -1
+              ? "#fef2f2"
+              : "#fff7ed"
+          }; border-left: 4px solid ${
+                  r.rebooking_approved == 1
+                    ? "#10b981"
+                    : r.rebooking_approved == -1
+                    ? "#ef4444"
+                    : "#ff9800"
+                };">
+            <h3 style="color: ${
+              r.rebooking_approved == 1
+                ? "#166534"
+                : r.rebooking_approved == -1
+                ? "#b91c1c"
+                : "#c2410c"
+            };"><i class="fas fa-calendar-check"></i> Rebooking Request</h3>
             <div class="details-grid">
               <div class="detail-item">
-                <label>New Requested Date</label>
-                <span>${formatDate(r.rebooking_new_date)}</span>
+                <label>Requested New Date</label>
+                <span style="font-weight: 600;">${formatDate(
+                  r.rebooking_new_date
+                )}</span>
               </div>
               <div class="detail-item">
                 <label>Reason</label>
@@ -2707,13 +2727,74 @@ function showReservationDetailsModal(r) {
               </div>
               <div class="detail-item">
                 <label>Status</label>
-                <span style="color: ${
-                  r.rebooking_approved == 1 ? "#4caf50" : "#ff9800"
-                }">
-                  ${r.rebooking_approved == 1 ? "Approved" : "Pending Approval"}
+                <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 13px; background: ${
+                  r.rebooking_approved == 1
+                    ? "#dcfce7"
+                    : r.rebooking_approved == -1
+                    ? "#fee2e2"
+                    : "#fed7aa"
+                }; color: ${
+                  r.rebooking_approved == 1
+                    ? "#166534"
+                    : r.rebooking_approved == -1
+                    ? "#b91c1c"
+                    : "#c2410c"
+                };">
+                  <i class="fas ${
+                    r.rebooking_approved == 1
+                      ? "fa-check-circle"
+                      : r.rebooking_approved == -1
+                      ? "fa-times-circle"
+                      : "fa-clock"
+                  }"></i>
+                  ${
+                    r.rebooking_approved == 1
+                      ? "Approved"
+                      : r.rebooking_approved == -1
+                      ? "Rejected"
+                      : "Pending Approval"
+                  }
                 </span>
               </div>
+              ${
+                r.rebooking_requested_at_formatted
+                  ? `
+              <div class="detail-item">
+                <label>Requested On</label>
+                <span>${r.rebooking_requested_at_formatted}</span>
+              </div>`
+                  : ""
+              }
+              ${
+                r.rebooking_approved_at_formatted
+                  ? `
+              <div class="detail-item">
+                <label>${
+                  r.rebooking_approved == 1 ? "Approved On" : "Processed On"
+                }</label>
+                <span>${r.rebooking_approved_at_formatted}</span>
+              </div>`
+                  : ""
+              }
             </div>
+            ${
+              r.rebooking_approved == 1
+                ? `
+            <div style="margin-top: 16px; padding: 12px 16px; background: #dcfce7; border-radius: 8px; color: #166534; font-size: 14px;">
+              <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+              <strong>Your rebooking has been approved!</strong> Your reservation has been updated to the new date.
+            </div>`
+                : ""
+            }
+            ${
+              r.rebooking_approved == -1
+                ? `
+            <div style="margin-top: 16px; padding: 12px 16px; background: #fee2e2; border-radius: 8px; color: #b91c1c; font-size: 14px;">
+              <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+              Your rebooking request was not approved. Your original reservation date remains unchanged. You may submit a new rebooking request if needed.
+            </div>`
+                : ""
+            }
           </div>`
               : ""
           }
@@ -2879,7 +2960,7 @@ function formatTime12Hour(timeString) {
 }
 
 // ===== REBOOKING MODAL =====
-function showRebookingModal(reservationId) {
+async function showRebookingModal(reservationId) {
   const reservation = loadedReservations.find(
     (r) => r.reservation_id == reservationId
   );
@@ -2889,81 +2970,190 @@ function showRebookingModal(reservationId) {
   }
 
   // Calculate date constraints
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const originalDate = new Date(reservation.check_in_date);
   const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 7); // Minimum 7 days from now
+  minDate.setDate(minDate.getDate() + 1); // Minimum tomorrow (will check 7-day rule on backend)
   const maxDate = new Date(originalDate);
   maxDate.setMonth(maxDate.getMonth() + 3); // Maximum 3 months from original date
 
-  const modalHTML = `
-    <div id="rebookingModal" class="reservation-modal-overlay" onclick="closeRebookingModal(event)">
-      <div class="reservation-modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
-        <div class="reservation-modal-header" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h2 style="color: white; margin: 0;">
-              <i class="fas fa-calendar-alt"></i> Request Rebooking
-            </h2>
-            <button onclick="closeRebookingModal()" class="modal-close-btn">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        </div>
-        
-        <div class="reservation-modal-body">
-          <div style="background: #fff3e0; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-            <p style="margin: 0; color: #e65100;">
-              <i class="fas fa-info-circle"></i> <strong>Rebooking Policy:</strong>
-            </p>
-            <ul style="margin: 10px 0 0 20px; font-size: 14px; color: #555;">
-              <li>Rebooking must be requested at least 7 days before check-in</li>
-              <li>New date must be within 3 months of original date</li>
-              <li>Downpayment is non-refundable but will be applied to new booking</li>
-              <li>Subject to date availability and admin approval</li>
-            </ul>
-          </div>
-          
-          <div style="margin-bottom: 20px;">
-            <p><strong>Current Check-in Date:</strong> ${formatDate(
-              reservation.check_in_date
-            )}</p>
-            <p><strong>Reservation #:</strong> ${reservation.reservation_id}</p>
-          </div>
-          
-          <form id="rebookingForm" onsubmit="submitRebooking(event, ${reservationId})">
-            <div style="margin-bottom: 20px;">
-              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
-                <i class="fas fa-calendar"></i> New Check-in Date *
-              </label>
-              <input type="date" name="new_date" required 
-                min="${minDate.toISOString().split("T")[0]}"
-                max="${maxDate.toISOString().split("T")[0]}"
-                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-              <small style="color: #666; display: block; margin-top: 5px;">
-                Available dates: ${formatDate(
-                  minDate.toISOString()
-                )} - ${formatDate(maxDate.toISOString())}
-              </small>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-              <label style="display: block; font-weight: 600; margin-bottom: 8px;">
-                <i class="fas fa-comment"></i> Reason for Rebooking
-              </label>
-              <textarea name="reason" rows="3" placeholder="Please explain why you need to rebook..."
-                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
-            </div>
-            
-            <button type="submit" class="modal-btn primary" style="width: 100%;">
-              <i class="fas fa-paper-plane"></i> Submit Rebooking Request
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
+  // Calculate days until check-in
+  const daysUntilCheckin = Math.floor(
+    (originalDate - today) / (1000 * 60 * 60 * 24)
+  );
 
-  document.body.insertAdjacentHTML("beforeend", modalHTML);
-  document.body.style.overflow = "hidden";
+  // Check if rebooking is allowed
+  if (daysUntilCheckin < 7) {
+    showNotification(
+      `Rebooking must be requested at least 7 days before check-in. You have only ${daysUntilCheckin} day(s) remaining.`,
+      "error"
+    );
+    return;
+  }
+
+  // Fetch unavailable dates and then render modal
+  fetch("user/get_unavailable_dates.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ booking_type: reservation.booking_type }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      const unavailable =
+        data.success && Array.isArray(data.unavailable_dates)
+          ? data.unavailable_dates
+          : [];
+      const modalHTML = `
+        <div id="rebookingModal" class="reservation-modal-overlay" onclick="closeRebookingModal(event)">
+          <div class="reservation-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()">
+            <div class="reservation-modal-header" style="background: linear-gradient(135deg, #11224e 0%, #1e3a8a 100%);">
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <h2 style="color: white; margin: 0;">
+                  <i class="fas fa-calendar-alt"></i> Request Rebooking
+                </h2>
+                <button onclick="closeRebookingModal()" class="modal-close-btn">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="reservation-modal-body" style="padding: 24px;">
+              <!-- Current Reservation Info -->
+              <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 20px; border-radius: 12px; margin-bottom: 24px; border-left: 4px solid #11224e;">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+                  <div style="width: 48px; height: 48px; background: #11224e; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-calendar-check" style="color: white; font-size: 20px;"></i>
+                  </div>
+                  <div>
+                    <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: 600;">CURRENT CHECK-IN DATE</p>
+                    <p style="margin: 0; font-size: 20px; font-weight: 700; color: #11224e;">${formatDate(
+                      reservation.check_in_date
+                    )}</p>
+                  </div>
+                </div>
+                <p style="margin: 0; font-size: 13px; color: #64748b;">
+                  <i class="fas fa-hashtag" style="margin-right: 6px;"></i>Reservation #${
+                    reservation.reservation_id
+                  }
+                  <span style="margin-left: 16px;"><i class="fas fa-box" style="margin-right: 6px;"></i>${
+                    reservation.package_type || reservation.booking_type
+                  }</span>
+                </p>
+              </div>
+              <form id="rebookingForm" onsubmit="submitRebooking(event, ${reservationId})">
+                <!-- New Date Selection -->
+                <div style="margin-bottom: 24px;">
+                  <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1e293b; font-size: 15px;">
+                    <i class="fas fa-calendar" style="color: #11224e; margin-right: 8px;"></i> New Check-in Date <span style="color: #ef4444;">*</span>
+                  </label>
+                  <input type="date" name="new_date" id="rebookNewDate" required 
+                    min="${minDate.toISOString().split("T")[0]}"
+                    max="${maxDate.toISOString().split("T")[0]}"
+                    style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
+                  <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                    <div style="flex: 1; background: #fef3c7; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                      <p style="margin: 0; font-size: 12px; color: #92400e;">
+                        <i class="fas fa-info-circle"></i> Must be requested 7+ days before current check-in
+                      </p>
+                    </div>
+                  </div>
+                  <div style="background: #f0fdf4; padding: 12px 16px; border-radius: 8px; margin-top: 12px; border: 1px solid #bbf7d0;">
+                    <p style="margin: 0; font-size: 13px; color: #166534;">
+                      <i class="fas fa-calendar-check" style="margin-right: 6px;"></i>
+                      <strong>Valid Date Range:</strong> ${formatDate(
+                        minDate.toISOString()
+                      )} to ${formatDate(
+        maxDate.toISOString()
+      )} <span style="opacity: 0.7;">(within 3 months)</span>
+                    </p>
+                  </div>
+                  <div id="unavailableDatesMsg" style="margin-top:10px; color:#ef4444; font-size:13px;"></div>
+                </div>
+                <!-- Reason -->
+                <div style="margin-bottom: 24px;">
+                  <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1e293b; font-size: 15px;">
+                    <i class="fas fa-comment-alt" style="color: #11224e; margin-right: 8px;"></i> Reason for Rebooking <span style="color: #ef4444;">*</span>
+                  </label>
+                  <textarea name="reason" rows="4" required placeholder="Please provide a reason for changing your reservation date..."
+                    style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; resize: vertical; font-family: inherit; transition: all 0.3s;"></textarea>
+                </div>
+                <!-- Rebooking Policy -->
+                <div style="background: #fffbeb; padding: 16px; border-radius: 10px; margin-bottom: 24px; border: 1px solid #fde68a;">
+                  <p style="margin: 0 0 12px 0; color: #92400e; font-weight: 600; font-size: 14px;">
+                    <i class="fas fa-exclamation-triangle"></i> Rebooking Policy:
+                  </p>
+                  <ul style="margin: 0; padding-left: 24px; font-size: 13px; color: #78350f; line-height: 1.8;">
+                    <li>Must be requested 7+ days before check-in</li>
+                    <li>Requires admin approval</li>
+                    <li>No additional fees if approved</li>
+                    <li>Original payment will be transferred to new date</li>
+                  </ul>
+                </div>
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px;">
+                  <button type="button" onclick="closeRebookingModal()" style="flex: 1; padding: 14px 24px; background: #f1f5f9; color: #64748b; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-times"></i> Cancel
+                  </button>
+                  <button type="submit" id="rebookSubmitBtn" style="flex: 2; padding: 14px 24px; background: linear-gradient(135deg, #11224e 0%, #1e3a8a 100%); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-paper-plane"></i> Submit Request
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML("beforeend", modalHTML);
+      document.body.style.overflow = "hidden";
+      // Add focus styles to inputs
+      const dateInput = document.getElementById("rebookNewDate");
+      if (dateInput) {
+        dateInput.addEventListener("focus", function () {
+          this.style.borderColor = "#11224e";
+          this.style.boxShadow = "0 0 0 3px rgba(17, 34, 78, 0.1)";
+        });
+        dateInput.addEventListener("blur", function () {
+          this.style.borderColor = "#e2e8f0";
+          this.style.boxShadow = "none";
+        });
+        // Disable unavailable dates
+        dateInput.addEventListener("input", function () {
+          if (unavailable.includes(this.value)) {
+            this.setCustomValidity(
+              "This date is already booked. Please choose another date."
+            );
+            document.getElementById("unavailableDatesMsg").textContent =
+              "Selected date is already booked.";
+          } else {
+            this.setCustomValidity("");
+            document.getElementById("unavailableDatesMsg").textContent = "";
+          }
+        });
+        // Initial disable for unavailable dates
+        dateInput.addEventListener("change", function () {
+          if (unavailable.includes(this.value)) {
+            this.setCustomValidity(
+              "This date is already booked. Please choose another date."
+            );
+            document.getElementById("unavailableDatesMsg").textContent =
+              "Selected date is already booked.";
+          } else {
+            this.setCustomValidity("");
+            document.getElementById("unavailableDatesMsg").textContent = "";
+          }
+        });
+      }
+      if (unavailable.length > 0) {
+        document.getElementById("unavailableDatesMsg").textContent =
+          "Some dates are already booked and cannot be selected.";
+      }
+    })
+    .catch(() => {
+      showNotification(
+        "Failed to load unavailable dates. Please try again.",
+        "error"
+      );
+    });
 }
 
 function closeRebookingModal(event) {
@@ -3989,6 +4179,24 @@ function createEnhancedReservationCard(r) {
   };
   const statusIcon = statusIcons[r.status] || "info-circle";
 
+  // Rebooking status indicator
+  let rebookingBadge = "";
+  if (r.rebooking_status === "pending") {
+    rebookingBadge = `<span class="rebooking-status-badge pending" title="Rebooking request pending approval">
+      <i class="fas fa-clock"></i> Rebooking Pending
+    </span>`;
+  } else if (r.rebooking_status === "approved") {
+    rebookingBadge = `<span class="rebooking-status-badge approved" title="Rebooking approved - new date: ${
+      r.rebooking_new_date_formatted || r.rebooking_new_date
+    }">
+      <i class="fas fa-check-circle"></i> Rebooking Approved
+    </span>`;
+  } else if (r.rebooking_status === "rejected") {
+    rebookingBadge = `<span class="rebooking-status-badge rejected" title="Rebooking request was rejected">
+      <i class="fas fa-times-circle"></i> Rebooking Rejected
+    </span>`;
+  }
+
   return `
     <div class="booking-history-card" data-status="${statusClass}" data-reservation-id="${
     r.reservation_id
@@ -4002,10 +4210,13 @@ function createEnhancedReservationCard(r) {
             </span>
             <span class="reservation-date">Booked: ${createdDate}</span>
           </div>
-          <span class="history-status-badge ${statusClass}">
-            <i class="fas fa-${statusIcon}"></i>
-            ${r.status_label}
-          </span>
+          <div class="history-status-badges">
+            ${rebookingBadge}
+            <span class="history-status-badge ${statusClass}">
+              <i class="fas fa-${statusIcon}"></i>
+              ${r.status_label}
+            </span>
+          </div>
         </div>
         
         <div class="history-card-body">

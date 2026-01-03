@@ -382,6 +382,13 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               </a>
             </li>
             <li class="nav-item">
+              <a href="#rebooking-requests" class="nav-link" data-section="rebooking-requests">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Rebooking Requests</span>
+                <span class="notification-badge" id="rebookingBadge" style="display:none; background:#ff9800; color:white; font-size:11px; padding:2px 6px; border-radius:10px; margin-left:8px;">0</span>
+              </a>
+            </li>
+            <li class="nav-item">
               <a href="#settings" class="nav-link" data-section="settings">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
@@ -1952,6 +1959,75 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               <div id="calendarEventContent" style="padding:24px;">
                 <!-- Event details will be populated here -->
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Rebooking Requests Section -->
+        <section id="rebooking-requests" class="content-section">
+          <div class="section-header" style="margin-bottom:30px;">
+            <h2 style="color:#333; font-size:32px; font-weight:700; margin:0 0 8px 0;">Rebooking Requests</h2>
+            <p style="color:#666; margin:0; font-size:16px;">Review and manage guest rebooking requests</p>
+          </div>
+
+          <!-- Stats Overview -->
+          <div class="stats-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(255,152,0,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#ff9800;"><i class="fas fa-clock"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#ff9800;" id="rebookingPendingCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Pending Requests</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(16,185,129,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#10b981;"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#10b981;" id="rebookingApprovedCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Approved</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(239,68,68,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#ef4444;"><i class="fas fa-times-circle"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#ef4444;" id="rebookingRejectedCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Rejected</div>
+              </div>
+            </div>
+            <div class="stat-card-res" style="background:white; color:#11224e; padding:24px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; transition:all 0.3s ease; border:2px solid #11224e;">
+              <div style="width:64px; height:64px; background:rgba(17,34,78,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#11224e;"><i class="fas fa-exchange-alt"></i></div>
+              <div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:4px; color:#11224e;" id="rebookingTotalCount">0</div>
+                <div style="font-size:14px; font-weight:500; color:#11224e;">Total Requests</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Tabs -->
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:20px;">
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              <button class="rebooking-filter-btn active" data-filter="pending" onclick="filterRebookingRequests('pending')" style="padding:12px 20px; background:#ff9800; color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-clock"></i> Pending <span id="filter-pending-count" style="background:rgba(255,255,255,0.3); padding:2px 8px; border-radius:10px; font-size:12px;">0</span>
+              </button>
+              <button class="rebooking-filter-btn" data-filter="approved" onclick="filterRebookingRequests('approved')" style="padding:12px 20px; background:#f1f5f9; color:#64748b; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-check-circle"></i> Approved <span id="filter-approved-count" style="background:#e2e8f0; padding:2px 8px; border-radius:10px; font-size:12px;">0</span>
+              </button>
+              <button class="rebooking-filter-btn" data-filter="rejected" onclick="filterRebookingRequests('rejected')" style="padding:12px 20px; background:#f1f5f9; color:#64748b; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-times-circle"></i> Rejected <span id="filter-rejected-count" style="background:#e2e8f0; padding:2px 8px; border-radius:10px; font-size:12px;">0</span>
+              </button>
+              <button class="rebooking-filter-btn" data-filter="all" onclick="filterRebookingRequests('all')" style="padding:12px 20px; background:#f1f5f9; color:#64748b; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-list"></i> All
+              </button>
+              <button onclick="loadRebookingRequests()" style="margin-left:auto; padding:12px 20px; background:white; border:2px solid #11224e; border-radius:10px; font-size:14px; font-weight:600; color:#11224e; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Rebooking Requests List -->
+          <div id="rebookingRequestsContainer" style="display:flex; flex-direction:column; gap:16px;">
+            <div style="background:white; padding:40px; border-radius:16px; text-align:center; color:#94a3b8;">
+              <i class="fas fa-spinner fa-spin" style="font-size:48px; margin-bottom:16px;"></i>
+              <p style="font-size:16px; margin:0;">Loading rebooking requests...</p>
             </div>
           </div>
         </section>
@@ -4365,6 +4441,340 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           }, 100);
         });
       }
+
+      // ========================================
+      // REBOOKING REQUESTS MANAGEMENT
+      // ========================================
+      
+      let currentRebookingFilter = 'pending';
+      let rebookingRequests = [];
+      
+      // Load rebooking requests
+      async function loadRebookingRequests(filter = currentRebookingFilter) {
+        currentRebookingFilter = filter;
+        const container = document.getElementById('rebookingRequestsContainer');
+        
+        try {
+          container.innerHTML = `
+            <div style="background:white; padding:40px; border-radius:16px; text-align:center; color:#94a3b8;">
+              <i class="fas fa-spinner fa-spin" style="font-size:48px; margin-bottom:16px;"></i>
+              <p style="font-size:16px; margin:0;">Loading rebooking requests...</p>
+            </div>
+          `;
+          
+          const res = await fetch(`get_rebooking_requests.php?status=${filter}`, { credentials: 'include' });
+          const data = await res.json();
+          
+          if (!data.success) {
+            throw new Error(data.message || 'Failed to load requests');
+          }
+          
+          rebookingRequests = data.requests || [];
+          
+          // Update stats
+          document.getElementById('rebookingPendingCount').textContent = data.counts?.pending || 0;
+          document.getElementById('rebookingApprovedCount').textContent = data.counts?.approved || 0;
+          document.getElementById('rebookingRejectedCount').textContent = data.counts?.rejected || 0;
+          document.getElementById('rebookingTotalCount').textContent = data.counts?.total || 0;
+          
+          // Update filter counts
+          document.getElementById('filter-pending-count').textContent = data.counts?.pending || 0;
+          document.getElementById('filter-approved-count').textContent = data.counts?.approved || 0;
+          document.getElementById('filter-rejected-count').textContent = data.counts?.rejected || 0;
+          
+          // Update badge
+          const badge = document.getElementById('rebookingBadge');
+          if (badge) {
+            if (data.counts?.pending > 0) {
+              badge.textContent = data.counts.pending;
+              badge.style.display = 'inline-block';
+            } else {
+              badge.style.display = 'none';
+            }
+          }
+          
+          // Render requests
+          if (rebookingRequests.length === 0) {
+            container.innerHTML = `
+              <div style="background:white; padding:60px; border-radius:16px; text-align:center;">
+                <i class="fas fa-inbox" style="font-size:64px; color:#cbd5e1; margin-bottom:20px;"></i>
+                <h3 style="color:#64748b; margin:0 0 8px 0;">No Rebooking Requests</h3>
+                <p style="color:#94a3b8; margin:0;">There are no ${filter === 'all' ? '' : filter} rebooking requests at the moment.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          container.innerHTML = rebookingRequests.map(request => renderRebookingRequestCard(request)).join('');
+          
+        } catch (err) {
+          console.error('Error loading rebooking requests:', err);
+          container.innerHTML = `
+            <div style="background:white; padding:40px; border-radius:16px; text-align:center; color:#ef4444;">
+              <i class="fas fa-exclamation-triangle" style="font-size:48px; margin-bottom:16px;"></i>
+              <p style="font-size:16px; margin:0;">Error: ${err.message}</p>
+              <button onclick="loadRebookingRequests()" style="margin-top:16px; padding:12px 24px; background:#11224e; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                <i class="fas fa-sync-alt"></i> Retry
+              </button>
+            </div>
+          `;
+        }
+      }
+      
+      function renderRebookingRequestCard(request) {
+        const statusColors = {
+          'pending': { bg: '#fff7ed', border: '#ff9800', text: '#c2410c', label: 'Pending Approval' },
+          'approved': { bg: '#f0fdf4', border: '#10b981', text: '#166534', label: 'Approved' },
+          'rejected': { bg: '#fef2f2', border: '#ef4444', text: '#b91c1c', label: 'Rejected' }
+        };
+        
+        const status = statusColors[request.approval_status] || statusColors.pending;
+        
+        return `
+          <div style="background:white; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:hidden; border-left:4px solid ${status.border};">
+            <!-- Header -->
+            <div style="padding:20px; background:${status.bg}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:56px; height:56px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; color:${status.text}; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                  ${(request.guest_name || 'G')[0].toUpperCase()}
+                </div>
+                <div>
+                  <h3 style="margin:0 0 4px 0; font-size:18px; color:#1e293b;">${escapeHtml(request.guest_name || 'Unknown Guest')}</h3>
+                  <p style="margin:0; font-size:13px; color:#64748b;">
+                    <i class="fas fa-envelope" style="margin-right:6px;"></i>${escapeHtml(request.guest_email || 'N/A')}
+                    ${request.guest_phone ? `<span style="margin-left:12px;"><i class="fas fa-phone" style="margin-right:6px;"></i>${escapeHtml(request.guest_phone)}</span>` : ''}
+                  </p>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="padding:8px 16px; background:${status.border}; color:white; border-radius:20px; font-size:12px; font-weight:600;">
+                  ${status.label}
+                </span>
+                <span style="padding:8px 16px; background:#11224e; color:white; border-radius:20px; font-size:12px; font-weight:600;">
+                  #${request.reservation_id}
+                </span>
+              </div>
+            </div>
+            
+            <!-- Body -->
+            <div style="padding:24px;">
+              <!-- Date Change Info -->
+              <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center; margin-bottom:24px; padding:20px; background:#f8fafc; border-radius:12px;">
+                <div style="text-align:center;">
+                  <p style="margin:0 0 4px 0; font-size:12px; color:#64748b; font-weight:600;">CURRENT DATE</p>
+                  <p style="margin:0; font-size:18px; font-weight:700; color:#1e293b;">${request.check_in_date_formatted}</p>
+                  <p style="margin:4px 0 0 0; font-size:12px; color:#64748b;">${request.booking_type_label || request.booking_type}</p>
+                </div>
+                <div style="text-align:center;">
+                  <i class="fas fa-arrow-right" style="font-size:24px; color:#ff9800;"></i>
+                </div>
+                <div style="text-align:center;">
+                  <p style="margin:0 0 4px 0; font-size:12px; color:#64748b; font-weight:600;">REQUESTED NEW DATE</p>
+                  <p style="margin:0; font-size:18px; font-weight:700; color:#10b981;">${request.rebooking_new_date_formatted}</p>
+                  <p style="margin:4px 0 0 0; font-size:12px; color:#64748b;">Same package</p>
+                </div>
+              </div>
+              
+              <!-- Reason -->
+              <div style="margin-bottom:24px;">
+                <h4 style="margin:0 0 8px 0; font-size:14px; color:#64748b; font-weight:600;"><i class="fas fa-comment-alt" style="margin-right:8px;"></i>Reason for Rebooking</h4>
+                <p style="margin:0; padding:16px; background:#f8fafc; border-radius:8px; color:#1e293b; font-size:14px; line-height:1.6;">
+                  ${escapeHtml(request.rebooking_reason) || '<em style="color:#94a3b8;">No reason provided</em>'}
+                </p>
+              </div>
+              
+              <!-- Request Info -->
+              <div style="display:flex; gap:24px; margin-bottom:24px; font-size:13px; color:#64748b;">
+                <div>
+                  <i class="fas fa-clock" style="margin-right:6px;"></i>
+                  Requested: <strong style="color:#1e293b;">${request.rebooking_requested_at_formatted || 'N/A'}</strong>
+                </div>
+                ${request.rebooking_approved_at_formatted ? `
+                  <div>
+                    <i class="fas fa-user-check" style="margin-right:6px;"></i>
+                    ${request.approval_status === 'approved' ? 'Approved' : 'Processed'}: <strong style="color:#1e293b;">${request.rebooking_approved_at_formatted}</strong>
+                    ${request.approved_by_name ? `by ${request.approved_by_name}` : ''}
+                  </div>
+                ` : ''}
+              </div>
+              
+              <!-- Payment Info -->
+              <div style="display:flex; gap:16px; padding:16px; background:#e0f2fe; border-radius:8px; margin-bottom:24px;">
+                <i class="fas fa-info-circle" style="color:#0284c7; margin-top:2px;"></i>
+                <div style="font-size:13px; color:#0369a1;">
+                  <strong>Payment Transfer:</strong> Original downpayment of ₱${parseFloat(request.downpayment_amount || 1000).toLocaleString()} will be transferred to the new date if approved.
+                  Total reservation: ₱${parseFloat(request.total_amount || 0).toLocaleString()}
+                </div>
+              </div>
+              
+              <!-- Action Buttons -->
+              ${request.approval_status === 'pending' ? `
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                  <button onclick="rejectRebooking('${request.reservation_id}')" style="padding:12px 24px; background:white; border:2px solid #ef4444; color:#ef4444; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; transition:all 0.2s;">
+                    <i class="fas fa-times"></i> Reject
+                  </button>
+                  <button onclick="approveRebooking('${request.reservation_id}')" style="padding:12px 24px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; transition:all 0.2s;">
+                    <i class="fas fa-check"></i> Approve Rebooking
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+      
+      function filterRebookingRequests(filter) {
+        // Update active button
+        document.querySelectorAll('.rebooking-filter-btn').forEach(btn => {
+          if (btn.dataset.filter === filter) {
+            btn.style.background = filter === 'pending' ? '#ff9800' : 
+                                   filter === 'approved' ? '#10b981' : 
+                                   filter === 'rejected' ? '#ef4444' : '#11224e';
+            btn.style.color = 'white';
+          } else {
+            btn.style.background = '#f1f5f9';
+            btn.style.color = '#64748b';
+          }
+        });
+        
+        loadRebookingRequests(filter);
+      }
+      
+      async function approveRebooking(reservationId) {
+        if (!confirm('Are you sure you want to approve this rebooking request?\n\nThe reservation will be updated to the new date and the original date will be released.')) {
+          return;
+        }
+        
+        try {
+          const formData = new FormData();
+          formData.append('reservation_id', reservationId);
+          formData.append('action', 'approve');
+          
+          const res = await fetch('approve_rebooking.php', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
+          
+          const data = await res.json();
+          
+          if (data.success) {
+            showAdminNotification('success', 'Rebooking Approved', data.message || 'The rebooking has been approved successfully.');
+            loadRebookingRequests();
+          } else {
+            showAdminNotification('error', 'Approval Failed', data.message || 'Failed to approve rebooking.');
+          }
+        } catch (err) {
+          console.error('Error approving rebooking:', err);
+          showAdminNotification('error', 'Error', 'An error occurred while approving the rebooking.');
+        }
+      }
+      
+      async function rejectRebooking(reservationId) {
+        const reason = prompt('Please provide a reason for rejecting this rebooking request (optional):');
+        if (reason === null) return; // User cancelled
+        
+        try {
+          const formData = new FormData();
+          formData.append('reservation_id', reservationId);
+          formData.append('action', 'reject');
+          if (reason) formData.append('reason', reason);
+          
+          const res = await fetch('approve_rebooking.php', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
+          
+          const data = await res.json();
+          
+          if (data.success) {
+            showAdminNotification('success', 'Rebooking Rejected', data.message || 'The rebooking request has been rejected.');
+            loadRebookingRequests();
+          } else {
+            showAdminNotification('error', 'Rejection Failed', data.message || 'Failed to reject rebooking.');
+          }
+        } catch (err) {
+          console.error('Error rejecting rebooking:', err);
+          showAdminNotification('error', 'Error', 'An error occurred while rejecting the rebooking.');
+        }
+      }
+      
+      // Admin notification helper
+      function showAdminNotification(type, title, message) {
+        const colors = {
+          success: { bg: '#f0fdf4', border: '#10b981', icon: 'fa-check-circle' },
+          error: { bg: '#fef2f2', border: '#ef4444', icon: 'fa-exclamation-circle' },
+          warning: { bg: '#fffbeb', border: '#f59e0b', icon: 'fa-exclamation-triangle' },
+          info: { bg: '#eff6ff', border: '#3b82f6', icon: 'fa-info-circle' }
+        };
+        
+        const color = colors[type] || colors.info;
+        
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 80px;
+          right: 20px;
+          background: ${color.bg};
+          border: 2px solid ${color.border};
+          border-radius: 12px;
+          padding: 16px 24px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          animation: slideIn 0.3s ease;
+          max-width: 400px;
+        `;
+        
+        notification.innerHTML = `
+          <i class="fas ${color.icon}" style="font-size:24px; color:${color.border};"></i>
+          <div>
+            <strong style="display:block; color:#1e293b; margin-bottom:4px;">${title}</strong>
+            <p style="margin:0; color:#64748b; font-size:14px;">${message}</p>
+          </div>
+          <button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; padding:4px;">
+            <i class="fas fa-times" style="color:#94a3b8;"></i>
+          </button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.remove(), 5000);
+      }
+      
+      // Initialize rebooking section when navigating to it
+      const rebookingNavLink = document.querySelector('a[data-section="rebooking-requests"]');
+      if (rebookingNavLink) {
+        rebookingNavLink.addEventListener('click', function() {
+          setTimeout(() => {
+            loadRebookingRequests();
+          }, 100);
+        });
+      }
+      
+      // Load initial rebooking count for badge
+      async function loadRebookingBadge() {
+        try {
+          const res = await fetch('get_rebooking_requests.php?status=pending', { credentials: 'include' });
+          const data = await res.json();
+          
+          if (data.success && data.counts?.pending > 0) {
+            const badge = document.getElementById('rebookingBadge');
+            if (badge) {
+              badge.textContent = data.counts.pending;
+              badge.style.display = 'inline-block';
+            }
+          }
+        } catch (err) {
+          console.error('Error loading rebooking badge:', err);
+        }
+      }
+      
+      // Load badge on page load
+      loadRebookingBadge();
 
     </script>
   </body>
