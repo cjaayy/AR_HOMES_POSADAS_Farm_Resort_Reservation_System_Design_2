@@ -1,0 +1,85 @@
+<!-- User Rebooking Status Section -->
+<div class="content-section" id="rebookings-status-section">
+  <div class="section-header-inline" style="margin-bottom: 25px">
+    <h2>
+      <i class="fas fa-exchange-alt" style="color: #11224e"></i>
+      My Rebooking Requests
+    </h2>
+  </div>
+
+  <!-- Rebooking Stats -->
+  <div class="rebooking-stats" style="margin-bottom: 30px">
+    <div class="rebooking-stat-card">
+      <div class="rebooking-stat-icon pending">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="rebooking-stat-content">
+        <div class="rebooking-stat-value" id="pendingRebookingsCount">0</div>
+        <div class="rebooking-stat-label">Pending Requests</div>
+      </div>
+    </div>
+    <div class="rebooking-stat-card">
+      <div class="rebooking-stat-icon approved">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="rebooking-stat-content">
+        <div class="rebooking-stat-value" id="approvedRebookingsCount">0</div>
+        <div class="rebooking-stat-label">Approved</div>
+      </div>
+    </div>
+    <div class="rebooking-stat-card">
+      <div class="rebooking-stat-icon rejected">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <div class="rebooking-stat-content">
+        <div class="rebooking-stat-value" id="rejectedRebookingsCount">0</div>
+        <div class="rebooking-stat-label">Rejected</div>
+      </div>
+    </div>
+    <div class="rebooking-stat-card">
+      <div class="rebooking-stat-icon total">
+        <i class="fas fa-history"></i>
+      </div>
+      <div class="rebooking-stat-content">
+        <div class="rebooking-stat-value" id="totalRebookingsCount">0</div>
+        <div class="rebooking-stat-label">Total Requests</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="rebooking-filter-tabs" style="margin-bottom: 20px">
+    <button
+      class="rebooking-filter-btn active"
+      onclick="filterUserRebookings('all')"
+    >
+      <i class="fas fa-list"></i> All Requests
+    </button>
+    <button
+      class="rebooking-filter-btn"
+      onclick="filterUserRebookings('pending')"
+    >
+      <i class="fas fa-clock"></i> Pending
+    </button>
+    <button
+      class="rebooking-filter-btn"
+      onclick="filterUserRebookings('approved')"
+    >
+      <i class="fas fa-check-circle"></i> Approved
+    </button>
+    <button
+      class="rebooking-filter-btn"
+      onclick="filterUserRebookings('rejected')"
+    >
+      <i class="fas fa-times-circle"></i> Rejected
+    </button>
+  </div>
+
+  <!-- Rebooking Requests List -->
+  <div id="userRebookingsList" class="rebookings-list">
+    <div class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Loading your rebooking requests...</p>
+    </div>
+  </div>
+</div>

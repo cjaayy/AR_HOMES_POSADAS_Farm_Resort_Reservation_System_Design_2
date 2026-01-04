@@ -164,11 +164,16 @@ try {
         WHERE reservation_id = :reservation_id
     ");
         // Debug: log parameters to file
-        file_put_contents(__DIR__ . '/rebooking_debug.log', "UPDATE params: " . json_encode([
-            ':new_date' => $new_date,
-            ':reason' => $reason,
-            ':reservation_id' => $reservation_id
-        ]) . "\n", FILE_APPEND);
+            // Ensure debug_logs directory exists and use correct path for debug log
+            $debugDir = realpath(__DIR__ . '/../debug_logs') ?: (__DIR__ . '/../debug_logs');
+            if (!is_dir($debugDir)) {
+                mkdir($debugDir, 0755, true);
+            }
+            file_put_contents($debugDir . '/rebooking_debug.log', "UPDATE params: " . json_encode([
+                ':new_date' => $new_date,
+                ':reason' => $reason,
+                ':reservation_id' => $reservation_id
+            ]) . "\n", FILE_APPEND);
         $stmt->execute([
             ':new_date' => $new_date,
             ':reason' => $reason,
@@ -186,7 +191,12 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     // Log error details for debugging
-    file_put_contents(__DIR__ . '/rebooking_debug.log', "ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
+        // Ensure debug_logs directory exists and use correct path for debug log
+        $debugDir = realpath(__DIR__ . '/../debug_logs') ?: (__DIR__ . '/../debug_logs');
+        if (!is_dir($debugDir)) {
+            mkdir($debugDir, 0755, true);
+        }
+        file_put_contents($debugDir . '/rebooking_debug.log', "ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()

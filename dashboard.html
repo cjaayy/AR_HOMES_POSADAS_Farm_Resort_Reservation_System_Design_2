@@ -85,6 +85,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
     />
+    <link rel="stylesheet" href="rebooking-styles.css?v=1.0" />
   </head>
 
   <body>
@@ -241,6 +242,16 @@
               <button class="nav-btn" data-section="my-reservations">
                 <i class="fas fa-calendar-plus"></i>
                 <span>Make Reservation</span>
+              </button>
+              <button class="nav-btn" data-section="rebookings-status">
+                <i class="fas fa-exchange-alt"></i>
+                <span>My Rebookings</span>
+                <span
+                  class="notification-badge"
+                  id="rebookingNotificationBadge"
+                  style="display: none"
+                  >0</span
+                >
               </button>
               <button
                 class="nav-btn booking-nav"
@@ -2781,6 +2792,187 @@
               </div>
             </div>
           </div>
+
+          <!-- My Rebookings Section -->
+          <div class="content-section" id="rebookings-status-section">
+            <div class="section-header-inline" style="margin-bottom: 25px">
+              <h2>
+                <i class="fas fa-exchange-alt" style="color: #11224e"></i>
+                My Rebooking Requests
+              </h2>
+              <button
+                class="btn-refresh"
+                onclick="loadMyRebookings()"
+                style="
+                  background: #11224e;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: 600;
+                  font-size: 0.9em;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  transition: all 0.3s ease;
+                  box-shadow: 0 2px 8px rgba(17, 34, 78, 0.3);
+                "
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(17, 34, 78, 0.5)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(17, 34, 78, 0.3)'"
+              >
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+
+            <!-- Rebooking Stats -->
+            <div class="rebooking-stats" style="margin-bottom: 30px">
+              <div class="rebooking-stat-card">
+                <div class="rebooking-stat-icon pending">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="rebooking-stat-content">
+                  <div class="rebooking-stat-value" id="pendingRebookingsCount">
+                    0
+                  </div>
+                  <div class="rebooking-stat-label">Pending Requests</div>
+                </div>
+              </div>
+              <div class="rebooking-stat-card">
+                <div class="rebooking-stat-icon approved">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="rebooking-stat-content">
+                  <div
+                    class="rebooking-stat-value"
+                    id="approvedRebookingsCount"
+                  >
+                    0
+                  </div>
+                  <div class="rebooking-stat-label">Approved</div>
+                </div>
+              </div>
+              <div class="rebooking-stat-card">
+                <div class="rebooking-stat-icon rejected">
+                  <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="rebooking-stat-content">
+                  <div
+                    class="rebooking-stat-value"
+                    id="rejectedRebookingsCount"
+                  >
+                    0
+                  </div>
+                  <div class="rebooking-stat-label">Rejected</div>
+                </div>
+              </div>
+              <div class="rebooking-stat-card">
+                <div class="rebooking-stat-icon total">
+                  <i class="fas fa-history"></i>
+                </div>
+                <div class="rebooking-stat-content">
+                  <div class="rebooking-stat-value" id="totalRebookingsCount">
+                    0
+                  </div>
+                  <div class="rebooking-stat-label">Total Requests</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="rebooking-filter-tabs" style="margin-bottom: 20px">
+              <button
+                class="rebooking-filter-btn active"
+                onclick="filterUserRebookings('all')"
+                style="
+                  padding: 10px 20px;
+                  background: #11224e;
+                  color: white;
+                  border: none;
+                  border-radius: 8px;
+                  font-size: 14px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                "
+              >
+                <i class="fas fa-list"></i> All Requests
+              </button>
+              <button
+                class="rebooking-filter-btn"
+                onclick="filterUserRebookings('pending')"
+                style="
+                  padding: 10px 20px;
+                  background: #f1f5f9;
+                  color: #64748b;
+                  border: none;
+                  border-radius: 8px;
+                  font-size: 14px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                "
+              >
+                <i class="fas fa-clock"></i> Pending
+              </button>
+              <button
+                class="rebooking-filter-btn"
+                onclick="filterUserRebookings('approved')"
+                style="
+                  padding: 10px 20px;
+                  background: #f1f5f9;
+                  color: #64748b;
+                  border: none;
+                  border-radius: 8px;
+                  font-size: 14px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                "
+              >
+                <i class="fas fa-check-circle"></i> Approved
+              </button>
+              <button
+                class="rebooking-filter-btn"
+                onclick="filterUserRebookings('rejected')"
+                style="
+                  padding: 10px 20px;
+                  background: #f1f5f9;
+                  color: #64748b;
+                  border: none;
+                  border-radius: 8px;
+                  font-size: 14px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                "
+              >
+                <i class="fas fa-times-circle"></i> Rejected
+              </button>
+            </div>
+
+            <!-- Rebooking Requests List -->
+            <div id="userRebookingsList" class="rebookings-list">
+              <div
+                class="loading-state"
+                style="text-align: center; padding: 40px; color: #6c757d"
+              >
+                <i
+                  class="fas fa-spinner fa-spin"
+                  style="font-size: 2em; margin-bottom: 15px"
+                ></i>
+                <p>Loading your rebooking requests...</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -4455,5 +4647,6 @@
         }
       });
     </script>
+    <script src="rebooking-manager.js?v=1.0"></script>
   </body>
 </html>

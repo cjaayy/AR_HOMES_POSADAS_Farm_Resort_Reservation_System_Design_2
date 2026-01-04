@@ -1,3 +1,52 @@
+// Function to load blocked dates for rebooking
+async function loadRebookedDates() {
+  try {
+    const response = await fetch("api/get_blocked_dates.php");
+    const data = await response.json();
+
+    if (data.success && data.dates) {
+      // Store blocked dates
+      window.blockedDates = data.dates.map((date) => date.date);
+
+      // Update calendar if flatpickr is initialized
+      if (window.reservationCalendar) {
+        window.reservationCalendar.set("disable", [
+          function (date) {
+            const dateStr = date.toISOString().split("T")[0];
+            return window.blockedDates.includes(dateStr);
+          },
+        ]);
+      }
+    }
+  } catch (error) {
+    console.error("Error loading blocked dates:", error);
+  }
+}
+
+// Initialize calendar with blocked dates
+function initializeReservationCalendar() {
+  const checkInDateInput = document.getElementById("checkInDate");
+
+  if (checkInDateInput && !window.reservationCalendar) {
+    // Load blocked dates first
+    loadRebookedDates().then(() => {
+      window.reservationCalendar = flatpickr(checkInDateInput, {
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        disable: [
+          function (date) {
+            const dateStr = date.toISOString().split("T")[0];
+            return window.blockedDates && window.blockedDates.includes(dateStr);
+          },
+        ],
+        onChange: function (selectedDates, dateStr, instance) {
+          // Update availability when date changes
+          checkDateAvailability(dateStr);
+        },
+      });
+    });
+  }
+}
 /**
  * AR Homes Booking Flow - Frontend Integration
  * Handles date availability, payment uploads, rebooking, and cancellation

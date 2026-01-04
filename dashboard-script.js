@@ -1,3 +1,126 @@
+// Function to format date for banners
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+// Function to add rebooking banners to reservation cards
+// Function to add rebooking banners to reservation cards
+function addRebookingBanners(reservation) {
+  if (
+    !reservation.rebooking_requested ||
+    reservation.rebooking_requested != 1
+  ) {
+    return "";
+  }
+  let bannerHtml = "";
+  const status = reservation.rebooking_approved;
+  // Format the new date
+  const newDate = reservation.rebooking_new_date
+    ? new Date(reservation.rebooking_new_date).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "";
+  if (status === null) {
+    // Pending approval
+    bannerHtml = `
+            <div class="reservation-banner" style="padding: 10px 15px; border-radius: 8px; margin: 10px 0; font-weight: 600; display: flex; align-items: center; gap: 10px; background: #fff3cd; color: #856404; border-left: 4px solid #ffc107;">
+                <i class="fas fa-clock"></i>
+                <div style="flex: 1;">
+                    <span>Rebooking Request Pending Approval</span>
+                    <div style="font-size: 0.85em; font-weight: normal; margin-top: 3px;">
+                        Requested new date: ${newDate}
+                    </div>
+                </div>
+            </div>
+        `;
+  } else if (status == 1) {
+    // Approved
+    bannerHtml = `
+            <div class="reservation-banner" style="padding: 10px 15px; border-radius: 8px; margin: 10px 0; font-weight: 600; display: flex; align-items: center; gap: 10px; background: #d4edda; color: #155724; border-left: 4px solid #28a745;">
+                <i class="fas fa-check-circle"></i>
+                <div style="flex: 1;">
+                    <span>Rebooking Approved!</span>
+                    <div style="font-size: 0.85em; font-weight: normal; margin-top: 3px;">
+                        New date: ${newDate}
+                    </div>
+                </div>
+            </div>
+        `;
+  } else if (status == -1) {
+    // Rejected
+    bannerHtml = `
+            <div class="reservation-banner" style="padding: 10px 15px; border-radius: 8px; margin: 10px 0; font-weight: 600; display: flex; align-items: center; gap: 10px; background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545;">
+                <i class="fas fa-times-circle"></i>
+                <div style="flex: 1;">
+                    <span>Rebooking Request Rejected</span>
+                    ${
+                      reservation.rebooking_reason
+                        ? `<div style="font-size: 0.85em; font-weight: normal; margin-top: 3px;">
+                            Reason: ${reservation.rebooking_reason}
+                        </div>`
+                        : ""
+                    }
+                </div>
+            </div>
+        `;
+  }
+  return bannerHtml;
+}
+
+// Update the reservation card generation to include banners
+// Update the reservation card generation to include banners and rebook button
+function generateReservationCardHTML(reservation) {
+  const bannerHtml = addRebookingBanners(reservation);
+  // Determine if rebooking is allowed
+  const canRebook =
+    reservation.status === "confirmed" &&
+    !reservation.rebooking_requested &&
+    reservation.downpayment_verified == 1;
+  // Calculate days until check-in
+  const checkInDate = new Date(reservation.check_in_date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const daysUntilCheckin = Math.ceil(
+    (checkInDate - today) / (1000 * 60 * 60 * 24)
+  );
+  const canRequestRebooking = daysUntilCheckin >= 7;
+  return `
+        <div class="reservation-card" data-reservation-id="${
+          reservation.reservation_id
+        }">
+            ${bannerHtml}
+            <!-- Your existing reservation card content here -->
+            ${
+              canRebook && canRequestRebooking
+                ? `
+            <button class="rebook-btn" onclick="openRebookingModal(${reservation.reservation_id}, '${reservation.check_in_date}')"
+                    style="margin-top: 10px; padding: 8px 16px; background: #11224e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-calendar-alt"></i> Request Rebooking
+            </button>
+            `
+                : ""
+            }
+            ${
+              canRebook && !canRequestRebooking && daysUntilCheckin > 0
+                ? `
+            <div style="margin-top: 10px; padding: 8px 12px; background: #fef3c7; color: #92400e; border-radius: 6px; font-size: 0.85em;">
+                <i class="fas fa-info-circle"></i>
+                Rebooking available ${daysUntilCheckin} days before check-in
+            </div>
+            `
+                : ""
+            }
+        </div>
+    `;
+}
 // ===== DASHBOARD JAVASCRIPT =====
 
 // Test function to verify popup works
