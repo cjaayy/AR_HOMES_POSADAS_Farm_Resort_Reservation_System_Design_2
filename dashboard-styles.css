@@ -4388,56 +4388,6 @@ gallery-slide.active {
   color: #5b21b6;
 }
 
-/* History Status Badges Container */
-.history-status-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-
-/* Rebooking Status Badge */
-.rebooking-status-badge {
-  padding: 4px 10px;
-  border-radius: 15px;
-  font-size: 11px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  animation: pulseSubtle 2s infinite;
-}
-
-.rebooking-status-badge.pending {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
-  border: 1px solid #f59e0b;
-}
-
-.rebooking-status-badge.approved {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #065f46;
-  border: 1px solid #10b981;
-  animation: none;
-}
-
-.rebooking-status-badge.rejected {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  color: #991b1b;
-  border: 1px solid #ef4444;
-  animation: none;
-}
-
-@keyframes pulseSubtle {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
 /* Card Body Info */
 .history-card-body {
   margin-bottom: 15px;

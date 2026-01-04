@@ -178,35 +178,6 @@ try {
             $reservation['check_in_date'] <= $three_months_from_now
         );
         
-        // Rebooking status information
-        if ($reservation['rebooking_requested'] == 1) {
-            $reservation['rebooking_status'] = 'pending';
-            $reservation['rebooking_status_label'] = 'Pending Approval';
-            
-            if ($reservation['rebooking_approved'] == 1) {
-                $reservation['rebooking_status'] = 'approved';
-                $reservation['rebooking_status_label'] = 'Approved';
-            } elseif ($reservation['rebooking_approved'] == -1) {
-                $reservation['rebooking_status'] = 'rejected';
-                $reservation['rebooking_status_label'] = 'Rejected';
-                // Allow re-requesting after rejection
-                $reservation['can_rebook'] = (
-                    in_array($reservation['status'], ['confirmed', 'rebooked', 'pending_confirmation']) &&
-                    $reservation['downpayment_verified'] == 1 &&
-                    $reservation['days_until_checkin'] >= 7 &&
-                    $reservation['check_in_date'] <= $three_months_from_now
-                );
-            }
-            
-            // Format rebooking dates
-            if ($reservation['rebooking_new_date']) {
-                $reservation['rebooking_new_date_formatted'] = date('M d, Y', strtotime($reservation['rebooking_new_date']));
-            }
-            if ($reservation['rebooking_approved_at']) {
-                $reservation['rebooking_approved_at_formatted'] = date('M d, Y g:i A', strtotime($reservation['rebooking_approved_at']));
-            }
-        }
-        
         // Can cancel? (only before admin/staff confirmation - once confirmed cannot cancel)
         $reservation['can_cancel'] = (
             in_array($reservation['status'], ['pending_payment', 'pending_confirmation']) &&

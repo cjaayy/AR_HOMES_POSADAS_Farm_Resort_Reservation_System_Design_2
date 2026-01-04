@@ -90,12 +90,9 @@ try {
         throw new Exception('Rebooking is not available for this reservation status');
     }
     
-    // Check if already requested rebooking (allow re-request if previously rejected)
-    if ($reservation['rebooking_requested'] == 1 && $reservation['rebooking_approved'] != -1) {
-        if ($reservation['rebooking_approved'] == 1) {
-            throw new Exception('Your rebooking request has already been approved');
-        }
-        throw new Exception('Rebooking has already been requested for this reservation. Please wait for admin approval.');
+    // Check if already requested rebooking
+    if ($reservation['rebooking_requested'] == 1) {
+        throw new Exception('Rebooking has already been requested for this reservation');
     }
     
     // Validate new date is within 3 months from original date
@@ -128,21 +125,17 @@ try {
     $stmt = $pdo->prepare("
         SELECT COUNT(*) as count FROM reservations 
         WHERE status IN ('confirmed', 'checked_in', 'rebooked')
-        AND reservation_id != ?
+        AND reservation_id != :id
         AND (
-                (check_in_date <= ? AND check_out_date >= ?)
-                OR (check_in_date <= ? AND check_out_date >= ?)
-                OR (check_in_date >= ? AND check_out_date <= ?)
+            (check_in_date <= :new_date AND check_out_date >= :new_date)
+            OR (check_in_date <= :new_check_out AND check_out_date >= :new_check_out)
+            OR (check_in_date >= :new_date AND check_out_date <= :new_check_out)
         )
     ");
     $stmt->execute([
-        $reservation_id,
-        $new_date,
-        $new_date,
-        $new_check_out,
-        $new_check_out,
-        $new_date,
-        $new_check_out
+        ':new_date' => $new_date,
+        ':new_check_out' => $new_check_out,
+        ':id' => $reservation_id
     ]);
     
     $result = $stmt->fetch();
@@ -151,29 +144,21 @@ try {
     }
     
     // Submit rebooking request (original date remains occupied until admin approval)
-    // Reset rebooking_approved to NULL for new/re-submitted requests
     $stmt = $pdo->prepare("
         UPDATE reservations 
         SET rebooking_requested = 1,
             rebooking_new_date = :new_date,
             rebooking_reason = :reason,
-            rebooking_approved = NULL,
-            rebooking_approved_by = NULL,
-            rebooking_approved_at = NULL,
+            rebooking_requested_at = NOW(),
             updated_at = NOW()
-        WHERE reservation_id = :reservation_id
+        WHERE reservation_id = :id
     ");
-        // Debug: log parameters to file
-        file_put_contents(__DIR__ . '/rebooking_debug.log', "UPDATE params: " . json_encode([
-            ':new_date' => $new_date,
-            ':reason' => $reason,
-            ':reservation_id' => $reservation_id
-        ]) . "\n", FILE_APPEND);
-        $stmt->execute([
-            ':new_date' => $new_date,
-            ':reason' => $reason,
-            ':reservation_id' => $reservation_id
-        ]);
+    
+    $stmt->execute([
+        ':new_date' => $new_date,
+        ':reason' => $reason,
+        ':id' => $reservation_id
+    ]);
     
     echo json_encode([
         'success' => true,
@@ -185,8 +170,6 @@ try {
     
 } catch (Exception $e) {
     http_response_code(500);
-    // Log error details for debugging
-    file_put_contents(__DIR__ . '/rebooking_debug.log', "ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
