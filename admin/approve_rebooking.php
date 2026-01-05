@@ -36,13 +36,17 @@ try {
     
     if ($action === 'approve') {
         // Get rebooking details
-        $stmt = $conn->prepare("SELECT rebooking_new_date, check_in_date, booking_type FROM reservations WHERE reservation_id = :id");
+        $stmt = $conn->prepare("SELECT rebooking_new_date, check_in_date, check_in_time, booking_type FROM reservations WHERE reservation_id = :id");
         $stmt->execute([':id' => $reservation_id]);
         $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$reservation) {
             throw new Exception('Reservation not found');
         }
+        
+        // Store original date before updating
+        $original_check_in_date = $reservation['check_in_date'];
+        $original_check_in_time = $reservation['check_in_time'];
         
         // Check if new date is still available
         $stmt = $conn->prepare("
@@ -71,26 +75,75 @@ try {
         }
         
         // Approve rebooking: Update dates, keep payment status, lock new date
+        // Store original date in rebooking_original_date field AND admin_notes (as backup)
         // Old date automatically becomes available for other users
-        $stmt = $conn->prepare("
-            UPDATE reservations 
-            SET check_in_date = rebooking_new_date,
-                check_out_date = :check_out_date,
-                rebooking_approved = 1,
-                rebooking_approved_by = :admin_id,
-                rebooking_approved_at = NOW(),
-                date_locked = 1,
-                locked_until = DATE_ADD(rebooking_new_date, INTERVAL 1 DAY),
-                status = 'confirmed',
-                updated_at = NOW()
-            WHERE reservation_id = :id
-        ");
         
-        $stmt->bindParam(':check_out_date', $check_out_date);
+        // Format time properly for admin_notes
+        $time_str = '';
+        if ($original_check_in_time) {
+            // Ensure time is in HH:MM:SS format
+            if (strlen($original_check_in_time) == 5) {
+                $time_str = $original_check_in_time . ':00'; // Add seconds if missing
+            } else {
+                $time_str = $original_check_in_time;
+            }
+        }
+        $original_date_note = "\n[Original Date: " . $original_check_in_date . ($time_str ? " " . $time_str : "") . "]";
         
-        $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
-        $stmt->bindParam(':id', $reservation_id);
-        $stmt->execute();
+        // Always store original date in admin_notes as backup, even if columns exist
+        try {
+            // First, try with original date columns
+            $stmt = $conn->prepare("
+                UPDATE reservations 
+                SET check_in_date = rebooking_new_date,
+                    check_out_date = :check_out_date,
+                    rebooking_original_date = :original_date,
+                    rebooking_original_time = :original_time,
+                    rebooking_approved = 1,
+                    rebooking_approved_by = :admin_id,
+                    rebooking_approved_at = NOW(),
+                    admin_notes = CONCAT(COALESCE(admin_notes, ''), :original_note),
+                    date_locked = 1,
+                    locked_until = DATE_ADD(rebooking_new_date, INTERVAL 1 DAY),
+                    status = 'confirmed',
+                    updated_at = NOW()
+                WHERE reservation_id = :id
+            ");
+            
+            $stmt->bindParam(':check_out_date', $check_out_date);
+            $stmt->bindParam(':original_date', $original_check_in_date);
+            $stmt->bindParam(':original_time', $original_check_in_time);
+            $stmt->bindParam(':original_note', $original_date_note);
+            $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $reservation_id);
+            $stmt->execute();
+        } catch (PDOException $e) {
+            // If original date columns don't exist, store only in admin_notes
+            if (strpos($e->getMessage(), 'Unknown column') !== false || strpos($e->getMessage(), 'rebooking_original') !== false) {
+                $stmt = $conn->prepare("
+                    UPDATE reservations 
+                    SET check_in_date = rebooking_new_date,
+                        check_out_date = :check_out_date,
+                        rebooking_approved = 1,
+                        rebooking_approved_by = :admin_id,
+                        rebooking_approved_at = NOW(),
+                        admin_notes = CONCAT(COALESCE(admin_notes, ''), :original_note),
+                        date_locked = 1,
+                        locked_until = DATE_ADD(rebooking_new_date, INTERVAL 1 DAY),
+                        status = 'confirmed',
+                        updated_at = NOW()
+                    WHERE reservation_id = :id
+                ");
+                
+                $stmt->bindParam(':check_out_date', $check_out_date);
+                $stmt->bindParam(':original_note', $original_date_note);
+                $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+                $stmt->bindParam(':id', $reservation_id);
+                $stmt->execute();
+            } else {
+                throw $e;
+            }
+        }
         
         echo json_encode([
             'success' => true,
@@ -100,18 +153,48 @@ try {
         
     } else {
         // Reject rebooking
-        $stmt = $conn->prepare("
-            UPDATE reservations 
-            SET rebooking_requested = 0,
-                rebooking_new_date = NULL,
-                rebooking_reason = NULL,
-                admin_notes = CONCAT(COALESCE(admin_notes, ''), '\n[', NOW(), '] Rebooking request rejected'),
-                updated_at = NOW()
-            WHERE reservation_id = :id
-        ");
+        $rejection_reason = $_POST['reason'] ?? '';
         
-        $stmt->bindParam(':id', $reservation_id);
-        $stmt->execute();
+        // Mark as rejected but keep the request data for user visibility
+        // Try to update with rejection fields, fallback if columns don't exist
+        try {
+            $stmt = $conn->prepare("
+                UPDATE reservations 
+                SET rebooking_requested = 0,
+                    rebooking_approved = 0,
+                    rebooking_rejected = 1,
+                    rebooking_rejected_at = NOW(),
+                    rebooking_rejected_by = :admin_id,
+                    rebooking_rejection_reason = :rejection_reason,
+                    admin_notes = CONCAT(COALESCE(admin_notes, ''), '\n[', NOW(), '] Rebooking request rejected', CASE WHEN :rejection_reason != '' THEN CONCAT('. Reason: ', :rejection_reason) ELSE '' END),
+                    updated_at = NOW()
+                WHERE reservation_id = :id
+            ");
+            
+            $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+            $stmt->bindParam(':rejection_reason', $rejection_reason);
+            $stmt->bindParam(':id', $reservation_id);
+            $stmt->execute();
+        } catch (PDOException $e) {
+            // If rejection columns don't exist, use simpler update
+            if (strpos($e->getMessage(), 'Unknown column') !== false || strpos($e->getMessage(), 'rebooking_rejected') !== false) {
+                $rejection_note = $rejection_reason ? "Rebooking request rejected. Reason: " . $rejection_reason : "Rebooking request rejected";
+                $stmt = $conn->prepare("
+                    UPDATE reservations 
+                    SET rebooking_requested = 0,
+                        rebooking_approved = 0,
+                        admin_notes = CONCAT(COALESCE(admin_notes, ''), '\n[', NOW(), '] ', :note),
+                        updated_at = NOW()
+                    WHERE reservation_id = :id
+                ");
+                
+                $stmt->bindParam(':note', $rejection_note);
+                $stmt->bindParam(':id', $reservation_id);
+                $stmt->execute();
+            } else {
+                throw $e;
+            }
+        }
         
         echo json_encode([
             'success' => true,

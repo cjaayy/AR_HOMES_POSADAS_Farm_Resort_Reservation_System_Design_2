@@ -1220,6 +1220,10 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                       <div>
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Original Date</div>
+                        <div style="font-weight:700; color:#1e293b; font-size:14px;">${r.original_check_in_date_formatted || (r.original_check_in_date ? formatDate(r.original_check_in_date) : (r.check_in_date && r.rebooking_approved != 1 ? formatDate(r.check_in_date) : 'N/A'))}</div>
+                      </div>
+                      <div>
                         <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">New Requested Date</div>
                         <div style="font-weight:700; color:#10b981; font-size:14px;"><i class="fas fa-arrow-right" style="margin-right:6px;"></i>${r.rebooking_new_date || 'N/A'}</div>
                       </div>
@@ -1997,6 +2001,9 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
               </div>
               <button onclick="loadRebookingRequests()" style="padding:12px 20px; background:#11224e; color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
                 <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+              <button onclick="testRebookingAPI()" style="padding:12px 20px; background:#10b981; color:white; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;" title="Test API Connection">
+                <i class="fas fa-vial"></i> Test API
               </button>
             </div>
           </div>
@@ -4491,6 +4498,12 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
 
       async function loadRebookingRequests() {
         const tbody = document.getElementById('rebookingRequestsBody');
+        if (!tbody) {
+          console.error('rebookingRequestsBody element not found');
+          return;
+        }
+        
+        // Show loading state
         tbody.innerHTML = `
           <tr>
             <td colspan="8" style="text-align:center; padding:3rem; color:#94a3b8;">
@@ -4501,39 +4514,130 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         `;
 
         try {
-          const res = await fetch(`get_rebooking_requests.php?status=${currentRebookingFilter}`, { credentials: 'include' });
-          const data = await res.json();
+          console.log('Fetching rebooking requests with status:', currentRebookingFilter);
+          console.log('Current URL:', window.location.href);
+          console.log('API URL will be:', `get_rebooking_requests.php?status=${currentRebookingFilter}`);
+          
+          // Add timeout to prevent hanging
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => {
+            console.error('Request timeout after 10 seconds');
+            controller.abort();
+          }, 10000); // 10 second timeout
+          
+          const startTime = Date.now();
+          const res = await fetch(`get_rebooking_requests.php?status=${currentRebookingFilter}`, { 
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json'
+            },
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          const duration = Date.now() - startTime;
+          console.log(`Request completed in ${duration}ms`);
+          console.log('Response status:', res.status, res.statusText);
+          console.log('Response headers:', [...res.headers.entries()]);
+          
+          // Check if response is ok
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error('HTTP Error Response:', errorText);
+            throw new Error(`HTTP error! status: ${res.status} - ${errorText.substring(0, 100)}`);
+          }
+          
+          // Get response text first to check if it's valid JSON
+          const text = await res.text();
+          console.log('Response text length:', text.length);
+          
+          if (!text || text.trim() === '') {
+            throw new Error('Empty response from server');
+          }
+          
+          let data;
+          try {
+            data = JSON.parse(text);
+            console.log('Parsed JSON data:', data);
+          } catch (parseError) {
+            console.error('JSON Parse Error:', parseError);
+            console.error('Response text:', text.substring(0, 500));
+            throw new Error('Invalid JSON response from server. Check console for details. Response: ' + text.substring(0, 200));
+          }
 
           if (!data.success) {
             tbody.innerHTML = `
               <tr>
                 <td colspan="8" style="text-align:center; padding:3rem; color:#ef4444;">
                   <i class="fas fa-exclamation-triangle" style="font-size:48px; margin-bottom:16px;"></i>
-                  <div style="font-size:16px;">${data.message || 'Failed to load rebooking requests'}</div>
+                  <div style="font-size:16px; font-weight:600;">${data.message || 'Failed to load rebooking requests'}</div>
+                  ${data.error_code ? `<div style="font-size:12px; color:#94a3b8; margin-top:8px;">Error Code: ${data.error_code}</div>` : ''}
                 </td>
               </tr>
             `;
             return;
           }
 
-          allRebookingRequests = data.requests || [];
+          allRebookingRequests = Array.isArray(data.requests) ? data.requests : [];
+          console.log('Loaded', allRebookingRequests.length, 'rebooking requests');
+          console.log('Data received:', data);
           
           // Update stats
-          updateRebookingStats(data.counts);
+          if (data.counts) {
+            updateRebookingStats(data.counts);
+          } else {
+            // Fallback if counts not provided
+            updateRebookingStats({
+              total: allRebookingRequests.length,
+              pending: allRebookingRequests.filter(r => !r.rebooking_approved || r.rebooking_approved == 0).length,
+              approved: allRebookingRequests.filter(r => r.rebooking_approved == 1).length
+            });
+          }
           
           // Render table
           renderRebookingTable();
           
         } catch (err) {
           console.error('Error loading rebooking requests:', err);
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="8" style="text-align:center; padding:3rem; color:#ef4444;">
-                <i class="fas fa-exclamation-circle" style="font-size:48px; margin-bottom:16px;"></i>
-                <div style="font-size:16px;">Error: ${err.message}</div>
-              </td>
-            </tr>
-          `;
+          console.error('Error stack:', err.stack);
+          console.error('Error name:', err.name);
+          console.error('Error message:', err.message);
+          
+          if (tbody) {
+            let errorMessage = err.message || 'Unknown error occurred';
+            let errorDetails = '';
+            
+            if (err.name === 'AbortError') {
+              errorMessage = 'Request timed out after 10 seconds.';
+              errorDetails = 'The server may be slow or unresponsive. Please check your connection and try again.';
+            } else if (err.message.includes('HTTP error')) {
+              errorMessage = 'Server Error (HTTP ' + (err.message.match(/\d+/)?.[0] || '500') + ')';
+              errorDetails = 'The server returned an error. Check the Network tab (F12) for details.';
+            } else if (err.message.includes('JSON')) {
+              errorMessage = 'Invalid Response Format';
+              errorDetails = 'The server returned data in an unexpected format. Check console for details.';
+            } else if (err.message.includes('Empty response')) {
+              errorMessage = 'Empty Response from Server';
+              errorDetails = 'The server returned no data. This may indicate a server error.';
+            }
+            
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="8" style="text-align:center; padding:3rem; color:#ef4444;">
+                  <i class="fas fa-exclamation-circle" style="font-size:48px; margin-bottom:16px;"></i>
+                  <div style="font-size:16px; font-weight:600; margin-bottom:8px;">Error: ${errorMessage}</div>
+                  ${errorDetails ? `<div style="font-size:13px; color:#64748b; margin-bottom:12px; max-width:500px; margin-left:auto; margin-right:auto;">${errorDetails}</div>` : ''}
+                  <div style="font-size:12px; color:#94a3b8; margin-top:8px;">Check browser console (F12) for more details</div>
+                  <button onclick="loadRebookingRequests()" style="margin-top:16px; padding:10px 20px; background:#11224e; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='#1e3a5f';" onmouseout="this.style.background='#11224e';">
+                    <i class="fas fa-redo"></i> Retry
+                  </button>
+                </td>
+              </tr>
+            `;
+          }
+        } finally {
+          // Always log completion
+          console.log('loadRebookingRequests function completed');
         }
       }
 
@@ -4549,14 +4653,24 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
       }
 
       function filterRebookings(status) {
+        console.log('Filtering rebookings by status:', status);
         currentRebookingFilter = status;
         
         // Update filter chips appearance
         document.querySelectorAll('.rebooking-filter-chip').forEach(chip => {
           chip.classList.remove('active');
           chip.style.background = 'white';
-          chip.style.color = chip.id.includes('pending') ? '#f59e0b' : 
-                             chip.id.includes('approved') ? '#10b981' : '#11224e';
+          const chipId = chip.id || '';
+          if (chipId.includes('pending')) {
+            chip.style.color = '#f59e0b';
+            chip.style.border = '2px solid #f59e0b';
+          } else if (chipId.includes('approved')) {
+            chip.style.color = '#10b981';
+            chip.style.border = '2px solid #10b981';
+          } else {
+            chip.style.color = '#11224e';
+            chip.style.border = '2px solid #11224e';
+          }
         });
         
         const activeChip = document.getElementById(`rebooking-chip-${status}`);
@@ -4565,15 +4679,19 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
           if (status === 'pending') {
             activeChip.style.background = '#f59e0b';
             activeChip.style.color = 'white';
+            activeChip.style.border = '2px solid #f59e0b';
           } else if (status === 'approved') {
             activeChip.style.background = '#10b981';
             activeChip.style.color = 'white';
+            activeChip.style.border = '2px solid #10b981';
           } else {
             activeChip.style.background = '#11224e';
             activeChip.style.color = 'white';
+            activeChip.style.border = '2px solid #11224e';
           }
         }
         
+        console.log('Calling loadRebookingRequests with filter:', status);
         loadRebookingRequests();
       }
 
@@ -4640,7 +4758,7 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
                 </div>
               </td>
               <td style="padding:16px;">
-                <div style="font-weight:600; color:#1e293b;">${formatDate(r.check_in_date)}</div>
+                <div style="font-weight:600; color:#1e293b;">${r.original_check_in_date_formatted || formatDate(r.original_check_in_date) || formatDate(r.check_in_date) || 'N/A'}</div>
                 <div style="font-size:11px; color:#94a3b8;">Original</div>
               </td>
               <td style="padding:16px;">
@@ -4757,14 +4875,99 @@ $roleDisplay = ucwords(str_replace('_', ' ', $adminRole));
         }
       }
 
+      // Test API function
+      async function testRebookingAPI() {
+        console.log('=== TESTING REBOOKING API ===');
+        try {
+          const testUrl = `get_rebooking_requests.php?status=pending`;
+          console.log('Testing URL:', testUrl);
+          console.log('Full URL would be:', window.location.origin + window.location.pathname.replace('dashboard.php', '') + testUrl);
+          
+          const startTime = Date.now();
+          const response = await fetch(testUrl, { 
+            credentials: 'include',
+            headers: { 'Accept': 'application/json' }
+          });
+          const duration = Date.now() - startTime;
+          
+          console.log('Response received in', duration, 'ms');
+          console.log('Status:', response.status, response.statusText);
+          console.log('Headers:', [...response.headers.entries()]);
+          
+          const text = await response.text();
+          console.log('Response text length:', text.length);
+          console.log('Response text (first 500 chars):', text.substring(0, 500));
+          
+          try {
+            const data = JSON.parse(text);
+            console.log('Parsed JSON:', data);
+            alert('API Test Successful!\n\nStatus: ' + response.status + '\nSuccess: ' + data.success + '\nRequests: ' + (data.requests?.length || 0) + '\n\nCheck console for full details.');
+          } catch (e) {
+            console.error('JSON Parse failed:', e);
+            alert('API returned invalid JSON!\n\nStatus: ' + response.status + '\nResponse: ' + text.substring(0, 200) + '\n\nCheck console for full response.');
+          }
+        } catch (err) {
+          console.error('Test failed:', err);
+          alert('API Test Failed!\n\nError: ' + err.message + '\n\nCheck console for details.');
+        }
+        console.log('=== TEST COMPLETE ===');
+      }
+
       // Initialize rebookings when navigating to rebookings section
-      const rebookingsNavLink = document.querySelector('a[data-section="rebookings"]');
-      if (rebookingsNavLink) {
-        rebookingsNavLink.addEventListener('click', function() {
+      function initializeRebookingsSection() {
+        const rebookingsNavLink = document.querySelector('a[data-section="rebookings"]');
+        if (rebookingsNavLink) {
+          rebookingsNavLink.addEventListener('click', function() {
+            setTimeout(() => {
+              console.log('Rebookings section clicked, loading...');
+              if (typeof loadRebookingRequests === 'function') {
+                loadRebookingRequests();
+              } else {
+                console.error('loadRebookingRequests function not found!');
+              }
+            }, 100);
+          });
+        }
+        
+        // Also load when section becomes visible (if already on rebookings section)
+        const rebookingsSection = document.getElementById('rebookings');
+        if (rebookingsSection && rebookingsSection.classList.contains('active')) {
+          console.log('Rebookings section is already active, loading data...');
           setTimeout(() => {
-            loadRebookingRequests();
-          }, 100);
+            if (typeof loadRebookingRequests === 'function') {
+              loadRebookingRequests();
+            }
+          }, 200);
+        }
+      }
+      
+      // Initialize on page load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeRebookingsSection);
+      } else {
+        initializeRebookingsSection();
+      }
+      
+      // Also set up observer to watch for section visibility
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            const rebookingsSection = document.getElementById('rebookings');
+            if (rebookingsSection && rebookingsSection.classList.contains('active')) {
+              console.log('Rebookings section became active, loading data...');
+              setTimeout(() => {
+                if (typeof loadRebookingRequests === 'function') {
+                  loadRebookingRequests();
+                }
+              }, 100);
+            }
+          }
         });
+      });
+      
+      const rebookingsSection = document.getElementById('rebookings');
+      if (rebookingsSection) {
+        observer.observe(rebookingsSection, { attributes: true, attributeFilter: ['class'] });
       }
 
     </script>

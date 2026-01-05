@@ -267,6 +267,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (defaultSection === "notifications") {
       loadUserNotifications();
     }
+    if (defaultSection === "rebooking-requests") {
+      loadRebookingRequests();
+    }
   } else {
     // Fallback to dashboard if saved section not found
     const dashboardSection = document.getElementById("dashboard-section");
@@ -2362,6 +2365,12 @@ let currentSearchTerm = "";
 // View Reservation Details - Full Modal Implementation
 async function viewReservationDetails(reservationId) {
   try {
+    // Remove any existing modal first
+    const existingModal = document.getElementById('reservationDetailsModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
     showNotification(
       `Loading details for reservation #${reservationId}...`,
       "info"
@@ -2369,23 +2378,60 @@ async function viewReservationDetails(reservationId) {
 
     // Find reservation from loaded data or fetch fresh
     let reservation = loadedReservations.find(
-      (r) => r.reservation_id == reservationId
+      (r) => r.reservation_id == reservationId || r.reservation_id == String(reservationId)
     );
 
     if (!reservation) {
       // Fetch from server if not in cache
-      const response = await fetch(`user/get_my_reservations.php`);
-      const result = await response.json();
-      if (result.success) {
-        loadedReservations = result.reservations;
-        reservation = loadedReservations.find(
-          (r) => r.reservation_id == reservationId
-        );
+      try {
+        const response = await fetch(`user/get_my_reservations.php`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        if (result.success && result.reservations) {
+          loadedReservations = result.reservations;
+          reservation = loadedReservations.find(
+            (r) => r.reservation_id == reservationId || r.reservation_id == String(reservationId)
+          );
+        }
+      } catch (e) {
+        console.error("Error fetching reservations:", e);
+      }
+    }
+
+    // If still not found, try fetching from rebooking requests
+    if (!reservation) {
+      try {
+        const rebookingResponse = await fetch(`user/get_my_rebooking_requests.php?status=all`);
+        if (rebookingResponse.ok) {
+          const rebookingResult = await rebookingResponse.json();
+          if (rebookingResult.success && rebookingResult.requests) {
+            const rebookingRequest = rebookingResult.requests.find(
+              (r) => r.reservation_id == reservationId || r.reservation_id == String(reservationId)
+            );
+            if (rebookingRequest) {
+              // Convert rebooking request format to reservation format for modal
+              reservation = {
+                ...rebookingRequest,
+                // Ensure we have all required fields for the modal
+                number_of_guests: rebookingRequest.number_of_guests || 1,
+                group_type: rebookingRequest.group_type || 'Not specified',
+                base_price: rebookingRequest.base_price || rebookingRequest.total_amount || 0,
+                remaining_balance: rebookingRequest.remaining_balance || (parseFloat(rebookingRequest.total_amount || 0) - parseFloat(rebookingRequest.downpayment_amount || 0)),
+                days_until_checkin: rebookingRequest.days_until_checkin || 0,
+                status_label: rebookingRequest.status_label || (rebookingRequest.status ? rebookingRequest.status.charAt(0).toUpperCase() + rebookingRequest.status.slice(1).replace('_', ' ') : 'Confirmed')
+              };
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching from rebooking requests:", e);
       }
     }
 
     if (!reservation) {
-      showNotification("Reservation not found", "error");
+      showNotification("Reservation not found. Please try refreshing the page.", "error");
       return;
     }
 
@@ -2393,7 +2439,7 @@ async function viewReservationDetails(reservationId) {
   } catch (error) {
     console.error("Error loading reservation details:", error);
     showNotification(
-      "Failed to load reservation details: " + error.message,
+      "Failed to load reservation details: " + (error.message || 'Unknown error'),
       "error"
     );
   }
@@ -2416,7 +2462,7 @@ function showReservationDetailsModal(r) {
 
     const statusColor = statusColors[r.status] || "#999";
     const remainingBalance =
-      parseFloat(r.total_amount) - parseFloat(r.downpayment_amount);
+      parseFloat(r.total_amount || 0) - parseFloat(r.downpayment_amount || 0);
 
     const modalHTML = `
     <div id="reservationDetailsModal" class="reservation-modal-overlay" onclick="closeReservationDetailsModal(event)">
@@ -2430,7 +2476,7 @@ function showReservationDetailsModal(r) {
                 }
               </h2>
               <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem;">
-                Created: ${formatDateTime(r.created_at)}
+                Created: ${r.created_at ? (typeof formatDateTime === 'function' ? formatDateTime(r.created_at) : new Date(r.created_at).toLocaleString()) : 'N/A'}
               </p>
             </div>
             <button onclick="closeReservationDetailsModal()" class="modal-close-btn">
@@ -2484,7 +2530,7 @@ function showReservationDetailsModal(r) {
             <div class="details-grid">
               <div class="detail-item">
                 <label>Booking Type</label>
-                <span>${formatBookingType(r.booking_type)}</span>
+                <span>${typeof formatBookingType === 'function' ? formatBookingType(r.booking_type) : (r.booking_type || 'Standard')}</span>
               </div>
               <div class="detail-item">
                 <label>Package</label>
@@ -2521,7 +2567,8 @@ function showReservationDetailsModal(r) {
                   <span style="font-weight: 700; color: #2e7d32; text-transform: uppercase; font-size: 0.85rem;">Check-in</span>
                 </div>
                 <div style="font-weight: 700; color: #1b5e20; font-size: 1.1rem; margin-bottom: 4px;">
-                  ${formatDate(r.check_in_date)}
+                  ${formatDate(r.rebooking_approved == 1 && (r.rebooking_original_date || r.original_check_in_date) ? (r.rebooking_original_date || r.original_check_in_date) : r.check_in_date)}
+                  ${r.rebooking_approved == 1 && (r.rebooking_original_date || r.original_check_in_date) ? ' <span style="font-size: 0.8rem; color: #666;">(Original)</span>' : ''}
                 </div>
                 <div style="color: #388e3c; font-size: 1rem; font-weight: 600;">
                   <i class="fas fa-clock" style="margin-right: 4px;"></i> ${formatTime12Hour(
@@ -2691,16 +2738,24 @@ function showReservationDetailsModal(r) {
           }
           
           ${
-            r.rebooking_requested == 1
+            r.rebooking_requested == 1 || r.rebooking_approved == 1
               ? `
           <!-- Rebooking Request -->
           <div class="details-section" style="background: #fff3e0; border-left: 4px solid #ff9800;">
-            <h3 style="color: #e65100;"><i class="fas fa-calendar-check"></i> Rebooking Request</h3>
+            <h3 style="color: #e65100;"><i class="fas fa-calendar-check"></i> Rebooking Information</h3>
             <div class="details-grid">
+              ${r.rebooking_approved == 1 && (r.rebooking_original_date || r.original_check_in_date) ? `
               <div class="detail-item">
-                <label>New Requested Date</label>
-                <span>${formatDate(r.rebooking_new_date)}</span>
+                <label>Original Date</label>
+                <span>${formatDate(r.rebooking_original_date || r.original_check_in_date || r.check_in_date)}</span>
               </div>
+              ` : ''}
+              ${r.rebooking_new_date ? `
+              <div class="detail-item">
+                <label>${r.rebooking_approved == 1 ? 'New Date (Approved)' : 'Requested New Date'}</label>
+                <span style="color: ${r.rebooking_approved == 1 ? '#4caf50' : '#ff9800'}; font-weight: 600;">${formatDate(r.rebooking_new_date)}</span>
+              </div>
+              ` : ''}
               <div class="detail-item">
                 <label>Reason</label>
                 <span>${r.rebooking_reason || "Not specified"}</span>
@@ -2709,10 +2764,16 @@ function showReservationDetailsModal(r) {
                 <label>Status</label>
                 <span style="color: ${
                   r.rebooking_approved == 1 ? "#4caf50" : "#ff9800"
-                }">
-                  ${r.rebooking_approved == 1 ? "Approved" : "Pending Approval"}
+                }; font-weight: 600;">
+                  ${r.rebooking_approved == 1 ? "✓ Approved" : "⏳ Pending Approval"}
                 </span>
               </div>
+              ${r.rebooking_approved_at ? `
+              <div class="detail-item">
+                <label>Approved At</label>
+                <span>${formatDateTime(r.rebooking_approved_at)}</span>
+              </div>
+              ` : ''}
             </div>
           </div>`
               : ""
@@ -6578,3 +6639,273 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }, 1500);
 });
+
+// ===== REBOOKING REQUESTS =====
+let currentUserRebookingFilter = 'all';
+
+async function loadRebookingRequests() {
+  const container = document.getElementById('rebookingRequestsList');
+  if (!container) {
+    console.error("Error: rebookingRequestsList element not found.");
+    return;
+  }
+  
+  container.innerHTML = `
+    <div style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+      <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 16px;"></i>
+      <div style="font-size: 16px;">Loading rebooking requests...</div>
+    </div>
+  `;
+  
+  try {
+    const response = await fetch(`user/get_my_rebooking_requests.php?status=${currentUserRebookingFilter}`, {
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 60px 20px; color: #ef4444;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+          <div style="font-size: 16px; font-weight: 600;">${data.message || 'Failed to load rebooking requests'}</div>
+        </div>
+      `;
+      return;
+    }
+    
+    // Update stats
+    if (data.counts) {
+      document.getElementById('rebookingPendingCount').textContent = data.counts.pending || 0;
+      document.getElementById('rebookingApprovedCount').textContent = data.counts.approved || 0;
+      document.getElementById('rebookingRejectedCount').textContent = data.counts.rejected || 0;
+      
+      // Update badge
+      const badge = document.getElementById('rebookingRequestsBadge');
+      if (badge) {
+        const pendingCount = data.counts.pending || 0;
+        if (pendingCount > 0) {
+          badge.textContent = pendingCount;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    }
+    
+    // Render requests
+    renderUserRebookingRequests(data.requests || []);
+    
+  } catch (error) {
+    console.error('Error loading rebooking requests:', error);
+    container.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; color: #ef4444;">
+        <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+        <div style="font-size: 16px; font-weight: 600;">Error: ${error.message}</div>
+        <button onclick="loadRebookingRequests()" style="margin-top: 16px; padding: 10px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          <i class="fas fa-redo"></i> Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
+function renderUserRebookingRequests(requests) {
+  const container = document.getElementById('rebookingRequestsList');
+  if (!container) return;
+  
+  if (!requests || requests.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+        <i class="fas fa-calendar-times" style="font-size: 64px; margin-bottom: 16px;"></i>
+        <h3 style="margin-top: 20px; color: #11224e;">No Rebooking Requests</h3>
+        <p style="color: #64748b;">You haven't made any rebooking requests yet.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = requests.map((request, index) => {
+    const status = request.rebooking_status || 'pending';
+    const statusLabel = request.rebooking_status_label || 'Pending';
+    
+    let statusColor = '#f59e0b'; // pending
+    let statusIcon = 'fa-clock';
+    if (status === 'approved') {
+      statusColor = '#10b981';
+      statusIcon = 'fa-check-circle';
+    } else if (status === 'rejected') {
+      statusColor = '#ef4444';
+      statusIcon = 'fa-times-circle';
+    }
+    
+    return `
+      <div class="booking-card" style="
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid ${statusColor};
+        transition: all 0.3s ease;
+      " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" 
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+          <div>
+            <h3 style="margin: 0 0 8px 0; color: #11224e; font-size: 18px;">
+              Reservation #${request.reservation_id}
+            </h3>
+            <p style="margin: 0; color: #64748b; font-size: 14px;">
+              ${request.booking_type ? request.booking_type.charAt(0).toUpperCase() + request.booking_type.slice(1) : 'N/A'} Booking
+              ${request.package_type ? ' • ' + request.package_type : ''}
+            </p>
+          </div>
+          <span style="
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: ${statusColor}15;
+            color: ${statusColor};
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          ">
+            <i class="fas ${statusIcon}"></i>
+            ${statusLabel}
+          </span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div>
+            <p style="margin: 0 0 4px 0; color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase;">Original Date</p>
+            <p style="margin: 0; color: #11224e; font-size: 14px; font-weight: 600;">
+              <i class="fas fa-calendar" style="color: #667eea; margin-right: 6px;"></i>
+              ${request.original_check_in_date_formatted || request.check_in_date_formatted || 'N/A'}
+            </p>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 12px;">
+              ${request.original_check_in_time_formatted || request.check_in_time_formatted || ''}
+            </p>
+          </div>
+          ${request.rebooking_new_date ? `
+          <div>
+            <p style="margin: 0 0 4px 0; color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase;">Requested New Date</p>
+            <p style="margin: 0; color: #11224e; font-size: 14px; font-weight: 600;">
+              <i class="fas fa-calendar-plus" style="color: #10b981; margin-right: 6px;"></i>
+              ${request.rebooking_new_date_formatted || 'N/A'}
+            </p>
+          </div>
+          ` : ''}
+          <div>
+            <p style="margin: 0 0 4px 0; color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase;">Requested At</p>
+            <p style="margin: 0; color: #11224e; font-size: 14px;">
+              <i class="fas fa-clock" style="color: #667eea; margin-right: 6px;"></i>
+              ${request.rebooking_requested_at ? new Date(request.rebooking_requested_at).toLocaleString() : 'N/A'}
+            </p>
+          </div>
+        </div>
+        
+        ${request.rebooking_reason ? `
+        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+          <p style="margin: 0 0 4px 0; color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase;">Reason</p>
+          <p style="margin: 0; color: #11224e; font-size: 14px;">${request.rebooking_reason}</p>
+        </div>
+        ` : ''}
+        
+        ${status === 'approved' && request.rebooking_approved_at ? `
+        <div style="background: #d1fae5; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+          <p style="margin: 0; color: #065f46; font-size: 14px;">
+            <i class="fas fa-check-circle" style="margin-right: 6px;"></i>
+            Approved on ${new Date(request.rebooking_approved_at).toLocaleString()}
+          </p>
+        </div>
+        ` : ''}
+        
+        ${status === 'rejected' ? `
+        <div style="background: #fee2e2; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+          <p style="margin: 0 0 4px 0; color: #991b1b; font-size: 14px; font-weight: 600;">
+            <i class="fas fa-times-circle" style="margin-right: 6px;"></i>
+            Rejected
+            ${request.rebooking_rejected_at ? ` on ${new Date(request.rebooking_rejected_at).toLocaleString()}` : ''}
+          </p>
+          ${request.rebooking_rejection_reason ? `
+          <p style="margin: 4px 0 0 0; color: #991b1b; font-size: 13px;">
+            Reason: ${request.rebooking_rejection_reason}
+          </p>
+          ` : ''}
+        </div>
+        ` : ''}
+        
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <button onclick="event.stopPropagation(); viewReservationDetails('${request.reservation_id}')" style="
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+          " onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">
+            <i class="fas fa-eye"></i> View Details
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterUserRebookings(status) {
+  currentUserRebookingFilter = status;
+  
+  // Update filter button styles
+  document.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.classList.remove('active');
+    btn.style.background = 'white';
+    btn.style.color = btn.id.includes('pending') ? '#f59e0b' : 
+                      btn.id.includes('approved') ? '#10b981' : 
+                      btn.id.includes('rejected') ? '#ef4444' : '#11224e';
+    btn.style.border = `2px solid ${btn.style.color}`;
+  });
+  
+  const activeBtn = document.getElementById(`user-rebooking-filter-${status}`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.style.background = activeBtn.style.color === '#f59e0b' ? '#f59e0b' :
+                                  activeBtn.style.color === '#10b981' ? '#10b981' :
+                                  activeBtn.style.color === '#ef4444' ? '#ef4444' : '#11224e';
+    activeBtn.style.color = 'white';
+    activeBtn.style.border = `2px solid ${activeBtn.style.background}`;
+  }
+  
+  loadRebookingRequests();
+}
+
+// This function is for rebooking requests - it should use the main viewReservationDetails
+// But we need to make sure it doesn't conflict with the one in booking history
+// So we'll just call the main one if it exists, otherwise navigate
+function viewReservationDetailsFromRebooking(reservationId) {
+  // Check if the main viewReservationDetails function exists (from booking history)
+  if (typeof viewReservationDetails === 'function' && viewReservationDetails.toString().includes('showReservationDetailsModal')) {
+    // Use the main modal function
+    viewReservationDetails(reservationId);
+  } else {
+    // Fallback: Navigate to My Reservations section
+    const navBtn = document.querySelector('[data-section="my-bookings"]');
+    if (navBtn) {
+      navBtn.click();
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Try to find and click the reservation card
+        const reservationCard = document.querySelector(`[data-reservation-id="${reservationId}"]`);
+        if (reservationCard) {
+          reservationCard.click();
+        }
+      }, 500);
+    }
+  }
+}

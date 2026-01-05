@@ -24,6 +24,14 @@ try {
     $user_email = $_SESSION['user_email'] ?? $_SESSION['email'] ?? null;
     $status_filter = $_GET['status'] ?? 'all'; // Filter by status if needed
     
+    // Check if rebooking_original_date column exists
+    try {
+        $testStmt = $conn->query("SHOW COLUMNS FROM reservations LIKE 'rebooking_original_date'");
+        $hasOriginalDateColumns = $testStmt->rowCount() > 0;
+    } catch (Exception $e) {
+        $hasOriginalDateColumns = false;
+    }
+    
     // Build query to fetch reservations by user_id OR by email (for legacy reservations)
     // This ensures old accounts that made reservations before proper user_id linking still see their bookings
     $sql = "
@@ -92,7 +100,15 @@ try {
             rebooking_new_date,
             rebooking_approved,
             rebooking_approved_by,
-            rebooking_approved_at,
+            rebooking_approved_at";
+    
+    if ($hasOriginalDateColumns) {
+        $sql .= ",
+            rebooking_original_date,
+            rebooking_original_time";
+    }
+    
+    $sql .= ",
             original_booking_id,
             cancellation_reason,
             cancelled_at,
@@ -130,6 +146,19 @@ try {
     
     // Format data for frontend
     foreach ($reservations as &$reservation) {
+        // For approved rebookings, extract original date from admin_notes if rebooking_original_date is not available
+        if ($reservation['rebooking_approved'] == 1 && empty($reservation['rebooking_original_date']) && !empty($reservation['admin_notes'])) {
+            $admin_notes = $reservation['admin_notes'];
+            // Try to extract original date from admin_notes
+            if (preg_match('/\[Original Date:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})(?:\s+([0-9]{2}:[0-9]{2}(?::[0-9]{2})?))?\]/i', $admin_notes, $matches)) {
+                $reservation['rebooking_original_date'] = $matches[1];
+                $reservation['rebooking_original_time'] = isset($matches[2]) && $matches[2] ? $matches[2] : ($reservation['check_in_time'] ?? null);
+            } elseif (preg_match('/Original\s+Date:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i', $admin_notes, $matches)) {
+                $reservation['rebooking_original_date'] = $matches[1];
+                $reservation['rebooking_original_time'] = $reservation['check_in_time'] ?? null;
+            }
+        }
+        
         // Map package type to display name
         $package_names = [
             'daytime-day' => 'Daytime Package',

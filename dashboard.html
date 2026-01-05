@@ -263,6 +263,16 @@
                 <i class="fas fa-history"></i>
                 <span>Reservation History</span>
               </button>
+              <button class="nav-btn" data-section="rebooking-requests">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Rebooking Requests</span>
+                <span
+                  class="notification-badge"
+                  id="rebookingRequestsBadge"
+                  style="display: none"
+                  >0</span
+                >
+              </button>
               <button class="nav-btn" data-section="notifications">
                 <i class="fas fa-bell"></i>
                 <span>Notifications</span>
@@ -2514,6 +2524,110 @@
             </div>
           </div>
 
+          <!-- Rebooking Requests Section -->
+          <div class="content-section" id="rebooking-requests-section">
+            <div class="section-header-inline" style="margin-bottom: 25px">
+              <h2>
+                <i class="fas fa-calendar-alt" style="color: #11224e"></i>
+                Rebooking Requests
+              </h2>
+              <button
+                class="btn-refresh"
+                onclick="loadRebookingRequests()"
+                style="
+                  background: #11224e;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: 600;
+                  font-size: 0.9em;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  transition: all 0.3s ease;
+                  box-shadow: 0 2px 8px rgba(17, 34, 78, 0.3);
+                "
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(17, 34, 78, 0.5)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(17, 34, 78, 0.3)'"
+              >
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+
+            <!-- Rebooking Stats -->
+            <div class="history-stats" style="margin-bottom: 30px;">
+              <div class="history-stat-card">
+                <div class="stat-icon pending">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="rebookingPendingCount">0</div>
+                  <div class="stat-label">Pending</div>
+                </div>
+              </div>
+              <div class="history-stat-card">
+                <div class="stat-icon approved">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="rebookingApprovedCount">0</div>
+                  <div class="stat-label">Approved</div>
+                </div>
+              </div>
+              <div class="history-stat-card">
+                <div class="stat-icon cancelled">
+                  <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value" id="rebookingRejectedCount">0</div>
+                  <div class="stat-label">Rejected</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div style="display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap;">
+              <button 
+                class="filter-tab active" 
+                onclick="filterUserRebookings('all')" 
+                id="user-rebooking-filter-all"
+                style="padding: 12px 24px; background: #11224e; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                All Requests
+              </button>
+              <button 
+                class="filter-tab" 
+                onclick="filterUserRebookings('pending')" 
+                id="user-rebooking-filter-pending"
+                style="padding: 12px 24px; background: white; color: #f59e0b; border: 2px solid #f59e0b; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                Pending
+              </button>
+              <button 
+                class="filter-tab" 
+                onclick="filterUserRebookings('approved')" 
+                id="user-rebooking-filter-approved"
+                style="padding: 12px 24px; background: white; color: #10b981; border: 2px solid #10b981; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                Approved
+              </button>
+              <button 
+                class="filter-tab" 
+                onclick="filterUserRebookings('rejected')" 
+                id="user-rebooking-filter-rejected"
+                style="padding: 12px 24px; background: white; color: #ef4444; border: 2px solid #ef4444; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                Rejected
+              </button>
+            </div>
+
+            <!-- Rebooking Requests List -->
+            <div id="rebookingRequestsList" style="display: flex; flex-direction: column; gap: 20px;">
+              <div style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <div style="font-size: 16px;">Loading rebooking requests...</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Notifications Section -->
           <div class="content-section" id="notifications-section">
             <div class="section-header-inline" style="margin-bottom: 25px">
@@ -4022,6 +4136,12 @@
                 typeof loadUserNotifications === "function"
               ) {
                 loadUserNotifications();
+              }
+              if (
+                sectionName === "rebooking-requests" &&
+                typeof loadRebookingRequests === "function"
+              ) {
+                loadRebookingRequests();
               }
             } else {
               console.error("Section not found:", sectionName + "-section");

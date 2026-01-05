@@ -122,20 +122,26 @@ try {
         $new_check_out = date('Y-m-d', strtotime($new_date . ' +1 day'));
     }
     
+    // Check if new date is available (cross-package blocking)
+    // Use unique parameter names to avoid binding issues
     $stmt = $pdo->prepare("
         SELECT COUNT(*) as count FROM reservations 
         WHERE status IN ('confirmed', 'checked_in', 'rebooked')
-        AND reservation_id != :id
+        AND reservation_id != :reservation_id
         AND (
-            (check_in_date <= :new_date AND check_out_date >= :new_date)
-            OR (check_in_date <= :new_check_out AND check_out_date >= :new_check_out)
-            OR (check_in_date >= :new_date AND check_out_date <= :new_check_out)
+            (check_in_date <= :new_date1 AND check_out_date >= :new_date2)
+            OR (check_in_date <= :new_check_out1 AND check_out_date >= :new_check_out2)
+            OR (check_in_date >= :new_date3 AND check_out_date <= :new_check_out3)
         )
     ");
     $stmt->execute([
-        ':new_date' => $new_date,
-        ':new_check_out' => $new_check_out,
-        ':id' => $reservation_id
+        ':new_date1' => $new_date,
+        ':new_date2' => $new_date,
+        ':new_date3' => $new_date,
+        ':new_check_out1' => $new_check_out,
+        ':new_check_out2' => $new_check_out,
+        ':new_check_out3' => $new_check_out,
+        ':reservation_id' => $reservation_id
     ]);
     
     $result = $stmt->fetch();
@@ -144,21 +150,27 @@ try {
     }
     
     // Submit rebooking request (original date remains occupied until admin approval)
+    // Update without rebooking_requested_at to avoid column existence issues
+    // The updated_at timestamp will serve as the request time
     $stmt = $pdo->prepare("
         UPDATE reservations 
         SET rebooking_requested = 1,
             rebooking_new_date = :new_date,
             rebooking_reason = :reason,
-            rebooking_requested_at = NOW(),
             updated_at = NOW()
-        WHERE reservation_id = :id
+        WHERE reservation_id = :reservation_id
     ");
     
     $stmt->execute([
         ':new_date' => $new_date,
         ':reason' => $reason,
-        ':id' => $reservation_id
+        ':reservation_id' => $reservation_id
     ]);
+    
+    // Check if update was successful
+    if ($stmt->rowCount() === 0) {
+        throw new Exception('Failed to update reservation. Reservation may not exist or you may not have permission.');
+    }
     
     echo json_encode([
         'success' => true,
