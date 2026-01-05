@@ -76,8 +76,8 @@ try {
     $conn = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Check if reservation exists and belongs to user
-    $checkSql = "SELECT reservation_id, status FROM reservations WHERE reservation_id = :res_id AND user_id = :user_id";
+    // Check if reservation exists and belongs to user - get all relevant fields
+    $checkSql = "SELECT reservation_id, status, checked_out, checked_in, check_out_date, check_in_date FROM reservations WHERE reservation_id = :res_id AND user_id = :user_id";
     $checkStmt = $conn->prepare($checkSql);
     $checkStmt->execute(['res_id' => $reservation_id, 'user_id' => $user_id]);
     $reservation = $checkStmt->fetch(PDO::FETCH_ASSOC);
@@ -88,10 +88,74 @@ try {
         exit;
     }
     
-    // Check if reservation is completed/checked out
-    if (!in_array($reservation['status'], ['completed', 'checked_out'])) {
+    // Check if reservation is completed/checked out (case-insensitive)
+    // Also check the checked_out flag as an alternative indicator
+    $status = strtolower(trim($reservation['status'] ?? ''));
+    $isCheckedOut = !empty($reservation['checked_out']) && ($reservation['checked_out'] == 1 || $reservation['checked_out'] === '1' || $reservation['checked_out'] === true);
+    $isCheckedIn = !empty($reservation['checked_in']) && ($reservation['checked_in'] == 1 || $reservation['checked_in'] === '1' || $reservation['checked_in'] === true);
+    
+    // Allow review if:
+    // 1. Status is completed/checked_out (case-insensitive), OR
+    // 2. Reservation has been checked out (checked_out = 1), OR
+    // 3. Check-out date has passed (regardless of status, if check-out date exists and is in the past)
+    $canReview = in_array($status, ['completed', 'checked_out']) || $isCheckedOut;
+    
+    // Additional check: if check-out date has passed, allow review (for reservations that may not have status updated)
+    if (!$canReview && !empty($reservation['check_out_date'])) {
+        try {
+            $checkOutDate = new DateTime($reservation['check_out_date']);
+            $today = new DateTime();
+            $today->setTime(0, 0, 0);
+            $checkOutDate->setTime(0, 0, 0);
+            // Allow review if check-out date is today or in the past
+            if ($checkOutDate <= $today) {
+                $canReview = true;
+                error_log("Review allowed for reservation #{$reservation_id} - check-out date ({$reservation['check_out_date']}) has passed or is today");
+            }
+        } catch (Exception $e) {
+            // Invalid date format, skip this check
+            error_log("Invalid check_out_date format for reservation #{$reservation_id}: " . $e->getMessage());
+        }
+    }
+    
+    // Also check if check-in date has passed (for same-day bookings where check-out might be same day)
+    if (!$canReview && !empty($reservation['check_in_date'])) {
+        try {
+            $checkInDate = new DateTime($reservation['check_in_date']);
+            $today = new DateTime();
+            $today->setTime(0, 0, 0);
+            $checkInDate->setTime(0, 0, 0);
+            // If check-in date has passed, allow review (especially for same-day bookings)
+            if ($checkInDate < $today) {
+                $canReview = true;
+                error_log("Review allowed for reservation #{$reservation_id} - check-in date ({$reservation['check_in_date']}) has passed");
+            }
+        } catch (Exception $e) {
+            // Invalid date format, skip this check
+            error_log("Invalid check_in_date format for reservation #{$reservation_id}: " . $e->getMessage());
+        }
+    }
+    
+    if (!$canReview) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'You can only review completed reservations']);
+        // Log the actual status for debugging (but don't expose to user)
+        error_log("Review submission rejected - Reservation #{$reservation_id} has status: '{$reservation['status']}', checked_out: " . ($isCheckedOut ? '1' : '0') . ", checked_in: " . ($isCheckedIn ? '1' : '0'));
+        // Return error with status info for debugging
+        echo json_encode([
+            'success' => false, 
+            'message' => 'You can only review completed reservations',
+            'debug' => [
+                'status' => $reservation['status'],
+                'status_lower' => $status,
+                'checked_out' => $isCheckedOut ? '1' : '0',
+                'checked_out_raw' => $reservation['checked_out'] ?? 'NULL',
+                'checked_in' => $isCheckedIn ? '1' : '0',
+                'checked_in_raw' => $reservation['checked_in'] ?? 'NULL',
+                'check_out_date' => $reservation['check_out_date'] ?? 'NULL',
+                'check_in_date' => $reservation['check_in_date'] ?? 'NULL',
+                'today' => date('Y-m-d')
+            ]
+        ]);
         exit;
     }
     

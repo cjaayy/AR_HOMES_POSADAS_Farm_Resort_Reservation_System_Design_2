@@ -3294,6 +3294,11 @@ async function submitReview(event, reservationId) {
         console.log("Navigation handled:", navError);
       }
     } else {
+      // Log debug info if available
+      if (data.debug) {
+        console.error("Review submission failed - Debug info:", data.debug);
+        console.error("Reservation status:", data.debug.status, "| Lowercase:", data.debug.status_lower, "| Checked out:", data.debug.checked_out);
+      }
       showNotification(data.message || "Failed to submit review", "error");
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
