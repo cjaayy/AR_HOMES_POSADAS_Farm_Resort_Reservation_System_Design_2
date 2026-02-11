@@ -342,7 +342,8 @@ body {
 }
 
 /* Specific padding for password input to accommodate toggle button */
-.input-wrapper input[type="password"] {
+.input-wrapper input[type="password"],
+.input-wrapper input[type="text"]#password {
   padding-right: 45px;
 }
 
@@ -447,13 +448,14 @@ body {
 
 /* Login Button */
 .login-btn {
-  width: 100%;
-  padding: 15px 20px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  width: 60%;
+  margin: 0 auto;
+  padding: 10px 16px;
+  background: #11224e;
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
@@ -462,7 +464,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(17, 34, 78, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -485,7 +487,7 @@ body {
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 25px rgba(17, 34, 78, 0.4);
 }
 
 .login-btn:hover::before {
@@ -1300,7 +1302,9 @@ body {
   padding: 20px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 }
 
 .map-modal.show {
