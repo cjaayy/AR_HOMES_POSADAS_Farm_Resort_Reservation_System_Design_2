@@ -25,6 +25,7 @@ timeout /t 3 /nobreak >nul
 :: ---- Step 3: Open Browser ----
 echo  [3/4] Opening browser...
 start "" "http://localhost/"
+start "" "https://arhomesposadas.cjaayy.dev/"
 echo        Local:  http://localhost/
 echo        Cloud:  https://arhomesposadas.cjaayy.dev/
 echo.
