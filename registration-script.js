@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Get password toggle buttons
   const passwordToggle = document.getElementById("passwordToggle");
   const confirmPasswordToggle = document.getElementById(
-    "confirmPasswordToggle"
+    "confirmPasswordToggle",
   );
 
   // Get submit button
@@ -372,8 +372,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Send registration request to backend
     // Always use the full Apache-served URL
-    const registerUrl =
-      "http://localhost/Design_2_Ayen_Design_AR_Homes_Posadas_Farm_Resort_Reservation_System/user/register.php";
+    const registerUrl = "user/register.php";
     fetch(registerUrl, {
       method: "POST",
       headers: {
@@ -388,7 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let data;
         try {
           data = JSON.parse(responseText);
-          } catch (e) {
+        } catch (e) {
           throw new Error("Invalid JSON response from server");
         }
 
@@ -410,7 +409,7 @@ document.addEventListener("DOMContentLoaded", function () {
               data.data.user_id +
               "\nUsername: " +
               data.data.username +
-              "\n\nCheck console for details, then click OK to stay on this page."
+              "\n\nCheck console for details, then click OK to stay on this page.",
           );
 
           // Redirect to login after short delay
@@ -504,8 +503,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Store in localStorage (in real app, this would be sent to backend)
     try {
       localStorage.setItem("registeredUser", JSON.stringify(userData));
-      } catch (error) {
-      }
+    } catch (error) {}
   }
 
   /**
@@ -580,5 +578,4 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   });
-
-  });
+});
